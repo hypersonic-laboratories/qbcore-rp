@@ -1,4 +1,7 @@
+---@type table<QBCore.Player> the logged in players
 QBCore.Players = {}
+
+---@class QBCore.Player
 QBCore.Player = {}
 
 RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
@@ -16,6 +19,12 @@ end)
 
 -- Logout
 
+---Logs out the player.
+---This will save and unload the players character, as well as
+---mark the player as no longer known, meaning trying to receive
+---the player after a call to this function will probably result
+---in errors.
+---@param source HPlayer the HPlayer object of the player to log out (see HELIX documentation for more info)
 function QBCore.Player.Logout(source)
     if not QBCore.Players[source] then return end
     local Player = QBCore.Players[source]
@@ -56,6 +65,15 @@ end
 
 -- Login
 
+---Logs in the player.
+---This will load the players character from the database,
+---create a player object, and call the 'QBCore:Server:OnPlayerLoaded' and
+---'QBCore:Client:OnPlayerLoaded' events.
+---@nodiscard
+---@param source HPlayer the HPlayer object of the player to log in (see HELIX documentation for more info)
+---@param citizenid string? the citizen ID of the character to load. If nil a new character will be created with the provided newData.
+---@param newData QBCore.PlayerData? the data for the new character to create. This will be ignored if the citizenid parameter is provided.
+---@return boolean success true if the player was successfully logged in, false otherwise
 function QBCore.Player.Login(source, citizenid, newData)
     if not source then return false end
     if citizenid then
@@ -81,6 +99,11 @@ function QBCore.Player.Login(source, citizenid, newData)
     return true
 end
 
+---Gets a player object by their license identifier.
+---This requires the player to be logged in.
+---@nodiscard
+---@param license string the license identifier of the player
+---@return QBCore.Player? player the player object if found, nil otherwise
 function QBCore.Player.GetPlayerByLicense(license)
     if license then
         local source = QBCore.Functions.GetSource(license)
@@ -104,6 +127,13 @@ local function applyDefaults(playerData, defaults)
     end
 end
 
+---Ensures that the provided player data has all required fields,
+---and creates a new player object. This should not be called if the
+---player is already logged in.
+---@nodiscard
+---@param source HPlayer the HPlayer object of the player to create (see HELIX documentation for more info)
+---@param PlayerData QBCore.PlayerData? the player data to check and create the player object with
+---@return QBCore.Player player the created player object
 function QBCore.Player.CheckPlayerData(source, PlayerData)
     PlayerData = PlayerData or {}
     local Offline = not source
@@ -118,6 +148,16 @@ function QBCore.Player.CheckPlayerData(source, PlayerData)
     return QBCore.Player.CreatePlayer(PlayerData, Offline)
 end
 
+-- TODO: create a QBCore.Player function factory creating the player
+-- data functions, create dummy implementations for proper doc generation
+-- and remove the function creation from the CreatePlayer function and
+-- instead generate them with the function factory.
+
+---Creates a new player object for the given player data.
+---@nodiscard
+---@param PlayerData QBCore.PlayerData the player data to create the player object with
+---@param Offline boolean whether the player is offline (true) or online (false)
+---@return QBCore.Player player the created player object
 function QBCore.Player.CreatePlayer(PlayerData, Offline)
     local self = {}
     self.Functions = {}
@@ -353,6 +393,8 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
     end
 end
 
+---Saves the player to the database.
+---@param source HPlayer the HPlayer object of the player to save (see HELIX documentation for more info)
 function QBCore.Player.Save(source)
     local pcoords = QBCore.Config.DefaultSpawn
     local ped = GetPlayerPawn(source)
@@ -428,6 +470,12 @@ local playertables = {
     { table = 'player_vehicles' }
 }
 
+---Attempts to delete the character with the given citizenid for the player
+---with the given source.
+---@nodiscard
+---@param source HPlayer the HPlayer object to delete the character for
+---@param citizenid string the citizenid of the chracter to delete
+---@return boolean success true if the character was successfully deleted, false otherwise
 function QBCore.Player.DeleteCharacter(source, citizenid)
     if not source or not citizenid then
         print('[Error] qb-core couldn\'t delete character')
