@@ -2,6 +2,9 @@
 QBCore.Players = {}
 
 ---@class QBCore.Player
+---@field public PlayerData QBCore.PlayerData The player data of the player
+---@field public Offline boolean Whether the player is offline (true) or online (false)
+---@field public Functions table<string, fun(... : any) : any> The functions available for the player
 QBCore.Player = {}
 
 RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
@@ -152,24 +155,19 @@ end
 -- data functions, create dummy implementations for proper doc generation
 -- and remove the function creation from the CreatePlayer function and
 -- instead generate them with the function factory.
-
----Creates a new player object for the given player data.
----@nodiscard
----@param PlayerData QBCore.PlayerData the player data to create the player object with
----@param Offline boolean whether the player is offline (true) or online (false)
----@return QBCore.Player player the created player object
-function QBCore.Player.CreatePlayer(PlayerData, Offline)
-    local self = {}
-    self.Functions = {}
-    self.PlayerData = PlayerData
-    self.Offline = Offline
-
-    function self.Functions.UpdatePlayerData()
+---@type table<string, fun(self: QBCore.Player): function>
+local functionFactory = {}
+function functionFactory.UpdatePlayerData(self)
+    ---@cast self QBCore.Player
+    return function()
         if self.Offline then return end
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Player:SetPlayerData', self.PlayerData)
     end
+end
 
-    function self.Functions.SetJob(job, grade)
+function functionFactory.SetJob(self)
+    ---@cast self QBCore.Player
+    return function(job, grade)
         job = job:lower()
         grade = grade or 1
         if not QBCore.Shared.Jobs[job] then return false end
@@ -183,7 +181,8 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
                 level = 1,
                 payment = 30,
                 isboss = false
-            }
+            },
+            isboss = false
         }
         local jobGradeInfo = QBCore.Shared.Jobs[job].grades[grade]
         if jobGradeInfo then
@@ -201,8 +200,11 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
 
         return true
     end
+end
 
-    function self.Functions.SetGang(gang, grade)
+function functionFactory.SetGang(self)
+    ---@cast self QBCore.Player
+    return  function(gang, grade)
         gang = gang:lower()
         grade = grade or 1
         if not QBCore.Shared.Gangs[gang] then return false end
@@ -213,7 +215,8 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
                 name = 'No Grades',
                 level = 1,
                 isboss = false
-            }
+            },
+            isboss = false
         }
         local gangGradeInfo = QBCore.Shared.Gangs[gang].grades[grade]
         if gangGradeInfo then
@@ -230,28 +233,44 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
 
         return true
     end
+end
 
-    function self.Functions.Notify(text, type, length, icon)
+function functionFactory.Notify(self)
+    ---@cast self QBCore.Player
+    return function(text, type, length, icon)
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Notify', text, type, length, icon)
     end
+end
 
-    function self.Functions.HasItem(items, amount)
-        QBCore.Functions.HasItem(self.PlayerData.source, items, amount)
+function functionFactory.HasItem(self)
+    ---@cast self QBCore.Player
+    return function(items, amount)
+        return QBCore.Functions.HasItem(self.PlayerData.source, items, amount)
     end
+end
 
-    function self.Functions.SetJobDuty(onDuty)
+function functionFactory.SetJobDuty(self)
+    ---@cast self QBCore.Player
+    return function(onDuty)
         self.PlayerData.job.onduty = not not onDuty
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnJobUpdate', self.PlayerData.job)
         self.Functions.UpdatePlayerData()
     end
+end
 
-    function self.Functions.SetPlayerData(key, val)
+function functionFactory.SetPlayerData(self)
+    ---@cast self QBCore.Player
+    return function(key, val)
         if not key or type(key) ~= 'string' then return end
         self.PlayerData[key] = val
         self.Functions.UpdatePlayerData()
     end
+end
 
-    function self.Functions.SetMetaData(meta, val)
+
+function functionFactory.SetMetaData(self)
+    ---@cast self QBCore.Player
+    return function(meta, val)
         if not meta or type(meta) ~= 'string' then return end
         if meta == 'hunger' or meta == 'thirst' then
             val = val > 100 and 100 or val
@@ -259,24 +278,33 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
         self.PlayerData.metadata[meta] = val
         self.Functions.UpdatePlayerData()
     end
+end
 
-    function self.Functions.GetMetaData(meta)
+function functionFactory.GetMetaData(self)
+    ---@cast self QBCore.Player
+    return function(meta)
         if not meta or type(meta) ~= 'string' then return end
         return self.PlayerData.metadata[meta]
     end
+end
 
-    function self.Functions.AddJobReputation(amount)
+function functionFactory.AddJobReputation(self)
+    ---@cast self QBCore.Player
+    return function(amount)
         if not amount then return end
         amount = tonumber(amount)
         self.PlayerData.metadata['jobrep'][self.PlayerData.job.name] = self.PlayerData.metadata['jobrep'][self.PlayerData.job.name] + amount
         self.Functions.UpdatePlayerData()
     end
+end
 
-    function self.Functions.AddMoney(moneytype, amount, reason)
+function functionFactory.AddMoney(self)
+    ---@cast self QBCore.Player
+    return function(moneytype, amount, reason)
         reason = reason or 'unknown'
         moneytype = moneytype:lower()
         amount = tonumber(amount)
-        if amount < 0 then return end
+        if amount < 0 then return false end
         if not self.PlayerData.money[moneytype] then return false end
         self.PlayerData.money[moneytype] = self.PlayerData.money[moneytype] + amount
 
@@ -288,12 +316,15 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
 
         return true
     end
+end
 
-    function self.Functions.RemoveMoney(moneytype, amount, reason)
+function functionFactory.RemoveMoney(self)
+    ---@cast self QBCore.Player
+    return function(moneytype, amount, reason)
         reason = reason or 'unknown'
         moneytype = moneytype:lower()
         amount = tonumber(amount)
-        if amount < 0 then return end
+        if amount < 0 then return false end
         if not self.PlayerData.money[moneytype] then return false end
         for _, mtype in pairs(QBCore.Config.Money.DontAllowMinus) do
             if mtype == moneytype then
@@ -315,8 +346,11 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
 
         return true
     end
+end
 
-    function self.Functions.SetMoney(moneytype, amount, reason)
+function functionFactory.SetMoney(self)
+    ---@cast self QBCore.Player
+    return function(moneytype, amount, reason)
         reason = reason or 'unknown'
         moneytype = moneytype:lower()
         amount = tonumber(amount)
@@ -333,19 +367,28 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
 
         return true
     end
+end
 
-    function self.Functions.GetMoney(moneytype)
+function functionFactory.GetMoney(self)
+    ---@cast self QBCore.Player
+    return function(moneytype)
         if not moneytype then return false end
         moneytype = moneytype:lower()
         return self.PlayerData.money[moneytype]
     end
+end
 
-    function self.Functions.SetCreditCard(cardNumber)
+function functionFactory.SetCreditCard(self)
+    ---@cast self QBCore.Player
+    return function(cardNumber)
         self.PlayerData.charinfo.card = cardNumber
         self.Functions.UpdatePlayerData()
     end
+end
 
-    function self.Functions.GetCardSlot(cardNumber, cardType)
+function functionFactory.GetCreditCardSlot(self)
+    ---@cast self QBCore.Player
+    return function(cardNumber, cardType)
         local item = tostring(cardType):lower()
         local slots = GetSlotsByItem(self.PlayerData.items, item)
         for _, slot in pairs(slots) do
@@ -357,26 +400,266 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
         end
         return nil
     end
+end
 
-    function self.Functions.Save()
+function functionFactory.Save(self)
+    ---@cast self QBCore.Player
+    return function()
         if self.Offline then
+            -- TODO: requires implementation?
             QBCore.Player.SaveOffline(self.PlayerData)
         else
             QBCore.Player.Save(self.PlayerData.source)
         end
     end
+end
 
-    function self.Functions.Logout()
+function functionFactory.Logout(self)
+    ---@cast self QBCore.Player
+    return function()
         if self.Offline then return end
         QBCore.Player.Logout(self.PlayerData.source)
     end
+end
 
-    function self.Functions.AddMethod(methodName, handler)
+function functionFactory.AddMethod(self)
+    ---@cast self QBCore.Player
+    return function(methodName, handler)
         self.Functions[methodName] = handler
     end
+end
 
-    function self.Functions.AddField(fieldName, data)
+function functionFactory.AddField(self)
+    ---@cast self QBCore.Player
+    return function(fieldName, data)
         self[fieldName] = data
+    end
+end
+
+---Updates the player data on the client.
+---This will trigger the 'QBCore:Player:SetPlayerData' event on the client with the players
+---current player data.
+---If the player is offline this function will do nothing.
+---@none-static
+function QBCore.Player.Functions.UpdatePlayerData()
+    error('Dummy implementation for doc generation only')
+end
+
+---Sets the job of the player.
+---This will update the players job data and trigger the 'QBCore:Client:OnJobUpdate' event on the client.
+---If the player is offline this will still update the job data, but will not trigger any client events.
+---@none-static
+---@nodiscard
+---@param job string the name of the job to set
+---@param grade number the grade level of the job to set
+---@return boolean success true if the job was successfully set, false otherwise
+function QBCore.Player.Functions.SetJob(job, grade)
+    error('Dummy implementation for doc generation only')
+end
+
+---Sets the gang of the player.
+---This will update the players gang data and trigger the 'QBCore:Client:OnGangUpdate' event on the client.
+---If the player is offline this will still update the gang data, but will not trigger any client events.
+---@none-static
+---@nodiscard
+---@param gang string the name of the gang to set
+---@param grade number the grade level of the gang to set
+---@return boolean success true if the gang was successfully set, false otherwise
+function QBCore.Player.Functions.SetGang(gang, grade)
+    error('Dummy implementation for doc generation only')
+end
+
+---Sends a notification to the player.
+---This will trigger the 'QBCore:Notify' event on the client with the provided parameters.
+---@none-static
+---@param text string the text of the notification
+---@param type string? the type of the notification (default: 'primary')
+---@param length number? the length of time the notification should be displayed
+---@param icon string? the icon to display with the notification
+function QBCore.Player.Functions.Notify(text, type, length, icon)
+    error('Dummy implementation for doc generation only')
+end
+
+---Checks if the player has the given item(s).
+---This will check if the player has the given item or list of items.
+---@none-static
+---@nodiscard
+---@param items string|table<string, any>|table<string> not sure about the table format.
+---the code of that is a little hard to read.
+---@param amount number? the amount of the item(s) to check for (default: 1)
+---@return boolean hasItem true if the player has the item(s), false otherwise
+function QBCore.Player.Functions.HasItem(items, amount)
+    error('Dummy implementation for doc generation only')
+end
+
+---Sets the job duty status of the player.
+---This will update the players job duty status and trigger the 'QBCore:Client:OnJobUpdate' event on the client.
+---@none-static
+---@param onDuty boolean whether the player is on duty for their job
+function QBCore.Player.Functions.SetJobDuty(onDuty)
+    error('Dummy implementation for doc generation only')
+end
+
+---Sets a key in the player's data to the given value.
+---This will update the player's data and trigger the 'QBCore:Player:SetPlayerData' event on the client.
+---@none-static
+---@param key string the key in the player's data to set
+---@param val any the value to set the key to
+function QBCore.Player.Functions.SetPlayerData(key, val)
+    error('Dummy implementation for doc generation only')
+end
+
+---Sets a metadata key in the player's metadata to the given value.
+---This will update the player's metadata and trigger the 'QBCore:Player:SetPlayerData' event on the client.
+---@none-static
+---@param meta string the metadata key to set
+---@param val any the value to set the metadata key to
+function QBCore.Player.Functions.SetMetaData(meta, val)
+    error('Dummy implementation for doc generation only')
+end
+
+---Gets a metadata value from the player's metadata.
+---This will return the value of the given metadata key.
+---@none-static
+---@nodiscard
+---@param meta string the metadata key to get
+---@return any value the value of the metadata key
+function QBCore.Player.Functions.GetMetaData(meta)
+    error('Dummy implementation for doc generation only')
+end
+
+---Adds job reputation to the player for their current job.
+---This will update the player's job reputation in their metadata
+---and trigger the 'QBCore:Player:SetPlayerData' event on the client.
+---@none-static
+---@param amount number the amount of job reputation to add
+function QBCore.Player.Functions.AddJobReputation(amount)
+    error('Dummy implementation for doc generation only')
+end
+
+---Adds money to the player's account.
+---This will update the player's money and trigger the 'QBCore:Client:OnMoneyChange'
+---as well as 'qb-hud:client:OnMoneyChange' events on the client.
+---A negative amount will be ignored and the function will return false.
+---@none-static
+---@nodiscard
+---@param moneytype string the type of money to add (e.g. 'cash', 'bank', etc.)
+---@param amount number the amount of money to add
+---@param reason string? the reason for adding the money (default: 'unknown')
+---@return boolean success true if the money was successfully added, false otherwise
+function QBCore.Player.Functions.AddMoney(moneytype, amount, reason)
+    error('Dummy implementation for doc generation only')
+end
+
+---Removes money from the player's account.
+---This will update the player's money and trigger the 'QBCore:Client:OnMoneyChange'
+---as well as 'qb-hud:client:OnMoneyChange' events on the client.
+---If the account is 'bank' it will also trigger the 'qb-phone:client:RemoveBankMoney' event.
+---A negative amount will be ignored and the function will return false.
+---@none-static
+---@nodiscard
+---@param moneytype string the type of money to remove (e.g. 'cash', 'bank', etc.)
+---@param amount number the amount of money to remove
+---@param reason string? the reason for removing the money (default: 'unknown')
+---@return boolean success true if the money was successfully removed, false otherwise
+function QBCore.Player.Functions.RemoveMoney(moneytype, amount, reason)
+    error('Dummy implementation for doc generation only')
+end
+
+---Sets the player's money to the given amount.
+---This will update the player's money and trigger the 'QBCore:Client:OnMoneyChange'
+---as well as 'qb-hud:client:OnMoneyChange' events on the client.
+---A negative amount will be ignored and the function will return false.
+---@none-static
+---@nodiscard
+---@param moneytype string the type of money to set (e.g. 'cash', 'bank', etc.)
+---@param amount number the amount of money to set
+---@param reason string? the reason for setting the money (default: 'unknown')
+---@return boolean success true if the money was successfully set, false otherwise
+function QBCore.Player.Functions.SetMoney(moneytype, amount, reason)
+    error('Dummy implementation for doc generation only')
+end
+
+---Gets the amount of money the player has for the given money type.
+---@none-static
+---@nodiscard
+---@param moneytype string the type of money to get (e.g. 'cash', 'bank', etc.)
+---@return number? amount the amount of money the player has, or nil if the money type is invalid
+function QBCore.Player.Functions.GetMoney(moneytype)
+    error('Dummy implementation for doc generation only')
+end
+
+---Sets the player's credit/debit card number.
+---This will update the player's character info and trigger the 'QBCore:Player:SetPlayerData' event on the client.
+---@none-static
+---@param cardNumber string the credit/debit card number to set
+function QBCore.Player.Functions.SetCreditCard(cardNumber)
+    error('Dummy implementation for doc generation only')
+end
+
+---Gets the inventory slot of the player's card with the given card number and type.
+---This will search the player's inventory for the card and return the slot if found.
+---If not found, it will return nil.
+---@none-static
+---@nodiscard
+---@param cardNumber string the credit/debit card number to search for
+---@param cardType string the type of card to search for (e.g. 'credit', 'debit', etc.)
+---@return number? slot the inventory slot of the card if found, or nil if not found
+function QBCore.Player.Functions.GetCardSlot(cardNumber, cardType)
+    error('Dummy implementation for doc generation only')
+end
+
+---Saves the player to the database.
+---If the player is offline, this will save the offline player data.
+---If the player is online, this will save the online player data.
+---@none-static
+function QBCore.Player.Functions.Save()
+    error('Dummy implementation for doc generation only')
+end
+
+---Logs out the player.
+---This will save and unload the players character, as well as
+---mark the player as no longer known, meaning trying to receive
+---the player after a call to this function will probably result
+---in errors.
+---@none-static
+function QBCore.Player.Functions.Logout()
+    error('Dummy implementation for doc generation only')
+end
+
+---Adds a new method to the player object.
+---This will add the given method to the player's Functions table.
+---This will only affect the current player object and not all player objects.
+---@none-static
+---@param methodName string the name of the method to add
+---@param handler function the function to add as the method
+function QBCore.Player.Functions.AddMethod(methodName, handler)
+    error('Dummy implementation for doc generation only')
+end
+
+---Adds a new field to the player object.
+---This will add the given field to the player object.
+---This will only affect the current player object and not all player objects.
+---@none-static
+---@param fieldName string the name of the field to add
+---@param data any the data to set the field to
+function QBCore.Player.Functions.AddField(fieldName, data)
+    error('Dummy implementation for doc generation only')
+end
+
+---Creates a new player object for the given player data.
+---@nodiscard
+---@param PlayerData QBCore.PlayerData the player data to create the player object with
+---@param Offline boolean whether the player is offline (true) or online (false)
+---@return QBCore.Player player the created player object
+function QBCore.Player.CreatePlayer(PlayerData, Offline)
+    local self = {}
+    self.Functions = {}
+    self.PlayerData = PlayerData
+    self.Offline = Offline
+
+    for key, func in pairs(functionFactory) do
+        self.Functions[key] = func(self)
     end
 
     if QBCore.Config.Server.Permissions[license] then
@@ -390,6 +673,7 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
         QBCore.Player.Save(self.PlayerData.source)
         exports['qb-multicharacter']:SetPlayerLoaded(self)
         self.Functions.UpdatePlayerData()
+        return self
     end
 end
 

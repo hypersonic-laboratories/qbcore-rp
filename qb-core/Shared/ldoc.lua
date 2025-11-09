@@ -1,3 +1,8 @@
+---@meta LDOC There is no actual code in this file, just some LuaDoc
+---comments for better documentation generation.
+---Has to be added to the package.json though to be picked up by
+---LuaDoc.
+
 ---@class QBCore.CharInfo
 ---@field public firstname string the character's first name
 ---@field public lastname string the character's last name
@@ -6,19 +11,21 @@
 ---@field public nationality string the character's nationality
 ---@field public phone string the character's phone number
 ---@field public account string the character's bank account number
+---@field public card string the character's credit/debit card number
 
 ---@class QBCore.JobInfo
 ---@field public name string the job's name/identifier
 ---@field public label string the job's label/display name
----@field public payment number the job's payment amount
 ---@field public type string the job's type/category (default: 'none')
 ---@field public onduty boolean whether the player is on duty for this job
----@field public isboss boolean whether the player is the boss of this job
 ---@field public grade QBCore.Grade the job grade information
+---@field public isboss boolean whether the player is the boss of this job
 
 ---@class QBCore.Grade
 ---@field public name string the grade's name/label
 ---@field public level number the grade's level
+---@field public payment number? the job's payment amount (nil for gangs)
+---@field public isboss boolean whether the player is the boss of this job
 
 ---@class QBCore.GangInfo
 ---@field public name string the gang's name/identifier
@@ -38,6 +45,11 @@
 ---@field public charinfo QBCore.CharInfo the character information of the player
 ---@field public job QBCore.JobInfo the job information of the player
 ---@field public gang QBCore.GangInfo the gang information of the player
+---@field public metadata QBCore.Metadata the metadata of the player
+---@field public items table<number, QBCore.Item> a table containing the player's items (indexed by slot number)
+
+---@class QBCore.Item
+---@field public info table<string, any> a table containing additional information about the item (not sure about the format)
 
 ---@class QBCore.CriminalRecord
 ---@field public hasRecord boolean whether the player has a criminal record

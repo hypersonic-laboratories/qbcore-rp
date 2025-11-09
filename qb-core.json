@@ -1,0 +1,2389 @@
+{
+  "namespaces": [
+    {
+      "name": "shared",
+      "classes": [
+        {
+          "name": "Locale",
+          "description": null,
+          "fields": [
+
+          ],
+          "functions": [
+            {
+              "name": "new",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "_",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "opts",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "extend",
+              "isStatic": false,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "phrases",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "prefix",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "clear",
+              "isStatic": false,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "replace",
+              "isStatic": false,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "phrases",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "locale",
+              "isStatic": false,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "newLocale",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "t",
+              "isStatic": false,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "key",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "subs",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "has",
+              "isStatic": false,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "key",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "delete",
+              "isStatic": false,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "phraseTarget",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "prefix",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name": "QBCore.CharInfo",
+          "description": null,
+          "fields": [
+            {
+              "name": "firstname",
+              "type": "string",
+              "isStatic": false,
+              "description": "the character's first name"
+            },
+            {
+              "name": "lastname",
+              "type": "string",
+              "isStatic": false,
+              "description": "the character's last name"
+            },
+            {
+              "name": "birthdate",
+              "type": "string",
+              "isStatic": false,
+              "description": "the character's birthdate in the format \"DD-MM-YYYY\""
+            },
+            {
+              "name": "gender",
+              "type": "number",
+              "isStatic": false,
+              "description": "the character's gender (0 for male?)"
+            },
+            {
+              "name": "nationality",
+              "type": "string",
+              "isStatic": false,
+              "description": "the character's nationality"
+            },
+            {
+              "name": "phone",
+              "type": "string",
+              "isStatic": false,
+              "description": "the character's phone number"
+            },
+            {
+              "name": "account",
+              "type": "string",
+              "isStatic": false,
+              "description": "the character's bank account number"
+            },
+            {
+              "name": "card",
+              "type": "string",
+              "isStatic": false,
+              "description": "the character's credit/debit card number"
+            }
+          ],
+          "functions": [
+
+          ]
+        },
+        {
+          "name": "QBCore.JobInfo",
+          "description": null,
+          "fields": [
+            {
+              "name": "name",
+              "type": "string",
+              "isStatic": false,
+              "description": "the job's name/identifier"
+            },
+            {
+              "name": "label",
+              "type": "string",
+              "isStatic": false,
+              "description": "the job's label/display name"
+            },
+            {
+              "name": "type",
+              "type": "string",
+              "isStatic": false,
+              "description": "the job's type/category (default: 'none')"
+            },
+            {
+              "name": "onduty",
+              "type": "boolean",
+              "isStatic": false,
+              "description": "whether the player is on duty for this job"
+            },
+            {
+              "name": "grade",
+              "type": "QBCore.Grade",
+              "isStatic": false,
+              "description": "the job grade information"
+            },
+            {
+              "name": "isboss",
+              "type": "boolean",
+              "isStatic": false,
+              "description": "whether the player is the boss of this job"
+            }
+          ],
+          "functions": [
+
+          ]
+        },
+        {
+          "name": "QBCore.Grade",
+          "description": null,
+          "fields": [
+            {
+              "name": "name",
+              "type": "string",
+              "isStatic": false,
+              "description": "the grade's name/label"
+            },
+            {
+              "name": "level",
+              "type": "number",
+              "isStatic": false,
+              "description": "the grade's level"
+            },
+            {
+              "name": "payment",
+              "type": "number?",
+              "isStatic": false,
+              "description": "the job's payment amount (nil for gangs)"
+            },
+            {
+              "name": "isboss",
+              "type": "boolean",
+              "isStatic": false,
+              "description": "whether the player is the boss of this job"
+            }
+          ],
+          "functions": [
+
+          ]
+        },
+        {
+          "name": "QBCore.GangInfo",
+          "description": null,
+          "fields": [
+            {
+              "name": "name",
+              "type": "string",
+              "isStatic": false,
+              "description": "the gang's name/identifier"
+            },
+            {
+              "name": "label",
+              "type": "string",
+              "isStatic": false,
+              "description": "the gang's label/display name"
+            },
+            {
+              "name": "isboss",
+              "type": "boolean",
+              "isStatic": false,
+              "description": "whether the player is the boss of this gang"
+            },
+            {
+              "name": "grade",
+              "type": "QBCore.Grade",
+              "isStatic": false,
+              "description": "the gang grade information"
+            }
+          ],
+          "functions": [
+
+          ]
+        },
+        {
+          "name": "QBCore.PlayerData",
+          "description": null,
+          "fields": [
+            {
+              "name": "netId",
+              "type": "number",
+              "isStatic": false,
+              "description": "the player's network ID"
+            },
+            {
+              "name": "license",
+              "type": "string",
+              "isStatic": false,
+              "description": "the player's helix license identifier"
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "isStatic": false,
+              "description": "the player's helix name (this is NOT the character name)"
+            },
+            {
+              "name": "source",
+              "type": "HPlayer",
+              "isStatic": false,
+              "description": "the HPlayer object of the player (see HELIX documentation for more info)"
+            },
+            {
+              "name": "citizenid",
+              "type": "string",
+              "isStatic": false,
+              "description": "the player's citizen ID"
+            },
+            {
+              "name": "cid",
+              "type": "number",
+              "isStatic": false,
+              "description": "(set to 1 by default) *no idea what this actually represents*"
+            },
+            {
+              "name": "money",
+              "type": "table<string, number>",
+              "isStatic": false,
+              "description": "a table containing the player's money amounts for each money type (see QBCore.Config.Money.MoneyTypes)"
+            },
+            {
+              "name": "optin",
+              "type": "boolean",
+              "isStatic": false,
+              "description": "(set to true by default) *no idea what this actually represents*"
+            },
+            {
+              "name": "charinfo",
+              "type": "QBCore.CharInfo",
+              "isStatic": false,
+              "description": "the character information of the player"
+            },
+            {
+              "name": "job",
+              "type": "QBCore.JobInfo",
+              "isStatic": false,
+              "description": "the job information of the player"
+            },
+            {
+              "name": "gang",
+              "type": "QBCore.GangInfo",
+              "isStatic": false,
+              "description": "the gang information of the player"
+            },
+            {
+              "name": "metadata",
+              "type": "QBCore.Metadata",
+              "isStatic": false,
+              "description": "the metadata of the player"
+            },
+            {
+              "name": "items",
+              "type": "table<number, QBCore.Item>",
+              "isStatic": false,
+              "description": "a table containing the player's items (indexed by slot number)"
+            }
+          ],
+          "functions": [
+
+          ]
+        },
+        {
+          "name": "QBCore.Item",
+          "description": null,
+          "fields": [
+            {
+              "name": "info",
+              "type": "table<string, any>",
+              "isStatic": false,
+              "description": "a table containing additional information about the item (not sure about the format)"
+            }
+          ],
+          "functions": [
+
+          ]
+        },
+        {
+          "name": "QBCore.CriminalRecord",
+          "description": null,
+          "fields": [
+            {
+              "name": "hasRecord",
+              "type": "boolean",
+              "isStatic": false,
+              "description": "whether the player has a criminal record"
+            },
+            {
+              "name": "date",
+              "type": "string?",
+              "isStatic": false,
+              "description": "the date of the record (when it was created)"
+            }
+          ],
+          "functions": [
+
+          ]
+        },
+        {
+          "name": "QBCore.Inside",
+          "description": null,
+          "fields": [
+            {
+              "name": "house",
+              "type": "string?",
+              "isStatic": false,
+              "description": "the house identifier if the player is inside a house"
+            },
+            {
+              "name": "apartment",
+              "type": "QBCore.Inside.Apartment",
+              "isStatic": false,
+              "description": "the apartment information. This is always present, but the fields inside may be nil if not applicable."
+            }
+          ],
+          "functions": [
+
+          ]
+        },
+        {
+          "name": "QBCore.Inside.Apartment",
+          "description": null,
+          "fields": [
+            {
+              "name": "apartmentType",
+              "type": "string",
+              "isStatic": false,
+              "description": "the type of apartment"
+            },
+            {
+              "name": "apartmentId",
+              "type": "string",
+              "isStatic": false,
+              "description": "the unique identifier of the apartment"
+            }
+          ],
+          "functions": [
+
+          ]
+        },
+        {
+          "name": "QBCore.PhoneData",
+          "description": null,
+          "fields": [
+            {
+              "name": "SerialNumber",
+              "type": "string",
+              "isStatic": false,
+              "description": "the phone's serial number"
+            },
+            {
+              "name": "InstalledApps",
+              "type": "table",
+              "isStatic": false,
+              "description": "the apps installed on the phone (I guess the format is table<string, boolean> or table<string> but not sure)"
+            }
+          ],
+          "functions": [
+
+          ]
+        }
+      ],
+      "functions": [
+
+      ],
+      "fields": [
+
+      ]
+    },
+    {
+      "name": "client",
+      "classes": [
+        {
+          "name": "QBCore.Functions",
+          "description": null,
+          "fields": [
+
+          ],
+          "functions": [
+            {
+              "name": "GetPlayerData",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "Debug",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "tbl",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "HideText",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "DrawText",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "text",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "position",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "ChangeText",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "text",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "position",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "KeyPressed",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "Notify",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "text",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "texttype",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "length",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "icon",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "functions": [
+
+      ],
+      "fields": [
+
+      ]
+    },
+    {
+      "name": "server",
+      "classes": [
+        {
+          "name": "QBCore.Functions",
+          "description": null,
+          "fields": [
+
+          ],
+          "functions": [
+            {
+              "name": "GetIdentifier",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "source",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetSource",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "identifier",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetPlayer",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "source",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetPlayerName",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "source",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetPlayerByCitizenId",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "citizenid",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetOfflinePlayerByCitizenId",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "citizenid",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetPlayerByLicense",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "license",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetPlayerByPhone",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "number",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetPlayerByAccount",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "account",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetPlayerByCharInfo",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "property",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "value",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetPlayers",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "GetQBPlayers",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GetPlayersOnDuty",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "job",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "GetDutyCount",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "job",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "CreateUseableItem",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "item",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "data",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "CanUseItem",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "item",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "Debug",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "tbl",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "Notify",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "source",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "message",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "type",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "length",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "icon",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "CreateCitizenId",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "CreateAccountNumber",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "CreateWalletId",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "CreatePhoneNumber",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "CreateFingerId",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "CreateSerialNumber",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "CreateApartmentId",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "GeneratePlate",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "CreateWeapon",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "weapon_name",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "coords",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "rotation",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "itemInfo",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "CreateVehicle",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "vehicle_name",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "coords",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "rotation",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "plate",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "fuel",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "SetMethod",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "methodName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "handler",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "SetField",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "fieldName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "data",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "AddJob",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "jobName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "job",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "AddJobs",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "jobs",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "RemoveJob",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "jobName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "UpdateJob",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "jobName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "job",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "AddItem",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "itemName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "item",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "UpdateItem",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "itemName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "item",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "AddItems",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "items",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "RemoveItem",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "itemName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "AddGang",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "gangName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "gang",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "AddGangs",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "gangs",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "RemoveGang",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "gangName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "UpdateGang",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "gangName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "gang",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "SetPlayerBucket",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "source",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "bucket",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "AddPlayerMethod",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "ids",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "methodName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "handler",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "AddPlayerField",
+              "isStatic": true,
+              "description": null,
+              "parameters": [
+                {
+                  "name": "ids",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "fieldName",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                },
+                {
+                  "name": "data",
+                  "type": "any",
+                  "optional": false,
+                  "description": null
+                }
+              ],
+              "returns": [
+
+              ]
+            }
+          ]
+        },
+        {
+          "name": "QBCore",
+          "description": null,
+          "fields": [
+            {
+              "name": "Players",
+              "type": "table<QBCore.Player>",
+              "isStatic": true,
+              "description": "the logged in players"
+            }
+          ],
+          "functions": [
+
+          ]
+        },
+        {
+          "name": "QBCore.Player",
+          "description": null,
+          "fields": [
+            {
+              "name": "PlayerData",
+              "type": "QBCore.PlayerData",
+              "isStatic": false,
+              "description": "The player data of the player"
+            },
+            {
+              "name": "Offline",
+              "type": "boolean",
+              "isStatic": false,
+              "description": "Whether the player is offline (true) or online (false)"
+            },
+            {
+              "name": "Functions",
+              "type": "table<string, fun(... : any) : any>",
+              "isStatic": false,
+              "description": "The functions available for the player"
+            }
+          ],
+          "functions": [
+            {
+              "name": "Logout",
+              "isStatic": true,
+              "description": "Logs out the player.\nThis will save and unload the players character, as well as\nmark the player as no longer known, meaning trying to receive\nthe player after a call to this function will probably result\nin errors.",
+              "parameters": [
+                {
+                  "name": "source",
+                  "type": "HPlayer",
+                  "optional": false,
+                  "description": "the HPlayer object of the player to log out (see HELIX documentation for more info)"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "",
+                  "description": null
+                }
+              ]
+            },
+            {
+              "name": "Login",
+              "isStatic": true,
+              "description": "Logs in the player.\nThis will load the players character from the database,\ncreate a player object, and call the 'QBCore:Server:OnPlayerLoaded' and\n'QBCore:Client:OnPlayerLoaded' events.",
+              "parameters": [
+                {
+                  "name": "source",
+                  "type": "HPlayer",
+                  "optional": false,
+                  "description": "the HPlayer object of the player to log in (see HELIX documentation for more info)"
+                },
+                {
+                  "name": "citizenid",
+                  "type": "string",
+                  "optional": true,
+                  "description": "the citizen ID of the character to load. If nil a new character will be created with the provided newData."
+                },
+                {
+                  "name": "newData",
+                  "type": "QBCore.PlayerData",
+                  "optional": true,
+                  "description": "the data for the new character to create. This will be ignored if the citizenid parameter is provided."
+                }
+              ],
+              "returns": [
+                {
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the player was successfully logged in, false otherwise"
+                }
+              ]
+            },
+            {
+              "name": "GetPlayerByLicense",
+              "isStatic": true,
+              "description": "Gets a player object by their license identifier.\nThis requires the player to be logged in.",
+              "parameters": [
+                {
+                  "name": "license",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the license identifier of the player"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "QBCore.Player",
+                  "name": "player",
+                  "description": "the player object if found, nil otherwise"
+                }
+              ]
+            },
+            {
+              "name": "CheckPlayerData",
+              "isStatic": true,
+              "description": "Ensures that the provided player data has all required fields,\nand creates a new player object. This should not be called if the\nplayer is already logged in.",
+              "parameters": [
+                {
+                  "name": "source",
+                  "type": "HPlayer",
+                  "optional": false,
+                  "description": "the HPlayer object of the player to create (see HELIX documentation for more info)"
+                },
+                {
+                  "name": "PlayerData",
+                  "type": "QBCore.PlayerData",
+                  "optional": true,
+                  "description": "the player data to check and create the player object with"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "QBCore.Player",
+                  "name": "player",
+                  "description": "the created player object"
+                }
+              ]
+            },
+            {
+              "name": "CreatePlayer",
+              "isStatic": true,
+              "description": "Creates a new player object for the given player data.",
+              "parameters": [
+                {
+                  "name": "PlayerData",
+                  "type": "QBCore.PlayerData",
+                  "optional": false,
+                  "description": "the player data to create the player object with"
+                },
+                {
+                  "name": "Offline",
+                  "type": "boolean",
+                  "optional": false,
+                  "description": "whether the player is offline (true) or online (false)"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "QBCore.Player",
+                  "name": "player",
+                  "description": "the created player object"
+                }
+              ]
+            },
+            {
+              "name": "Save",
+              "isStatic": true,
+              "description": "Saves the player to the database.",
+              "parameters": [
+                {
+                  "name": "source",
+                  "type": "HPlayer",
+                  "optional": false,
+                  "description": "the HPlayer object of the player to save (see HELIX documentation for more info)"
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "DeleteCharacter",
+              "isStatic": true,
+              "description": "Attempts to delete the character with the given citizenid for the player\nwith the given source.",
+              "parameters": [
+                {
+                  "name": "source",
+                  "type": "HPlayer",
+                  "optional": false,
+                  "description": "the HPlayer object to delete the character for"
+                },
+                {
+                  "name": "citizenid",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the citizenid of the chracter to delete"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the character was successfully deleted, false otherwise"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "QBCore.Player.Functions",
+          "description": null,
+          "fields": [
+
+          ],
+          "functions": [
+            {
+              "name": "UpdatePlayerData",
+              "isStatic": false,
+              "description": "Updates the player data on the client.\nThis will trigger the 'QBCore:Player:SetPlayerData' event on the client with the players\ncurrent player data.\nIf the player is offline this function will do nothing.",
+              "parameters": [
+
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "SetJob",
+              "isStatic": false,
+              "description": "Sets the job of the player.\nThis will update the players job data and trigger the 'QBCore:Client:OnJobUpdate' event on the client.\nIf the player is offline this will still update the job data, but will not trigger any client events.",
+              "parameters": [
+                {
+                  "name": "job",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the name of the job to set"
+                },
+                {
+                  "name": "grade",
+                  "type": "number",
+                  "optional": false,
+                  "description": "the grade level of the job to set"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the job was successfully set, false otherwise"
+                }
+              ]
+            },
+            {
+              "name": "SetGang",
+              "isStatic": false,
+              "description": "Sets the gang of the player.\nThis will update the players gang data and trigger the 'QBCore:Client:OnGangUpdate' event on the client.\nIf the player is offline this will still update the gang data, but will not trigger any client events.",
+              "parameters": [
+                {
+                  "name": "gang",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the name of the gang to set"
+                },
+                {
+                  "name": "grade",
+                  "type": "number",
+                  "optional": false,
+                  "description": "the grade level of the gang to set"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the gang was successfully set, false otherwise"
+                }
+              ]
+            },
+            {
+              "name": "Notify",
+              "isStatic": false,
+              "description": "Sends a notification to the player.\nThis will trigger the 'QBCore:Notify' event on the client with the provided parameters.",
+              "parameters": [
+                {
+                  "name": "text",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the text of the notification"
+                },
+                {
+                  "name": "type",
+                  "type": "string",
+                  "optional": true,
+                  "description": "the type of the notification (default: 'primary')"
+                },
+                {
+                  "name": "length",
+                  "type": "number",
+                  "optional": true,
+                  "description": "the length of time the notification should be displayed"
+                },
+                {
+                  "name": "icon",
+                  "type": "string",
+                  "optional": true,
+                  "description": "the icon to display with the notification"
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "HasItem",
+              "isStatic": false,
+              "description": "Checks if the player has the given item(s).\nThis will check if the player has the given item or list of items.",
+              "parameters": [
+                {
+                  "name": "items",
+                  "type": "string|table<string, any>|table<string>",
+                  "optional": false,
+                  "description": "not sure about the table format.\nthe code of that is a little hard to read."
+                },
+                {
+                  "name": "amount",
+                  "type": "number",
+                  "optional": true,
+                  "description": "the amount of the item(s) to check for (default: 1)"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "boolean",
+                  "name": "hasItem",
+                  "description": "true if the player has the item(s), false otherwise"
+                }
+              ]
+            },
+            {
+              "name": "SetJobDuty",
+              "isStatic": false,
+              "description": "Sets the job duty status of the player.\nThis will update the players job duty status and trigger the 'QBCore:Client:OnJobUpdate' event on the client.",
+              "parameters": [
+                {
+                  "name": "onDuty",
+                  "type": "boolean",
+                  "optional": false,
+                  "description": "whether the player is on duty for their job"
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "SetPlayerData",
+              "isStatic": false,
+              "description": "Sets a key in the player's data to the given value.\nThis will update the player's data and trigger the 'QBCore:Player:SetPlayerData' event on the client.",
+              "parameters": [
+                {
+                  "name": "key",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the key in the player's data to set"
+                },
+                {
+                  "name": "val",
+                  "type": "any",
+                  "optional": false,
+                  "description": "the value to set the key to"
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "SetMetaData",
+              "isStatic": false,
+              "description": "Sets a metadata key in the player's metadata to the given value.\nThis will update the player's metadata and trigger the 'QBCore:Player:SetPlayerData' event on the client.",
+              "parameters": [
+                {
+                  "name": "meta",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the metadata key to set"
+                },
+                {
+                  "name": "val",
+                  "type": "any",
+                  "optional": false,
+                  "description": "the value to set the metadata key to"
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "GetMetaData",
+              "isStatic": false,
+              "description": "Gets a metadata value from the player's metadata.\nThis will return the value of the given metadata key.",
+              "parameters": [
+                {
+                  "name": "meta",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the metadata key to get"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "any",
+                  "name": "value",
+                  "description": "the value of the metadata key"
+                }
+              ]
+            },
+            {
+              "name": "AddJobReputation",
+              "isStatic": false,
+              "description": "Adds job reputation to the player for their current job.\nThis will update the player's job reputation in their metadata\nand trigger the 'QBCore:Player:SetPlayerData' event on the client.",
+              "parameters": [
+                {
+                  "name": "amount",
+                  "type": "number",
+                  "optional": false,
+                  "description": "the amount of job reputation to add"
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "AddMoney",
+              "isStatic": false,
+              "description": "Adds money to the player's account.\nThis will update the player's money and trigger the 'QBCore:Client:OnMoneyChange'\nas well as 'qb-hud:client:OnMoneyChange' events on the client.\nA negative amount will be ignored and the function will return false.",
+              "parameters": [
+                {
+                  "name": "moneytype",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the type of money to add (e.g. 'cash', 'bank', etc.)"
+                },
+                {
+                  "name": "amount",
+                  "type": "number",
+                  "optional": false,
+                  "description": "the amount of money to add"
+                },
+                {
+                  "name": "reason",
+                  "type": "string",
+                  "optional": true,
+                  "description": "the reason for adding the money (default: 'unknown')"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the money was successfully added, false otherwise"
+                }
+              ]
+            },
+            {
+              "name": "RemoveMoney",
+              "isStatic": false,
+              "description": "Removes money from the player's account.\nThis will update the player's money and trigger the 'QBCore:Client:OnMoneyChange'\nas well as 'qb-hud:client:OnMoneyChange' events on the client.\nIf the account is 'bank' it will also trigger the 'qb-phone:client:RemoveBankMoney' event.\nA negative amount will be ignored and the function will return false.",
+              "parameters": [
+                {
+                  "name": "moneytype",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the type of money to remove (e.g. 'cash', 'bank', etc.)"
+                },
+                {
+                  "name": "amount",
+                  "type": "number",
+                  "optional": false,
+                  "description": "the amount of money to remove"
+                },
+                {
+                  "name": "reason",
+                  "type": "string",
+                  "optional": true,
+                  "description": "the reason for removing the money (default: 'unknown')"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the money was successfully removed, false otherwise"
+                }
+              ]
+            },
+            {
+              "name": "SetMoney",
+              "isStatic": false,
+              "description": "Sets the player's money to the given amount.\nThis will update the player's money and trigger the 'QBCore:Client:OnMoneyChange'\nas well as 'qb-hud:client:OnMoneyChange' events on the client.\nA negative amount will be ignored and the function will return false.",
+              "parameters": [
+                {
+                  "name": "moneytype",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the type of money to set (e.g. 'cash', 'bank', etc.)"
+                },
+                {
+                  "name": "amount",
+                  "type": "number",
+                  "optional": false,
+                  "description": "the amount of money to set"
+                },
+                {
+                  "name": "reason",
+                  "type": "string",
+                  "optional": true,
+                  "description": "the reason for setting the money (default: 'unknown')"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the money was successfully set, false otherwise"
+                }
+              ]
+            },
+            {
+              "name": "GetMoney",
+              "isStatic": false,
+              "description": "Gets the amount of money the player has for the given money type.",
+              "parameters": [
+                {
+                  "name": "moneytype",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the type of money to get (e.g. 'cash', 'bank', etc.)"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "number",
+                  "name": "amount",
+                  "description": "the amount of money the player has, or nil if the money type is invalid"
+                }
+              ]
+            },
+            {
+              "name": "SetCreditCard",
+              "isStatic": false,
+              "description": "Sets the player's credit/debit card number.\nThis will update the player's character info and trigger the 'QBCore:Player:SetPlayerData' event on the client.",
+              "parameters": [
+                {
+                  "name": "cardNumber",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the credit/debit card number to set"
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "GetCardSlot",
+              "isStatic": false,
+              "description": "Gets the inventory slot of the player's card with the given card number and type.\nThis will search the player's inventory for the card and return the slot if found.\nIf not found, it will return nil.",
+              "parameters": [
+                {
+                  "name": "cardNumber",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the credit/debit card number to search for"
+                },
+                {
+                  "name": "cardType",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the type of card to search for (e.g. 'credit', 'debit', etc.)"
+                }
+              ],
+              "returns": [
+                {
+                  "type": "number",
+                  "name": "slot",
+                  "description": "the inventory slot of the card if found, or nil if not found"
+                }
+              ]
+            },
+            {
+              "name": "Save",
+              "isStatic": false,
+              "description": "Saves the player to the database.\nIf the player is offline, this will save the offline player data.\nIf the player is online, this will save the online player data.",
+              "parameters": [
+
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "Logout",
+              "isStatic": false,
+              "description": "Logs out the player.\nThis will save and unload the players character, as well as\nmark the player as no longer known, meaning trying to receive\nthe player after a call to this function will probably result\nin errors.",
+              "parameters": [
+
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "AddMethod",
+              "isStatic": false,
+              "description": "Adds a new method to the player object.\nThis will add the given method to the player's Functions table.\nThis will only affect the current player object and not all player objects.",
+              "parameters": [
+                {
+                  "name": "methodName",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the name of the method to add"
+                },
+                {
+                  "name": "handler",
+                  "type": "function",
+                  "optional": false,
+                  "description": "the function to add as the method"
+                }
+              ],
+              "returns": [
+
+              ]
+            },
+            {
+              "name": "AddField",
+              "isStatic": false,
+              "description": "Adds a new field to the player object.\nThis will add the given field to the player object.\nThis will only affect the current player object and not all player objects.",
+              "parameters": [
+                {
+                  "name": "fieldName",
+                  "type": "string",
+                  "optional": false,
+                  "description": "the name of the field to add"
+                },
+                {
+                  "name": "data",
+                  "type": "any",
+                  "optional": false,
+                  "description": "the data to set the field to"
+                }
+              ],
+              "returns": [
+
+              ]
+            }
+          ]
+        }
+      ],
+      "functions": [
+        {
+          "name": "DatabaseAction",
+          "isStatic": true,
+          "description": null,
+          "parameters": [
+            {
+              "name": "ActionType",
+              "type": "any",
+              "optional": false,
+              "description": null
+            },
+            {
+              "name": "...",
+              "type": "any",
+              "optional": false,
+              "description": null
+            }
+          ],
+          "returns": [
+            {
+              "type": "any",
+              "name": "",
+              "description": null
+            }
+          ]
+        },
+        {
+          "name": "onShutdown",
+          "isStatic": true,
+          "description": null,
+          "parameters": [
+
+          ],
+          "returns": [
+
+          ]
+        }
+      ],
+      "fields": [
+
+      ]
+    }
+  ]
+}
