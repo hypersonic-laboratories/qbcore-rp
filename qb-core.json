@@ -542,28 +542,28 @@
             {
               "name": "GetPlayerData",
               "isStatic": true,
-              "description": null,
+              "description": "Returns this players playerdata.",
               "parameters": [
 
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "QBCore.PlayerData",
+                  "name": "PlayerData",
+                  "description": "the qb-core playerdata of this player"
                 }
               ]
             },
             {
               "name": "Debug",
               "isStatic": true,
-              "description": null,
+              "description": "Debug function to dump tables to console.",
               "parameters": [
                 {
                   "name": "tbl",
-                  "type": "any",
+                  "type": "table",
                   "optional": false,
-                  "description": null
+                  "description": "The table to dump"
                 }
               ],
               "returns": [
@@ -577,7 +577,7 @@
             {
               "name": "HideText",
               "isStatic": true,
-              "description": null,
+              "description": "Hides the current Text.",
               "parameters": [
 
               ],
@@ -592,19 +592,19 @@
             {
               "name": "DrawText",
               "isStatic": true,
-              "description": null,
+              "description": "Draws text on the players screen.",
               "parameters": [
                 {
                   "name": "text",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "The text to draw"
                 },
                 {
                   "name": "position",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "The position on the screen to draw the text (default: \"left\")"
                 }
               ],
               "returns": [
@@ -618,19 +618,19 @@
             {
               "name": "ChangeText",
               "isStatic": true,
-              "description": null,
+              "description": "Changes the text currently being drawn on the players screen.",
               "parameters": [
                 {
                   "name": "text",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "The new text to draw"
                 },
                 {
                   "name": "position",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "The position on the screen to draw the text (default: \"left\")"
                 }
               ],
               "returns": [
@@ -644,7 +644,7 @@
             {
               "name": "KeyPressed",
               "isStatic": true,
-              "description": null,
+              "description": "Notifies the server that the key has been pressed (???)",
               "parameters": [
 
               ],
@@ -659,31 +659,31 @@
             {
               "name": "Notify",
               "isStatic": true,
-              "description": null,
+              "description": "Sends a notification to the player.",
               "parameters": [
                 {
                   "name": "text",
-                  "type": "any",
+                  "type": "string|",
                   "optional": false,
                   "description": null
                 },
                 {
                   "name": "texttype",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "The type of notification"
                 },
                 {
                   "name": "length",
-                  "type": "any",
+                  "type": "number",
                   "optional": false,
-                  "description": null
+                  "description": "The length of time the notification should be displayed in milliseconds"
                 },
                 {
                   "name": "icon",
-                  "type": "any",
-                  "optional": false,
-                  "description": null
+                  "type": "string",
+                  "optional": true,
+                  "description": "The icon to display in the notification"
                 }
               ],
               "returns": [
@@ -717,283 +717,300 @@
             {
               "name": "GetIdentifier",
               "isStatic": true,
-              "description": null,
+              "description": "Returns the HELIX identifier for the given HPlayer object",
               "parameters": [
                 {
                   "name": "source",
-                  "type": "any",
+                  "type": "HPlayer",
                   "optional": false,
-                  "description": null
+                  "description": "the HELIX player object (see HELIX documentation for more info)"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "string",
+                  "name": "identifier",
+                  "description": "the HELIX identifier"
                 }
               ]
             },
             {
               "name": "GetSource",
               "isStatic": true,
-              "description": null,
+              "description": "Returns the HPlayer object for the given HELIX identifier.\nIf the player is not found, nil is returned.",
               "parameters": [
                 {
                   "name": "identifier",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the HELIX identifier"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "HPlayer",
+                  "name": "source",
+                  "description": "the HELIX player object (see HELIX documentation for more info)"
                 }
               ]
             },
             {
               "name": "GetPlayer",
               "isStatic": true,
-              "description": null,
+              "description": "Returns the QBCore.Player object for the given source.\nIf the player is not found, nil is returned.",
               "parameters": [
                 {
                   "name": "source",
-                  "type": "any",
+                  "type": "HPlayer",
                   "optional": false,
-                  "description": null
+                  "description": "the HELIX player object (see HELIX documentation for more info)"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "QBCore.Player",
+                  "name": "player",
+                  "description": "the QBCore.Player object"
                 }
               ]
             },
             {
               "name": "GetPlayerName",
               "isStatic": true,
-              "description": null,
+              "description": "Returns the HELIX! player name for the given source.",
               "parameters": [
                 {
                   "name": "source",
-                  "type": "any",
+                  "type": "HPlayer",
                   "optional": false,
-                  "description": null
+                  "description": "the HELIX player object (see HELIX documentation for more info)"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "string",
+                  "name": "playerName",
+                  "description": "the player's name"
                 }
               ]
             },
             {
               "name": "GetPlayerByCitizenId",
               "isStatic": true,
-              "description": null,
+              "description": "Returns the QBCore.Player object for the given citizenid.\nIf the player is not found, nil is returned.\nThe owner of the character has to be online for this to work.",
               "parameters": [
                 {
                   "name": "citizenid",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the citizenid of the player"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "QBCore.Player",
+                  "name": "player",
+                  "description": "the QBCore.Player object"
                 }
               ]
             },
             {
               "name": "GetOfflinePlayerByCitizenId",
               "isStatic": true,
-              "description": null,
+              "description": "Returns the offline QBCore.Player object for the given citizenid.\nIf the player is not found, nil is returned.\nFor this to work, the player does not have to be online.",
               "parameters": [
                 {
                   "name": "citizenid",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the citizenid of the player"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "QBCore.Player",
+                  "name": "player",
+                  "description": "the QBCore.Player object"
                 }
               ]
             },
             {
               "name": "GetPlayerByLicense",
               "isStatic": true,
-              "description": null,
+              "description": "Returns the QBCore.Player object for the given player license.\nIf the player with that license is not online nil is returned.",
               "parameters": [
                 {
                   "name": "license",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the license of the player"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "QBCore.Player",
+                  "name": "player",
+                  "description": "the QBCore.Player object"
                 }
               ]
             },
             {
               "name": "GetPlayerByPhone",
               "isStatic": true,
-              "description": null,
+              "description": "Returns the QBCore.Player object for the given phone number.\nIf no player with that phone number is online, nil is returned.",
               "parameters": [
                 {
                   "name": "number",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the phone number of the player to search for"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "QBCore.Player",
+                  "name": "player",
+                  "description": "the QBCore.Player object"
                 }
               ]
             },
             {
               "name": "GetPlayerByAccount",
               "isStatic": true,
-              "description": null,
+              "description": "Returns the QBCore.Player object for the given banking account name.\nIf no player with that account name is online, nil is returned.",
               "parameters": [
                 {
                   "name": "account",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the banking account name of the player to search for"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "QBCore.Player",
+                  "name": "player",
+                  "description": "the QBCore.Player object"
                 }
               ]
             },
             {
               "name": "GetPlayerByCharInfo",
               "isStatic": true,
-              "description": null,
+              "description": "Searches for a player by a specific property in their charinfo.\nIf no player with that property value is online, nil is returned.",
               "parameters": [
                 {
                   "name": "property",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the property in charinfo to search by"
                 },
                 {
                   "name": "value",
                   "type": "any",
                   "optional": false,
-                  "description": null
+                  "description": "the value of the property to search for"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "QBCore.Player",
+                  "name": "player",
+                  "description": "the QBCore.Player object"
                 }
               ]
             },
             {
               "name": "GetPlayers",
               "isStatic": true,
-              "description": null,
-              "parameters": [
-
-              ],
-              "returns": [
-
-              ]
-            },
-            {
-              "name": "GetQBPlayers",
-              "isStatic": true,
-              "description": null,
+              "description": "Returns a list with the sources of all online players.",
               "parameters": [
 
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "table<HPlayer>",
+                  "name": "sources",
+                  "description": "a list with the sources of all online players"
+                }
+              ]
+            },
+            {
+              "name": "GetQBPlayers",
+              "isStatic": true,
+              "description": "Returns a map with all online QBCore.Player objects.\nThe keys are the HPlayer objects and the values are the QBCore.Player objects for those sources.",
+              "parameters": [
+
+              ],
+              "returns": [
+                {
+                  "type": "table<HPlayer, QBCore.Player>",
+                  "name": "players",
+                  "description": "a list with all online QBCore.Player objects"
                 }
               ]
             },
             {
               "name": "GetPlayersOnDuty",
               "isStatic": true,
-              "description": null,
+              "description": "Returns a list with the sources (HPlayer) of all online players on duty for the given job.\nAlso returns the count of players on duty for that job.",
               "parameters": [
                 {
                   "name": "job",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the job name to search for"
                 }
               ],
               "returns": [
-
+                {
+                  "type": "table<HPlayer>",
+                  "name": "players",
+                  "description": "a list with the sources of all online players on duty for the given job"
+                },
+                {
+                  "type": "number",
+                  "name": "count",
+                  "description": "the count of players on duty for that job"
+                }
               ]
             },
             {
               "name": "GetDutyCount",
               "isStatic": true,
-              "description": null,
+              "description": "Returns the count of online players on duty for the given job.",
               "parameters": [
                 {
                   "name": "job",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the job name to search for"
                 }
               ],
               "returns": [
-
+                {
+                  "type": "number",
+                  "name": "count",
+                  "description": "the count of players on duty for that job"
+                }
               ]
             },
             {
               "name": "CreateUseableItem",
               "isStatic": true,
-              "description": null,
+              "description": "Creates a new usable item with the given item name and data.",
               "parameters": [
                 {
                   "name": "item",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the item name to register as usable"
                 },
                 {
                   "name": "data",
-                  "type": "any",
+                  "type": "function",
                   "optional": false,
-                  "description": null
+                  "description": "the function to call when the item is used"
                 }
               ],
               "returns": [
@@ -1003,33 +1020,33 @@
             {
               "name": "CanUseItem",
               "isStatic": true,
-              "description": null,
+              "description": "Checks if the given item is registered as usable.",
               "parameters": [
                 {
                   "name": "item",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the item name to check"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "canUse",
+                  "description": "true if the item is usable, false otherwise"
                 }
               ]
             },
             {
               "name": "Debug",
               "isStatic": true,
-              "description": null,
+              "description": "Debugs the given table by dumping its contents to the console.\nThis function only works if HPlayer is not defined (WHY???).",
               "parameters": [
                 {
                   "name": "tbl",
-                  "type": "any",
+                  "type": "table",
                   "optional": false,
-                  "description": null
+                  "description": "the table to debug"
                 }
               ],
               "returns": [
@@ -1043,37 +1060,37 @@
             {
               "name": "Notify",
               "isStatic": true,
-              "description": null,
+              "description": "Sends a notification to the given source.\nThis function only works if HPlayer is not defined (WHY???).",
               "parameters": [
                 {
                   "name": "source",
-                  "type": "any",
+                  "type": "HPlayer",
                   "optional": false,
-                  "description": null
+                  "description": "the HELIX player object (see HELIX documentation for more info)"
                 },
                 {
                   "name": "message",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the message to send"
                 },
                 {
                   "name": "type",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the type of notification (e.g., 'success', 'error', 'info')"
                 },
                 {
                   "name": "length",
-                  "type": "any",
+                  "type": "number",
                   "optional": false,
-                  "description": null
+                  "description": "the length of time the notification should be displayed (in milliseconds)"
                 },
                 {
                   "name": "icon",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the icon to display with the notification"
                 }
               ],
               "returns": [
@@ -1087,127 +1104,127 @@
             {
               "name": "CreateCitizenId",
               "isStatic": true,
-              "description": null,
+              "description": "Creates a new citizen ID.",
               "parameters": [
 
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "string",
+                  "name": "citizenId",
+                  "description": "the newly created citizen ID"
                 }
               ]
             },
             {
               "name": "CreateAccountNumber",
               "isStatic": true,
-              "description": null,
+              "description": "Creates a new account number. (for banking?)",
               "parameters": [
 
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "string",
+                  "name": "accountNumber",
+                  "description": "the newly created account number"
                 }
               ]
             },
             {
               "name": "CreateWalletId",
               "isStatic": true,
-              "description": null,
+              "description": "Creates a new wallet ID. (for what?)",
               "parameters": [
 
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "string",
+                  "name": "walletId",
+                  "description": "the newly created wallet ID"
                 }
               ]
             },
             {
               "name": "CreatePhoneNumber",
               "isStatic": true,
-              "description": null,
+              "description": "Creates a new phone number.",
               "parameters": [
 
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "string",
+                  "name": "phoneNumber",
+                  "description": "the newly created phone number"
                 }
               ]
             },
             {
               "name": "CreateFingerId",
               "isStatic": true,
-              "description": null,
+              "description": "Creates a new fingerprint ID.",
               "parameters": [
 
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "string",
+                  "name": "fingerId",
+                  "description": "the newly created fingerprint ID"
                 }
               ]
             },
             {
               "name": "CreateSerialNumber",
               "isStatic": true,
-              "description": null,
+              "description": "Creates a new serial number. (for weapons, phones, etc.)",
               "parameters": [
 
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "string",
+                  "name": "serialNumber",
+                  "description": "the newly created serial number"
                 }
               ]
             },
             {
               "name": "CreateApartmentId",
               "isStatic": true,
-              "description": null,
+              "description": "Creates a new apartment ID.",
               "parameters": [
 
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "string",
+                  "name": "apartmentId",
+                  "description": "the newly created apartment ID"
                 }
               ]
             },
             {
               "name": "GeneratePlate",
               "isStatic": true,
-              "description": null,
+              "description": "Generates a new vehicle plate.",
               "parameters": [
 
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "string",
+                  "name": "plate",
+                  "description": "the newly created vehicle plate"
                 }
               ]
             },
             {
               "name": "CreateWeapon",
               "isStatic": true,
-              "description": null,
+              "description": "Dose nothing (literally empty).",
               "parameters": [
                 {
                   "name": "weapon_name",
@@ -1241,411 +1258,503 @@
             {
               "name": "CreateVehicle",
               "isStatic": true,
-              "description": null,
+              "description": "Creates a new vehicle with the given parameters.",
               "parameters": [
                 {
                   "name": "vehicle_name",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the vehicle to create"
                 },
                 {
                   "name": "coords",
-                  "type": "any",
+                  "type": "Vector",
                   "optional": false,
-                  "description": null
+                  "description": "the coordinates to spawn the vehicle at"
                 },
                 {
                   "name": "rotation",
-                  "type": "any",
-                  "optional": false,
-                  "description": null
+                  "type": "Rotator",
+                  "optional": true,
+                  "description": "the rotation to spawn the vehicle with (default: Rotator(0, 0, 0))"
                 },
                 {
                   "name": "plate",
-                  "type": "any",
+                  "type": "nil",
                   "optional": false,
-                  "description": null
+                  "description": "this is completely ignored"
                 },
                 {
                   "name": "fuel",
-                  "type": "any",
-                  "optional": false,
-                  "description": null
+                  "type": "number",
+                  "optional": true,
+                  "description": "the fuel level to set the vehicle to (0.0 - 1.0, default: 1.0)"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "HVehicle",
+                  "name": "vehicle",
+                  "description": "the created vehicle object (see HELIX documentation for more info)"
                 }
               ]
             },
             {
               "name": "SetMethod",
               "isStatic": true,
-              "description": null,
+              "description": "Adds / Replaces a method in the QBCore.Functions table.\nTriggers 'QBCore:Server:UpdateObject' after adding / replacing the method.",
               "parameters": [
                 {
                   "name": "methodName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the method to add / replace"
                 },
                 {
                   "name": "handler",
-                  "type": "any",
+                  "type": "function",
                   "optional": false,
-                  "description": null
+                  "description": "the function to set as the method"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the method was added / replaced successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "SetField",
               "isStatic": true,
-              "description": null,
+              "description": "Adds / Replaces a field in the QBCore table.\nTriggers 'QBCore:Server:UpdateObject' after adding / replacing the field.",
               "parameters": [
                 {
                   "name": "fieldName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the field to add / replace"
                 },
                 {
                   "name": "data",
                   "type": "any",
                   "optional": false,
-                  "description": null
+                  "description": "the data to set as the field"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the field was added / replaced successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "AddJob",
               "isStatic": true,
-              "description": null,
+              "description": "Adds a new job to the QBCore.Shared.Jobs table.\nTriggers 'QBCore:Client:OnSharedUpdate' and 'QBCore:Server:UpdateObject' after adding the job.",
               "parameters": [
                 {
                   "name": "jobName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the job to add"
                 },
                 {
                   "name": "job",
-                  "type": "any",
+                  "type": "QBCore.JobInfo",
                   "optional": false,
-                  "description": null
+                  "description": "the job data to add"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the job was added successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "AddJobs",
               "isStatic": true,
-              "description": null,
+              "description": "Adds multiple new jobs to the QBCore.Shared.Jobs table.\nTriggers 'QBCore:Client:OnSharedUpdateMultiple' and 'QBCore:Server:UpdateObject' after adding the jobs.",
               "parameters": [
                 {
                   "name": "jobs",
-                  "type": "any",
+                  "type": "table<string, QBCore.JobInfo>",
                   "optional": false,
-                  "description": null
+                  "description": "the jobs to add"
                 }
               ],
               "returns": [
-
+                {
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the jobs were added successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
+                },
+                {
+                  "type": "QBCore.JobInfo",
+                  "name": "errorItem",
+                  "description": "the job that caused the error, if any"
+                }
               ]
             },
             {
               "name": "RemoveJob",
               "isStatic": true,
-              "description": null,
+              "description": "Removes a job from the QBCore.Shared.Jobs table.\nTriggers 'QBCore:Client:OnSharedUpdate' and 'QBCore:Server:UpdateObject' after removing the job.",
               "parameters": [
                 {
                   "name": "jobName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the job to remove"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the job was removed successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "UpdateJob",
               "isStatic": true,
-              "description": null,
+              "description": "Updates an existing job in the QBCore.Shared.Jobs table.\nTriggers 'QBCore:Client:OnSharedUpdate' and 'QBCore:Server:UpdateObject' after updating the job.",
               "parameters": [
                 {
                   "name": "jobName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the job to update"
                 },
                 {
                   "name": "job",
-                  "type": "any",
+                  "type": "QBCore.JobInfo",
                   "optional": false,
-                  "description": null
+                  "description": "the new job data"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the job was updated successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "AddItem",
               "isStatic": true,
-              "description": null,
+              "description": "Adds a new item to the QBCore.Shared.Items table.\nTriggers 'QBCore:Client:OnSharedUpdate' and 'QBCore:Server:UpdateObject' after adding the item.",
               "parameters": [
                 {
                   "name": "itemName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the item to add"
                 },
                 {
                   "name": "item",
-                  "type": "any",
+                  "type": "QBCore.Item",
                   "optional": false,
-                  "description": null
+                  "description": "the item data to add"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the item was added successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "UpdateItem",
               "isStatic": true,
-              "description": null,
+              "description": "Updates an existing item in the QBCore.Shared.Items table.\nTriggers 'QBCore:Client:OnSharedUpdate' and 'QBCore:Server:UpdateObject' after updating the item.",
               "parameters": [
                 {
                   "name": "itemName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the item to update"
                 },
                 {
                   "name": "item",
-                  "type": "any",
+                  "type": "QBCore.Item",
                   "optional": false,
-                  "description": null
+                  "description": "the new item data"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the item was updated successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "AddItems",
               "isStatic": true,
-              "description": null,
+              "description": "Adds multiple new items to the QBCore.Shared.Items table.\nTriggers 'QBCore:Client:OnSharedUpdateMultiple' and 'QBCore:Server:UpdateObject' after adding the items.",
               "parameters": [
                 {
                   "name": "items",
-                  "type": "any",
+                  "type": "table<string, QBCore.Item>",
                   "optional": false,
-                  "description": null
+                  "description": "the items to add"
                 }
               ],
               "returns": [
-
+                {
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the items were added successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
+                }
               ]
             },
             {
               "name": "RemoveItem",
               "isStatic": true,
-              "description": null,
+              "description": "Removes an item from the QBCore.Shared.Items table.\nTriggers 'QBCore:Client:OnSharedUpdate' and 'QBCore:Server:UpdateObject' after removing the item.",
               "parameters": [
                 {
                   "name": "itemName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the item to remove"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the item was removed successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "AddGang",
               "isStatic": true,
-              "description": null,
+              "description": "Adds a new gang to the QBCore.Shared.Gangs table.\nTriggers 'QBCore:Client:OnSharedUpdate' and 'QBCore:Server:UpdateObject' after adding the gang.",
               "parameters": [
                 {
                   "name": "gangName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the gang to add"
                 },
                 {
                   "name": "gang",
-                  "type": "any",
+                  "type": "QBCore.GangInfo",
                   "optional": false,
-                  "description": null
+                  "description": "the gang data to add"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the gang was added successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "AddGangs",
               "isStatic": true,
-              "description": null,
+              "description": "Adds multiple new gangs to the QBCore.Shared.Gangs table.\nTriggers 'QBCore:Client:OnSharedUpdateMultiple' and 'QBCore:Server:UpdateObject' after adding the gangs.",
               "parameters": [
                 {
                   "name": "gangs",
-                  "type": "any",
+                  "type": "table<string, QBCore.GangInfo>",
                   "optional": false,
-                  "description": null
+                  "description": "the gangs to add"
                 }
               ],
               "returns": [
-
+                {
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the gangs were added successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
+                },
+                {
+                  "type": "QBCore.GangInfo",
+                  "name": "errorItem",
+                  "description": "the gang that caused the error, if any"
+                }
               ]
             },
             {
               "name": "RemoveGang",
               "isStatic": true,
-              "description": null,
+              "description": "Removes a gang from the QBCore.Shared.Gangs table.\nTriggers 'QBCore:Client:OnSharedUpdate' and 'QBCore:Server:UpdateObject' after removing the gang.",
               "parameters": [
                 {
                   "name": "gangName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the gang to remove"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the gang was removed successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "UpdateGang",
               "isStatic": true,
-              "description": null,
+              "description": "Updates an existing gang in the QBCore.Shared.Gangs table.\nTriggers 'QBCore:Client:OnSharedUpdate' and 'QBCore:Server:UpdateObject' after updating the gang.",
               "parameters": [
                 {
                   "name": "gangName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the gang to update"
                 },
                 {
                   "name": "gang",
-                  "type": "any",
+                  "type": "QBCore.GangInfo",
                   "optional": false,
-                  "description": null
+                  "description": "the new gang data"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the gang was updated successfully, false otherwise"
+                },
+                {
+                  "type": "string",
+                  "name": "message",
+                  "description": "the result message"
                 }
               ]
             },
             {
               "name": "SetPlayerBucket",
               "isStatic": true,
-              "description": null,
+              "description": "Sets the player's bucket (instance) to the given bucket number.\nAlso updates the player's dimension to match the bucket.",
               "parameters": [
                 {
                   "name": "source",
-                  "type": "any",
+                  "type": "HPlayer",
                   "optional": false,
-                  "description": null
+                  "description": "the HELIX player object (see HELIX documentation for more info)"
                 },
                 {
                   "name": "bucket",
-                  "type": "any",
+                  "type": "number",
                   "optional": false,
-                  "description": null
+                  "description": "the bucket number to set the player to"
                 }
               ],
               "returns": [
                 {
-                  "type": "any",
-                  "name": "",
-                  "description": null
+                  "type": "boolean",
+                  "name": "success",
+                  "description": "true if the player's bucket was set successfully, false otherwise"
                 }
               ]
             },
             {
               "name": "AddPlayerMethod",
               "isStatic": true,
-              "description": null,
+              "description": "Adds a new method to the specified players.",
               "parameters": [
                 {
                   "name": "ids",
-                  "type": "any",
+                  "type": "number|table<number>",
                   "optional": false,
-                  "description": null
+                  "description": "the source(s) of the player(s) to add"
                 },
                 {
                   "name": "methodName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the method to add"
                 },
                 {
                   "name": "handler",
-                  "type": "any",
+                  "type": "function",
                   "optional": false,
-                  "description": null
+                  "description": "the function to set as the method"
                 }
               ],
               "returns": [
@@ -1655,25 +1764,25 @@
             {
               "name": "AddPlayerField",
               "isStatic": true,
-              "description": null,
+              "description": "Adds a new field to the specified players.",
               "parameters": [
                 {
                   "name": "ids",
-                  "type": "any",
+                  "type": "number|table<number>",
                   "optional": false,
-                  "description": null
+                  "description": "the source(s) of the player(s) to add"
                 },
                 {
                   "name": "fieldName",
-                  "type": "any",
+                  "type": "string",
                   "optional": false,
-                  "description": null
+                  "description": "the name of the field to add"
                 },
                 {
                   "name": "data",
                   "type": "any",
                   "optional": false,
-                  "description": null
+                  "description": "the data to set as the field"
                 }
               ],
               "returns": [
@@ -1687,8 +1796,20 @@
           "description": null,
           "fields": [
             {
+              "name": "Player_Buckets",
+              "type": "table<string, {id: HPlayer, bucket: number}>",
+              "isStatic": true,
+              "description": "player buckets by identifier"
+            },
+            {
+              "name": "UsableItems",
+              "type": "table<string, function>",
+              "isStatic": true,
+              "description": "usable items (function not sure, probably not since the parameter given to the function is called \"data\""
+            },
+            {
               "name": "Players",
-              "type": "table<QBCore.Player>",
+              "type": "table<HPlayer, QBCore.Player>",
               "isStatic": true,
               "description": "the logged in players"
             }

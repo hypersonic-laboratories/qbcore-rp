@@ -1,4 +1,4 @@
----@type table<QBCore.Player> the logged in players
+---@type table<HPlayer, QBCore.Player> the logged in players
 QBCore.Players = {}
 
 ---@class QBCore.Player
