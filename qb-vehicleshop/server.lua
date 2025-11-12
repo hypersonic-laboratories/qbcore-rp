@@ -87,10 +87,11 @@ RegisterServerEvent('qb-vehicleshop:server:purchaseVehicle', function(source, da
         vehicle,
         '{}',
         plate,
-        'apartment',
+        'apartments',
         0
     })
-    HVehicle(spawnLocation.location, spawnLocation.rotation, vehicleInfo.asset_name)
+    local pVehicle = HVehicle(spawnLocation.location, spawnLocation.rotation, vehicleInfo.asset_name)
+    pVehicle:SetPlate(plate)
     TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.purchased'), 'success')
 end)
 

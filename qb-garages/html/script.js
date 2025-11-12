@@ -175,7 +175,7 @@ function populateVehicleList(garageLabel, vehicles) {
         stats.classList.add("stats");
 
         const maxValues = {
-            fuel: 100,
+            fuel: 1,
             engine: 1,
             body: 1,
         };

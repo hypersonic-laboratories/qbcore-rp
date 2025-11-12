@@ -47,7 +47,7 @@ local function OpenGarageMenu()
 end
 
 local function DepositVehicle(vehicle)
-    TriggerServerEvent('qb-garages:server:DepositVehicle', vehicle.Plate, zone.indexgarage, 1)
+    TriggerServerEvent('qb-garages:server:DepositVehicle', zone.indexgarage, 1)
 end
 
 local function IsVehicleAllowed(class, vehicle)

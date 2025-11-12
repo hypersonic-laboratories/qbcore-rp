@@ -127,6 +127,7 @@ local function SetInApartmentTargets(apartmentName)
 			label = Lang:t('text.open_stash'),
 			type = 'server',
 			event = 'qb-apartments:server:OpenStash',
+			CurrentApartment = CurrentApartment,
 		},
 	})
 	RegisterInApartmentTarget('outfitsPos', outfitsPos, 0, {

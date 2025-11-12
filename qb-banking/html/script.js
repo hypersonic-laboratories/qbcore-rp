@@ -240,20 +240,14 @@ const bankingApp = Vue.createApp({
                 return;
             }
 
-            hEvent(
-                "orderCard",
-                {
-                    pin: this.debitPin,
-                },
-                (response) => {
-                    if (response.success) {
-                        this.debitPin = "";
-                        this.addNotification(response.message, "success");
-                    } else {
-                        this.addNotification(response.message, "error");
-                    }
+            hEvent("orderCard", { pin: this.debitPin }, (response) => {
+                if (response.success) {
+                    this.debitPin = "";
+                    this.addNotification(response.message, "success");
+                } else {
+                    this.addNotification(response.message, "error");
                 }
-            );
+            });
         },
         openAccount() {
             if (!this.createAccountName || this.createAccountAmount < 0) {

@@ -471,9 +471,9 @@ function AddItem(identifier, item, amount, slot, info, reason)
             combinable = itemInfo.combinable
         }
 
-        if exports['qb-core']:Shared('SplitStr', item, '_')[1] == 'weapon' then
+        if itemInfo.type == 'weapon' then
             if not inventory[slot].info.serie then
-                inventory[slot].info.serie = tostring(exports['qb-core']:Shared('RandomInt', 2) .. exports['qb-core']:Shared('RandomStr', 3) .. exports['qb-core']:Shared('RandomInt', 1) .. exports['qb-core']:Shared('RandomStr', 2) .. exports['qb-core']:Shared('RandomInt', 3) .. exports['qb-core']:Shared('RandomStr', 4))
+                inventory[slot].info.serie = exports['qb-core']:CreateSerialNumber()
             end
             if not inventory[slot].info.quality then
                 inventory[slot].info.quality = 100

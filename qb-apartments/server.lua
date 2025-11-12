@@ -185,7 +185,7 @@ RegisterServerEvent('qb-apartments:server:LogoutApartment', function(source, dat
 end)
 
 RegisterServerEvent('qb-apartments:server:OpenStash', function(source, data)
-	exports['qb-inventory']:OpenInventory(source, data.apartmentId)
+	exports['qb-inventory']:OpenInventory(source, data.CurrentApartment)
 end)
 
 RegisterServerEvent('qb-apartments:server:RingDoor', function(source, data)
