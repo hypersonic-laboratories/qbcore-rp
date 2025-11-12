@@ -20,28 +20,29 @@ jobs:
       JAR_FILE: LuaDocGenerator-1.0-SNAPSHOT.jar
 
     steps:
-      # Step 1: Checkout current repo
       - name: Checkout current repository
         uses: actions/checkout@v4
 
-      # Step 2: Checkout external repo (for static site files)
       - name: Checkout external repository (LuaDocGenerator)
         uses: actions/checkout@v4
         with:
           repository: XGEN-OSC/LuaDocGenerator
           path: external-repo
 
-      # Step 3: Download LuaDocGenerator JAR
+      - name: Set up Java 23
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '23'
+
       - name: Download LuaDocGenerator JAR
         run: |
           curl -L $JAR_URL -o $JAR_FILE
 
-      # Step 4: Generate documentation JSON
       - name: Run LuaDocGenerator
         run: |
           java -jar $JAR_FILE --project "$CONFIG_JSON" "$OUTPUT_JSON"
 
-      # Step 5: Prepare deployment folder
       - name: Prepare deployment directory
         run: |
           mkdir -p deploy
@@ -49,7 +50,6 @@ jobs:
           cp docviewconfig.js deploy/
           cp "$OUTPUT_JSON" deploy/
 
-      # Step 6: Deploy to GitHub Pages
       - name: Deploy static site to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
