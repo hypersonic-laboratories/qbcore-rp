@@ -101,24 +101,15 @@ local function OpenATM()
     end)
 end
 
-local function NearATM()
-    local ped = GetPlayerPawn()
-    if not ped then return end
-    local playerCoords = GetEntityCoords(ped)
-    for _, v in pairs(Config.atmModels) do
-        local hash = joaat(v)
-        local atm = IsObjectNearPoint(hash, playerCoords.x, playerCoords.y, playerCoords.z, 1.5)
-        if atm then
-            return true
-        end
-    end
-end
+RegisterClientEvent('qb-banking:client:openATM', function()
+    OpenATM()
+end)
 
 -- Events
 
-RegisterClientEvent('qb-banking:client:useCard', function()
-    if NearATM() then OpenATM() end
-end)
+-- RegisterClientEvent('qb-banking:client:useCard', function()
+--     if NearATM() then OpenATM() end
+-- end)
 
 -- Threads
 
@@ -150,20 +141,20 @@ Timer.SetTimeout(function()
         })
     end
 
-    -- for i = 1, #Config.atmModels do
-    --     local atmModel = Config.atmModels[i]
-    --     exports['qb-target']:AddTargetModel(atmModel, {
-    --         options = {
-    --             {
-    --                 icon = 'fas fa-university',
-    --                 label = 'Open ATM',
-    --                 item = 'bank_card',
-    --                 action = function()
-    --                     OpenATM()
-    --                 end,
-    --             }
-    --         },
-    --         distance = 1.5
-    --     })
-    -- end
+    for i = 1, #Config.atmModels do
+        local atmModel = Config.atmModels[i]
+        exports['qb-target']:AddTargetModel(atmModel, {
+            options = {
+                {
+                    icon = 'fas fa-university',
+                    label = 'Open ATM',
+                    --item = 'bank_card',
+                    event = 'qb-banking:client:openATM',
+                }
+            },
+            distance = 1000
+        })
+    end
+
+    StaticMesh(Vector(-6570, 2835.962, -390), Rotator(0, -90, 0), '/Game/QBCore/Meshes/SM_ATM.SM_ATM')
 end, 2000)

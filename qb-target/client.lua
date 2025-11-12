@@ -2,7 +2,7 @@ local player_data = {}
 local isLoggedIn = false
 local playerController = nil
 local target_active, target_entity, raycast_timer = false, nil, nil
-local nui_data, send_data, Entities, Types, Zones = {}, {}, {}, {}, {}
+local nui_data, send_data, Entities, Types, Zones, Models = {}, {}, {}, {}, {}, {}
 local my_webui = WebUI('qb-target', 'qb-target/html/index.html')
 local subMenuOpen = false
 
@@ -132,6 +132,18 @@ local function AddTargetEntity(entity, parameters)
 end
 exports('qb-target', 'AddTargetEntity', AddTargetEntity)
 
+local function AddTargetModel(modelName, parameters)
+    if not modelName or not parameters then return end
+    if type(parameters) ~= 'table' then return end
+    if not parameters.options or type(parameters.options) ~= 'table' then return end
+    local distance = parameters.distance or Config.MaxDistance
+    local options  = parameters.options
+    if not options or #options == 0 then return end
+    if not Models[modelName] then Models[modelName] = {} end
+    SetOptions(Models[modelName], distance, options)
+end
+exports('qb-target', 'AddTargetModel', AddTargetModel)
+
 local function RemoveTargetEntity(entity)
     if not entity then return end
     Entities[entity] = nil
@@ -260,7 +272,8 @@ local function handleEntity(trace_result)
     end
     local entity_has_options = Entities[trace_result.Entity]
     local type_has_options = Types[tostring(trace_result.ActorName)]
-    if not entity_has_options and not type_has_options then
+    local model_has_options = Models[tostring(trace_result.MeshName)]
+    if not entity_has_options and not type_has_options and not model_has_options then
         clearTarget()
         return
     end
@@ -271,8 +284,10 @@ local function handleEntity(trace_result)
         local distance = trace_result.Distance
         local entity_options = Entities[target_entity]
         local type_options = Types[tostring(trace_result.ActorName)]
+        local model_options = Models[tostring(trace_result.MeshName)]
         if entity_options then setupOptions(entity_options, target_entity, distance) end
         if type_options then setupOptions(type_options, target_entity, distance) end
+        if model_options then setupOptions(model_options, target_entity, distance) end
     end
 end
 
@@ -301,6 +316,8 @@ local function handleRaycast()
             trace_result.Distance = distance
             trace_result.Success = true
             trace_result.ActorName = hitActor:GetName()
+            trace_result.Mesh = hitComp.StaticMesh and hitComp.StaticMesh or nil
+            trace_result.MeshName = hitComp.StaticMesh and hitComp.StaticMesh:GetName() or nil
         end
     end
     return trace_result
@@ -360,14 +377,14 @@ end, 'Pressed')
 -- Setup config options
 
 -- local function configureType(typeKey, configOption)
--- 	if not Types[typeKey] then Types[typeKey] = {} end
--- 	if not configOption.distance or not configOption.options then return end
--- 	SetOptions(Types[typeKey], configOption.distance, configOption.options)
+--     if not Types[typeKey] then Types[typeKey] = {} end
+--     if not configOption.distance or not configOption.options then return end
+--     SetOptions(Types[typeKey], configOption.distance, configOption.options)
 -- end
 
 -- configureType('WorldVehicleWheeled', Config.GlobalWorldVehicleWheeledOptions)
 -- configureType('WorldProp', Config.GlobalWorldPropOptions)
 -- configureType('WorldWeapon', Config.GlobalWorldWeaponOptions)
--- configureType('WorldStaticMesh', Config.GlobalWorldStaticMeshOptions)
+--configureType('UStaticMesh', Config.GlobalWorldStaticMeshOptions)
 -- configureType('ALS_WorldCharacterBP_C', Config.ALS_WorldCharacterBP_C)
 -- configureType('WorldVehicleDoorComponent', Config.GlobalWorldVehicleDoorOptions)

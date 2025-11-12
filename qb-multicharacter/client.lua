@@ -6,17 +6,13 @@ local my_webui = WebUI('qb-multicharacter', 'qb-multicharacter/html/index.html')
 my_webui:RegisterEventHandler('selectCharacter', function(data)
     local cData = data.cData
     TriggerServerEvent('qb-multicharacter:server:loadUserData', cData)
-    my_webui:SendEvent('openUI', Config.customNationality, false, 0, false, translations)
+    my_webui:SendEvent('ui', Config.customNationality, false, 0, false, translations)
 end)
 
 my_webui:RegisterEventHandler('setupCharacters', function()
     TriggerCallback('setupCharacters', function(characters)
         my_webui:SendEvent('setupCharacters', characters)
     end)
-end)
-
-my_webui:RegisterEventHandler('RemoveBlur', function()
-    SetTimecycleModifier('default')
 end)
 
 my_webui:RegisterEventHandler('createNewCharacter', function(data)
@@ -42,18 +38,29 @@ function onShutdown()
     end
 end
 
-local function setupCharMenuUI(numOfChars)
-    local translations = {}
-    for k in pairs(Lang.fallback and Lang.fallback.phrases or Lang.phrases) do
-        if k:sub(0, ('ui.'):len()) then
-            translations[k:sub(('ui.'):len() + 1)] = Lang:t(k)
+local function openCharMenu()
+    TriggerCallback('GetNumberOfCharacters', function(data)
+        local charCount = data.charCount
+        local countries = data.countries
+        local translations = {}
+        for k in pairs(Lang.fallback and Lang.fallback.phrases or Lang.phrases) do
+            if k:sub(0, ('ui.'):len()) then
+                translations[k:sub(('ui.'):len() + 1)] = Lang:t(k)
+            end
         end
-    end
-    if my_webui then
-        my_webui:SetInputMode(1)
-        my_webui:SetStackOrder(1)
-        my_webui:SendEvent('openUI', Config.customNationality, true, numOfChars, Config.EnableDeleteButton, translations)
-    end
+        if my_webui then
+            my_webui:SetInputMode(1)
+            my_webui:SetStackOrder(1)
+            my_webui:SendEvent('ui', {
+                customNationality = Config.customNationality,
+                toggle = true,
+                nChar = charCount,
+                enableDeleteButton = Config.EnableDeleteButton,
+                translations = translations,
+                countries = countries,
+            })
+        end
+    end)
 end
 
 -- Events
@@ -70,9 +77,7 @@ RegisterClientEvent('qb-multicharacter:client:closeNUI', function()
 end)
 
 RegisterClientEvent('qb-multicharacter:client:chooseChar', function()
-    TriggerCallback('GetNumberOfCharacters', function(numOfChars)
-        setupCharMenuUI(numOfChars)
-    end)
+    openCharMenu(true)
 end)
 
 RegisterClientEvent('qb-multicharacter:client:closeNUIdefault', function()

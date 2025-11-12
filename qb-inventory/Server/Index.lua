@@ -184,6 +184,10 @@ RegisterServerEvent('qb-inventory:server:updateDrop', function(source, dropId)
     DropData.isHeld = nil
     if DropData.entity:IsValid() then
         DropData.entity:K2_DetachFromActor(UE.EDetachmentRule.KeepWorld, UE.EDetachmentRule.KeepWorld, UE.EDetachmentRule.KeepWorld)
+        local Mesh = DropData.entity:GetComponentByClass(UE.UStaticMeshComponent)
+        local Box = DropData.interactable.BoxCollision
+        if Mesh then Mesh:SetCollisionProfileName('BlockAllDynamic', true) end
+        if Box then Box:SetCollisionProfileName('BlockAllDynamic', true) end
     end
 end)
 
@@ -209,7 +213,7 @@ RegisterCallback('server.createDrop', function(source, item)
         PawnRotation.Yaw = PawnRotation.Yaw
 
         local bag = StaticMesh(SpawnPosition, PawnRotation, Config.ItemDropObject, CollisionType.StaticOnly)
-        bag:SetActorScale3D(Vector(0.4, 0.4, 0.4))
+        bag:SetActorScale3D(Vector(0.8, 0.8, 0.8))
         local newDropId = string.format('drop-%d', math.random(111111, 9999999))
         local bagInteractable = Interactable({
             {
@@ -233,11 +237,14 @@ RegisterCallback('server.createDrop', function(source, item)
                     TriggerClientEvent(source, 'qb-inventory:client:holdDrop', newDropId)
                     Drop.InteractableProp:SetMobility(UE.EComponentMobility.Movable)
                     Drop.InteractableProp:K2_AttachToComponent(mesh, 'hand_r', UE.EAttachmentRule.KeepRelative, UE.EAttachmentRule.KeepRelative, UE.EAttachmentRule.KeepRelative, true)
-                    Drop.InteractableProp:K2_SetActorRelativeLocation(Vector(0, 5, 0), false, nil, true)
-                    Drop.InteractableProp:K2_SetActorRelativeRotation(Rotator(0, 0, 0), false, nil, true)
-                    Drop.InteractableProp:SetActorScale3D(Vector(0.3, 0.3, 0.3))
+                    Drop.InteractableProp:K2_SetActorRelativeLocation(Vector(-35, 0, 10), false, nil, true)
+                    Drop.InteractableProp:K2_SetActorRelativeRotation(Rotator(-95, 0, 0), false, nil, true)
+                    Drop.InteractableProp:SetActorScale3D(Vector(0.8, 0.8, 0.8))
                     Drop:K2_AttachToActor(Drop.InteractableProp, '', UE.EAttachmentRule.SnapToTarget, UE.EAttachmentRule.SnapToTarget, UE.EAttachmentRule.SnapToTarget, true)
                     DropData.isHeld = Instigator
+                    local MeshComponent = Drop.InteractableProp:GetComponentByClass(UE.UStaticMeshComponent)
+                    if MeshComponent then MeshComponent:SetCollisionProfileName('HandAttachedMesh', true) end
+                    if Drop.BoxCollision then Drop.BoxCollision:SetCollisionProfileName('HandAttachedMesh', true) end
                 end
             }
         })

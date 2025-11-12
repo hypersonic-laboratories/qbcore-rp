@@ -20,7 +20,7 @@ Config = {
     CleanupDropTime = 15,    -- in minutes
     CleanupDropInterval = 1, -- in minutes
 
-    ItemDropObject = '/Engine/BasicShapes/Cube.Cube',
+    ItemDropObject = '/Game/QBCore/Meshes/SM_DuffelBag.SM_DuffelBag',
 }
 
 VehicleStorage = {

@@ -1,5 +1,7 @@
 local Lang = require('locales/en')
 local hasDonePreloading = {}
+local dir = debug.getinfo(1, 'S').source .. '/../' -- append trailing slash, exit file dir
+local Countries = {}
 
 -- Handling Player Load
 
@@ -42,6 +44,20 @@ local function GetOwnedApartment(cid)
     end
     return nil
 end
+
+local function readCountriesFile()
+	local fileHandle, msg = io.open(dir .. './countries.json', 'r')
+	if not fileHandle then
+		print("[qb-multicharacter] Error: Couldn't read countries list", msg)
+		return
+	end
+	local content = fileHandle:read('a')
+	fileHandle:close()
+
+	local countries = JSON.parse(content)
+	return countries
+end
+Countries = readCountriesFile() or {}
 
 -- Commands
 
@@ -165,7 +181,8 @@ RegisterCallback('GetNumberOfCharacters', function(source)
     else
         numOfChars = Config.DefaultNumberOfCharacters
     end
-    return numOfChars
+
+    return {charCount = numOfChars, countries = Countries}
 end)
 
 RegisterCallback('setupCharacters', function(source)

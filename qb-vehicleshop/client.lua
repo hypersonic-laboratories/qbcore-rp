@@ -81,9 +81,9 @@ RegisterClientEvent('qb-vehicleshop:client:vehMenu', function(data)
         }
     }
 
-    for vehicleName in pairs(Vehicles) do
+    for vehicleName, vehicleData in pairs(Vehicles) do
         vehMenu[#vehMenu + 1] = {
-            header = vehicleName,
+            header = vehicleData.label,
             params = {
                 isServer = true,
                 event = 'qb-vehicleshop:server:swapVehicle',

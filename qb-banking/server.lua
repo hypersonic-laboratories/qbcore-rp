@@ -341,7 +341,9 @@ RegisterCallback('orderCard', function(source, data)
         cardNumber = cardNumber,
         cardPin = pinNumber,
     }
-    exports['qb-inventory']:AddItem(source, 'bank_card', 1, false, info, 'qb-banking:server:orderCard')
+    if not exports['qb-inventory']:AddItem(source, 'bank_card', 1, false, info, 'qb-banking:server:orderCard') then
+        return { success = false, message = Lang:t('error.error') }
+    end
     return { success = true, message = Lang:t('success.card') }
 end)
 
@@ -494,3 +496,5 @@ end
 --     TriggerClientEvent('QBCore:Notify', src, string.format(Lang:t('success.give'), amount), 'success')
 --     TriggerClientEvent('QBCore:Notify', target.PlayerData.source, string.format(Lang:t('success.receive'), amount), 'success')
 -- end)
+
+StaticMesh(Vector(-6570, 2835.962, -390), Rotator(0, -90, 0), '/Game/QBCore/Meshes/SM_ATM.SM_ATM')

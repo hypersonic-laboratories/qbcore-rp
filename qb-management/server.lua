@@ -58,10 +58,10 @@ RegisterServerEvent('qb-management:server:GradeUpdateGang', function(source, dat
     local Member = exports['qb-core']:GetPlayerByCitizenId(data.cid) or exports['qb-core']:GetOfflinePlayerByCitizenId(data.cid)
     if not Member then return end
 
-    if not Player.PlayerData.gang.isboss then
-        ExploitBan(source, 'GradeUpdateGang Exploiting')
-        return
-    end
+    -- if not Player.PlayerData.gang.isboss then
+    --     ExploitBan(source, 'GradeUpdateGang Exploiting')
+    --     return
+    -- end
 
     if data.grade > Player.PlayerData.gang.grade.level then
         TriggerClientEvent(source, 'QBCore:Notify', 'You cannot promote to this rank!', 'error')
@@ -87,10 +87,10 @@ RegisterServerEvent('qb-management:server:FireMember', function(source, target)
     if not Player then return end
     local Member = exports['qb-core']:GetPlayerByCitizenId(target) or exports['qb-core']:GetOfflinePlayerByCitizenId(target)
 
-    if not Player.PlayerData.gang.isboss then
-        ExploitBan(source, 'FireMember Exploiting')
-        return
-    end
+    -- if not Player.PlayerData.gang.isboss then
+    --     ExploitBan(source, 'FireMember Exploiting')
+    --     return
+    -- end
 
     if Member then
         if target == Player.PlayerData.citizenid then
@@ -140,10 +140,10 @@ RegisterServerEvent('qb-management:server:GradeUpdate', function(source, data)
     local Employee = exports['qb-core']:GetPlayerByCitizenId(data.cid) or exports['qb-core']:GetOfflinePlayerByCitizenId(data.cid)
     if not Employee then return end
 
-    if not Player.PlayerData.job.isboss then
-        ExploitBan(source, 'GradeUpdate Exploiting')
-        return
-    end
+    -- if not Player.PlayerData.job.isboss then
+    --     ExploitBan(source, 'GradeUpdate Exploiting')
+    --     return
+    -- end
 
     if data.grade > Player.PlayerData.job.grade.level then
         TriggerClientEvent(source, 'QBCore:Notify', 'You cannot promote to this rank!', 'error')
@@ -168,10 +168,10 @@ RegisterServerEvent('qb-management:server:FireEmployee', function(source, target
     local Player = exports['qb-core']:GetPlayer(src)
     local Employee = exports['qb-core']:GetPlayerByCitizenId(target) or exports['qb-core']:GetOfflinePlayerByCitizenId(target)
 
-    if not Player.PlayerData.job.isboss then
-        ExploitBan(source, 'FireEmployee Exploiting')
-        return
-    end
+    -- if not Player.PlayerData.job.isboss then
+    --     ExploitBan(source, 'FireEmployee Exploiting')
+    --     return
+    -- end
 
     if Employee then
         if target == Player.PlayerData.citizenid then
@@ -219,30 +219,50 @@ RegisterCallback('GetEmployees', function(source, jobname)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
 
-    if not Player.PlayerData.job.isboss then
-        ExploitBan(source, 'GetEmployees Exploiting')
-        return
-    end
+    -- if not Player.PlayerData.job.isboss then
+    --     ExploitBan(source, 'GetEmployees Exploiting')
+    --     return
+    -- end
 
     local employees = {}
-    local players = exports['qb-core']:DatabaseAction('Select', "SELECT * FROM `players` WHERE `job` LIKE '%" .. jobname .. "%'", {})
-    if players[1] then
-        for _, value in pairs(players) do
-            local Target = exports['qb-core']:GetPlayerByCitizenId(value.citizenid) or exports['qb-core']:GetOfflinePlayerByCitizenId(value.citizenid)
-            if Target and Target.PlayerData.job.name == jobname then
-                local isOnline = Target.PlayerData.source
+    local foundEmployees = {}
+
+    local onlinePlayers = exports['qb-core']:GetPlayers()
+    for i = 1, #onlinePlayers do
+        local src = onlinePlayers[i]
+        local player = exports['qb-core']:GetPlayer(src)
+        local playerData = player and player.PlayerData
+        if playerData and playerData.job and playerData.job.name == jobname then
+            employees[#employees + 1] = {
+                empSource = playerData.citizenid,
+                grade = playerData.job.grade,
+                isboss = playerData.job.isboss,
+                name = '🟢 ' .. playerData.charinfo.firstname .. ' ' .. playerData.charinfo.lastname
+            }
+            foundEmployees[playerData.citizenid] = true
+        end
+    end
+
+    local offlinePlayers = exports['qb-core']:DatabaseAction('Select', "SELECT * FROM `players` WHERE `job` LIKE '%" .. jobname .. "%'", {})
+    if offlinePlayers[1] then
+        for _, data in pairs(offlinePlayers) do
+            local jobData = JSON.parse(data.job)
+            if jobData.name == jobname and not foundEmployees[data.citizenid] then
+                local charInfo = JSON.parse(data.charinfo)
                 employees[#employees + 1] = {
-                    empSource = Target.PlayerData.citizenid,
-                    grade = Target.PlayerData.job.grade,
-                    isboss = Target.PlayerData.job.isboss,
-                    name = (isOnline and '🟢 ' or '❌ ') .. Target.PlayerData.charinfo.firstname .. ' ' .. Target.PlayerData.charinfo.lastname
+                    empSource = data.citizenid,
+                    grade = jobData.grade,
+                    isboss = jobData.isboss,
+                    name = '❌ ' .. charInfo.firstname .. ' ' .. charInfo.lastname
                 }
             end
         end
-        table.sort(employees, function(a, b)
-            return a.grade.level > b.grade.level
-        end)
     end
+
+    table.sort(employees, function(a, b)
+        return a.grade.level > b.grade.level
+    end)
+
     return employees
 end)
 
@@ -250,30 +270,50 @@ RegisterCallback('GetMembers', function(source, gangname)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
 
-    if not Player.PlayerData.gang.isboss then
-        ExploitBan(source, 'GetMembers Exploiting')
-        return
-    end
+    -- if not Player.PlayerData.gang.isboss then
+    --     ExploitBan(source, 'GetMembers Exploiting')
+    --     return
+    -- end
 
     local members = {}
-    local players = exports['qb-core']:DatabaseAction('Select', "SELECT * FROM `players` WHERE `gang` LIKE '%" .. gangname .. "%'", {})
-    if players[1] then
-        for _, value in pairs(players) do
-            local Target = exports['qb-core']:GetPlayerByCitizenId(value.citizenid) or exports['qb-core']:GetOfflinePlayerByCitizenId(value.citizenid)
-            if Target and Target.PlayerData.gang.name == gangname then
-                local isOnline = Target.PlayerData.source
+    local foundMembers = {}
+
+    local onlinePlayers = exports['qb-core']:GetPlayers()
+    for i = 1, #onlinePlayers do
+        local src = onlinePlayers[i]
+        local player = exports['qb-core']:GetPlayer(src)
+        local playerData = player and player.PlayerData
+        if playerData and playerData.gang and playerData.gang.name == gangname then
+            members[#members + 1] = {
+                empSource = playerData.citizenid,
+                grade = playerData.gang.grade,
+                isboss = playerData.gang.isboss,
+                name = '🟢 ' .. playerData.charinfo.firstname .. ' ' .. playerData.charinfo.lastname
+            }
+            foundMembers[playerData.citizenid] = true
+        end
+    end
+
+    local offlinePlayers = exports['qb-core']:DatabaseAction('Select', "SELECT * FROM `players` WHERE `gang` LIKE '%" .. gangname .. "%'", {})
+    if offlinePlayers[1] then
+        for _, data in pairs(offlinePlayers) do
+            local gangData = JSON.parse(data.gang)
+            if gangData.name == gangname and not foundMembers[data.citizenid] then
+                local charInfo = JSON.parse(data.charinfo)
                 members[#members + 1] = {
-                    empSource = Target.PlayerData.citizenid,
-                    grade = Target.PlayerData.gang.grade,
-                    isboss = Target.PlayerData.gang.isboss,
-                    name = (isOnline and '🟢 ' or '❌ ') .. Target.PlayerData.charinfo.firstname .. ' ' .. Target.PlayerData.charinfo.lastname
+                    empSource = data.citizenid,
+                    grade = gangData.grade,
+                    isboss = gangData.isboss,
+                    name = '❌ ' .. charInfo.firstname .. ' ' .. charInfo.lastname
                 }
             end
         end
-        table.sort(members, function(a, b)
-            return a.grade.level > b.grade.level
-        end)
     end
+
+    table.sort(members, function(a, b)
+        return a.grade.level > b.grade.level
+    end)
+
     return members
 end)
 
