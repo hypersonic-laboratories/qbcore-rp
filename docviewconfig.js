@@ -1,1 +1,1 @@
-const WEB_URL = "https://raw.githubusercontent.com/XGEN-OSC/LuaDocGenerator/refs/heads/master/example/output.json";
+const WEB_URL = "./qb-core.json";
