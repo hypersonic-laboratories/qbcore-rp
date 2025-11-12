@@ -31,6 +31,7 @@ jobs:
           mkdir -p deploy
           cp -r external-repo/view/* deploy/
           cp docviewconfig.js deploy/
+          cp qb-core.json deploy/
 
       # Step 4: Deploy to GitHub Pages
       - name: Deploy static site to GitHub Pages
