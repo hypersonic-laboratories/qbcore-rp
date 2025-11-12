@@ -1,0 +1,40 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout current repo
+      - name: Checkout current repository
+        uses: actions/checkout@v4
+
+      # Step 2: Checkout external repo (for the static site files)
+      - name: Checkout external repository (LuaDocGenerator)
+        uses: actions/checkout@v4
+        with:
+          repository: XGEN-OSC/LuaDocGenerator
+          path: external-repo
+
+      # Step 3: Prepare deployment folder
+      - name: Prepare deployment directory
+        run: |
+          mkdir -p deploy
+          cp -r external-repo/view/* deploy/
+          cp docviewconfig.js deploy/
+
+      # Step 4: Deploy to GitHub Pages
+      - name: Deploy static site to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy
