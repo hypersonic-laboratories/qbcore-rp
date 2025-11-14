@@ -41,13 +41,24 @@ jobs:
           server-password: ${{ secrets.GITHUB_TOKEN }}
           settings-path: ${{ github.workspace }}      # writes settings.xml here
 
+      - name: Set up Java and Maven auth
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '23'
+          server-id: github                # must match <id> in POM or temp repo
+          server-username: GITHUB_ACTOR
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+          settings-path: ${{ github.workspace }}
+
+
       - name: Download LuaDocGenerator JAR from GitHub Packages
         run: |
           mvn -s $GITHUB_WORKSPACE/settings.xml \
-            dependency:get \
-            -DremoteRepositories=https://maven.pkg.github.com/XGEN-OSC/LuaDocGenerator \
-            -Dartifact=${GROUP_ID}:${ARTIFACT_ID}:${VERSION} \
-            -Dtransitive=false
+              dependency:get \
+              -Dartifact=io.github.xgenosc:luadocgenerator:1.0.0 \
+              -DremoteRepositories=https://maven.pkg.github.com/XGEN-OSC/LuaDocGenerator
+
 
       - name: Locate downloaded JAR
         id: findjar
