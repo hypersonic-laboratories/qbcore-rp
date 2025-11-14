@@ -16,8 +16,8 @@ jobs:
     env:
       CONFIG_JSON: qb-core/package.json         # Path to your input project config
       OUTPUT_JSON: qb-core.json                 # Output JSON file name
-      JAR_URL: https://github.com/XGEN-OSC/LuaDocGenerator/releases/download/latest/LuaDocGenerator-1.0-SNAPSHOT.jar
-      JAR_FILE: LuaDocGenerator-1.0-SNAPSHOT.jar
+      JAR_URL: https://github.com/XGEN-OSC/LuaDocGenerator/releases/download/latest/LuaDocGenerator.jar
+      JAR_FILE: LuaDocGenerator.jar
 
     steps:
       - name: Checkout current repository
