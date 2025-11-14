@@ -8,16 +8,18 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  packages: read   # 🔥 Required to read from GitHub Packages
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     env:
-      CONFIG_JSON: qb-core/package.json         # Path to your input project config
-      OUTPUT_JSON: qb-core.json                 # Output JSON file name
-      JAR_URL: https://github.com/XGEN-OSC/LuaDocGenerator/releases/download/latest/LuaDocGenerator-1.0-SNAPSHOT.jar
-      JAR_FILE: LuaDocGenerator-1.0-SNAPSHOT.jar
+      CONFIG_JSON: qb-core/package.json
+      OUTPUT_JSON: qb-core.json
+      GROUP_ID: io.github.xgenosc
+      ARTIFACT_ID: LuaDocGenerator
+      VERSION: 1.0.0
 
     steps:
       - name: Checkout current repository
@@ -29,19 +31,33 @@ jobs:
           repository: XGEN-OSC/LuaDocGenerator
           path: external-repo
 
-      - name: Set up Java 23
+      - name: Set up Java 23 and Maven auth for GitHub Packages
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '23'
+          server-id: github                           # matches <id> in pom.xml
+          server-username: GITHUB_ACTOR
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+          settings-path: ${{ github.workspace }}      # writes settings.xml here
 
-      - name: Download LuaDocGenerator JAR
+      - name: Download LuaDocGenerator JAR from GitHub Packages
         run: |
-          curl -L $JAR_URL -o $JAR_FILE
+          mvn -s $GITHUB_WORKSPACE/settings.xml \
+            dependency:get \
+            -DremoteRepositories=https://maven.pkg.github.com/XGEN-OSC/LuaDocGenerator \
+            -Dartifact=${GROUP_ID}:${ARTIFACT_ID}:${VERSION} \
+            -Dtransitive=false
+
+      - name: Locate downloaded JAR
+        id: findjar
+        run: |
+          JAR_PATH=$(find ~/.m2 -name "${ARTIFACT_ID}-${VERSION}.jar" | head -n 1)
+          echo "jar_path=$JAR_PATH" >> $GITHUB_OUTPUT
 
       - name: Run LuaDocGenerator
         run: |
-          java -jar $JAR_FILE --project "$CONFIG_JSON" "$OUTPUT_JSON"
+          java -jar "${{ steps.findjar.outputs.jar_path }}" --project "$CONFIG_JSON" "$OUTPUT_JSON"
 
       - name: Prepare deployment directory
         run: |
