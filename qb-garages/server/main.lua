@@ -187,14 +187,7 @@ RegisterServerEvent('qb-garages:server:DepositVehicle', function(source, garage)
     for k, v in pairs(Seats) do
         local Occupier = v:GetSeatOccupancy()
         if Occupier then
-            local AS = Occupier:GetLyraAbilitySystemComponent()
-            local Abilities = AS.ActivatableAbilities
-            for k, v in pairs(Abilities.Items) do
-                if v.Ability:GetName() == 'Default__GA_Vehicle_Exit_C' then
-                    AS:ServerTryActivateAbilityWithEventData(v.Handle, true, UE.FPredictionKey(), UE.FGameplayEventData())
-                    break
-                end
-            end
+            UE.UHelixAbilitySystemGlobals.SendExitVehicleEventToActor(Occupier, UE.FHExitVehicleParams())
         end
     end
 
