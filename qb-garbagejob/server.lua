@@ -10,9 +10,6 @@ RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
         if route.vehicle and route.vehicle:IsValid() then
             DeleteVehicle(route.vehicle)
         end
-        if route.holdingBag and route.holdingBag:IsValid() then
-            DeleteEntity(route.holdingBag)
-        end
         routes[GetPlayerId(source)] = nil
     end
 end)
@@ -94,8 +91,8 @@ local function CompleteJob(source, returnedTruck)
         DeleteVehicle(route.vehicle)
     end
 
-    if route.holdingBag and route.holdingBag:IsValid() then
-        DeleteEntity(route.holdingBag)
+    if route.holdingBag then
+        HInventory.RemoveItemByName(source, 'ID_Misc_TrashBag', 1)
     end
 
     routes[GetPlayerId(source)] = nil
@@ -170,7 +167,7 @@ RegisterServerEvent('qb-garbagejob:server:grabBag', function(source, data)
         return
     end
 
-    if route.holdingBag and route.holdingBag:IsValid() then
+    if route.holdingBag then
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.already_holding_bag'), 'error')
         return
     end
@@ -180,16 +177,9 @@ RegisterServerEvent('qb-garbagejob:server:grabBag', function(source, data)
         return
     end
 
-    local ped = GetPlayerPawn(source)
-    if not ped then return end
-    local mesh = ped:GetCharacterBaseMesh()
-    local coords = GetEntityCoords(data.entity)
-    local garbageBag = StaticMesh(Vector(coords.X + 130, coords.Y, coords.Z), Rotator(), '/Game/QBCore/Meshes/SM_Trash.SM_Trash')
-    AttachActorToComponent(garbageBag.Object, mesh, Vector(-90, 5, 10), Rotator(-95, 0, 0), 'hand_r', nil, true)
-
-    routes[GetPlayerId(source)].holdingBag = garbageBag
+    local gotItem = HInventory.GiveAndEquipItemByName(source, 'ID_Misc_TrashBag')
+    routes[GetPlayerId(source)].holdingBag = gotItem
     routes[GetPlayerId(source)].collectedDumpsters[data.entity] = true
-
     TriggerClientEvent(source, 'QBCore:Notify', Lang:t('info.load_bag'))
 end)
 
@@ -205,13 +195,12 @@ RegisterServerEvent('qb-garbagejob:server:loadBag', function(source)
         return
     end
 
-    if not route.holdingBag or not route.holdingBag:IsValid() then
+    if not route.holdingBag then
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.no_bag'), 'error')
         return
     end
 
-    DetachActor(route.holdingBag)
-    DeleteEntity(route.holdingBag)
+    HInventory.RemoveItemByName(source, 'ID_Misc_TrashBag', 1)
     routes[GetPlayerId(source)].holdingBag = nil
 
     routes[GetPlayerId(source)].stopsCompleted = route.stopsCompleted + 1

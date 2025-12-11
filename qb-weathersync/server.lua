@@ -29,22 +29,24 @@ RemoveAll(UE.AExponentialHeightFog) -- Fog
 RemoveAll(UE.AVolumetricCloud)      -- Clouds
 
 local sky = Sky()
+sky.SkyActor:SetReplicates(true)
+sky.WeatherActor:SetReplicates(true)
 sky:SetTimeOfDay(1200)
 sky:ChangeWeather(WeatherType.ClearSkies)
 sky:SetAnimateTimeOfDay(true)
 
 RegisterServerEvent('qb-weathersync:server:changeTime', function(source, hour)
-    if not sky then sky = Sky() end
+    local sky = Sky()
     sky:SetTimeOfDay(hour)
 end)
 
 RegisterServerEvent('qb-weathersync:server:changeWeather', function(source, weatherType)
-    if not sky then sky = Sky() end
+    local sky = Sky()
     local enumWeather = enumTable[weatherType] or WeatherType.ClearSkies
     sky:ChangeWeather(enumWeather, 5)
 end)
 
 RegisterServerEvent('qb-weathersync:server:enableAurora', function(source, enable)
-    if not sky then sky = Sky() end
+    local sky = Sky()
     sky:EnableAurora(enable)
 end)
