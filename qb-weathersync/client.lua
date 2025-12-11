@@ -18,6 +18,22 @@ RemoveAll(UE.AVolumetricCloud)      -- Clouds
 
 -- Events
 
+RegisterClientEvent('qb-weathersync:client:changeTime', function(hour)
+    local sky = Sky()
+    sky:SetTimeOfDay(hour)
+end)
+
+RegisterClientEvent('qb-weathersync:client:changeWeather', function(weatherType)
+    local sky = Sky()
+    local enumWeather = Config.weatherTypes[weatherType] or WeatherType.ClearSkies
+    sky:ChangeWeather(enumWeather, 5)
+end)
+
+RegisterClientEvent('qb-weathersync:client:enableAurora', function(enable)
+    local sky = Sky()
+    sky:EnableAurora(enable)
+end)
+
 -- NUI Callbacks
 
 my_webui:RegisterEventHandler('setTime', function(data)
