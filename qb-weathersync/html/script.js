@@ -2,9 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const timeSlider = document.getElementById("timeSlider");
     const timeDisplay = document.getElementById("timeDisplay");
     const weatherBtns = document.querySelectorAll(".weather-btn");
-    const auroraToggle = document.getElementById("auroraToggle");
-
-    let auroraEnabled = false;
 
     /* ---- Time ---- */
 
@@ -35,20 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 weather: weatherType,
             });
         });
-    });
-
-    /* ---- Aurora toggle ---- */
-
-    function sendAuroraState() {
-        hEvent("toggleAurora", {
-            enabled: auroraEnabled,
-        });
-    }
-
-    auroraToggle.addEventListener("click", () => {
-        auroraEnabled = !auroraEnabled;
-        auroraToggle.classList.toggle("active", auroraEnabled);
-        sendAuroraState();
     });
 
     /* ---- NUI show/hide from client.lua ---- */

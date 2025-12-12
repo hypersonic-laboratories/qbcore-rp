@@ -4,10 +4,12 @@ local my_webui = WebUI('qb-weathersync', 'qb-weathersync/html/index.html')
 -- Spawn Sky
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
-    sky = Sky()
-    sky:SetTimeOfDay(Config.StartingTime)
-    sky:SetAnimateTimeOfDay(Config.AnimateTime)
-    sky:ChangeWeather(Config.StartingWeather)
+    TriggerCallback('syncRequest', function(skyInfo)
+        sky = Sky()
+        sky:SetTimeOfDay(skyInfo.time)
+        sky:SetAnimateTimeOfDay(Config.AnimateTime)
+        sky:ChangeWeather(Config.WeatherTypes[skyInfo.weather])
+    end)
 end)
 
 -- Functions
@@ -36,12 +38,7 @@ end)
 RegisterClientEvent('qb-weathersync:client:changeWeather', function(weatherType)
     if not sky then return end
     local enumWeather = Config.WeatherTypes[weatherType] or WeatherType.ClearSkies
-    sky:ChangeWeather(enumWeather, 5)
-end)
-
-RegisterClientEvent('qb-weathersync:client:enableAurora', function(enable)
-    if not sky then return end
-    sky:EnableAurora(enable)
+    sky:ChangeWeather(enumWeather, Config.TransitionDelay)
 end)
 
 -- NUI Callbacks
@@ -56,15 +53,10 @@ my_webui:RegisterEventHandler('setWeather', function(data)
     TriggerServerEvent('qb-weathersync:server:changeWeather', weatherType)
 end)
 
-my_webui:RegisterEventHandler('toggleAurora', function(data)
-    local enable = data.enabled
-    TriggerServerEvent('qb-weathersync:server:enableAurora', enable)
-end)
-
 -- Inputs
 
 local ui_open = false
-Input.BindKey('F7', function()
+Input.BindKey(Config.Key, function()
     if not ui_open then
         ui_open = true
         my_webui:BringToFront()

@@ -1,6 +1,8 @@
 Config = {
+	Key = 'F7',
 	StartingTime = 1400,
-	StartingWeather = WeatherType.ClearSkies,
+	TransitionDelay = 5, -- in seconds between weather states
+	StartingWeather = 'ClearSkies',
 	AnimateTime = true,
 	WeatherTypes = {
 	    ['ClearSkies'] = WeatherType.ClearSkies,
