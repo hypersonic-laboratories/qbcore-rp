@@ -287,8 +287,8 @@ function OpenInventoryById(source, targetId)
     local playerItems = Player.PlayerData.items
     local targetItems = TargetPlayer.PlayerData.items
     local formattedInventory = {
-        name = 'otherplayer-' .. targetId,
-        label = targetId:GetAccountName(),
+        name = 'otherplayer-' .. TargetPlayer.PlayerData.citizenid,
+        label = TargetPlayer.PlayerData.name,
         maxweight = Config.MaxWeight,
         slots = Config.MaxSlots,
         inventory = targetItems

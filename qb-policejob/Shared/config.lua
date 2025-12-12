@@ -43,10 +43,10 @@ Config = {
             Vector(0, 0, 0)
         },
         fingerprint = {
-            { coords = Vector(94619.2, -161676.1, 198.6),  heading = 132 },
+            { coords = Vector(-339884.98, -148380.16, -2889.0),  rotation = Rotator(0, 90, 0) },
         },
         evidence = {
-            { coords = Vector(94344.3, -161916.0, 198.6),  heading = 132 },
+            { coords = Vector(-339641.0, -149006.58, -2912.50),  heading = 0 },
         },
         stations = {
             { label = 'Police Station', coords = Vector(-340540.36, -147839.66, -2884.60) },

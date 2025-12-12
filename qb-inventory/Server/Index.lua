@@ -125,7 +125,7 @@ RegisterServerEvent('qb-inventory:server:closeInventory', function(source, inven
     if not inventory then return end
     if inventory:find('shop-') then return end
     if inventory:find('otherplayer-') then
-        local targetId = tonumber(inventory:match('otherplayer%-(.+)'))
+        local targetId = inventory:match('otherplayer%-(.+)')
         --targetId:SetValue('inv_busy', false, true)
         return
     end
@@ -385,8 +385,8 @@ local function getItem(inventoryId, src, slot)
         local Player = exports['qb-core']:GetPlayer(src)
         item = Player.PlayerData.items[slot]
     elseif inventoryId:find('otherplayer-') then
-        local targetId = tonumber(inventoryId:match('otherplayer%-(.+)'))
-        local targetPlayer = exports['qb-core']:GetPlayer(targetId)
+        local targetCitizenId = inventoryId:match('otherplayer%-(.+)')
+        local targetPlayer = exports['qb-core']:GetPlayerByCitizenId(targetCitizenId)
         if targetPlayer then
             item = targetPlayer.PlayerData.items[slot]
         end
@@ -402,7 +402,7 @@ local function getIdentifier(inventoryId, src)
     if inventoryId == 'player' then
         return src
     elseif inventoryId:find('otherplayer-') then
-        return tonumber(inventoryId:match('otherplayer%-(.+)'))
+        return exports['qb-core']:GetPlayerByCitizenId(inventoryId:match('otherplayer%-(.+)')).PlayerData.source
     else
         return inventoryId
     end

@@ -77,7 +77,7 @@ RegisterClientEvent('qb-multicharacter:client:closeNUI', function()
 end)
 
 RegisterClientEvent('qb-multicharacter:client:chooseChar', function()
-    openCharMenu(true)
+    openCharMenu()
 end)
 
 RegisterClientEvent('qb-multicharacter:client:closeNUIdefault', function()
