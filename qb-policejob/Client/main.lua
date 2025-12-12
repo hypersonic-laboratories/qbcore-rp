@@ -120,22 +120,28 @@ end)
 
 -- Events
 
-local fingerprint = false
-Input.BindKey('BackSpace', function(key_name)
+Input.BindKey('BackSpace', function()
     if not fingerprint then return end
-    my_webui:SendEvent('qb-policejob:client:closeFingerprint')
-    my_webui:SetInputMode(0)
-    fingerprint = false
+    my_webui:SendEvent('closeFingerprint')
+    closeFingerprint()
 end)
 
-my_webui:RegisterEventHandler('qb-policejob:client:scanFinger', function()
-    Events.CallRemote('qb-policejob:server:scanFinger')
+my_webui:RegisterEventHandler('closeFingerprint', function()
+    closeFingerprint()
 end)
 
-RegisterClientEvent('qb-policejob:client:fingerprint', function()
+my_webui:RegisterEventHandler('scanFinger', function()
+    TriggerServerEvent('qb-policejob:server:scanFinger')
+end)
+
+RegisterClientEvent('qb-policejob:client:openFingerprint', function()
     my_webui:SetInputMode(1)
-    my_webui:SendEvent('qb-policejob:client:openFingerprint')
+    my_webui:SendEvent('openFingerprint')
     fingerprint = true
+end)
+
+RegisterClientEvent('qb-policejob:client:updateFingerprint', function(fingerprintId)
+    my_webui:SendEvent('updateFingerprint', { fingerprintId = fingerprintId })
 end)
 
 RegisterClientEvent('qb-policejob:client:evidence', function()
@@ -144,7 +150,7 @@ RegisterClientEvent('qb-policejob:client:evidence', function()
     local player_coords = GetEntityCoords(player_ped)
     for i = 1, #Config.Locations.evidence do
         local coords = Config.Locations.evidence[i].coords
-        local distance = player_coords:Distance(coords)
+        local distance = player_coords:Dist(coords)
         if distance < 500 then
             TriggerServerEvent('qb-policejob:server:evidence', i)
         end
@@ -337,6 +343,42 @@ for i = 1, #Config.Locations['stash'] do
                 event = 'qb-policejob:server:openStash',
                 label = Lang:t('target.open_personal_stash'),
                 icon = 'fas fa-box',
+                --jobType = 'leo'
+            },
+        }
+    )
+end
+
+-- Evidence
+for i = 1, #Config.Locations['evidence'] do
+    local pos = Config.Locations['evidence'][i]
+    AddTargetZone('Box', 'polevid_' .. i, pos.coords, 250.0, 100.0, { minZ = pos.coords.Z - 100, maxZ = pos.coords.Z + 100, heading = pos.heading or 0, debug = true},
+        {
+            {
+                type = 'client',
+                event = 'qb-policejob:client:evidence',
+                label = Lang:t('target.open_evidence_stash'),
+                icon = 'fas fa-box-open',
+                --jobType = 'leo'
+            },
+        }
+    )
+end
+
+-- Fingerprint
+for i = 1, #Config.Locations['fingerprint'] do
+    local pos = Config.Locations['fingerprint'][i]
+    AddTargetZone('Mesh',
+        'polfprint_' .. i,
+        pos.coords,
+        pos.rotation or Rotator(0, 0, 0),
+        '/Game/QBCore/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        {
+            {
+                type = 'server',
+                event = 'qb-policejob:server:openFingerprint',
+                label = Lang:t('target.open_fingerprint'),
+                icon = 'fas fa-fingerprint',
                 --jobType = 'leo'
             },
         }

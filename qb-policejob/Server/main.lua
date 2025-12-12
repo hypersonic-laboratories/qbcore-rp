@@ -93,37 +93,60 @@ RegisterServerEvent('qb-policejob:server:retrieveVehicle', function(source, data
     Vehicle:SetPlate(Lang:t('info.police_plate') .. tostring(math.random(1000, 9999)))
 end)
 
---[[
-Events.SubscribeRemote('qb-policejob:server:evidence', function(source, drawer)
-    local Player = QBCore.Functions.GetPlayer(source)
+RegisterServerEvent('qb-policejob:server:evidence', function(source, drawer)
+    local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
-    OpenInventory(source, 'evidence_' .. drawer, {
+    exports['qb-inventory']:OpenInventory(source, 'evidence_' .. drawer, {
         maxweight = 4000000,
         slots = 500,
     })
 end)
 
-Events.SubscribeRemote('qb-policejob:server:fingerprint', function(source)
-    local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-    local closest_player, distance = QBCore.Functions.GetClosestPlayer(source)
-    if not closest_player or distance > 500 then return end
-    Events.CallRemote('qb-policejob:client:fingerprint', closest_player)
+RegisterServerEvent('qb-policejob:server:openFingerprint', function(source)
+    local PlayerPawn = GetPlayerPawn(source)
+    if not PlayerPawn then return end
+    local ClosestFingerprint = GetClosestFingerprint(GetEntityCoords(PlayerPawn))
+    if not ClosestFingerprint then return end
+
+    -- Add client to nearest fingerprint session
+    FingerprintSessions[ClosestFingerprint] = FingerprintSessions[ClosestFingerprint] or {}
+    FingerprintSessions[ClosestFingerprint][source] = true
+    TriggerClientEvent(source, 'qb-policejob:client:openFingerprint')
 end)
 
-Events.SubscribeRemote('qb-policejob:server:scanFinger', function(source)
-    local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
-    local fingerprint = Player.PlayerData.metadata['fingerprint']
-    local closest_player, distance = QBCore.Functions.GetClosestPlayer(source)
-    if not closest_player or distance > 500 then return end
-    Events.CallRemote('QBCore:Notify', closest_player, 'Fingerprint: ' .. fingerprint)
+RegisterServerEvent('qb-policejob:server:closeFingerprint', function(source)
+    local PlayerPawn = GetPlayerPawn(source)
+    if not PlayerPawn then return end
+    local ClosestFingerprint = GetClosestFingerprint(GetEntityCoords(PlayerPawn))
+    if not ClosestFingerprint then return end
+
+    -- Remove client from nearest fingerprint session
+    if FingerprintSessions[ClosestFingerprint] then
+        FingerprintSessions[ClosestFingerprint][source] = nil
+    end
 end)
 
-Events.SubscribeRemote('qb-policejob:server:search', function(source, data)
-    local Player = QBCore.Functions.GetPlayer(source)
+RegisterServerEvent('qb-policejob:server:scanFinger', function(source)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player then return end
+
+    local PlayerPawn = GetPlayerPawn(source)
+    local PlayerCoords = GetEntityCoords(PlayerPawn)
+    local FingerprintId = Player.PlayerData.metadata['fingerprint']
+
+    local ClosestFingerprint = GetClosestFingerprint(PlayerCoords)
+    if not ClosestFingerprint then return end
+
+    -- Notify relevant clients to update fingerprint UI
+    for target in pairs(FingerprintSessions[ClosestFingerprint] or {}) do
+        TriggerClientEvent(target, 'qb-policejob:client:updateFingerprint', FingerprintId)
+    end
+end)
+
+
+RegisterServerEvent('qb-policejob:server:search', function(source, data)
+    local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
 
