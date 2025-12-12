@@ -30,6 +30,7 @@ local function setupPeds()
     TriggerCallback('getPeds', function(jobPeds)
         for i = 1, #jobPeds do
             local ped = jobPeds[i].npc
+            print('NPC Client: ', ped)
             local distance = 1000
             local options = {
                 {
