@@ -1,8 +1,16 @@
 local my_webui = WebUI('Fingerprint', 'qb-policejob/html/index.html')
-local player_data = {}
+local Targets = {}
 require('locales/en')
 
 -- Functions
+
+-- Cleanup
+function onShutdown()
+    for name, _ in pairs(Targets) do
+        exports['qb-target']:RemoveZone(name)
+    end
+end
+
 local function getAuthorizedVehicles(grade)
     local authorizedVehicles = {}
     for minimumGrade, vehicles in pairs(Config.AuthorizedVehicles) do
@@ -265,11 +273,20 @@ end)
  ]]
 
 --- Target Setup
+local function AddTargetZone(type, name, ...)
+    if type == 'Mesh' then
+        exports['qb-target']:AddMeshTarget(name, ...)
+    elseif type == 'Box' then
+        exports['qb-target']:AddBoxZone(name, ...)
+    end
+
+    Targets[name] = true
+end
 
 -- Duty
 for i = 1, #Config.Locations['duty'] do
     local pos = Config.Locations['duty'][i]
-    exports['qb-target']:AddMeshTarget(
+    AddTargetZone('Mesh',
         'polduty_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
@@ -289,7 +306,7 @@ end
 -- Vehicle
 for i = 1, #Config.Locations['vehicle'] do
     local pos = Config.Locations['vehicle'][i]
-    exports['qb-target']:AddMeshTarget(
+    AddTargetZone('Mesh',
         'polveh_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
@@ -309,7 +326,7 @@ end
 -- Stash
 for i = 1, #Config.Locations['stash'] do
     local pos = Config.Locations['stash'][i]
-    exports['qb-target']:AddMeshTarget(
+    AddTargetZone('Mesh',
         'polstash_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
