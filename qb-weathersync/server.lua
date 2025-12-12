@@ -1,23 +1,4 @@
-local function RemoveAll(class)
-    local actors = UE.TArray(UE.AActor)
-    UE.UGameplayStatics.GetAllActorsOfClass(HWorld, class, actors)
-    for _, actor in pairs(actors) do
-        actor:K2_DestroyActor()
-    end
-end
-
-RemoveAll(UE.ADirectionalLight)     -- Sun light
-RemoveAll(UE.ASkyLight)             -- Skylight
-RemoveAll(UE.ASkyAtmosphere)        -- Atmosphere
-RemoveAll(UE.AExponentialHeightFog) -- Fog
-RemoveAll(UE.AVolumetricCloud)      -- Clouds
-
-local sky = Sky()
-sky.SkyActor:SetReplicates(true)
-sky.WeatherActor:SetReplicates(true)
-sky:SetTimeOfDay(Config.StartingTime)
-sky:ChangeWeather(Config.StartingWeather)
-sky:SetAnimateTimeOfDay(Config.AnimateTime)
+-- Events
 
 RegisterServerEvent('qb-weathersync:server:changeTime', function(_, hour)
     BroadcastEvent('qb-weathersync:client:changeTime', hour)

@@ -1,4 +1,14 @@
+local sky
 local my_webui = WebUI('qb-weathersync', 'qb-weathersync/html/index.html')
+
+-- Spawn Sky
+
+RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
+    sky = Sky()
+    sky:SetTimeOfDay(Config.StartingTime)
+    sky:SetAnimateTimeOfDay(Config.AnimateTime)
+    sky:ChangeWeather(Config.StartingWeather)
+end)
 
 -- Functions
 
@@ -19,18 +29,18 @@ RemoveAll(UE.AVolumetricCloud)      -- Clouds
 -- Events
 
 RegisterClientEvent('qb-weathersync:client:changeTime', function(hour)
-    local sky = Sky()
+    if not sky then return end
     sky:SetTimeOfDay(hour)
 end)
 
 RegisterClientEvent('qb-weathersync:client:changeWeather', function(weatherType)
-    local sky = Sky()
-    local enumWeather = Config.weatherTypes[weatherType] or WeatherType.ClearSkies
+    if not sky then return end
+    local enumWeather = Config.WeatherTypes[weatherType] or WeatherType.ClearSkies
     sky:ChangeWeather(enumWeather, 5)
 end)
 
 RegisterClientEvent('qb-weathersync:client:enableAurora', function(enable)
-    local sky = Sky()
+    if not sky then return end
     sky:EnableAurora(enable)
 end)
 
