@@ -225,3 +225,39 @@ for i = 1, #Config.Locations['helicopter'] do
         }
     )
 end
+
+-- Global Player
+
+exports['qb-target']:AddGlobalPlayer({
+    distance = 1000,
+    options = {
+        {
+            icon = 'fas fa-heart-pulse',
+            label = 'Check Health Status',
+            type = 'server',
+            event = 'qb-hospitaljob:server:status',
+            -- job = 'ambulance'
+        },
+        {
+            icon = 'fas fa-user-doctor',
+            label = 'Revive',
+            type = 'server',
+            event = 'qb-hospitaljob:server:revive',
+            -- job = 'ambulance'
+        },
+        {
+            icon = 'fas fa-bandage',
+            label = 'Bandage',
+            type = 'server',
+            event = 'qb-hospitaljob:server:bandage',
+            -- job = 'ambulance'
+        },
+        {
+            icon = 'fas fa-user-group',
+            label = 'Escort',
+            type = 'server',
+            event = 'qb-hospitaljob:server:escort',
+            -- job = 'ambulance'
+        }
+    }
+})
