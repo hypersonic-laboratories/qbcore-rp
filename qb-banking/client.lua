@@ -158,6 +158,4 @@ Timer.SetTimeout(function()
             distance = 1000
         })
     end
-
-    StaticMesh(Vector(-6570, 2835.962, -390), Rotator(0, -90, 0), '/Game/QBCore/Meshes/SM_ATM.SM_ATM')
 end, 2000)
