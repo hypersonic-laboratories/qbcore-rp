@@ -331,6 +331,65 @@ local function AddMeshTarget(name, location, rotation, meshPath, meshOptions, ta
 end
 exports('qb-target', 'AddMeshTarget', AddMeshTarget)
 
+local function AddGlobalClass(className, parameters)
+    if not className or not parameters then return end
+    if type(parameters) ~= 'table' then return end
+    if not parameters.options or type(parameters.options) ~= 'table' then return end
+    if type(className) == 'userdata' then className = className:GetName() end
+    if type(className) ~= 'string' then return end
+    local distance = parameters.distance or Config.MaxDistance
+    local options  = parameters.options
+    if not options or #options == 0 then return end
+    if not Types[className] then Types[className] = {} end
+    SetOptions(Types[className], distance, options)
+end
+exports('qb-target', 'AddGlobalClass', AddGlobalClass)
+
+local function AddGlobalNPC(parameters)
+    if not parameters then return end
+    if type(parameters) ~= 'table' then return end
+    if not parameters.options or type(parameters.options) ~= 'table' then return end
+    local distance = parameters.distance or Config.MaxDistance
+    local options  = parameters.options
+    if not options or #options == 0 then return end
+    local npcClassName = "BP_Character_NPC_Helix_Sandbox_C"
+    if not Types[npcClassName] then Types[npcClassName] = {} end
+    for _, option in ipairs(options) do
+        option.canInteract = function(entity)
+            local controller = entity:GetController()
+            if not controller then return false end
+            local controllerClassName = controller:GetClass():GetName()
+            if controllerClassName ~= "B_AI_Controller_C" then return false end
+            return true
+        end
+    end
+    SetOptions(Types[npcClassName], distance, options)
+end
+exports('qb-target', 'AddGlobalNPC', AddGlobalNPC)
+
+local function AddGlobalPlayer(parameters)
+    if not parameters then return end
+    if type(parameters) ~= 'table' then return end
+    if not parameters.options or type(parameters.options) ~= 'table' then return end
+    local distance = parameters.distance or Config.MaxDistance
+    local options  = parameters.options
+    if not options or #options == 0 then return end
+    local playerClassName = "BP_Character_Player_Helix_Sandbox_C"
+    if not Types[playerClassName] then Types[playerClassName] = {} end
+    for _, option in ipairs(options) do
+        option.canInteract = function(entity)
+            local controller = entity:GetController()
+            if not controller then return false end
+            local controllerClassName = controller:GetClass():GetName()
+            if controllerClassName ~= "BP_HelixPlayerController_C" then return false end
+            if controller == HPlayer then return false end
+            return true
+        end
+    end
+    SetOptions(Types[playerClassName], distance, options)
+end
+exports('qb-target', 'AddGlobalPlayer', AddGlobalPlayer)
+
 local function GetPrimitiveComponents(actor)
     if not actor then return {} end
     local components = {}
@@ -448,7 +507,7 @@ local function handleEntity(trace_result)
         return
     end
     local entity_has_options = Entities[trace_result.Entity]
-    local type_has_options = Types[tostring(trace_result.ActorName)]
+    local type_has_options = Types[trace_result.ClassName]
     local model_has_options = Models[tostring(trace_result.MeshName)]
     if not entity_has_options and not type_has_options and not model_has_options then
         clearTarget()
@@ -463,7 +522,7 @@ local function handleEntity(trace_result)
         nearby_components[target_component] = nil
         local distance = trace_result.Distance
         local entity_options = Entities[target_entity]
-        local type_options = Types[tostring(trace_result.ActorName)]
+        local type_options = Types[trace_result.ClassName]
         local model_options = Models[tostring(trace_result.MeshName)]
         if entity_options then setupOptions(entity_options, target_entity, distance) end
         if type_options then setupOptions(type_options, target_entity, distance) end
@@ -490,7 +549,7 @@ local function handleRaycast()
     local hit = Trace:LineSingle(start, stop, UE.ETraceTypeQuery.Visibility, UE.EDrawDebugTrace.None)
     local trace_result = nil
     if hit then
-        local _, _, _, distance, location, _, _, _, _, hitActor, hitComp = UE.UGameplayStatics.BreakHitResult(hit)
+        local bBlockingHit, bInitialOverlap, time, distance, location, impactPoint, normal, impactNormal, physMat, hitActor, hitComp, hitBoneName, boneName, hitItem, elementIndex, faceIndex, traceStart, traceEnd = UE.UGameplayStatics.BreakHitResult(hit)
         local actor = hitActor
         if not actor and hitComp then
             actor = hitComp:GetOwner()
@@ -500,11 +559,20 @@ local function handleRaycast()
             trace_result.Entity = hitActor
             trace_result.ComponentName = hitComp
             trace_result.Location = location
+            trace_result.ImpactPoint = impactPoint
+            trace_result.Normal = normal
+            trace_result.ImpactNormal = impactNormal
             trace_result.Distance = distance
+            trace_result.HitBoneName = hitBoneName
+            trace_result.BoneName = boneName
+            trace_result.PhysMat = physMat
+            trace_result.BlockingHit = bBlockingHit
             trace_result.Success = true
             trace_result.ActorName = hitActor:GetName()
             trace_result.Mesh = hitComp.StaticMesh and hitComp.StaticMesh or nil
             trace_result.MeshName = hitComp.StaticMesh and hitComp.StaticMesh:GetName() or nil
+            trace_result.Class = hitActor:GetClass()
+            trace_result.ClassName = hitActor:GetClass():GetName()
         end
     end
     return trace_result
