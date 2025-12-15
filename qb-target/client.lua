@@ -358,8 +358,7 @@ local function AddGlobalNPC(parameters)
         option.canInteract = function(entity)
             local controller = entity:GetController()
             if not controller then return false end
-            local controllerClassName = controller:GetClass():GetName()
-            if controllerClassName ~= "B_AI_Controller_C" then return false end
+            if not controller:IsA(UE.AHAIController) then return false end
             return true
         end
     end
@@ -380,8 +379,7 @@ local function AddGlobalPlayer(parameters)
         option.canInteract = function(entity)
             local controller = entity:GetController()
             if not controller then return false end
-            local controllerClassName = controller:GetClass():GetName()
-            if controllerClassName ~= "BP_HelixPlayerController_C" then return false end
+            if not controller:IsA(UE.AHPlayerController) then return false end
             if controller == HPlayer then return false end
             return true
         end
