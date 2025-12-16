@@ -354,14 +354,14 @@ local function AddGlobalNPC(parameters)
     if not options or #options == 0 then return end
     local npcClassName = "BP_Character_NPC_Helix_Sandbox_C"
     if not Types[npcClassName] then Types[npcClassName] = {} end
-    for _, option in ipairs(options) do
-        option.canInteract = function(entity)
-            local controller = entity:GetController()
-            if not controller then return false end
-            if not controller:IsA(UE.AHAIController) then return false end
-            return true
-        end
-    end
+    -- for _, option in ipairs(options) do
+    --     option.canInteract = function(entity)
+    --         local controller = entity:GetController()
+    --         if not controller then return false end
+    --         if not controller:IsA(UE.AHAIController) then return false end
+    --         return true
+    --     end
+    -- end
     SetOptions(Types[npcClassName], distance, options)
 end
 exports('qb-target', 'AddGlobalNPC', AddGlobalNPC)
@@ -375,15 +375,15 @@ local function AddGlobalPlayer(parameters)
     if not options or #options == 0 then return end
     local playerClassName = "BP_Character_Player_Helix_Sandbox_C"
     if not Types[playerClassName] then Types[playerClassName] = {} end
-    for _, option in ipairs(options) do
-        option.canInteract = function(entity)
-            local controller = entity:GetController()
-            if not controller then return false end
-            if not controller:IsA(UE.AHPlayerController) then return false end
-            if controller == HPlayer then return false end
-            return true
-        end
-    end
+    -- for _, option in ipairs(options) do
+    --     option.canInteract = function(entity)
+    --         local controller = entity:GetController()
+    --         if not controller then return false end
+    --         if not controller:IsA(UE.AHPlayerController) then return false end
+    --         if controller == HPlayer then return false end
+    --         return true
+    --     end
+    -- end
     SetOptions(Types[playerClassName], distance, options)
 end
 exports('qb-target', 'AddGlobalPlayer', AddGlobalPlayer)
