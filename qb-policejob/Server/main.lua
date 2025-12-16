@@ -1,58 +1,31 @@
 require('locales/en')
 local Vehicles = exports['qb-core']:GetShared('Vehicles')
+local FingerprintSessions = {}
+local States = {Escorted = {}}
 
---[[
+-- Functions
 
-for i = 1, #Config.Locations['evidence'] do
-    local location_info = Config.Locations['evidence'][i]
-    local coords = location_info.coords
-    local heading = location_info.heading
-    local ped = HCharacter(coords, Rotator(0, heading, 0), '/CharacterCreator/CharacterAssets/Avatar_FBX/Body/Male/Mesh/Male_Full_Body')
-    ped:AddSkeletalMeshAttached('head', 'helix::SK_Male_Head')
-    ped:AddSkeletalMeshAttached('chest', 'helix::SK_Police_Top')
-    ped:AddSkeletalMeshAttached('legs', 'helix::SK_Police_Lower')
-    ped:AddSkeletalMeshAttached('feet', 'helix::SK_Police_Shoes')
-    ped:AddSkeletalMeshAttached('hat', 'helix::SK_Police_Hat')
-
-    peds[ped] = {
-        options = {
-            {
-                type = 'client',
-                event = 'qb-policejob:client:evidence',
-                label = 'Evidence Locker',
-                icon = 'fas fa-dungeon',
-                jobType = 'leo'
-            },
-        },
-        distance = 400,
-    }
+local function GetClosestFingerprint(coords)
+    local closestFingerprint
+    for i = 1, #Config.Locations.fingerprint do
+        local FingerprintCoords = Config.Locations.fingerprint[i].coords
+        local distance = coords:Dist(FingerprintCoords)
+        if distance <= 500 then
+            closestFingerprint = i
+            break
+        end
+    end
+    return closestFingerprint
 end
 
-for i = 1, #Config.Locations['fingerprint'] do
-    local location_info = Config.Locations['fingerprint'][i]
-    local coords = location_info.coords
-    local heading = location_info.heading
-    local ped = HCharacter(coords, Rotator(0, heading, 0), '/CharacterCreator/CharacterAssets/Avatar_FBX/Body/Male/Mesh/Male_Full_Body')
-    ped:AddSkeletalMeshAttached('head', 'helix::SK_Male_Head')
-    ped:AddSkeletalMeshAttached('chest', 'helix::SK_Police_Top')
-    ped:AddSkeletalMeshAttached('legs', 'helix::SK_Police_Lower')
-    ped:AddSkeletalMeshAttached('feet', 'helix::SK_Police_Shoes')
-    ped:AddSkeletalMeshAttached('hat', 'helix::SK_Police_Hat')
-
-    peds[ped] = {
-        options = {
-            {
-                type = 'server',
-                event = 'qb-policejob:server:fingerprint',
-                label = 'Fingerprint',
-                icon = 'fas fa-fingerprint',
-                jobType = 'leo'
-            },
-        },
-        distance = 400,
-    }
+local function GetEscortedTarget(source)
+    for k, v in pairs(States.Escorted) do
+        if v == source then
+            return k
+        end
+    end
+    return nil
 end
-]]
 -- Callbacks
 
 -- Events
@@ -219,37 +192,50 @@ Events.SubscribeRemote('qb-policejob:server:handcuff', function(source, data)
             target_ped:SetValue('handcuffs', handcuffs, true)
         end
     end, 5000)
-end)
+end)]]
 
-Events.SubscribeRemote('qb-policejob:server:putvehicle', function(source, data)
-    local Player = QBCore.Functions.GetPlayer(source)
+RegisterServerEvent('qb-policejob:server:putvehicle', function(source, data)
+    local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
     local target_ped = data.entity
     if not target_ped then return end
-    local target_player = target_ped:GetPlayer()
-    if not target_player then return end
-    local closest_vehicle, distance = QBCore.Functions.GetClosestHVehicle(source)
+    if not target_ped:GetController() then return end
+    local closest_vehicle, distance = GetClosestVehicle(GetEntityCoords(target_ped))
     if not closest_vehicle or distance > 500 then return end
-    local allowed_passengers = closest_vehicle:NumOfAllowedPassanger()
-    local current_passengers = closest_vehicle:NumOfCurrentPassanger()
-    if current_passengers >= allowed_passengers then return end
-    target_ped:EnterVehicle(closest_vehicle)
+    local Seats = closest_vehicle:K2_GetComponentsByClass(UE.USeatComponent):ToTable()
+    for i = 3, #Seats do
+        local Seat = Seats[i]
+        if not Seat:IsSeatOccupied() then
+            local VehicleParams = UE.FHEnterVehicleParams()
+            VehicleParams.bSkipAnimations = true
+            UE.UHelixAbilitySystemGlobals.SendEnterVehicleEventToActorBySeat(target_ped, closest_vehicle, Seat, VehicleParams)
+            return
+        end
+    end
 end)
 
-Events.SubscribeRemote('qb-policejob:server:takevehicle', function(source, data)
-    local Player = QBCore.Functions.GetPlayer(source)
+local SEATS = {
+    RR = 2,
+    RL = 3,
+}
+RegisterServerEvent('qb-policejob:server:takevehicle', function(source, data)
+    local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
-    local target_ped = data.entity
-    if not target_ped then return end
-    local target_player = target_ped:GetPlayer()
-    if not target_player then return end
-    local closest_vehicle, distance = QBCore.Functions.GetClosestHVehicle(source)
-    if not closest_vehicle or distance > 500 then return end
-    print(closest_vehicle, distance)
-end)
 
+    local SeatIndex = (data.door == 'RR' and SEATS.RR) or (data.door == 'RL' and SEATS.RL)
+    local Vehicle = data.entity
+    local Seat = Vehicle:GetSeatByIndex(SeatIndex)
+    if not Seat then return end
+    local Occupant = Seat:GetSeatOccupancy()
+    if not Occupant then return end -- Notify no occupant
+
+    local VehicleParams = UE.FHExitVehicleParams()
+    VehicleParams.bSkipAnimations = true
+    UE.UHelixAbilitySystemGlobals.SendExitVehicleEventToActor(Occupant, VehicleParams)
+end)
+--[[
 Events.SubscribeRemote('qb-policejob:server:tracker', function(source, player_id)
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return end

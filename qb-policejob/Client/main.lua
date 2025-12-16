@@ -23,6 +23,41 @@ local function getAuthorizedVehicles(grade)
     return authorizedVehicles
 end
 
+local fingerprint = false
+local function closeFingerprint()
+    my_webui:SetInputMode(0)
+    fingerprint = false
+    TriggerServerEvent('qb-policejob:server:closeFingerprint')
+end
+
+exports['qb-target']:AddTargetModel('SM_Door_RR_PoliceCar', {
+    options = {
+        {
+            label = 'Take Out Vehicle',
+            icon = 'fas fa-person',
+            type = 'server',
+            event = 'qb-policejob:server:takevehicle',
+            jobType = 'leo',
+            door = 'RR',
+        }
+    },
+    distance = 500,
+})
+
+exports['qb-target']:AddTargetModel('SM_Door_RL_PoliceCar', {
+    options = {
+        {
+            label = 'Take Out Vehicle',
+            icon = 'fas fa-person',
+            type = 'server',
+            event = 'qb-policejob:server:takevehicle',
+            jobType = 'leo',
+            door = 'RL',
+        }
+    },
+    distance = 500,
+})
+
 exports['qb-target']:AddGlobalPlayer({
     options = {
         {
