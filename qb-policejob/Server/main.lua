@@ -125,44 +125,14 @@ RegisterServerEvent('qb-policejob:server:search', function(source, data)
 
     local target_ped = data.entity
     if not target_ped then return end
-    local target_coords = target_ped:GetLocation()
-    local player_coords = source:GetControlledCharacter():GetLocation()
-    local distance = player_coords:Distance(target_coords)
+    local target_coords = GetEntityCoords(target_ped)
+    local player_coords = GetEntityCoords(GetPlayerPawn(source))
+    local distance = player_coords:Dist(target_coords)
     if distance > 500 then return end
-    local target_player = target_ped:GetPlayer()
-    OpenInventoryById(source, target_player)
+    local target_player = target_ped:GetController()
+    exports['qb-inventory']:OpenInventoryById(source, target_player)
 end)
-
-Events.SubscribeRemote('qb-policejob:server:escort', function(source, data)
-    local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-    local target_ped = data.entity
-    if not target_ped then return end
-    local target_coords = target_ped:GetLocation()
-    local player_ped = source:GetControlledCharacter()
-    local player_coords = player_ped:GetLocation()
-    local distance = player_coords:Distance(target_coords)
-    if distance > 500 then return end
-    local player_rotation = player_ped:GetRotation()
-    local placing_position = player_rotation:GetForwardVector() * 100
-    if not target_ped:GetValue('escorted', false) then
-        target_ped:SetInputEnabled(false)
-        target_ped:SetGravityEnabled(false)
-        target_ped:AttachTo(player_ped)
-        target_ped:SetRelativeLocation(Vector(99, 9, 0))
-        target_ped:SetCollision(CollisionType.Auto)
-        target_ped:SetValue('escorted', true, true)
-    else
-        target_ped:Detach()
-        target_ped:SetInputEnabled(true)
-        target_ped:SetLocation(placing_position + player_coords)
-        target_ped:SetCollision(CollisionType.Normal)
-        target_ped:SetGravityEnabled(true)
-        target_ped:SetValue('escorted', false, true)
-    end
-end)
-
+--[[
 Events.SubscribeRemote('qb-policejob:server:handcuff', function(source, data)
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return end

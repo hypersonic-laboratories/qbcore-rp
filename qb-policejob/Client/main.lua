@@ -110,26 +110,13 @@ exports['qb-target']:AddGlobalPlayer({
                 return entity:GetPlayer()
             end
         },
---         {
---             type = 'server',
---             event = 'qb-policejob:server:putvehicle',
---             label = 'Put In Vehicle',
---             icon = 'fas fa-car',
---             jobType = 'leo',
---             canInteract = function(entity)
---                 return entity:GetPlayer() and entity:GetValue('escorted', false)
---             end
---         },
-        -- {
-        --     type = 'server',
-        --     event = 'qb-policejob:server:takevehicle',
-        --     label = 'Take Out Vehicle',
-        --     icon = 'fas fa-car',
-        --     jobType = 'leo',
-        --     canInteract = function(entity)
-        --         return entity:GetPlayer()
-        --     end
-        -- },
+        {
+            type = 'server',
+            event = 'qb-policejob:server:putvehicle',
+            label = 'Put In Vehicle',
+            icon = 'fas fa-car',
+            jobType = 'leo',
+        },
     },
     distance = 500
 })
