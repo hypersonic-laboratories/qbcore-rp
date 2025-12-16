@@ -21,17 +21,17 @@
     --surface-container: #211f26;
     --surface-container-high: #2b2930;
     --surface-container-highest: #36343b;
-    --error: #b3261e;
+    --error: #E5484D;
     --on-error: #ffffff;
     --error-container: #93000a;
     --on-error-container: #ffdad5;
     --outline: #79747e;
     --outline-variant: #49454f;
-    --success: #9bd880;
+    --success: #00FA7B;
     --on-success: #193800;
     --success-container: #275000;
     --on-success-container: #b6f397;
-    --warning: #ffba47;
+    --warning: #F5D90A;
     --on-warning: #422b00;
     --warning-container: #5f3f00;
     --on-warning-container: #ffddb0;
@@ -125,12 +125,20 @@ div {
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
     padding: 0px 10px 10px;
     margin-bottom: 8px;
+    clip-path: polygon(
+        10px 0,
+        calc(100% - 10px) 0,
+        100% 10px,
+        100% 100%,
+        0 100%,
+        0 10px
+    );
 }
 
 .inventory-grid {
     flex-grow: 1;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .labels-container {
@@ -143,12 +151,11 @@ div {
 }
 
 .item-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    align-content: flex-start;
-    width: 100%;
-    box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .item-slot {
@@ -156,12 +163,20 @@ div {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: calc(20% - 2px);
+    width: auto;
     height: 10vh;
-    background-color: rgba(30, 30, 30, 0.6);
-    border: 1px solid rgba(80, 80, 80, 0.5);
+    background-color: #595959;
+    border: 1px solid #FFFFFF;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    border-radius: 3px 3px 0 3px;
     box-sizing: border-box;
+    clip-path: polygon(
+        0 0,
+        100% 0,
+        100% calc(100% - 10px),
+        calc(100% - 10px) 100%,
+        0 100%
+    );
 }
 
 .item-slot-img {
