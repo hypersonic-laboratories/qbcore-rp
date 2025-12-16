@@ -131,5 +131,24 @@ RegisterServerEvent('qb-hospitaljob:server:bandage', function(source, data)
     end
 end)
 
-RegisterServerEvent('qb-hospitaljob:server:escort', function(source)
+RegisterServerEvent('qb-hospitaljob:server:escort', function(source, data)
+    local pawn = GetPlayerPawn(source)
+    local target_pawn = data.entity
+    if not target_pawn then return end
+    local target_coords = GetEntityCoords(target_pawn)
+    local player_coords = GetEntityCoords(pawn)
+    local distance = player_coords:Dist(target_coords)
+    if distance > 500 then return end
+    if not target_pawn:GetAttachParentActor() then
+        target_pawn:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_None, nil)
+        AttachActorToComponent(target_pawn, pawn:K2_GetRootComponent(), Vector(100, 50, 0), Rotator(), 'root')
+    else
+        DetachActor(target_pawn)
+        local player_rotation = GetEntityRotation(pawn)
+        local placing_position = player_rotation:GetForwardVector() * 100
+        SetEntityCoords(target_pawn, player_coords + placing_position)
+        local root = target_pawn:K2_GetRootComponent()
+        target_pawn:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_Walking, nil)
+        root:SetCollisionProfileName('LyraPawnCapsule', true) -- reset pawn collision
+    end
 end)
