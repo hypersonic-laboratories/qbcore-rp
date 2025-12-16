@@ -554,7 +554,7 @@ local function handleRaycast()
         end
         if actor then
             trace_result = {}
-            trace_result.Entity = hitActor
+            trace_result.Entity = actor
             trace_result.ComponentName = hitComp
             trace_result.Location = location
             trace_result.ImpactPoint = impactPoint
@@ -566,11 +566,11 @@ local function handleRaycast()
             trace_result.PhysMat = physMat
             trace_result.BlockingHit = bBlockingHit
             trace_result.Success = true
-            trace_result.ActorName = hitActor:GetName()
+            trace_result.ActorName = actor:GetName()
             trace_result.Mesh = hitComp.StaticMesh and hitComp.StaticMesh or nil
             trace_result.MeshName = hitComp.StaticMesh and hitComp.StaticMesh:GetName() or nil
-            trace_result.Class = hitActor:GetClass()
-            trace_result.ClassName = hitActor:GetClass():GetName()
+            trace_result.Class = actor:GetClass()
+            trace_result.ClassName = actor:GetClass():GetName()
         end
     end
     return trace_result
