@@ -1,5 +1,6 @@
 local my_webui = WebUI('Fingerprint', 'qb-policejob/html/index.html')
 local Targets = {}
+local IsEscorting = false
 require('locales/en')
 
 -- Functions
@@ -66,9 +67,6 @@ exports['qb-target']:AddGlobalPlayer({
             label = 'Jail',
             icon = 'fas fa-user-lock',
             jobType = 'leo',
-            canInteract = function(entity)
-                return entity:GetPlayer()
-            end
         },
         {
             type = 'server',
@@ -76,9 +74,6 @@ exports['qb-target']:AddGlobalPlayer({
             label = 'View Info',
             icon = 'fas fa-question',
             jobType = 'leo',
-            canInteract = function(entity)
-                return entity:GetPlayer()
-            end
         },
         {
             type = 'server',
@@ -86,19 +81,13 @@ exports['qb-target']:AddGlobalPlayer({
             label = 'Search',
             icon = 'fas fa-magnifying-glass',
             jobType = 'leo',
-            canInteract = function(entity)
-                return entity:GetPlayer()
-            end
         },
         {
-            type = 'server',
-            event = 'qb-policejob:server:escort',
+            type = 'client',
+            event = 'qb-policejob:client:escort',
             label = 'Escort',
             icon = 'fas fa-user-group',
             jobType = 'leo',
-            canInteract = function(entity)
-                return entity:GetPlayer()
-            end
         },
         {
             type = 'server',
@@ -106,9 +95,6 @@ exports['qb-target']:AddGlobalPlayer({
             label = 'Handcuff',
             icon = 'fas fa-handcuffs',
             jobType = 'leo',
-            canInteract = function(entity)
-                return entity:GetPlayer()
-            end
         },
         {
             type = 'server',
@@ -146,6 +132,16 @@ Input.BindKey('BackSpace', function()
     if not fingerprint then return end
     my_webui:SendEvent('closeFingerprint')
     closeFingerprint()
+end)
+
+Input.BindKey('E', function()
+    if not IsEscorting then return end
+    TriggerCallback('escort', function(success)
+        if not success then return end
+
+        exports['qb-core']:HideText()
+        IsEscorting = false
+    end)
 end)
 
 my_webui:RegisterEventHandler('closeFingerprint', function()
@@ -210,6 +206,15 @@ RegisterClientEvent('qb-policejob:client:vehicleMenu', function(data)
         }
     }
     exports['qb-menu']:openMenu(vehicleMenu)
+end)
+
+RegisterClientEvent('qb-policejob:client:escort', function(data)
+    TriggerCallback('escort', function(success)
+        if not success then return end
+
+        exports['qb-core']:DrawText(Lang:t('info.escort_toggle'))
+        IsEscorting = true
+    end, data.entity)
 end)
 
 local police_alert = 0

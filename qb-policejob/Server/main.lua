@@ -28,6 +28,39 @@ local function GetEscortedTarget(source)
 end
 -- Callbacks
 
+RegisterCallback('escort', function(source, target_ped)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player then return end
+    if Player.PlayerData.job.type ~= 'leo' then return end
+    target_ped = target_ped or GetEscortedTarget(source)
+    if not target_ped then return end
+    local target_coords = GetEntityCoords(target_ped)
+    local player_ped = GetPlayerPawn(source)
+    local player_coords = GetEntityCoords(player_ped)
+    local distance = player_coords:Dist(target_coords)
+    if distance > 500 then return end
+
+    if not States.Escorted[target_ped] then
+        target_ped:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_None, nil)
+        AttachActorToComponent(target_ped, player_ped:K2_GetRootComponent(), Vector(100, 50, 0), Rotator(), 'root')
+        TriggerClientEvent(target_ped:GetController(), 'qb-policejob:client:setEscorted', player_ped, true)
+        States.Escorted[target_ped] = source
+        return true
+    else
+        DetachActor(target_ped)
+        TriggerClientEvent(target_ped:GetController(), 'qb-policejob:client:setEscorted', player_ped, false)
+        States.Escorted[target_ped] = nil
+        local player_rotation = GetEntityRotation(player_ped)
+        local placing_position = player_rotation:GetForwardVector() * 100
+        SetEntityCoords(target_ped, player_coords + placing_position)
+        local root = target_ped:K2_GetRootComponent()
+        target_ped:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_Walking, nil)
+        root:SetCollisionProfileName('LyraPawnCapsule', true) -- reset pawn collision
+        return true
+    end
+    return
+end)
+
 -- Events
 
 RegisterServerEvent('qb-policejob:server:openStash', function(source)
@@ -61,7 +94,6 @@ RegisterServerEvent('qb-policejob:server:retrieveVehicle', function(source, data
 
     -- Spawn Vehicle
     local SpawnLocation = Config.Locations.vehicle[data.locationIndex].spawn
-    print('Spawning Vehicle at:', SpawnLocation.coords, SpawnLocation.rotation, VehicleData.asset_name)
     local Vehicle = HVehicle(SpawnLocation.coords, SpawnLocation.rotation, VehicleData.asset_name)
     Vehicle:SetPlate(Lang:t('info.police_plate') .. tostring(math.random(1000, 9999)))
 end)

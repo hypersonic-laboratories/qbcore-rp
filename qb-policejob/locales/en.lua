@@ -133,6 +133,7 @@ local Translations = {
         officer_down = 'Officer %{lastname} | %{callsign} Down',
         fine_issued = 'Fine has been issued to offender succesfully',
         received_fine = 'State Debt Recovery has automatically recovered the fines owed...',
+        escort_toggle = '[E] Stop Escorting',
     },
     evidence = {
         red_hands = 'Red hands',
