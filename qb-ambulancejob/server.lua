@@ -74,7 +74,6 @@ RegisterServerEvent('qb-ambulancejob:server:checkOut', function(source)
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:status', function(source, data)
-    --local pawn = GetPlayerPawn(source)
     local pawn = data.entity
     local boneArray = UE.TArray(UE.FHLimbHealthState)
     UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(pawn, boneArray)
@@ -85,13 +84,12 @@ RegisterServerEvent('qb-hospitaljob:server:status', function(source, data)
         print(healthState.MaxHealth)
         local tagContainer = healthState.RecentDamageTypes
         for k,v in pairs(tagContainer.GameplayTags) do
-            print(k,v)
+            print(v.TagName)
         end
     end
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:revive', function(source, data)
-    --local pawn = GetPlayerPawn(source)
     local pawn = data.entity
     if not pawn then return end
 
@@ -117,7 +115,6 @@ RegisterServerEvent('qb-hospitaljob:server:revive', function(source, data)
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:bandage', function(source, data)
-    --local pawn = GetPlayerPawn(source)
     local pawn = data.entity
     if not pawn then return end
 
@@ -135,7 +132,4 @@ RegisterServerEvent('qb-hospitaljob:server:bandage', function(source, data)
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:escort', function(source)
-end)
-
-RegisterServerEvent('qb-hospitaljob:client:emergency', function(source)
 end)
