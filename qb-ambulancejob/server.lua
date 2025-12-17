@@ -141,10 +141,35 @@ end)
 RegisterServerEvent('qb-hospitaljob:server:treatLimb', function(source, data)
     local targetPawn = data.entity
     local limbTag = data.limbTag
+    local limbName = data.limb
     local healAmount = data.maxHealth or 100.0
     local gameplayTag = UE.FGameplayTag()
     gameplayTag.TagName = limbTag
     local success = UE.UHGameplaySystemGlobals.HealTargetLimb(targetPawn, gameplayTag, healAmount)
+    if success then
+        TriggerClientEvent(source, "QBCore:Notify", limbName .. ' healed', 'success')
+        local boneArray = UE.TArray(UE.FHLimbHealthState)
+        UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(targetPawn, boneArray)
+        local limbData = {}
+        for i = 1, boneArray:Num() do
+            local healthState = boneArray[i]
+            local limbInfo = {
+                limbTag = healthState.LimbTag.TagName,
+                currentHealth = healthState.CurrentHealth,
+                maxHealth = healthState.MaxHealth,
+                entity = targetPawn,
+                damageTypes = {}
+            }
+            local tagContainer = healthState.RecentDamageTypes
+            for k, v in pairs(tagContainer.GameplayTags) do
+                table.insert(limbInfo.damageTypes, v.TagName)
+            end
+            table.insert(limbData, limbInfo)
+        end
+        TriggerClientEvent(source, 'qb-hospitaljob:client:openStatusMenu', limbData)
+    else
+        TriggerClientEvent(source, "QBCore:Notify", 'Failed to heal ' .. limbName, 'error')
+    end
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:escort', function(source, data)
