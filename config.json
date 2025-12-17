@@ -23,6 +23,7 @@
     "qb-taxijob",
     "qb-deliveryjob",
     "qb-ambulancejob",
-    "qb-weathersync"
+    "qb-weathersync",
+    "qb-fuel"
   ]
 }
