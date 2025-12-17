@@ -117,6 +117,9 @@ setupPeds()
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     player_data = exports['qb-core']:GetPlayerData()
+    TriggerCallback('GetCuffedState', function(CuffedState)
+        IsCuffed = CuffedState
+    end, true)
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()

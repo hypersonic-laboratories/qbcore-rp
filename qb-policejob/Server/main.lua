@@ -90,6 +90,21 @@ RegisterCallback('escort', function(source, target_ped)
     return Success
 end)
 
+RegisterCallback('GetCuffedState', function(source, PlayAnimation)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player then return end
+
+    local Cuffed = IsHandcuffed(Player.PlayerData.citizenid)
+    if Cuffed and PlayAnimation then
+        local BaseAnimPath = '/Game/Characters/Heroes/Unified/Animations/HostageSet/'
+        local AnimParams = UE.FHelixPlayAnimParams()
+        AnimParams.AnimSlotName = 'UpperBody'
+        AnimParams.LoopCount = -1
+        Animation.Play(GetPlayerPawn(source), BaseAnimPath .. 'Paired_Handcuffs/Paired_HandcuffHostage_Loop_Vic.Paired_HandcuffHostage_Loop_Vic', AnimParams)
+    end
+    return Cuffed
+end)
+
 -- Events
 
 RegisterServerEvent('qb-policejob:server:openStash', function(source)
