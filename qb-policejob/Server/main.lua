@@ -40,7 +40,6 @@ local function ToggleEscort(source, target_ped)
     end
 
     local target_coords = GetEntityCoords(target_ped)
-    local player_ped = GetPlayerPawn(source)
     local player_coords = GetEntityCoords(player_ped)
     local distance = player_coords:Dist(target_coords)
     if distance > 500 then return end
@@ -78,13 +77,6 @@ RegisterCallback('escort', function(source, target_ped)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
     target_ped = target_ped or GetEscortedTarget(source)
-    if not target_ped then return end
-    if not target_ped:IsValid() then return true end
-    local target_coords = GetEntityCoords(target_ped)
-    local player_ped = GetPlayerPawn(source)
-    local player_coords = GetEntityCoords(player_ped)
-    local distance = player_coords:Dist(target_coords)
-    if distance > 500 then return end
 
     local Success = ToggleEscort(source, target_ped)
     return Success
