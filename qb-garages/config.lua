@@ -26,6 +26,97 @@ Config.Garages = {
         -- jobType = ''
         category = Config.VehicleClass.Car
     },
+
+    -- Middle Machines
+    parkinggarageA = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-352670, -185040, -1270),
+        spawnPoint = { { coords = Vector(-353030, -184770, -1367), heading = 180, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+    parkinggarageB = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-352600, -185040, -1670),
+        spawnPoint = { { coords = Vector(-353030, -184770, -1767), heading = 180, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+    parkinggarageC = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-352600, -185030, -2070),
+        spawnPoint = { { coords = Vector(-353030, -184770, -2167), heading = 180, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+    parkinggarageD = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-352590, -185030, -2470),
+        spawnPoint = { { coords = Vector(-353030, -184770, -2567), heading = 180, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+    parkinggarageE = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-352600, -185030, -2870),
+        spawnPoint = { { coords = Vector(-353030, -184770, -2967), heading = 180, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+
+    -- Right Back Corner
+    parkinggarageF = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-348960, -181460, -1670),
+        spawnPoint = { { coords = Vector(-348949, -181999, -1767), heading = -90, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+    parkinggarageG = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-348960, -181460, -2070),
+        spawnPoint = { { coords = Vector(-348949, -181999, -2167), heading = -90, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+    parkinggarageH = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-348960, -181460, -2470),
+        spawnPoint = { { coords = Vector(-348949, -181999, -2567), heading = -90, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+
+    -- Left Back Corner
+    parkinggarageI = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-355770, -182360, -1670),
+        spawnPoint = { { coords = Vector(-355469, -181889, -1767), heading = -90, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+    parkinggarageJ = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-355760, -182980, -2070),
+        spawnPoint = { { coords = Vector(-355469, -181889, -2167), heading = -90, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+    parkinggarageK = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-355784, -182982, -2475),
+        spawnPoint = { { coords = Vector(-355469, -181889, -2567), heading = -90, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+    parkinggarageL = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-355800, -182990, -2870),
+        spawnPoint = { { coords = Vector(-355680, -182439, -2966), heading = 90, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
+
     cardealer = {
         label = 'Car Dealer',
         takeVehicle = Vector(-301186, -213380, -2882),
