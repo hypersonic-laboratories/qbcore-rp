@@ -229,6 +229,7 @@ RegisterServerEvent('qb-policejob:server:putvehicle', function(source, data)
     for i = 3, #Seats do
         local Seat = Seats[i]
         if not Seat:IsSeatOccupied() then
+            if States.Escorted[target_ped] then ToggleEscort(States.Escorted[target_ped], target_ped) end -- stop escorting if being put in vehicle
             local VehicleParams = UE.FHEnterVehicleParams()
             VehicleParams.bSkipAnimations = true
             UE.UHelixAbilitySystemGlobals.SendEnterVehicleEventToActorBySeat(target_ped, closest_vehicle, Seat, VehicleParams)
