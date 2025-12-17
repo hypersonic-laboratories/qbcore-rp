@@ -131,7 +131,7 @@ RegisterServerEvent('qb-garages:server:SpawnVehicle', function(source, plate, in
     -- @TODO Set Vehicle Mods, Plate
     local vehicle = HVehicle(SpawnPoint.coords, Rotator(0, SpawnPoint.heading, 0), SharedVehicles[vehicleName].asset_name)
     vehicle:SetPlate(plate)
-    vehicle:SetFuel(tonumber(results[1].fuel) or 1.0)
+    vehicle:SetFuel(tonumber(results[1].fuel) or 100.0)
     updateVehicleState(0, plate, Player.PlayerData.citizenid)
     OutsideVehicles[plate] = { entity = vehicle }
     Timer.SetTimeout(function()

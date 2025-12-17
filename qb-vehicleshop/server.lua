@@ -41,7 +41,8 @@ RegisterServerEvent('qb-vehicleshop:server:testDrive', function(_, data)
     local vehicleClass = vehicleInfo['asset_name']
     local location = coords.location
     local rotation = coords.rotation
-    HVehicle(location, rotation, vehicleClass)
+    local hVehicle = HVehicle(location, rotation, vehicleClass)
+    hVehicle:SetFuel(100.0)
 end)
 
 RegisterServerEvent('qb-vehicleshop:server:swapVehicle', function(_, data)
@@ -92,6 +93,7 @@ RegisterServerEvent('qb-vehicleshop:server:purchaseVehicle', function(source, da
     })
     local pVehicle = HVehicle(spawnLocation.location, spawnLocation.rotation, vehicleInfo.asset_name)
     pVehicle:SetPlate(plate)
+    pVehicle:SetFuel(100.0)
     TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.purchased'), 'success')
 end)
 
