@@ -6,13 +6,6 @@ require('locales/en')
 
 -- Functions
 
--- Cleanup
-function onShutdown()
-    for name, _ in pairs(Targets) do
-        exports['qb-target']:RemoveZone(name)
-    end
-end
-
 local function getAuthorizedVehicles(grade)
     local authorizedVehicles = {}
     for minimumGrade, vehicles in pairs(Config.AuthorizedVehicles) do
@@ -32,81 +25,16 @@ local function closeFingerprint()
     TriggerServerEvent('qb-policejob:server:closeFingerprint')
 end
 
-exports['qb-target']:AddTargetModel('SM_Door_RR_PoliceCar', {
-    options = {
-        {
-            label = 'Take Out Vehicle',
-            icon = 'fas fa-person',
-            type = 'server',
-            event = 'qb-policejob:server:takevehicle',
-            jobType = 'leo',
-            door = 'RR',
-        }
-    },
-    distance = 500,
-})
+exports('qb-policejob', 'IsHandcuffed', function()
+    return IsCuffed
+end)
 
-exports['qb-target']:AddTargetModel('SM_Door_RL_PoliceCar', {
-    options = {
-        {
-            label = 'Take Out Vehicle',
-            icon = 'fas fa-person',
-            type = 'server',
-            event = 'qb-policejob:server:takevehicle',
-            jobType = 'leo',
-            door = 'RL',
-        }
-    },
-    distance = 500,
-})
-
-exports['qb-target']:AddGlobalPlayer({
-    options = {
-        {
-            type = 'client',
-            event = 'qb-prison:client:jail',
-            label = 'Jail',
-            icon = 'fas fa-user-lock',
-            jobType = 'leo',
-        },
-        {
-            type = 'server',
-            event = 'qb-policejob:server:info',
-            label = 'View Info',
-            icon = 'fas fa-question',
-            jobType = 'leo',
-        },
-        {
-            type = 'server',
-            event = 'qb-policejob:server:search',
-            label = 'Search',
-            icon = 'fas fa-magnifying-glass',
-            jobType = 'leo',
-        },
-        {
-            type = 'client',
-            event = 'qb-policejob:client:escort',
-            label = 'Escort',
-            icon = 'fas fa-user-group',
-            jobType = 'leo',
-        },
-        {
-            type = 'server',
-            event = 'qb-policejob:server:handcuff',
-            label = 'Handcuff',
-            icon = 'fas fa-handcuffs',
-            jobType = 'leo',
-        },
-        {
-            type = 'server',
-            event = 'qb-policejob:server:putvehicle',
-            label = 'Put In Vehicle',
-            icon = 'fas fa-car',
-            jobType = 'leo',
-        },
-    },
-    distance = 500
-})
+-- Cleanup
+function onShutdown()
+    for name, _ in pairs(Targets) do
+        exports['qb-target']:RemoveZone(name)
+    end
+end
 
 -- Handlers
 --[[ 
@@ -429,3 +357,79 @@ for i = 1, #Config.Locations['fingerprint'] do
         }
     )
 end
+
+exports['qb-target']:AddTargetModel('SM_Door_RR_PoliceCar', {
+    options = {
+        {
+            label = 'Take Out Vehicle',
+            icon = 'fas fa-person',
+            type = 'server',
+            event = 'qb-policejob:server:takevehicle',
+            jobType = 'leo',
+            door = 'RR',
+        }
+    },
+    distance = 500,
+})
+
+exports['qb-target']:AddTargetModel('SM_Door_RL_PoliceCar', {
+    options = {
+        {
+            label = 'Take Out Vehicle',
+            icon = 'fas fa-person',
+            type = 'server',
+            event = 'qb-policejob:server:takevehicle',
+            jobType = 'leo',
+            door = 'RL',
+        }
+    },
+    distance = 500,
+})
+
+exports['qb-target']:AddGlobalPlayer({
+    options = {
+        {
+            type = 'client',
+            event = 'qb-prison:client:jail',
+            label = 'Jail',
+            icon = 'fas fa-user-lock',
+            jobType = 'leo',
+        },
+        {
+            type = 'server',
+            event = 'qb-policejob:server:info',
+            label = 'View Info',
+            icon = 'fas fa-question',
+            jobType = 'leo',
+        },
+        {
+            type = 'server',
+            event = 'qb-policejob:server:search',
+            label = 'Search',
+            icon = 'fas fa-magnifying-glass',
+            jobType = 'leo',
+        },
+        {
+            type = 'client',
+            event = 'qb-policejob:client:escort',
+            label = 'Escort',
+            icon = 'fas fa-user-group',
+            jobType = 'leo',
+        },
+        {
+            type = 'server',
+            event = 'qb-policejob:server:handcuff',
+            label = 'Handcuff',
+            icon = 'fas fa-handcuffs',
+            jobType = 'leo',
+        },
+        {
+            type = 'server',
+            event = 'qb-policejob:server:putvehicle',
+            label = 'Put In Vehicle',
+            icon = 'fas fa-car',
+            jobType = 'leo',
+        },
+    },
+    distance = 500
+})
