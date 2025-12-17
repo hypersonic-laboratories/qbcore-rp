@@ -77,16 +77,23 @@ RegisterServerEvent('qb-hospitaljob:server:status', function(source, data)
     local pawn = data.entity
     local boneArray = UE.TArray(UE.FHLimbHealthState)
     UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(pawn, boneArray)
+    local limbData = {}
     for i = 1, boneArray:Num() do
         local healthState = boneArray[i]
-        print(healthState.LimbTag.TagName)
-        print(healthState.CurrentHealth)
-        print(healthState.MaxHealth)
+        local limbInfo = {
+            limbTag = healthState.LimbTag.TagName,
+            currentHealth = healthState.CurrentHealth,
+            maxHealth = healthState.MaxHealth,
+            entity = pawn,
+            damageTypes = {}
+        }
         local tagContainer = healthState.RecentDamageTypes
-        for k,v in pairs(tagContainer.GameplayTags) do
-            print(v.TagName)
+        for k, v in pairs(tagContainer.GameplayTags) do
+            table.insert(limbInfo.damageTypes, v.TagName)
         end
+        table.insert(limbData, limbInfo)
     end
+    TriggerClientEvent(source, 'qb-hospitaljob:client:openStatusMenu', limbData)
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:revive', function(source, data)
@@ -129,6 +136,15 @@ RegisterServerEvent('qb-hospitaljob:server:bandage', function(source, data)
         local healAmount = halfHealth - currentHealth
         UE.UHGameplaySystemGlobals.HealTarget(pawn, healAmount)
     end
+end)
+
+RegisterServerEvent('qb-hospitaljob:server:treatLimb', function(source, data)
+    local targetPawn = data.entity
+    local limbTag = data.limbTag
+    local healAmount = data.maxHealth or 100.0
+    local gameplayTag = UE.FGameplayTag()
+    gameplayTag.TagName = limbTag
+    local success = UE.UHGameplaySystemGlobals.HealTargetLimb(targetPawn, gameplayTag, healAmount)
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:escort', function(source, data)
