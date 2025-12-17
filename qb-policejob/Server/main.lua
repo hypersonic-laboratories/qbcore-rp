@@ -1,7 +1,10 @@
 require('locales/en')
 local Vehicles = exports['qb-core']:GetShared('Vehicles')
 local FingerprintSessions = {}
-local States = {Escorted = {}}
+local States = {
+    Escorted = {}, -- <target_ped: AHCharacter, escorting_source: AHPlayerController>
+    Cuffed = {} -- <target_citizenid: string, cuffing_source: AHPlayerController> ID used for persistence
+}
 
 -- Functions
 
@@ -61,6 +64,12 @@ local function ToggleEscort(source, target_ped)
         return true
     end
 end
+
+local function IsHandcuffed(CitizenId)
+    return States.Cuffed[CitizenId] ~= nil
+end
+
+exports('qb-policejob', 'IsHandcuffed', IsHandcuffed)
 
 -- Callbacks
 
@@ -184,37 +193,55 @@ RegisterServerEvent('qb-policejob:server:search', function(source, data)
     local target_player = target_ped:GetController()
     exports['qb-inventory']:OpenInventoryById(source, target_player)
 end)
---[[
-Events.SubscribeRemote('qb-policejob:server:handcuff', function(source, data)
-    local Player = QBCore.Functions.GetPlayer(source)
+
+RegisterServerEvent('qb-policejob:server:handcuff', function(source, data)
+    local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' and not Player.PlayerData.job.onduty then
-        Events.CallRemote('QBCore:Notify', source, Lang:t('error.on_duty_police_only'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.on_duty_police_only'), 'error')
         return
     end
-    local ped = source:GetControlledCharacter()
-    local ped_coords = ped:GetLocation()
+    local ped = GetPlayerPawn(source)
+    local ped_coords = GetEntityCoords(ped)
     local target_ped = data.entity
-    local target_coords = target_ped:GetLocation()
-    if ped_coords:Distance(target_coords) > 500 then return end
+    local target_coords = GetEntityCoords(target_ped)
+    if ped_coords:Dist(target_coords) > 500 then return end
 
-    ped:PlayAnimation('rp-anims-k::Paired_HandcuffHostage_Start_Att', AnimationSlotType.FullBody, false, 0.5, 0.5)
-    target_ped:PlayAnimation('rp-anims-k::Paired_HandcuffHostage_Start_Vic', AnimationSlotType.FullBody, false, 0.5, 0.5)
+    -- Target
+    local TargetAnimParams = UE.FHelixPlayAnimParams()
+    TargetAnimParams.AnimSlotName = 'UpperBody'
+    TargetAnimParams.LoopCount = -1
+
+    -- Cuffer
+    local AnimParams = UE.FHelixPlayAnimParams()
+    AnimParams.bUseMotionWarping = true
+
+    local FinalTransform = Transform()
+    FinalTransform.Translation = GetEntityCoords(target_ped)
+    FinalTransform.Rotation = GetEntityRotation(target_ped):ToQuat()
+    AnimParams.WarpTargetTransform = FinalTransform
+
+    local BaseAnimPath = '/Game/Characters/Heroes/Unified/Animations/HostageSet/'
+    Animation.Play(ped, BaseAnimPath .. 'Paired_Handcuffs/Paired_HandcuffHostage_Start_Att.Paired_HandcuffHostage_Start_Att', AnimParams)
+    Animation.Play(target_ped, BaseAnimPath .. 'Paired_Handcuffs/Paired_HandcuffHostage_Start_Vic.Paired_HandcuffHostage_Start_Vic', TargetAnimParams)
 
     Timer.SetTimeout(function()
-        if targetPed:GetValue('is_cuffed', false) then
-            target_ped:GetValue('handcuffs'):Destroy()
-            target_ped:StopAnimation('rp-anims-k::Paired_HandcuffHostage_Loop_Vic')
-            target_ped:SetValue('is_cuffed', false, true)
+        local Controller = target_ped:GetController()
+        local TargetPlayer = exports['qb-core']:GetPlayer(Controller)
+        if not TargetPlayer then return end
+        local PlayerId = TargetPlayer.PlayerData.citizenid
+        if IsHandcuffed(PlayerId) then
+            Animation.Stop(target_ped)
+            States.Cuffed[PlayerId] = nil
+            TriggerClientEvent(Controller, 'qb-policejob:client:setCuffed', false)
         else
-            local handcuffs = StaticMesh(target_coords, Rotator(), 'abcca-qbcore::SM_Handcuffs', CollisionType.NoCollision)
-            handcuffs:AttachTo(target_ped, AttachmentRule.SnapToTarget, 'hand_r', 0, true)
-            target_ped:PlayAnimation('rp-anims-k::Paired_HandcuffHostage_Loop_Vic', AnimationSlotType.UpperBody, true, 0.5, 0.5)
-            target_ped:SetValue('is_cuffed', true, true)
-            target_ped:SetValue('handcuffs', handcuffs, true)
+            Animation.Stop(target_ped)
+            Animation.Play(target_ped, BaseAnimPath .. 'Paired_Handcuffs/Paired_HandcuffHostage_Loop_Vic.Paired_HandcuffHostage_Loop_Vic', TargetAnimParams)
+            States.Cuffed[PlayerId] = source
+            TriggerClientEvent(Controller, 'qb-policejob:client:setCuffed', true)
         end
     end, 5000)
-end)]]
+end)
 
 RegisterServerEvent('qb-policejob:server:putvehicle', function(source, data)
     local Player = exports['qb-core']:GetPlayer(source)

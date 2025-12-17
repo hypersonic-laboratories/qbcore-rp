@@ -1,6 +1,7 @@
 local my_webui = WebUI('Fingerprint', 'qb-policejob/html/index.html')
 local Targets = {}
 local IsEscorting = false
+local IsCuffed = false
 require('locales/en')
 
 -- Functions
@@ -215,6 +216,20 @@ RegisterClientEvent('qb-policejob:client:escort', function(data)
         exports['qb-core']:DrawText(Lang:t('info.escort_toggle'))
         IsEscorting = true
     end, data.entity)
+end)
+
+RegisterClientEvent('qb-policejob:client:setEscorted', function(Escorter, IsEscorted)
+    local PlayerPed = GetPlayerPawn(HPlayer)
+    if IsEscorted then
+        AttachActorToComponent(PlayerPed, Escorter:K2_GetRootComponent(), Vector(100, 50, 0), Rotator(), 'root')
+    else
+        DetachActor(PlayerPed)
+        PlayerPed:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_Walking, nil)
+    end
+end)
+
+RegisterClientEvent('qb-policejob:client:setCuffed', function(NewIsCuffed)
+    IsCuffed = NewIsCuffed
 end)
 
 local police_alert = 0
