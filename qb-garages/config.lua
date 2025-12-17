@@ -116,6 +116,13 @@ Config.Garages = {
         type = 'public',
         category = Config.VehicleClass.Car
     },
+    parkinggarageM = {
+        label = 'Parking Garage',
+        takeVehicle = Vector(-348784, -181949, -2873),
+        spawnPoint = { { coords = Vector(-348899, -182530, -2967), heading = -90, } },
+        type = 'public',
+        category = Config.VehicleClass.Car
+    },
 
     cardealer = {
         label = 'Car Dealer',
