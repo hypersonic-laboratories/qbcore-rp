@@ -31,6 +31,11 @@ local function ToggleEscort(source, target_ped)
     local player_ped = GetPlayerPawn(source)
     if not player_ped then return end
     if not target_ped then return end
+    if not target_ped:IsValid() then
+        States.Escorted[target_ped] = nil
+        return true
+    end
+
     local target_coords = GetEntityCoords(target_ped)
     local player_ped = GetPlayerPawn(source)
     local player_coords = GetEntityCoords(player_ped)
