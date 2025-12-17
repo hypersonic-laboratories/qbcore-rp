@@ -74,25 +74,30 @@ RegisterServerEvent('qb-ambulancejob:server:checkOut', function(source)
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:status', function(source, data)
-    local pawn = GetPlayerPawn(source)
-    -- local pawn = data.entity
+    local pawn = data.entity
     local boneArray = UE.TArray(UE.FHLimbHealthState)
     UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(pawn, boneArray)
+    local limbData = {}
     for i = 1, boneArray:Num() do
         local healthState = boneArray[i]
-        print(healthState.LimbTag.TagName)
-        print(healthState.CurrentHealth)
-        print(healthState.MaxHealth)
+        local limbInfo = {
+            limbTag = healthState.LimbTag.TagName,
+            currentHealth = healthState.CurrentHealth,
+            maxHealth = healthState.MaxHealth,
+            entity = pawn,
+            damageTypes = {}
+        }
         local tagContainer = healthState.RecentDamageTypes
-        for k,v in pairs(tagContainer.GameplayTags) do
-            print(k,v)
+        for k, v in pairs(tagContainer.GameplayTags) do
+            table.insert(limbInfo.damageTypes, v.TagName)
         end
+        table.insert(limbData, limbInfo)
     end
+    TriggerClientEvent(source, 'qb-hospitaljob:client:openStatusMenu', limbData)
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:revive', function(source, data)
-    local pawn = GetPlayerPawn(source)
-    -- local pawn = data.entity
+    local pawn = data.entity
     if not pawn then return end
 
     local healthComp = pawn:GetComponentByClass(UE.UHActorHealthComponent)
@@ -117,8 +122,7 @@ RegisterServerEvent('qb-hospitaljob:server:revive', function(source, data)
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:bandage', function(source, data)
-    local pawn = GetPlayerPawn(source)
-    -- local pawn = data.entity
+    local pawn = data.entity
     if not pawn then return end
 
     local healthComp = pawn:GetComponentByClass(UE.UHActorHealthComponent)
@@ -134,8 +138,58 @@ RegisterServerEvent('qb-hospitaljob:server:bandage', function(source, data)
     end
 end)
 
-RegisterServerEvent('qb-hospitaljob:server:escort', function(source)
+RegisterServerEvent('qb-hospitaljob:server:treatLimb', function(source, data)
+    local targetPawn = data.entity
+    local limbTag = data.limbTag
+    local limbName = data.limb
+    local healAmount = data.maxHealth or 100.0
+    local gameplayTag = UE.FGameplayTag()
+    gameplayTag.TagName = limbTag
+    local success = UE.UHGameplaySystemGlobals.HealTargetLimb(targetPawn, gameplayTag, healAmount)
+    if success then
+        TriggerClientEvent(source, "QBCore:Notify", limbName .. ' healed', 'success')
+        local boneArray = UE.TArray(UE.FHLimbHealthState)
+        UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(targetPawn, boneArray)
+        local limbData = {}
+        for i = 1, boneArray:Num() do
+            local healthState = boneArray[i]
+            local limbInfo = {
+                limbTag = healthState.LimbTag.TagName,
+                currentHealth = healthState.CurrentHealth,
+                maxHealth = healthState.MaxHealth,
+                entity = targetPawn,
+                damageTypes = {}
+            }
+            local tagContainer = healthState.RecentDamageTypes
+            for k, v in pairs(tagContainer.GameplayTags) do
+                table.insert(limbInfo.damageTypes, v.TagName)
+            end
+            table.insert(limbData, limbInfo)
+        end
+        TriggerClientEvent(source, 'qb-hospitaljob:client:openStatusMenu', limbData)
+    else
+        TriggerClientEvent(source, "QBCore:Notify", 'Failed to heal ' .. limbName, 'error')
+    end
 end)
 
-RegisterServerEvent('qb-hospitaljob:client:emergency', function(source)
+RegisterServerEvent('qb-hospitaljob:server:escort', function(source, data)
+    local pawn = GetPlayerPawn(source)
+    local target_pawn = data.entity
+    if not target_pawn then return end
+    local target_coords = GetEntityCoords(target_pawn)
+    local player_coords = GetEntityCoords(pawn)
+    local distance = player_coords:Dist(target_coords)
+    if distance > 500 then return end
+    if not target_pawn:GetAttachParentActor() then
+        target_pawn:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_None, nil)
+        AttachActorToComponent(target_pawn, pawn:K2_GetRootComponent(), Vector(100, 50, 0), Rotator(), 'root')
+    else
+        DetachActor(target_pawn)
+        local player_rotation = GetEntityRotation(pawn)
+        local placing_position = player_rotation:GetForwardVector() * 100
+        SetEntityCoords(target_pawn, player_coords + placing_position)
+        local root = target_pawn:K2_GetRootComponent()
+        target_pawn:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_Walking, nil)
+        root:SetCollisionProfileName('LyraPawnCapsule', true) -- reset pawn collision
+    end
 end)

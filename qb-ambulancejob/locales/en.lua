@@ -82,7 +82,8 @@ local Translations = {
         big_bleed = 'bleeding very much...',
     },
     menu = {
-        amb_vehicles = 'Ambulance Vehicles',
+        amb_vehicles = 'Vehicles',
+        amb_helicotpers = 'Helicopters',
         status = 'Health Status',
         close = '⬅ Close Menu',
     },

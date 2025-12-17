@@ -116,6 +116,62 @@ RegisterClientEvent('qb-ambulancejob:client:checkedIn', function()
     exports['qb-core']:DrawText(Lang:t('text.bed_out'))
 end)
 
+RegisterClientEvent('qb-hospitaljob:client:openStatusMenu', function(limbData)
+    local statusMenu = {
+        {
+            header = Lang:t('menu.status'),
+            isMenuHeader = true
+        }
+    }
+    for _, limb in ipairs(limbData) do
+        local healthPercent = math.floor((limb.currentHealth / limb.maxHealth) * 100)
+        local limbName = limb.limbTag:gsub("GameplayEffect%.DamageArea%.", "")
+        local damageText = ""
+        if #limb.damageTypes > 0 then
+            local cleanedDamageTypes = {}
+            for _, damageType in ipairs(limb.damageTypes) do
+                local cleanType = damageType:gsub("GameplayEffect%.DamageType%.", "")
+                table.insert(cleanedDamageTypes, cleanType)
+            end
+            damageText = "<br>Damage Types: " .. table.concat(cleanedDamageTypes, ", ")
+        end
+        local healthColor = "#00ff00"
+        if healthPercent <= 0 then
+            healthColor = "#ff0000"
+        elseif healthPercent < 50 then
+            healthColor = "#ffff00"
+        end
+        table.insert(statusMenu, {
+            header = '<span style="color: ' .. healthColor .. ';">' .. limbName .. '</span>',
+            txt = string.format("Health: %d%% (%d/%d)%s",
+                healthPercent,
+                limb.currentHealth,
+                limb.maxHealth,
+                damageText
+            ),
+            params = {
+                isServer = true,
+                event = 'qb-hospitaljob:server:treatLimb',
+                args = {
+                    limb = limbName,
+                    limbTag = limb.limbTag,
+                    health = limb.currentHealth,
+                    maxHealth = limb.maxHealth,
+                    damageTypes = limb.damageTypes,
+                    entity = limb.entity
+                }
+            }
+        })
+    end
+    table.insert(statusMenu, {
+        header = Lang:t('menu.close'),
+        params = {
+            event = 'qb-menu:client:closeMenu'
+        }
+    })
+    exports['qb-menu']:openMenu(statusMenu)
+end)
+
 -- Input
 
 Input.BindKey('E', function()
