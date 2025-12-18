@@ -167,8 +167,8 @@ Config.Products = {
 }
 
 Config.Locations = {
-	['minimart'] = {
-		['label'] = 'MiniMart',
+	['jetstop'] = {
+		['label'] = 'Jet Stop',
 		['coords'] = Vector(-350380, -111683, -2867),
 		['heading'] = 0,
 		['ped'] = '/CharacterCreator/CharacterAssets/Avatar_FBX/Body/Male/Mesh/Male_Full_Body',
@@ -181,6 +181,38 @@ Config.Locations = {
 		['blipscale'] = 0.6,
 		['blipcolor'] = 0,
 		['delivery'] = Vector(26.45, -1315.51, 29.62),
+		['useStock'] = false,
+	},
+	['jetstop2'] = {
+		['label'] = 'Jet Stop',
+		['coords'] = Vector(-352276, -208951, -2883),
+		['heading'] = 0,
+		['ped'] = '/CharacterCreator/CharacterAssets/Avatar_FBX/Body/Male/Mesh/Male_Full_Body',
+		['animation'] = 'WORLD_HUMAN_STAND_MOBILE',
+		['targetIcon'] = 'fas fa-shopping-basket',
+		['targetLabel'] = 'Open Shop',
+		['products'] = Config.Products['normal'],
+		['showblip'] = true,
+		['blipsprite'] = 52,
+		['blipscale'] = 0.6,
+		['blipcolor'] = 0,
+		['delivery'] = Vector(-352276, -208951, -2883),
+		['useStock'] = false,
+	},
+	['jetstop3'] = {
+		['label'] = 'Jet Stop',
+		['coords'] = Vector(-265472, -102698, -1851),
+		['heading'] = 0,
+		['ped'] = '/CharacterCreator/CharacterAssets/Avatar_FBX/Body/Male/Mesh/Male_Full_Body',
+		['animation'] = 'WORLD_HUMAN_STAND_MOBILE',
+		['targetIcon'] = 'fas fa-shopping-basket',
+		['targetLabel'] = 'Open Shop',
+		['products'] = Config.Products['normal'],
+		['showblip'] = true,
+		['blipsprite'] = 52,
+		['blipscale'] = 0.6,
+		['blipcolor'] = 0,
+		['delivery'] = Vector(-265472, -102698, -1851),
 		['useStock'] = false,
 	},
 	['gunshop'] = {
