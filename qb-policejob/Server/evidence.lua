@@ -1,9 +1,10 @@
 local Weapons = exports['qb-core']:GetShared('Weapons')
-local EvidenceTypes = [
+local EvidenceTypes = {
     Casings = {},
     BloodDrops = {},
     Fingerprints = {},
-]
+}
+local PlayerStatus = {}
 
 -- Functions
 
@@ -80,4 +81,38 @@ RegisterServerEvent('qb-policejob:server:CreateFingerprint', function(source, co
     }
     Fingerprints[Fingerprint.id] = Fingerprint
     TriggerCLPoliceEvent('qb-policejob:client:SyncNewFingerprint', Fingerprint)
+end)
+
+RegisterServerEvent('qb-policejob:server:UpdateStatus', function(source, statusList)
+    PlayerStatus[source] = statusList
+end)
+
+-- Callbacks
+
+RegisterCallback('GetPlayerStatus', function(source)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player then return end
+    if Player.PlayerData.job.type ~= 'leo' then return end
+
+    local PlayerPawn = GetPlayerPawn(source)
+    if not PlayerPawn then return end
+
+    local PlayerCoords = GetEntityCoords(PlayerPawn)
+    local ClosestPawn = GetClosestPawn(PlayerCoords, 500)
+    if not ClosestPawn or not ClosestPawn:IsPlayerControlled() then exports['qb-core']:Notify(source, 'You\'re not close enough to check status', 'error') return end
+
+    local ClosestPlayerStatus = PlayerStatus[ClosestPawn:GetController()]
+    if not ClosestPlayerStatus then exports['qb-core']:Notify(source, 'Player status is normal') return end
+
+    local FormattedStatuses = {}
+    for k, v in pairs(ClosestPlayerStatus) do
+        table.insert(FormattedStatuses, v.text)
+    end
+
+    if #FormattedStatuses <= 0 then
+        exports['qb-core']:Notify(source, 'Player status is normal')
+        return
+    end
+
+    return FormattedStatuses
 end)

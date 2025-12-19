@@ -252,6 +252,7 @@ end)
  ]]
 
 --- Target Setup
+--@TODO: Locales
 local function AddTargetZone(type, name, ...)
     if type == 'Mesh' then
         exports['qb-target']:AddMeshTarget(name, ...)
@@ -430,6 +431,13 @@ exports['qb-target']:AddGlobalPlayer({
             icon = 'fas fa-car',
             jobType = 'leo',
         },
+        {
+            type = 'client',
+            event = 'qb-policejob:client:checkStatus',
+            label = 'Check Status',
+            icon = 'fas fa-question',
+            jobType = 'leo',
+        }
     },
     distance = 500
 })

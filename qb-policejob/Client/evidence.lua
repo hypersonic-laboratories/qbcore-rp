@@ -6,6 +6,7 @@ local CurrentBlooddrop = nil
 local Fingerprints = {}
 local CurrentFingerprint = 0
 local shotAmount = 0
+local StatusTimer = nil
 
 local StatusList = {
     ['fight'] = Lang:t('evidence.red_hands'),
@@ -36,10 +37,10 @@ local function dropCasing(weapon, ped)
     local coords = GetEntityCoords(ped) + placing_position
     TriggerServerEvent('qb-policejob:server:CreateCasing', weapon, coords)
 end
---[[
+
 -- Events
 
-Events.Subscribe('evidence:client:SetStatus', function(statusId, time)
+RegisterClientEvent('qb-policejob:client:SetStatus', function(statusId, time)
     if time > 0 and StatusList[statusId] then
         if (CurrentStatusList == nil or CurrentStatusList[statusId] == nil) or
             (CurrentStatusList[statusId] and CurrentStatusList[statusId].time < 20) then
@@ -47,13 +48,21 @@ Events.Subscribe('evidence:client:SetStatus', function(statusId, time)
                 text = StatusList[statusId],
                 time = time
             }
-            QBCore.Functions.Notify(CurrentStatusList[statusId].text, 'error')
+            exports['qb-core']:Notify(CurrentStatusList[statusId].text, 'error')
         end
     elseif StatusList[statusId] then
         CurrentStatusList[statusId] = nil
     end
-    Events.CallRemote('evidence:server:UpdateStatus', CurrentStatusList)
-end)]]
+    TriggerServerEvent('evidence:server:UpdateStatus', CurrentStatusList)
+end)
+
+RegisterClientEvent('qb-policejob:client:checkStatus', function()
+    TriggerCallback('GetPlayerStatus', function(statusList)
+        for k, v in pairs(statusList) do
+            exports['qb-core']:Notify(v)
+        end
+    end)
+end)
 
 RegisterClientEvent('qb-policejob:client:SyncNewCasing', function(Casing)
     Casings[Casing.id] = {
@@ -91,6 +100,29 @@ RegisterClientEvent('qb-policejob:client:SyncNewFingerprint', function(Fingerpri
 end)
 
 -- Handlers
+
+RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
+    StatusTimer = Timer.SetInterval(function()
+        if CurrentStatusList and next(CurrentStatusList) then
+            for k, _ in pairs(CurrentStatusList) do
+                if CurrentStatusList[k].time > 0 then
+                    CurrentStatusList[k].time = CurrentStatusList[k].time - 10
+                else
+                    CurrentStatusList[k].time = 0
+                end
+            end
+            TriggerServerEvent('qb-policejob:server:UpdateStatus', CurrentStatusList)
+        end
+        if shotAmount > 0 then shotAmount = 0 end
+    end, 10000)
+end)
+
+RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+    if StatusTimer then
+        Timer.ClearInterval(StatusTimer)
+        StatusTimer = nil
+    end
+end)
 --[[
 HCharacter.Subscribe('Fire', function(self, weapon)
     local player = Client.GetLocalPlayer()
@@ -111,7 +143,7 @@ RegisterClientEvent('HEvent:ShotFired', function()
     --@TODO Maybe need to check ped to ensure it's the local player
     if shotAmount > 5 and (CurrentStatusList == nil or CurrentStatusList['gunpowder'] == nil) then
         if math.random(1, 10) <= 7 then
-            TriggerLocalClientEvent('evidence:client:SetStatus', 'gunpowder', 200)
+            TriggerLocalClientEvent('qb-policejob:client:SetStatus', 'gunpowder', 200)
         end
     end
     dropCasing(weapon, ped)
@@ -156,23 +188,4 @@ Input.Subscribe('MouseDown', function(key_name)
             end
         end
     end
-end)
-
--- Timers
-
-Timer.SetInterval(function()
-    if Client.GetValue('isLoggedIn', false) then
-        if CurrentStatusList and next(CurrentStatusList) then
-            for k, _ in pairs(CurrentStatusList) do
-                if CurrentStatusList[k].time > 0 then
-                    CurrentStatusList[k].time = CurrentStatusList[k].time - 10
-                else
-                    CurrentStatusList[k].time = 0
-                end
-            end
-            Events.CallRemote('evidence:server:UpdateStatus', CurrentStatusList)
-        end
-        if shotAmount > 0 then shotAmount = 0 end
-    end
-end, 10000)
- ]]
+end)]]
