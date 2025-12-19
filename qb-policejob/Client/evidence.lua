@@ -67,6 +67,18 @@ RegisterClientEvent('qb-policejob:client:SyncNewCasing', function(Casing)
     }
 end)
 
+RegisterClientEvent('qb-policejob:client:SyncNewBlooddrop', function(BloodDrop)
+    Blooddrops[BloodDrop.id] = {
+        citizenId = BloodDrop.citizenId,
+        bloodType = BloodDrop.bloodType,
+        coords = {
+            x = BloodDrop.coords.X,
+            y = BloodDrop.coords.Y,
+            z = BloodDrop.coords.Z
+        }
+    }
+end)
+
 -- Handlers
 --[[
 HCharacter.Subscribe('Fire', function(self, weapon)
