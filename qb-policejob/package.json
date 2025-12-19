@@ -9,6 +9,7 @@
     ],
     "server": [
         "Server/main.lua",
-        "Server/commands.lua"
+        "Server/commands.lua",
+        "Server/evidence.lua"
     ]
 }

@@ -1,4 +1,4 @@
---[[ local CurrentStatusList = {}
+local CurrentStatusList = {}
 local Casings = {}
 local CurrentCasing = nil
 local Blooddrops = {}
@@ -23,15 +23,20 @@ local StatusList = {
     ['agitated'] = Lang:t('evidence.agitated')
 }
 
+--[[@TODO:
+* Casings
+* Blooddrop
+* Fingerprint
+]]
+
 -- Functions
 
 local function dropCasing(weapon, ped)
-    local player_rotation = ped:GetRotation()
-    local placing_position = player_rotation:GetForwardVector() * 100
-    local coords = placing_position + player_coords
-    Events.CallRemote('evidence:server:CreateCasing', weapon, coords)
+    local placing_position = ped:GetActorForwardVector() * 100
+    local coords = GetEntityCoords(ped) + placing_position
+    TriggerServerEvent('qb-policejob:server:CreateCasing', weapon, coords)
 end
-
+--[[
 -- Events
 
 Events.Subscribe('evidence:client:SetStatus', function(statusId, time)
@@ -48,10 +53,22 @@ Events.Subscribe('evidence:client:SetStatus', function(statusId, time)
         CurrentStatusList[statusId] = nil
     end
     Events.CallRemote('evidence:server:UpdateStatus', CurrentStatusList)
+end)]]
+
+RegisterClientEvent('qb-policejob:client:SyncNewCasing', function(Casing)
+    Casings[Casing.id] = {
+        type = Casing.weapon,
+        serialNumber = Casing.serialNumber and Casing.serialNumber or Lang:t('evidence.serial_not_visible'),
+        coords = {
+            x = Casing.coords.X,
+            y = Casing.coords.Y,
+            z = Casing.coords.Z
+        }
+    }
 end)
 
 -- Handlers
-
+--[[
 HCharacter.Subscribe('Fire', function(self, weapon)
     local player = Client.GetLocalPlayer()
     local ped = player:GetControlledCharacter()
@@ -62,8 +79,21 @@ HCharacter.Subscribe('Fire', function(self, weapon)
         end
     end
     dropCasing(weapon, ped)
-end)
+end)]]
 
+---@TODO Awaiting support for weapon fire event, need more info on data passed
+RegisterClientEvent('HEvent:ShotFired', function()
+    local ped = GetPlayerPawn(HPlayer)
+    if not ped then return end
+    --@TODO Maybe need to check ped to ensure it's the local player
+    if shotAmount > 5 and (CurrentStatusList == nil or CurrentStatusList['gunpowder'] == nil) then
+        if math.random(1, 10) <= 7 then
+            TriggerLocalClientEvent('evidence:client:SetStatus', 'gunpowder', 200)
+        end
+    end
+    dropCasing(weapon, ped)
+end)
+--[[
 Input.Subscribe('MouseDown', function(key_name)
     if key_name == 'RightMouseButton' then
         local player = Client.GetLocalPlayer()
