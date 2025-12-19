@@ -1,4 +1,5 @@
 local my_webui = WebUI('Fingerprint', 'qb-policejob/html/index.html')
+local citizen_info_webui = WebUI('CitizenInfo', 'qb-policejob/html/info.html')
 local Targets = {}
 local IsEscorting = false
 local IsCuffed = false
@@ -82,6 +83,10 @@ end)
 
 my_webui:RegisterEventHandler('scanFinger', function()
     TriggerServerEvent('qb-policejob:server:scanFinger')
+end)
+
+citizen_info_webui:RegisterEventHandler('close', function()
+    citizen_info_webui:SetInputMode(0)
 end)
 
 RegisterClientEvent('qb-policejob:client:openFingerprint', function()
@@ -191,65 +196,39 @@ Events.SubscribeRemote('qb-policejob:client:tracker', function(coords, citizenid
     Timer.SetTimeout(function()
         Events.Call('Map:RemoveBlip', 'tracker_' .. citizenid)
     end, 30000)
+end)]]
+
+RegisterClientEvent('qb-policejob:client:checkCitizenInfo', function(PlayerData)
+    -- Character Info
+    local CharInfo = PlayerData.charinfo
+    local CitizenId = PlayerData.citizenid
+    local Gender = CharInfo.gender == 0 and 'Male' or 'Female'
+    local CharacterInfo = {
+        Name = CharInfo.firstname .. ' ' .. CharInfo.lastname,
+        CitizenId = CitizenId,
+        Birthdate = CharInfo.birthdate,
+        Nationality = CharInfo.nationality,
+        PhoneNumber = CharInfo.phone,
+        Gender = Gender,
+    }
+
+    -- Job Info
+    local JobData = PlayerData.job
+    local JobInfo = {
+        Label = JobData.label,
+        Grade = JobData.grade.name,
+    }
+
+    local Metadata = PlayerData.metadata
+    citizen_info_webui:SendEvent('OpenUI', {
+        Character = CharacterInfo,
+        Job = JobInfo,
+        Licenses = Metadata.licences,
+        CriminalRecord = Metadata.criminalrecord,
+        Tracker = Metadata.tracker,
+    })
+    citizen_info_webui:SetInputMode(1)
 end)
-
-Events.SubscribeRemote('qb-policejob:client:info', function(data)
-    local char_info = data.charinfo
-    local job_info = data.job
-    local char_metadata = data.metadata
-    local info_menu = ContextMenu.new()
-
-    -- Character Information
-    local citizen_id = data.citizenid
-    local birthdate = char_info.birthdate
-    local nationality = char_info.nationality
-    local phone_number = char_info.phone
-    local gender = char_info.gender == 0 and 'Male' or 'Female'
-    info_menu:addDropdown('char-info', 'Documentation', {
-        { id = '1', label = 'Citizen ID: ' .. citizen_id,     type = 'button', callback = function() end },
-        { id = '2', label = 'Birthdate: ' .. birthdate,       type = 'button', callback = function() end },
-        { id = '3', label = 'Gender: ' .. gender,             type = 'button', callback = function() end },
-        { id = '4', label = 'Nationality: ' .. nationality,   type = 'button', callback = function() end },
-        { id = '5', label = 'Phone Number: ' .. phone_number, type = 'button', callback = function() end },
-    })
-
-    -- Job Information
-    local job = job_info.label
-    local rank = job_info.grade.name
-    info_menu:addDropdown('job', 'Job Information', {
-        { id = '1', label = 'Job: ' .. job,   type = 'button', callback = function() end },
-        { id = '2', label = 'Rank: ' .. rank, type = 'button', callback = function() end }
-    })
-
-    -- Licenses
-    local licenses = char_metadata.licences
-    local license_table = {}
-    for license, obtained in pairs(licenses) do
-        license_table[#license_table + 1] = { id = tostring(license), label = license:gsub('^%l', string.upper), type = 'checkbox', checked = obtained, callback = function() end }
-    end
-    info_menu:addDropdown('licenses', 'Licenses', license_table)
-
-    -- Criminal
-    local criminal_record = char_metadata.criminalrecord.hasRecord
-    local has_tracker = char_metadata.tracker
-    info_menu:addDropdown('criminal', 'Criminal Record', {
-        { id = '1', label = 'Criminal Record', type = 'checkbox', checked = criminal_record, callback = function() end },
-        {
-            id = '2',
-            label = 'Manage Tracker',
-            type = 'checkbox',
-            checked = has_tracker,
-            callback = function()
-                Events.CallRemote('qb-policejob:server:tracker', data.source)
-            end
-        }
-    })
-
-    info_menu:SetHeader(char_info.firstname .. ' ' .. char_info.lastname)
-    info_menu:setMenuInfo('Citizen Information')
-    info_menu:Open(false, true)
-end)
- ]]
 
 --- Target Setup
 --@TODO: Locales

@@ -292,51 +292,24 @@ RegisterServerEvent('qb-policejob:server:takevehicle', function(source, data)
     VehicleParams.bSkipAnimations = true
     UE.UHelixAbilitySystemGlobals.SendExitVehicleEventToActor(Occupant, VehicleParams)
 end)
---[[
-Events.SubscribeRemote('qb-policejob:server:tracker', function(source, player_id)
-    local Player = QBCore.Functions.GetPlayer(source)
+
+RegisterServerEvent('qb-policejob:server:info', function(source, data)
+    local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
-    local target_ped = player_id:GetControlledCharacter()
+    local target_ped = data.entity or GetPlayerPawn(source)
     if not target_ped then return end
-    local target_coords = target_ped:GetLocation()
-    local player_ped = source:GetControlledCharacter()
-    local player_coords = player_ped:GetLocation()
-    local distance = player_coords:Distance(target_coords)
-    if distance > 500 then return end
-    local OtherPlayer = QBCore.Functions.GetPlayer(player_id)
+    local OtherPlayer = exports['qb-core']:GetPlayer(target_ped:GetController())
     if not OtherPlayer then return end
-    local tracker_active = OtherPlayer.PlayerData.metadata.tracker
-    if tracker_active then
-        OtherPlayer.Functions.SetMetaData('tracker', false)
-        Events.CallRemote('QBCore:Notify', player_id, Lang:t('success.anklet_taken_off'), 'success')
-        Events.CallRemote('QBCore:Notify', source, Lang:t('success.took_anklet_from', { firstname = Target.PlayerData.charinfo.firstname, lastname = Target.PlayerData.charinfo.lastname }), 'success')
-    else
-        OtherPlayer.Functions.SetMetaData('tracker', true)
-        Events.CallRemote('QBCore:Notify', player_id, Lang:t('success.put_anklet'), 'success')
-        Events.CallRemote('QBCore:Notify', source, Lang:t('success.put_anklet_on', { firstname = Target.PlayerData.charinfo.firstname, lastname = Target.PlayerData.charinfo.lastname }), 'success')
-    end
+    TriggerClientEvent(source, 'qb-policejob:client:checkCitizenInfo', OtherPlayer.PlayerData)
 end)
-
+--[[
 Events.SubscribeRemote('qb-policejob:server:leaveCamera', function(source, coords)
     source:SetCameraLocation(coords)
     local newChar = HCharacter(coords, Rotator(), source)
     local player_dimension = source:GetDimension()
     newChar:SetDimension(player_dimension)
     source:Possess(newChar)
-end)
-
-Events.SubscribeRemote('qb-policejob:server:info', function(source, data)
-    local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-    local target_ped = data.entity
-    if not target_ped then return end
-    local target_player = target_ped:GetPlayer()
-    if not target_player then return end
-    local OtherPlayer = QBCore.Functions.GetPlayer(target_player)
-    if not OtherPlayer then return end
-    Events.CallRemote('qb-policejob:client:info', source, OtherPlayer.PlayerData)
 end)
 
 Events.SubscribeRemote('qb-policejob:server:policeAlert', function(source, text)
