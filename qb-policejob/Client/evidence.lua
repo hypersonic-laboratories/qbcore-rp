@@ -79,6 +79,17 @@ RegisterClientEvent('qb-policejob:client:SyncNewBlooddrop', function(BloodDrop)
     }
 end)
 
+RegisterClientEvent('qb-policejob:client:SyncNewFingerprint', function(Fingerprint)
+    Fingerprints[Fingerprint.id] = {
+        playerFingerprint = Fingerprint.playerFingerprint,
+        coords = {
+            x = Fingerprint.coords.X,
+            y = Fingerprint.coords.Y,
+            z = Fingerprint.coords.Z
+        }
+    }
+end)
+
 -- Handlers
 --[[
 HCharacter.Subscribe('Fire', function(self, weapon)

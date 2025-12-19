@@ -2,6 +2,7 @@ local Weapons = exports['qb-core']:GetShared('Weapons')
 local EvidenceTypes = [
     Casings = {},
     BloodDrops = {},
+    Fingerprints = {},
 ]
 
 -- Functions
@@ -65,4 +66,18 @@ RegisterServerEvent('qb-policejob:server:CreateBlooddrop', function(source, coor
     }
     EvidenceTypes.BloodDrops[BloodDrop.id] = BloodDrop
     TriggerCLPoliceEvent('qb-policejob:client:SyncNewBlooddrop', BloodDrop)
+end)
+
+-- Triggered by packages to create a player fingerprint
+RegisterServerEvent('qb-policejob:server:CreateFingerprint', function(source, coords)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player then return end
+
+    local Fingerprint = {
+        id = CreateEvidenceId('Fingerprints'),
+        playerFingerprint = Player.PlayerData.metadata.fingerprint,
+        coords = coords,
+    }
+    Fingerprints[Fingerprint.id] = Fingerprint
+    TriggerCLPoliceEvent('qb-policejob:client:SyncNewFingerprint', Fingerprint)
 end)
