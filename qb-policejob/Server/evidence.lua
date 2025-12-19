@@ -28,7 +28,7 @@ end
 
 -- Events
 
-RegisterServerEvent('qb-policejob:server:CreateCasing', function(weapon, coords)
+RegisterServerEvent('qb-policejob:server:CreateCasing', function(source, weapon, coords)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
 
