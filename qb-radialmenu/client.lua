@@ -233,7 +233,7 @@ my_webui:RegisterEventHandler('selectItem', function(inData)
 end)
 
 my_webui:RegisterEventHandler('closeRadial', function()
-    setRadialState(false)
+    closeRadial()
 end)
 
 -- Inputs

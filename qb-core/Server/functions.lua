@@ -204,7 +204,7 @@ function QBCore.Functions.CreateVehicle(vehicle_name, coords, rotation, plate, f
 	if not vehicleData then return end
 	if not rotation then rotation = Rotator(0, 0, 0) end
 	local vehicle = HVehicle(coords, rotation, vehicleData.asset_name, vehicleData.collision_type, vehicleData.gravity_enabled)
-	if fuel then vehicle:SetFuel(fuel) else vehicle:SetFuel(1.0) end
+	if fuel then vehicle:SetFuel(fuel) else vehicle:SetFuel(100.0) end
 	vehicle:SetEngineHealth(1.0)
 	return vehicle
 end
