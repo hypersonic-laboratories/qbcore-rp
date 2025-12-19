@@ -39,12 +39,13 @@ RegisterServerEvent('qb-policejob:server:CreateCasing', function(weapon, coords)
     end
 
     local casing = {
-        id = GenerateId(8, 'number'),
+        id = CreateEvidenceId('Casings'),
         weapon = weapon,
         serialNumber = SerialNumber,
         coords = coords,
         time = os.time()
     }
+    EvidenceTypes.Casings[casing.id] = casing
     TriggerCLPoliceEvent('qb-policejob:client:SyncNewCasing', casing)
 end)
 
