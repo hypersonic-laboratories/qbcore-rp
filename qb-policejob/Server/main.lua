@@ -293,12 +293,12 @@ RegisterServerEvent('qb-policejob:server:takevehicle', function(source, data)
     UE.UHelixAbilitySystemGlobals.SendExitVehicleEventToActor(Occupant, VehicleParams)
 end)
 
-RegisterServerEvent('qb-policejob:server:toggleTracker', function(source, CitizenId, Toggle)
+RegisterServerEvent('qb-policejob:server:toggleTracker', function(source, args)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
 
-    local TargetPlayer = exports['qb-core']:GetPlayerByCitizenId(CitizenId)
+    local TargetPlayer = exports['qb-core']:GetPlayerByCitizenId(args.CitizenId)
     if not TargetPlayer then return end
 
     local TargetPed = GetPlayerPawn(TargetPlayer.PlayerData.source)
@@ -312,12 +312,15 @@ RegisterServerEvent('qb-policejob:server:toggleTracker', function(source, Citize
 
     local NewTrackerState = not TargetPlayer.PlayerData.metadata.tracker
     exports['qb-core']:Player(TargetPlayer.PlayerData.source, 'SetMetaData', 'tracker', NewTrackerState)
-
+    
     local FirstName = TargetPlayer.PlayerData.charinfo.firstname
     local LastName = TargetPlayer.PlayerData.charinfo.lastname
     local NameData = { firstname = FirstName, lastname = LastName }
     TriggerClientEvent(source, 'QBCore:Notify', NewTrackerState and Lang:t('success.put_anklet_on', NameData) or Lang:t('success.took_anklet_from', NameData), 'success')
     TriggerClientEvent(TargetPlayer.PlayerData.source, 'QBCore:Notify', NewTrackerState and Lang:t('success.put_anklet') or Lang:t('success.anklet_taken_off'), 'success')
+
+    TargetPlayer.PlayerData.metadata.tracker = NewTrackerState -- transient, used for UI update
+    TriggerClientEvent(source, 'qb-policejob:client:viewCriminalRecord', { PlayerData = TargetPlayer.PlayerData })
 end)
 
 RegisterServerEvent('qb-policejob:server:info', function(source, data)

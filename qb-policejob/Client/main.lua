@@ -202,36 +202,146 @@ Events.SubscribeRemote('qb-policejob:client:tracker', function(coords, citizenid
     end, 30000)
 end)]]
 
-RegisterClientEvent('qb-policejob:client:checkCitizenInfo', function(PlayerData)
+RegisterClientEvent('qb-policejob:client:checkCitizenInfo', function(args)
+    local PlayerData = args.PlayerData or args
     -- Character Info
     local CharInfo = PlayerData.charinfo
     local CitizenId = PlayerData.citizenid
     local Gender = CharInfo.gender == 0 and 'Male' or 'Female'
-    local CharacterInfo = {
-        Name = CharInfo.firstname .. ' ' .. CharInfo.lastname,
-        CitizenId = CitizenId,
-        Birthdate = CharInfo.birthdate,
-        Nationality = CharInfo.nationality,
-        PhoneNumber = CharInfo.phone,
-        Gender = Gender,
-    }
-
+    
     -- Job Info
     local JobData = PlayerData.job
-    local JobInfo = {
-        Label = JobData.label,
-        Grade = JobData.grade.name,
+    
+    local menuItems = {
+        {
+            header = 'Citizen Info',
+            isMenuHeader = true,
+        },
+        {
+            header = 'Name',
+            txt = CharInfo.firstname .. ' ' .. CharInfo.lastname,
+        },
+        {
+            header = 'Gender',
+            txt = Gender,
+        },
+        {
+            header = 'Nationality',
+            txt = CharInfo.nationality,
+        },
+        {
+            header = 'Phone Number',
+            txt = CharInfo.phone,
+        },
+        {
+            header = 'Citizen ID',
+            txt = CitizenId,
+        },
+        {
+            header = 'Date of Birth',
+            txt = CharInfo.birthdate,
+        },
+        {
+            header = 'Job',
+            txt = JobData.label .. ' | ' .. JobData.grade.name,
+        },
+        {
+            header = 'View Licenses',
+            txt = '',
+            params = {
+                event = 'qb-policejob:client:viewLicenses',
+                args = {
+                    PlayerData = PlayerData,
+                }
+            }
+        },
+        {
+            header = 'View Criminal Record',
+            txt = '',
+            params = {
+                event = 'qb-policejob:client:viewCriminalRecord',
+                args = {
+                    PlayerData = PlayerData,
+                }
+            }
+        },
+    }
+    
+    exports['qb-menu']:openMenu(menuItems)
+end)
+
+RegisterClientEvent('qb-policejob:client:viewLicenses', function(args)
+    local licenseMenu = {
+        {
+            header = 'Licenses',
+            isMenuHeader = true,
+        },
+        {
+            header = '← Go Back',
+            params = {
+                event = 'qb-policejob:client:checkCitizenInfo',
+                args = {
+                    PlayerData = args.PlayerData,
+                }
+            }
+        },
+    }
+    for license, obtained in pairs(args.PlayerData.metadata.licences) do
+        licenseMenu[#licenseMenu + 1] = {
+            header = string.format('%s | %s%s', obtained and '✅' or '❌', license:sub(1, 1):upper(), license:sub(2))
+        }
+    end
+    licenseMenu[#licenseMenu + 1] = {
+        header = 'Close Menu',
+        txt = '',
+        params = {
+            event = 'qb-menu:client:closeMenu',
+        }
     }
 
-    local Metadata = PlayerData.metadata
-    citizen_info_webui:SendEvent('OpenUI', {
-        Character = CharacterInfo,
-        Job = JobInfo,
-        Licenses = Metadata.licences,
-        CriminalRecord = Metadata.criminalrecord,
-        Tracker = Metadata.tracker,
-    })
-    citizen_info_webui:SetInputMode(1)
+    exports['qb-menu']:openMenu(licenseMenu)
+end)
+
+RegisterClientEvent('qb-policejob:client:viewCriminalRecord', function(args)
+    local criminalRecordMenu = {
+        {
+            header = 'Criminal Record',
+            isMenuHeader = true,
+        },
+        {
+            header = '← Go Back',
+            params = {
+                event = 'qb-policejob:client:checkCitizenInfo',
+                args = {
+                    PlayerData = args.PlayerData,
+                }
+            }
+        },
+        {
+            header = 'Has Criminal Record',
+            txt = args.PlayerData.metadata.criminalrecord.hasRecord and 'Yes' or 'No',
+        },
+        {
+            header = 'Toggle Tracker',
+            txt = args.PlayerData.metadata.tracker and '✅ Active' or '❌ Inactive',
+            params = {
+                isServer = true,
+                event = 'qb-policejob:server:toggleTracker',
+                args = {
+                    CitizenId = args.PlayerData.citizenid,
+                }
+            }
+        }
+    }
+    criminalRecordMenu[#criminalRecordMenu + 1] = {
+        header = 'Close Menu',
+        txt = '',
+        params = {
+            event = 'qb-menu:client:closeMenu',
+        }
+    }
+
+    exports['qb-menu']:openMenu(criminalRecordMenu)
 end)
 
 --- Target Setup
