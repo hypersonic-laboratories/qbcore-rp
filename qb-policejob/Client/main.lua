@@ -1,5 +1,4 @@
 local my_webui = WebUI('Fingerprint', 'qb-policejob/html/index.html')
-local citizen_info_webui = WebUI('CitizenInfo', 'qb-policejob/html/info.html')
 local Targets = {}
 local IsEscorting = false
 local IsCuffed = false
@@ -83,14 +82,6 @@ end)
 
 my_webui:RegisterEventHandler('scanFinger', function()
     TriggerServerEvent('qb-policejob:server:scanFinger')
-end)
-
-citizen_info_webui:RegisterEventHandler('toggleTracker', function(CitizenId, Checked)
-    TriggerServerEvent('qb-policejob:server:toggleTracker', CitizenId, Checked)
-end)
-
-citizen_info_webui:RegisterEventHandler('close', function()
-    citizen_info_webui:SetInputMode(0)
 end)
 
 RegisterClientEvent('qb-policejob:client:openFingerprint', function()
