@@ -195,7 +195,7 @@ RegisterServerEvent('qb-garages:server:DepositVehicle', function(source, garage)
     for k, v in pairs(Seats) do
         local Occupier = v:GetSeatOccupancy()
         if Occupier then
-            UE.UHelixAbilitySystemGlobals.SendExitVehicleEventToActor(Occupier, UE.FHExitVehicleParams())
+            UE.UHGameplaySystemGlobals.SendExitVehicleEventToActor(Occupier, UE.FHExitVehicleParams())
         end
     end
 

@@ -148,7 +148,7 @@ RegisterServerEvent('qb-taxijob:server:pickupNPC', function(source, benchIndex)
         if npc and npc:IsValid() then
             local params = UE.FHEnterVehicleParams()
             params.bSkipAnimations = true
-            local success = UE.UHelixAbilitySystemGlobals.SendEnterVehicleEventToActor(
+            local success = UE.UHGameplaySystemGlobals.SendEnterVehicleEventToActor(
                 npc,
                 vehicle,
                 2,
@@ -206,7 +206,7 @@ RegisterServerEvent('qb-taxijob:server:dropoffNPC', function(source, benchIndex,
         for _, v in pairs(Seats) do
             local Occupier = v:GetSeatOccupancy()
             if Occupier and Occupier == npc then
-                UE.UHelixAbilitySystemGlobals.SendExitVehicleEventToActor(Occupier, UE.FHExitVehicleParams())
+                UE.UHGameplaySystemGlobals.SendExitVehicleEventToActor(Occupier, UE.FHExitVehicleParams())
                 break
             end
         end

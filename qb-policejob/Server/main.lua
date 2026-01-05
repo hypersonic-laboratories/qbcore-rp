@@ -266,7 +266,7 @@ RegisterServerEvent('qb-policejob:server:putvehicle', function(source, data)
             if States.Escorted[target_ped] then ToggleEscort(States.Escorted[target_ped], target_ped) end -- stop escorting if being put in vehicle
             local VehicleParams = UE.FHEnterVehicleParams()
             VehicleParams.bSkipAnimations = true
-            UE.UHelixAbilitySystemGlobals.SendEnterVehicleEventToActorBySeat(target_ped, closest_vehicle, Seat, VehicleParams)
+            UE.UHGameplaySystemGlobals.SendEnterVehicleEventToActorBySeat(target_ped, closest_vehicle, Seat, VehicleParams)
             return
         end
     end
@@ -290,7 +290,7 @@ RegisterServerEvent('qb-policejob:server:takevehicle', function(source, data)
 
     local VehicleParams = UE.FHExitVehicleParams()
     VehicleParams.bSkipAnimations = true
-    UE.UHelixAbilitySystemGlobals.SendExitVehicleEventToActor(Occupant, VehicleParams)
+    UE.UHGameplaySystemGlobals.SendExitVehicleEventToActor(Occupant, VehicleParams)
 end)
 
 RegisterServerEvent('qb-policejob:server:toggleTracker', function(source, args)
