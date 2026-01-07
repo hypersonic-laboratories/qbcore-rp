@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
             index = Number(index) + 1;
             const targetOption = document.createElement("div");
             targetOption.id = `target-option-${index}`;
+            targetOption.className = "target-option";
             const targetIcon = document.createElement("span");
             targetIcon.id = `target-icon-${index}`;
             const icon = document.createElement("i");
@@ -33,7 +34,21 @@ document.addEventListener("DOMContentLoaded", function () {
             targetIcon.appendChild(icon);
             targetIcon.appendChild(document.createTextNode(" "));
             targetOption.appendChild(targetIcon);
-            targetOption.appendChild(document.createTextNode(itemData.label));
+            
+            const labelContainer = document.createElement("div");
+            labelContainer.className = "target-label-container";
+            const mainLabel = document.createElement("div")
+            mainLabel.textContent = itemData.label;
+            labelContainer.appendChild(mainLabel);
+            
+            if (itemData.subLabel) {
+                const subLabel = document.createElement("div");
+                subLabel.className = "target-sublabel";
+                subLabel.textContent = itemData.subLabel;
+                labelContainer.appendChild(subLabel);
+            }
+            
+            targetOption.appendChild(labelContainer);
             targetLabel.appendChild(targetOption);
         }
     }
@@ -59,14 +74,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function handleMouseDown(event) {
-        const element = event.target;
-
         // Left click
-        if (event.button === 0 && element.id) {
-            const split = element.id.split("-");
-            if (split[0] === "target" && split[1] !== "eye") {
-                hEvent("selectTarget", split[2]);
-                targetLabel.textContent = "";
+        if (event.button === 0) {
+            const targetOption = event.target.closest('.target-option');
+            if (targetOption && targetOption.id) {
+                const split = targetOption.id.split("-");
+                if (split[0] === "target" && split[1] !== "eye") {
+                    hEvent("selectTarget", split[2]);
+                    targetLabel.textContent = "";
+                }
             }
         }
 

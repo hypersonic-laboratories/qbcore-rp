@@ -375,15 +375,14 @@ local function AddGlobalPlayer(parameters)
     if not options or #options == 0 then return end
     local playerClassName = "BP_Character_Player_Helix_Sandbox_C"
     if not Types[playerClassName] then Types[playerClassName] = {} end
-    -- for _, option in ipairs(options) do
-    --     option.canInteract = function(entity)
-    --         local controller = entity:GetController()
-    --         if not controller then return false end
-    --         if not controller:IsA(UE.AHPlayerController) then return false end
-    --         if controller == HPlayer then return false end
-    --         return true
-    --     end
-    -- end
+    for _, option in ipairs(options) do
+        option.canInteract = function(entity)
+            local controller = entity:GetController()
+            if controller == HPlayer then return false end
+            if not entity:IsPlayerControlled() then return false end
+            return true
+        end
+    end
     SetOptions(Types[playerClassName], distance, options)
 end
 exports('qb-target', 'AddGlobalPlayer', AddGlobalPlayer)
@@ -490,6 +489,7 @@ local function setupOptions(datatable, entity, distance)
                 icon = data.icon,
                 targeticon = data.targetIcon,
                 label = data.label,
+                subLabel = data.subLabel,
             }
             local index = #nui_data + 1
             nui_data[index] = new_option
