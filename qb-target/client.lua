@@ -1,18 +1,13 @@
 local player_data = {}
 local isLoggedIn = false
-local playerController = nil
-local target_active, target_entity, raycast_timer, target_component = false, nil, nil, nil
-local nearby_scan_timer = nil
-local nearby_components = {} -- Track components showing stencil 1
+local target_active, target_entity = false, nil
 local nui_data, send_data, Entities, Types, Zones, Models = {}, {}, {}, {}, {}, {}
 local my_webui = WebUI('qb-target', 'qb-target/html/index.html')
-local subMenuOpen = false
 
 -- UI
 
 my_webui:RegisterEventHandler('selectTarget', function(option)
     option = tonumber(option) or option
-    subMenuOpen = false
     if not next(send_data) then return end
     local data = send_data[option]
     if not data then return end
@@ -37,19 +32,49 @@ end)
 
 -- Handlers
 
+local function registerModels()
+    local actors = UE.TArray(UE.AActor)
+    local class = UE.UClass.Load("/Script/Engine.StaticMeshActor")
+    UE.UGameplayStatics.GetAllActorsOfClass(HWorld, class, actors)
+    local lactors = actors:ToTable()
+    for _,v in ipairs(lactors) do
+        local mesh = v:GetComponentByClass(UE.UStaticMeshComponent)
+        if mesh then
+            local smesh = mesh.StaticMesh
+            if smesh then
+                local meshName = smesh:GetName()
+                if Models[meshName] then
+                    Xray.RegisterActor(v)
+                end
+            end
+        end
+    end
+end
+
+local function registerGlobalClasses()
+    for className in pairs(Types) do
+        local actors = UE.TArray(UE.AActor)
+        local class = UE.UClass.Load(className)
+        if class then
+            UE.UGameplayStatics.GetAllActorsOfClass(HWorld, class, actors)
+            local lactors = actors:ToTable()
+            for k, v in ipairs(lactors) do
+                Xray.RegisterActor(v, function() end)
+            end
+        end
+    end
+end
+
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     isLoggedIn = true
     player_data = exports['qb-core']:GetPlayerData()
-    if HPlayer then
-        playerController = HPlayer
-    elseif not HPlayer then
-        playerController = UE.UGameplayStatics.GetPlayerController(HWorld, 0)
-    end
+    registerModels()
+    registerGlobalClasses()
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
-    player_data = {}
     isLoggedIn = false
+    player_data = {}
 end)
 
 RegisterClientEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
@@ -121,76 +146,11 @@ local function SetOptions(tbl, distance, options)
 end
 
 -- Post Process Setup
-local OutlinePPPath = '/Game/Effects/Materials/PostProcess/MPP_Outline_Inst.MPP_Outline_Inst'
-local OutlinePPMaterial = UE.UObject.Load(OutlinePPPath)
 
--- Scalar Parameters
-local scalarParams = OutlinePPMaterial.ScalarParameterValues
-local InnerlineIntensity = scalarParams[1]
-local OutlineIntensity = scalarParams[2]
-InnerlineIntensity.ParameterValue = Config.InnerlineIntensity
-OutlineIntensity.ParameterValue = Config.OutlineIntensity
-scalarParams[1] = InnerlineIntensity
-scalarParams[2] = OutlineIntensity
-OutlinePPMaterial.ScalarParameterValues = scalarParams
-
--- Vector Parameters
-local vectorParams = OutlinePPMaterial.VectorParameterValues
-local highlight = vectorParams[1]
-highlight.ParameterValue = UE.FLinearColor(Config.HighlightColor.R, Config.HighlightColor.G, Config.HighlightColor.B, Config.HighlightColor.A)
-local select = vectorParams[2]
-select.ParameterValue = UE.FLinearColor(Config.SelectColor.R, Config.SelectColor.G, Config.SelectColor.B, Config.SelectColor.A)
-vectorParams[1] = highlight
-vectorParams[2] = select
-OutlinePPMaterial.VectorParameterValues = vectorParams
-
-local OutlinePPIndex = nil
-local function ToggleOutlinePP(enable)
-    local pawn = GetPlayerPawn()
-    if not pawn then return end
-    local camera = pawn:GetComponentByClass(UE.UCameraComponent)
-    if not camera then return end
-    local settings = camera.PostProcessSettings
-    local array = settings.WeightedBlendables.Array
-    if not array then return end
-    local newWeight = enable and 1.0 or 0.0
-    if OutlinePPIndex ~= nil then
-        local blend = array[OutlinePPIndex]
-        if blend and blend.Object == OutlinePPMaterial then
-            blend.Weight = newWeight
-            return
-        else
-            OutlinePPIndex = nil
-        end
-    end
-    local foundIndex = nil
-    for i, blend in ipairs(array) do
-        if blend.Object == OutlinePPMaterial then
-            foundIndex = i
-            break
-        end
-    end
-    if not foundIndex then
-        local newBlend = UE.FWeightedBlendable()
-        newBlend.Object = OutlinePPMaterial
-        newBlend.Weight = newWeight
-        table.insert(array, newBlend)
-        OutlinePPIndex = #array
-        settings.WeightedBlendables.Array = array
-        return
-    end
-    local blend = array[foundIndex]
-    blend.Weight = newWeight
-    array[foundIndex] = blend
-    OutlinePPIndex = foundIndex
-end
-
-local function ShowPostProcessOnComponent(comp, stencilValue)
-    if not comp then return end
-    local enable = stencilValue > 0
-    comp:SetRenderCustomDepth(enable)
-    comp:SetCustomDepthStencilValue(stencilValue)
-end
+Xray.SetOutlineIntensity(Config.InnerlineIntensity, Config.OutlineIntensity)
+Xray.SetOutlineColors(Config.HighlightColor, Config.SelectColor)
+Xray.SetSelectionMultiplier(1.0)
+Xray.SetDetectionDistanceOverride(Config.MaxDistance)
 
 -- Exports
 
@@ -203,6 +163,7 @@ local function AddTargetEntity(entity, parameters)
     if not options or #options == 0 then return end
     if not Entities[entity] then Entities[entity] = {} end
     SetOptions(Entities[entity], distance, options)
+    Xray.RegisterActor(entity)
 end
 exports('qb-target', 'AddTargetEntity', AddTargetEntity)
 
@@ -215,6 +176,7 @@ local function AddTargetModel(modelName, parameters)
     if not options or #options == 0 then return end
     if not Models[modelName] then Models[modelName] = {} end
     SetOptions(Models[modelName], distance, options)
+    if isLoggedIn then registerModels() end
 end
 exports('qb-target', 'AddTargetModel', AddTargetModel)
 
@@ -342,6 +304,7 @@ local function AddGlobalClass(className, parameters)
     if not options or #options == 0 then return end
     if not Types[className] then Types[className] = {} end
     SetOptions(Types[className], distance, options)
+    if isLoggedIn then registerGlobalClasses() end
 end
 exports('qb-target', 'AddGlobalClass', AddGlobalClass)
 
@@ -363,6 +326,7 @@ local function AddGlobalNPC(parameters)
     --     end
     -- end
     SetOptions(Types[npcClassName], distance, options)
+    if isLoggedIn then registerGlobalClasses() end
 end
 exports('qb-target', 'AddGlobalNPC', AddGlobalNPC)
 
@@ -384,102 +348,9 @@ local function AddGlobalPlayer(parameters)
         end
     end
     SetOptions(Types[playerClassName], distance, options)
+    if isLoggedIn then registerGlobalClasses() end
 end
 exports('qb-target', 'AddGlobalPlayer', AddGlobalPlayer)
-
-local function GetPrimitiveComponents(actor)
-    if not actor then return {} end
-    local components = {}
-    local allComps = actor:K2_GetComponentsByClass(UE.UPrimitiveComponent)
-    if allComps then
-        for _, comp in pairs(allComps) do
-            table.insert(components, comp)
-        end
-    end
-    return components
-end
-
-local function ClearAllNearbyHighlights()
-    for comp, _ in pairs(nearby_components) do
-        ShowPostProcessOnComponent(comp, 0)
-    end
-    nearby_components = {}
-end
-
-local function UpdateNearbyInteractables()
-    if not target_active then return end
-
-    local playerPos = GetEntityCoords(GetPlayerPawn())
-    if not playerPos then return end
-    local stillNearby = {}
-    for entity, options in pairs(Entities) do
-        if entity and entity:IsValid() then
-            local entityPos = GetEntityCoords(entity)
-            local distance = GetDistanceBetweenCoords(playerPos, entityPos)
-            local hasValidOptions = false
-            for _, data in pairs(options) do
-                if checkOptions(data, entity, distance) then
-                    hasValidOptions = true
-                    break
-                end
-            end
-            if hasValidOptions then
-                local components = GetPrimitiveComponents(entity)
-                for _, comp in ipairs(components) do
-                    if comp and comp:IsValid() then
-                        if comp ~= target_component then
-                            if not nearby_components[comp] then
-                                ShowPostProcessOnComponent(comp, 1)
-                            end
-                            stillNearby[comp] = true
-                        end
-                    end
-                end
-            end
-        end
-    end
-    for comp, _ in pairs(nearby_components) do
-        if not stillNearby[comp] and comp ~= target_component then
-            ShowPostProcessOnComponent(comp, 0)
-        end
-    end
-    nearby_components = stillNearby
-end
-
-local function clearTarget()
-    if not target_entity then return end
-    if target_component then
-        local playerPos = GetEntityCoords(GetPlayerPawn())
-        if playerPos and target_entity:IsValid() then
-            local entityPos = GetEntityCoords(target_entity)
-            local distance = GetDistanceBetweenCoords(playerPos, entityPos)
-            local hasValidOptions = false
-            local options = Entities[target_entity]
-            if options then
-                for _, data in pairs(options) do
-                    if checkOptions(data, target_entity, distance) then
-                        hasValidOptions = true
-                        break
-                    end
-                end
-            end
-            if hasValidOptions then
-                ShowPostProcessOnComponent(target_component, 1)
-                nearby_components[target_component] = true
-            else
-                ShowPostProcessOnComponent(target_component, 0)
-            end
-        else
-            ShowPostProcessOnComponent(target_component, 0)
-        end
-        target_component = nil
-    end
-    target_entity = nil
-    nui_data = {}
-    if my_webui then
-        my_webui:SendEvent('leftTarget')
-    end
-end
 
 local function setupOptions(datatable, entity, distance)
     if not datatable then return end
@@ -499,146 +370,77 @@ local function setupOptions(datatable, entity, distance)
     end
 end
 
-local function handleEntity(trace_result)
-    if not trace_result or not trace_result.Entity or not trace_result.Success then
-        clearTarget()
-        return
-    end
-    local entity_has_options = Entities[trace_result.Entity]
-    local type_has_options = Types[trace_result.ClassName]
-    local model_has_options = Models[tostring(trace_result.MeshName)]
-    if not entity_has_options and not type_has_options and not model_has_options then
-        clearTarget()
-        return
-    end
-    if target_entity ~= trace_result.Entity then
-        clearTarget()
-        target_entity = trace_result.Entity
-        target_component = trace_result.ComponentName
-        nui_data = {}
-        ShowPostProcessOnComponent(target_component, 2)
-        nearby_components[target_component] = nil
-        local distance = trace_result.Distance
-        local entity_options = Entities[target_entity]
-        local type_options = Types[trace_result.ClassName]
-        local model_options = Models[tostring(trace_result.MeshName)]
-        if entity_options then setupOptions(entity_options, target_entity, distance) end
-        if type_options then setupOptions(type_options, target_entity, distance) end
-        if model_options then setupOptions(model_options, target_entity, distance) end
-        if #nui_data > 0 then
-            local target_icon = nui_data[1] and nui_data[1].targeticon or ''
-            if my_webui then
-                my_webui:SendEvent('foundTarget', { icon = target_icon, options = nui_data })
-            end
-        end
-    end
-end
-
-local function handleRaycast()
-    if not target_active then return end
-    if not playerController then return end
-    local w, h = playerController:GetViewportSize()
-    local sp = UE.FVector2D(w * 0.5, h * 0.5)
-    local pos, dir = UE.FVector(), UE.FVector()
-    if not UE.UGameplayStatics.DeprojectScreenToWorld(playerController, sp, pos, dir) then return end
-    local startOffset = Config.RaycastStartOffset or 25.0
-    local start = pos + dir * startOffset
-    local stop = start + dir * Config.MaxDistance
-    local hit = Trace:LineSingle(start, stop, UE.ETraceTypeQuery.Visibility, UE.EDrawDebugTrace.None)
-    local trace_result = nil
-    if hit then
-        local bBlockingHit, bInitialOverlap, time, distance, location, impactPoint, normal, impactNormal, physMat, hitActor, hitComp, hitBoneName, boneName, hitItem, elementIndex, faceIndex, traceStart, traceEnd = UE.UGameplayStatics.BreakHitResult(hit)
-        local actor = hitActor
-        if not actor and hitComp then
-            actor = hitComp:GetOwner()
-        end
-        if actor then
-            trace_result = {}
-            trace_result.Entity = actor
-            trace_result.ComponentName = hitComp
-            trace_result.Location = location
-            trace_result.ImpactPoint = impactPoint
-            trace_result.Normal = normal
-            trace_result.ImpactNormal = impactNormal
-            trace_result.Distance = distance
-            trace_result.HitBoneName = hitBoneName
-            trace_result.BoneName = boneName
-            trace_result.PhysMat = physMat
-            trace_result.BlockingHit = bBlockingHit
-            trace_result.Success = true
-            trace_result.ActorName = actor:GetName()
-            trace_result.Mesh = hitComp.StaticMesh and hitComp.StaticMesh or nil
-            trace_result.MeshName = hitComp.StaticMesh and hitComp.StaticMesh:GetName() or nil
-            trace_result.Class = actor:GetClass()
-            trace_result.ClassName = actor:GetClass():GetName()
-        end
-    end
-    return trace_result
-end
-
-function enableTarget()
+local function enableTarget()
     if target_active then return end
     target_active = true
-    ToggleOutlinePP(true)
-    my_webui:SendEvent('openTarget')
-    local raycastInterval = Config.RaycastInterval or 100
-    raycast_timer = Timer.SetInterval(function()
-        local trace_result = handleRaycast()
-        handleEntity(trace_result)
-    end, raycastInterval)
-    local nearbyScanInterval = Config.NearbyScanInterval or 500
-    nearby_scan_timer = Timer.SetInterval(function()
-        UpdateNearbyInteractables()
-    end, nearbyScanInterval)
+    --if my_webui then my_webui:SendEvent('openTarget') end
 end
 
 function disableTarget()
     if not target_active then return end
-    if target_component then
-        ShowPostProcessOnComponent(target_component, 0)
-        target_component = nil
-    end
-    ClearAllNearbyHighlights()
-    ToggleOutlinePP(false)
     target_active, target_entity = false, nil
     nui_data, send_data = {}, {}
     if my_webui then
         my_webui:SendEvent('closeTarget')
         my_webui:SetInputMode(0)
     end
-    if raycast_timer then
-        Timer.ClearInterval(raycast_timer)
-        raycast_timer = nil
-    end
-    if nearby_scan_timer then
-        Timer.ClearInterval(nearby_scan_timer)
-        nearby_scan_timer = nil
-    end
 end
 
--- Inputs
+local function clearTarget()
+    if not target_entity then return end
+    target_entity = nil
+    nui_data = {}
+    if my_webui then my_webui:SendEvent('leftTarget') end
+end
 
-Input.BindKey(Config.OpenKey, function()
-    if not isLoggedIn then return end
-    if target_active then return end
-    if HPlayer:GetInputMode() == 1 then return end
-    enableTarget()
-end, 'Pressed')
+local function GetModelKeyFromActor(actor)
+    if not actor then return nil end
+    local smc = actor:GetComponentByClass(UE.UStaticMeshComponent)
+    if not smc or not smc.StaticMesh then return nil end
+    local sm = smc.StaticMesh
+    return (sm.GetName and sm:GetName()) or nil
+end
 
-Input.BindKey(Config.OpenKey, function()
+Xray.RegisterListener(function(controller, target, state)
     if not isLoggedIn then return end
-    if HPlayer:GetInputMode() == 1 then return end
-    if target_active and not subMenuOpen then
+    if state == XrayState.BeginFocus then
+        enableTarget()
+
+        local entity_has_options = Entities[target]
+        local className          = target:GetClass():GetName()
+        local type_has_options   = Types[className]
+        local modelKey           = GetModelKeyFromActor(target)
+        local model_has_options  = Models[modelKey]
+
+        if not entity_has_options and not type_has_options and not model_has_options then
+            clearTarget()
+            return
+        end
+
+        if target_entity ~= target then
+            clearTarget()
+            target_entity = target
+            nui_data = {}
+
+            local distance = GetDistanceBetweenActors(GetPlayerPawn(), target)
+
+            if entity_has_options then setupOptions(entity_has_options, target, distance) end
+            if type_has_options   then setupOptions(type_has_options,   target, distance) end
+            if model_has_options  then setupOptions(model_has_options,  target, distance) end
+
+            if #nui_data > 0 and my_webui then
+                local target_icon = nui_data[1].targeticon or ''
+                my_webui:SendEvent('foundTarget', { icon = target_icon, options = nui_data })
+            end
+        end
+    elseif state == XrayState.EndFocus then
+        clearTarget()
+    elseif state == XrayState.Reveal then
+        if target_active and target_entity and nui_data and nui_data[1] then
+            my_webui:BringToFront()
+            my_webui:SetInputMode(1)
+        end
+    elseif state == XrayState.Cancel then
         disableTarget()
-        subMenuOpen = false
     end
-end, 'Released')
-
-Input.BindKey(Config.MenuControlKey, function()
-    if not isLoggedIn then return end
-    if target_active and target_entity and nui_data and nui_data[1] then
-        subMenuOpen = true
-        my_webui:BringToFront()
-        my_webui:SetInputMode(1)
-    end
-end, 'Pressed')
+end)
