@@ -45,6 +45,7 @@ RegisterServerEvent('HEvent:PlayerPossessed', function()
         HPawn(Config.Locations['Depots'][i].pedSpawn.coords, Rotator(0, Config.Locations['Depots'][i].pedSpawn.heading, 0), function(npc)
             jobPeds[#jobPeds + 1] = { npc = npc, depot = i }
             npc:SetCharacterName('Taxi Depot')
+            SetEntityInvincible(npc, true)
         end, { CharacterName = 'Taxi Depot', bShowNameplate = true })
     end
     Initialised = true
