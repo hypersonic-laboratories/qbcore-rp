@@ -1,4 +1,53 @@
 QBCore.Shared.Vehicles = {
+	-- 2.0 Vehicles
+	bp_bent = {
+		brand = 'Bentley',
+		label = 'Bentley Continental GT',
+		asset_name = '/HelixVehicles/Blueprints/Cars/Bent/BP_Bent.BP_Bent_C',
+		collision_type = CollisionType.Normal,
+		gravity_enabled = true,
+		price = 250000,
+	},
+	bp_bugat = {
+		brand = 'Bugatti',
+		label = 'Bugatti Veyron',
+		asset_name = '/HelixVehicles/Blueprints/Cars/Bugat/BP_Bugat.BP_Bugat_C',
+		collision_type = CollisionType.Normal,
+		gravity_enabled = true,
+		price = 350000,
+	},
+	bp_cama = {
+		brand = 'Camaro',
+		label = 'Camaro ZL1',
+		asset_name = '/HelixVehicles/Blueprints/Cars/Cama/BP_Cama.BP_Cama_C',
+		collision_type = CollisionType.Normal,
+		gravity_enabled = true,
+		price = 60000,
+	},
+	bp_chev_zr = {
+		brand = 'Chevrolet',
+		label = 'Chevrolet Silverado ZR1',
+		asset_name = '/HelixVehicles/Blueprints/Cars/Chev_ZR/BP_Chev_ZR.BP_Chev_ZR_C',
+		collision_type = CollisionType.Normal,
+		gravity_enabled = true,
+		price = 120000,
+	},
+	bp_merc = {
+		brand = 'Mercedes',
+		label = 'Mercedes 500E',
+		asset_name = '/HelixVehicles/Blueprints/Cars/DefaultCar/BP_VehicleCar.BP_VehicleCar_C',
+		collision_type = CollisionType.Normal,
+		gravity_enabled = true,
+		price = 45000,
+	},
+	bp_h1 = {
+		brand = 'Hummer',
+		label = 'H1',
+		asset_name = '/HelixVehicles/Blueprints/Cars/H1/BP_H1.BP_H1_C',
+		collision_type = CollisionType.Normal,
+		gravity_enabled = true,
+		price = 80000,
+	},
 	-- Advanced Vehicles
 	bp_police = {
 		label = 'Police Car',
