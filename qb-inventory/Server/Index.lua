@@ -6,6 +6,21 @@ require('Shared/locales/en')
 
 SharedItems = exports['qb-core']:GetShared('Items')
 
+Timer.CreateThread(function()
+    local results = exports['qb-core']:DatabaseAction('Select', 'SELECT * FROM inventories')
+    if type(results) ~= 'table' then print('No inventories found') return end
+
+    for i = 1, #results do
+        local inventory = results[i]
+        local cacheKey = inventory.identifier
+        Inventories[cacheKey] = {
+            items = JSON.parse(inventory.items) or {},
+            isOpen = false
+        }
+    end
+    print(#results .. ' inventories successfully loaded')
+end)
+
 -- Handlers
 
 RegisterServerEvent('QBCore:Server:PlayerLoaded', function(Player)
