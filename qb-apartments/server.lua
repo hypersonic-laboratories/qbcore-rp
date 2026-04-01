@@ -6,14 +6,106 @@ local ApartmentObjects = {}
 local function AddPlayerToApartment(source, apartmentId)
 	local Player = exports['qb-core']:GetPlayer(source)
 	if not Player then return end
+
 	if ApartmentObjects[apartmentId] ~= nil then
 		ApartmentObjects[apartmentId].players[Player.PlayerData.citizenid] = source
+
+		local insideMeta = Player.PlayerData.metadata['inside']
+		insideMeta.apartment.apartmentType = ApartmentObjects[apartmentId].label
+		insideMeta.apartment.apartmentId = apartmentId
+		insideMeta.house = nil
+		exports['qb-core']:Player(source, 'SetMetaData', 'inside', insideMeta)
+
+		local enteringPlayerId = GetPlayerId(source)
+		TriggerClientEvent(source, 'qb-apartments:client:HideAllPlayers')
+
+		local inst = ApartmentObjects[apartmentId]
+		local insideSources = {}
+		for _, playerSrc in pairs(inst.players) do
+			insideSources[playerSrc] = true
+		end
+		local enteringTalker = source:GetVoiceTalker()
+
+		for _, otherCtrl in pairs(GetAllPlayers()) do
+			if otherCtrl ~= source then
+				local otherPS = otherCtrl.PlayerState
+				if otherPS and enteringTalker then
+					local otherIsInside = insideSources[otherCtrl] == true
+					local shouldMute = not otherIsInside
+					enteringTalker:SetMutedForPlayerState(shouldMute, otherPS)
+					local otherTalker = otherCtrl:GetVoiceTalker()
+					if otherTalker then
+						otherTalker:SetMutedForPlayerState(shouldMute, source.PlayerState)
+					end
+				end
+			end
+		end
+
+		for _, otherCtrl in pairs(GetAllPlayers()) do
+			if otherCtrl ~= source and not insideSources[otherCtrl] then
+				TriggerClientEvent(otherCtrl, 'qb-apartments:client:HidePlayer', enteringPlayerId)
+			end
+		end
+
+		for _, otherCtrl in pairs(inst.players) do
+			if otherCtrl ~= source then
+				TriggerClientEvent(source, 'qb-apartments:client:ShowPlayer', GetPlayerId(otherCtrl))
+				TriggerClientEvent(otherCtrl, 'qb-apartments:client:ShowPlayer', enteringPlayerId)
+			end
+		end
 	end
 end
 
 local function RemovePlayerFromApartment(Player, apartmentId)
 	if ApartmentObjects[apartmentId] and ApartmentObjects[apartmentId].players ~= nil then
 		ApartmentObjects[apartmentId].players[Player.PlayerData.citizenid] = nil
+
+		local source = Player.PlayerData.source
+
+		local insideMeta = Player.PlayerData.metadata['inside']
+		insideMeta.apartment.apartmentType = nil
+		insideMeta.apartment.apartmentId = nil
+		insideMeta.house = nil
+		exports['qb-core']:Player(source, 'SetMetaData', 'inside', insideMeta)
+
+		local inst = ApartmentObjects[apartmentId]
+		local insideSources = {}
+		for _, playerSrc in pairs(inst.players) do
+			insideSources[playerSrc] = true
+		end
+		local leavingTalker = source:GetVoiceTalker()
+		local leavingPlayerId = GetPlayerId(source)
+
+		for _, otherCtrl in pairs(GetAllPlayers()) do
+			if otherCtrl ~= source then
+				local otherPS = otherCtrl.PlayerState
+				if otherPS and leavingTalker then
+					local otherIsStillInside = insideSources[otherCtrl] == true
+					local shouldMute = otherIsStillInside
+					leavingTalker:SetMutedForPlayerState(shouldMute, otherPS)
+					local otherTalker = otherCtrl:GetVoiceTalker()
+					if otherTalker then
+						otherTalker:SetMutedForPlayerState(shouldMute, source.PlayerState)
+					end
+				end
+			end
+		end
+
+		TriggerClientEvent(source, 'qb-apartments:client:ShowAllPlayers')
+
+		for _, insideCtrl in pairs(inst.players) do
+			TriggerClientEvent(source, 'qb-apartments:client:HidePlayer', GetPlayerId(insideCtrl))
+		end
+
+		for _, insideCtrl in pairs(inst.players) do
+			TriggerClientEvent(insideCtrl, 'qb-apartments:client:HidePlayer', leavingPlayerId)
+		end
+
+		for _, otherCtrl in pairs(GetAllPlayers()) do
+			if otherCtrl ~= source and not insideSources[otherCtrl] then
+				TriggerClientEvent(otherCtrl, 'qb-apartments:client:ShowPlayer', leavingPlayerId)
+			end
+		end
 	end
 end
 
@@ -27,8 +119,9 @@ local function GetOrCreateOffset(apartmentId)
 	local highestOffset = 0
 	if ApartmentObjects ~= nil then
 		for _, apartmentData in pairs(ApartmentObjects) do
-			if apartmentData.offset and tonumber(apartmentData.offset) > highestOffset then
-				highestOffset = tonumber(apartmentData.offset)
+			local offsetNum = tonumber(apartmentData.offset)
+			if offsetNum and offsetNum > highestOffset then
+				highestOffset = offsetNum
 			end
 		end
 	end
@@ -55,10 +148,7 @@ local function EnterApartment(source, apartmentId, aptName)
 		Apartments.Locations[aptName].coords[3] + offset
 	)
 
-	local data = exports['qb-interior']:CreateApartmentFurnished(source, coords, false, false)
-	data[1].Object:SetReplicates(false)
-	data[1].Object:SetReplicateMovement(false)
-	data[1].Component:SetIsReplicated(false)
+	local data = exports['qb-interior']:StarterAptFurn_S(source, coords, false, false)
 	local apartmentData = { object = data[1], poiOffsets = data[2] }
 
 	if not ApartmentObjects[apartmentId] then
@@ -75,12 +165,6 @@ local function EnterApartment(source, apartmentId, aptName)
 
 	AddPlayerToApartment(source, apartmentId)
 
-	local insideMeta = Player.PlayerData.metadata['inside']
-	insideMeta.apartment.apartmentType = aptName
-	insideMeta.apartment.apartmentId = apartmentId
-	insideMeta.house = nil
-	exports['qb-core']:Player(source, 'SetMetaData', 'inside', insideMeta)
-
 	TriggerClientEvent(source, 'qb-apartments:client:EnterApartment', coords, offset, apartmentId, aptName)
 end
 
@@ -92,15 +176,11 @@ local function LeaveApartment(source, apartmentId, aptName)
 
 	RemovePlayerFromApartment(Player, apartmentId)
 
-	local insideMeta = Player.PlayerData.metadata['inside']
-	insideMeta.apartment.apartmentType = nil
-	insideMeta.apartment.apartmentId = nil
-	insideMeta.house = nil
-	exports['qb-core']:Player(source, 'SetMetaData', 'inside', insideMeta)
-
 	local ped = GetPlayerPawn(source)
 	if not ped then return end
 	SetEntityCoords(ped, Vector(exitCoords[1], exitCoords[2], exitCoords[3]))
+
+	exports['qb-interior']:DespawnInterior_S(apartmentId)
 	TriggerClientEvent(source, 'qb-apartments:client:LeaveApartment')
 end
 

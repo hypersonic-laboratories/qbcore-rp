@@ -8,6 +8,22 @@ local testDriveVeh, inTestDrive = 0, false
 local function setupTargets()
     for shop, shopData in pairs(Config.Shops) do
         local vehicles = shopData['ShowroomVehicles']
+
+        exports['qb-target']:AddBoxZone(shop .. '_finance', shopData['FinanceZone'], 500, 500, {
+            name = shop .. '_finance',
+            heading = 0,
+            debug = true,
+            distance = 1000,
+        }, {
+            {
+                icon = 'fas fa-money-bill',
+                label = 'Manage Financed Vehicles',
+                type = 'server',
+                event = 'qb-vehicleshop:server:manageFinancedVehicles',
+                shop = shop,
+            }
+        })
+
         for i = 1, #vehicles do
             local vehicleData = vehicles[i]
 

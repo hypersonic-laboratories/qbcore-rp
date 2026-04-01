@@ -14,24 +14,24 @@ Config.Shops = {
         ['Type'] = 'free-use',
         ['Job'] = 'none',
         ['TestDriveTimeLimit'] = 0.5,
-        --['ReturnLocation'] = Vector(-44.74, -1082.58, 26.68),
+        ['ReturnLocation'] = Vector(566599, 543296, 4564),
         ['VehicleSpawn'] = {
-            location = Vector(-301169, -213000, -2989),
-            rotation = Rotator(0, 180, 0)
+            location = Vector(566528, 542426, 4467),
+            rotation = Rotator(0, -90, 0)
         },
         ['TestDriveSpawn'] = {
-            location = Vector(-301169, -213000, -2989),
-            rotation = Rotator(0, 180, 0)
+            location = Vector(566528, 542426, 4467),
+            rotation = Rotator(0, -90, 0)
         },
-        ['FinanceZone'] = Vector(-303228, -214848, -2882),
+        ['FinanceZone'] = Vector(567958, 543877, 4564),
         ['ShowroomVehicles'] = {
             {
                 coords = {
-                    location = Vector(-304469, -215200, -2966),
-                    rotation = Rotator(0, 90, 0)
+                    location = Vector(567561, 545062, 4470),
+                    rotation = Rotator(0, 0, 0)
                 },
-                defaultVehicle = 'bp_police',
-                chosenVehicle = 'bp_police',
+                defaultVehicle = 'bp_merc',
+                chosenVehicle = 'bp_merc',
             },
             -- {
             --     coords = {

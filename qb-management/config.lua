@@ -2,16 +2,16 @@ Config = Config or {}
 
 Config.BossMenus = {
     police = {
-        Vector(-340758, -147778, -2882),
+        Vector(563110, 571810, 4640),
     },
     ambulance = {
-        Vector(-344086, -141574, -2883),
+        Vector(0, 0, 0), -- TO DO
     },
     cardealer = {
-        Vector(-302322, -215151, -2882),
+        Vector(567700, 542850, 4550),
     },
     mechanic = {
-        Vector(-351003, -115278, -2878),
+        Vector(567730, 563060, 4500),
     },
 }
 

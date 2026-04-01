@@ -12,6 +12,7 @@ require('locales/en')
 
 local function OpenGarageMenu()
     TriggerCallback('server.GetGarageVehicles', function(result)
+        if type(result) == 'string' then result = result:ToTable() end
         if result == nil then return exports['qb-core']:Notify(Lang:t('error.no_vehicles'), 'error', 5000) end
         local formattedVehicles = {}
         for _, v in pairs(result) do

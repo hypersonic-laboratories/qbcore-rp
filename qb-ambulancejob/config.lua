@@ -1,24 +1,24 @@
 local Lang = require('locales/en')
 
 Config = {
-    VehicleSpawn = { coords = Vector(-349229, -139019, -2946), heading = 0 },
-    HelicopterSpawn = { coords = Vector(-345480, -138200, -2980), heading = 0 },
+    VehicleSpawn = { coords = Vector(0, 0, 0), heading = 0 },
+    HelicopterSpawn = { coords = Vector(0, 0, 0), heading = 0 },
     Locations = {
         ['checking'] = {
-            { coords = Vector(-344130, -141190, -2897) },
-            { coords = Vector(-347940, -140850, -2897) }
+            { coords = Vector(0, 0, 0) },
+            { coords = Vector(0, 0, 0) }
         },
         ['duty'] = {
-            { coords = Vector(-343980, -141420, -2897), rotation = Rotator(0, 90, 0) }
+            { coords = Vector(0, 0, 0), rotation = Rotator(0, 0, 0) }
         },
         ['vehicle'] = {
-            { coords = Vector(-348320, -139850, -2970) }
+            { coords = Vector(0, 0, 0) }
         },
         ['helicopter'] = {
-            { coords = Vector(-345370, -139850, -2970) }
+            { coords = Vector(0, 0, 0) }
         },
         ['stash'] = {
-            { coords = Vector(-344210, -141690, -2840) }
+            { coords = Vector(0, 0, 0) }
         },
         ['jailbeds'] = {
             { coords = Vector(0, 0, 0), taken = false, model = '/Game/QBCore/Meshes/LP_HospitalBed.LP_HospitalBed' },
@@ -29,14 +29,13 @@ Config = {
         ['hospital'] = {
             {
                 ['name'] = Lang:t('info.pb_hospital'),
-                ['location'] = Vector(-346870, -140900, -2910),
+                ['location'] = Vector(0, 0, 0),
                 ['beds'] = {
-                    { coords = Vector(-348850, -141600, -2819), heading = 90,  taken = false },
-                    { coords = Vector(-348280, -141600, -2819), heading = 90,  taken = false },
-                    { coords = Vector(-347990, -141600, -2819), heading = 90,  taken = false },
-                    { coords = Vector(-347690, -140080, -2819), heading = 260, taken = false },
-                    { coords = Vector(-348050, -140110, -2819), heading = 260, taken = false },
-                    { coords = Vector(-348590, -140110, -2819), heading = 260, taken = false },
+                    { coords = Vector(0, 0, 0), heading = 0, taken = false },
+                    { coords = Vector(0, 0, 0), heading = 0, taken = false },
+                    { coords = Vector(0, 0, 0), heading = 0, taken = false },
+                    { coords = Vector(0, 0, 0), heading = 0, taken = false },
+                    { coords = Vector(0, 0, 0), heading = 0, taken = false },
                 },
             },
             -- {

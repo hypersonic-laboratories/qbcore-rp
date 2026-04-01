@@ -1,6 +1,5 @@
 local Lang = require('locales/en')
 local isLoggedIn = false
-local playerPawn = nil
 local InApartment = false
 local ClosestApartment = nil
 local CurrentApartment = nil
@@ -171,8 +170,7 @@ end
 
 local function SetClosestApartment()
 	if not isLoggedIn then return end
-	if not playerPawn then return end
-	local ped = playerPawn
+	local ped = GetPlayerPawn()
 	if not ped then return end
 	local pos = GetEntityCoords(ped)
 	local current = nil
@@ -203,7 +201,7 @@ function onShutdown()
 		intervalTimer = nil
 	end
 	if ApartmentObj and ApartmentObj ~= 0 then
-		exports['qb-interior']:DespawnInterior(ApartmentObj)
+		exports['qb-interior']:DespawnInterior_C(ApartmentObj)
 		ApartmentObj = 0
 	end
 	DeleteApartmentsEntranceTargets()
@@ -214,7 +212,6 @@ end
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
 	isLoggedIn = true
-	playerPawn = GetPlayerPawn()
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
@@ -241,7 +238,7 @@ RegisterClientEvent('qb-apartments:client:setupSpawnUI', function(cData)
 end)
 
 RegisterClientEvent('qb-apartments:client:EnterApartment', function(coords, offset, apartmentId, apartmentName)
-	local data = exports['qb-interior']:CreateApartmentFurnished_C(coords)
+	local data = exports['qb-interior']:StarterAptFurn_C(coords)
 	ApartmentObj = data[1]
 	POIOffsets = data[2]
 	InApartment = true
@@ -253,7 +250,7 @@ RegisterClientEvent('qb-apartments:client:EnterApartment', function(coords, offs
 end)
 
 RegisterClientEvent('qb-apartments:client:LeaveApartment', function()
-	exports['qb-interior']:DespawnInterior(ApartmentObj)
+	exports['qb-interior']:DespawnInterior_C(ApartmentObj)
 	CurrentApartment = nil
 	ClosestApartment = nil
 	InApartment = false
@@ -363,6 +360,52 @@ RegisterClientEvent('qb-apartments:client:ChangeOutfit', function()
 	HPlayer:ClothingMenu()
 end)
 
+-- Visibility & Voice
+
+-- Hide Everyone
+RegisterClientEvent('qb-apartments:client:HideAllPlayers', function()
+	local pawns = GetAllPawns()
+	for _, pawn in pairs(pawns) do
+		if not pawn:IsLocallyControlled() then
+			pawn:SetActorHiddenInGame(true)
+		end
+	end
+end)
+
+-- Show Everyone
+RegisterClientEvent('qb-apartments:client:ShowAllPlayers', function()
+	local pawns = GetAllPawns()
+	for _, pawn in pairs(pawns) do
+		if not pawn:IsLocallyControlled() then
+			pawn:SetActorHiddenInGame(false)
+		end
+	end
+end)
+
+local function FindPawnByPlayerId(targetPlayerId)
+	for _, pawn in pairs(GetAllPawns()) do
+		local ps = pawn.PlayerState
+		if ps and ps:GetPlayerId() == targetPlayerId then
+			return pawn
+		end
+	end
+	return nil
+end
+
+RegisterClientEvent('qb-apartments:client:ShowPlayer', function(targetPlayerId)
+	local pawn = FindPawnByPlayerId(targetPlayerId)
+	if pawn and not pawn:IsLocallyControlled() then
+		pawn:SetActorHiddenInGame(false)
+	end
+end)
+
+RegisterClientEvent('qb-apartments:client:HidePlayer', function(targetPlayerId)
+	local pawn = FindPawnByPlayerId(targetPlayerId)
+	if pawn and not pawn:IsLocallyControlled() then
+		pawn:SetActorHiddenInGame(true)
+	end
+end)
+
 -- Loop
 
 intervalTimer = Timer.SetInterval(function()
@@ -373,3 +416,32 @@ intervalTimer = Timer.SetInterval(function()
 		end
 	end
 end, 1000)
+
+-- Commands
+
+local HConsole = GetActorByTag('HConsole')
+if HConsole then
+	HConsole:RegisterCommand('getoffset', 'Apartment Offset', nil, { HWorld, function()
+		if not InApartment then return end
+		if not CurrentApartment then return end
+		if not ClosestApartment then return end
+		if not POIOffsets then return end
+
+		local spawnPos = Vector(
+			Apartments.Locations[ClosestApartment].coords[1],
+			Apartments.Locations[ClosestApartment].coords[2],
+			Apartments.Locations[ClosestApartment].coords[3] + CurrentOffset
+		)
+
+		local playerPawn = GetPlayerPawn()
+		if not playerPawn then return end
+		local pos = GetEntityCoords(playerPawn)
+		local offset = ('{ x = %.2f, y = %.2f, z = %.2f }'):format(
+			spawnPos.X - pos.X,
+			spawnPos.Y - pos.Y,
+			pos.Z - spawnPos.Z
+		)
+		CopyToClipboard(offset)
+		exports['qb-core']:Notify('Offset copied to clipboard')
+	end })
+end

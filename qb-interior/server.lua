@@ -3,37 +3,50 @@ local nextId = 1
 
 -- Functions
 
-local function TeleportToInterior(player, x, y, z, h)
+local function TeleportToInterior(player, x, y, z)
 	local ped = GetPlayerPawn(player)
 	if not ped then return end
 	SetEntityCoords(ped, Vector(x, y, z))
 end
 
-RegisterServerEvent('qb-interior:server:teleportPlayer', function(player, x, y, z, h)
-	TeleportToInterior(player, x, y, z, h)
+RegisterServerEvent('qb-interior:server:teleportPlayer', function(player, x, y, z)
+	TeleportToInterior(player, x, y, z)
 end)
 
-exports('qb-interior', 'DespawnInterior', function(id)
-	if interiors[id] and interiors[id].object then
-		if DoesEntityExist(interiors[id].object) then
-			DeleteEntity(interiors[id].object)
-			interiors[id] = nil
-		end
+exports('qb-interior', 'DespawnInterior_S', function(id)
+	if interiors[id] then
+		if interiors[id].object then interiors[id].object:K2_DestroyActor() end
+		if interiors[id].light then interiors[id].light:K2_DestroyActor() end
+		interiors[id] = nil
 	end
 end)
 
-local function CreateShell(player, spawn, exitXYZH, model, teleport)
+local function CreateShell(player, spawn, exitXYZH, shellData, teleport)
+	if not shellData.model then
+		print('No model provided for interior shell')
+		return
+	end
+
 	local id = nextId
 	nextId = nextId + 1
+	interiors[id] = {}
 
 	local POIOffsets = {}
 	POIOffsets.exit = exitXYZH
-	local house = StaticMesh(Vector(spawn.X, spawn.Y, spawn.Z), Rotator(), model)
+	interiors[id].POIOffsets = POIOffsets
 
-	interiors[id] = {
-		object = house,
-		POIOffsets = POIOffsets
-	}
+	local spawnTransform = Transform()
+	spawnTransform.Translation = Vector(spawn.X, spawn.Y, spawn.Z)
+
+	if shellData.model then
+		local house = SpawnActor(shellData.model, spawnTransform)
+		interiors[id].object = house
+	end
+
+	if shellData.light then
+		local light = SpawnActor(shellData.light, spawnTransform)
+		interiors[id].light = light
+	end
 
 	if teleport or teleport == nil then
 		Timer.SetTimeout(function()
@@ -41,8 +54,7 @@ local function CreateShell(player, spawn, exitXYZH, model, teleport)
 				player,
 				spawn.X - POIOffsets.exit.x,
 				spawn.Y - POIOffsets.exit.y,
-				spawn.Z + POIOffsets.exit.z,
-				POIOffsets.exit.h
+				spawn.Z + POIOffsets.exit.z
 			)
 		end, 1000)
 	end
@@ -50,17 +62,20 @@ local function CreateShell(player, spawn, exitXYZH, model, teleport)
 	return id, POIOffsets
 end
 
--- Shells
+-- Housing Shells
 
-exports('qb-interior', 'CreateApartmentFurnished', function(player, spawn, isNew, teleport)
-	local exit = JSON.parse('{"x": 430.0, "y": 347.0, "z": 93.0, "h": 90.81}')
-	local model = '/Game/Shells/modernhotel_shell/SM_modernhotel_shell.SM_modernhotel_shell'
-	local id, POIOffsets = CreateShell(player, spawn, exit, model, teleport)
+exports('qb-interior', 'StarterAptFurn_S', function(player, spawn, isNew, teleport)
+	local exit = { x = 0, y = 100, z = 100 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BPP_Miami_StarterApartment_01_Interior_Furnished.BPP_Miami_StarterApartment_01_Interior_Furnished_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_ApartmentLevel1_01_Lighting.BP_ApartmentLevel1_01_Lighting_C'
+	}
+	local id, POIOffsets = CreateShell(player, spawn, exit, shellData, teleport)
 
 	if POIOffsets then
-		POIOffsets.clothes = JSON.parse('{"x": 247.8, "y": -296.9, "z": 110.0, "h": 2.263}')
-		POIOffsets.stash = JSON.parse('{"x": -237.7, "y": -296.9, "z": 110.0, "h": 2.263}')
-		POIOffsets.logout = JSON.parse('{"x": -458.3, "y": 134.6, "z": 93.0, "h": 2.263}')
+		POIOffsets.clothes = { x = -405.08, y = 449.07, z = 93.43 }
+		POIOffsets.stash = { x = 639.49, y = 467.39, z = 93.43 }
+		POIOffsets.logout = { x = 239.45, y = 660.92, z = 93.43 }
 		interiors[id].POIOffsets = POIOffsets
 	end
 
@@ -77,62 +92,94 @@ exports('qb-interior', 'CreateApartmentFurnished', function(player, spawn, isNew
 	return { interiors[id].object, POIOffsets }
 end)
 
-exports('qb-interior', 'CreateContainer', function(spawn)
-	local exit = JSON.parse('{"x": 10.0, "y": 458.0, "z": 93.0, "h": 100.51}')
-	local model = '/Game/Shells/container_shell/SM_container_shell.SM_container_shell'
-	return CreateShell(spawn, exit, model)
+exports('qb-interior', 'StarterApt_S', function(player, spawn)
+	local exit = { x = 0, y = 100, z = 100 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BPP_Miami_StarterApartment_01_Interior.BPP_Miami_StarterApartment_01_Interior_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_ApartmentLevel1_01_Lighting.BP_ApartmentLevel1_01_Lighting_C'
+	}
+	return CreateShell(player, spawn, exit, shellData)
 end)
 
-exports('qb-interior', 'CreateFurniMid', function(spawn)
-	local exit = JSON.parse('{"x": 118.0, "y": 830.0, "z": 93.0, "h": 82.04}')
-	local model = '/Game/Shells/furnitured_midapart/SM_furnitured_midapart.SM_furnitured_midapart'
-	return CreateShell(spawn, exit, model)
+exports('qb-interior', 'MarinaApt_S', function(player, spawn)
+	local exit = { x = 6.58, y = 101.13, z = 108.25 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BPP_Miami_MarinaApartment_01_Interior.BPP_Miami_MarinaApartment_01_Interior_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_ApartmentLevel2_Lighting.BP_ApartmentLevel2_Lighting_C'
+	}
+	return CreateShell(player, spawn, exit, shellData)
 end)
 
-exports('qb-interior', 'CreateFranklinAunt', function(spawn)
-	local exit = JSON.parse('{"x": -21.0, "y": 466.50, "z": 93.0, "h": 82.55}')
-	local model = '/Game/Shells/shell_frankaunt/SM_shell_frankaunt.SM_shell_frankaunt'
-	return CreateShell(spawn, exit, model)
+exports('qb-interior', 'ResidentialHouse_S', function(player, spawn)
+	local exit = { x = 276.25, y = -79.29, z = 92.82 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BPP_Miami_ResidentialHouse_Mid_01_Interior.BPP_Miami_ResidentialHouse_Mid_01_Interior_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_Miami_ResidentialHouse_Mid_01_Lighting.BP_Miami_ResidentialHouse_Mid_01_Lighting_C'
+	}
+	return CreateShell(player, spawn, exit, shellData)
 end)
 
-exports('qb-interior', 'CreateGarageMed', function(spawn)
-	local exit = JSON.parse('{"x": 1153.0, "y": -129.0, "z": 93.0, "h": -6.23}')
-	local model = '/Game/Shells/shell_garagem/SM_shell_garagem.SM_shell_garagem'
-	return CreateShell(spawn, exit, model)
+exports('qb-interior', 'OceanDrive_S', function(player, spawn)
+	local exit = { x = -5.28, y = 60.54, z = 93.65 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BPP_Miami_OceanDrivePenthouse_01_Interior.BPP_Miami_OceanDrivePenthouse_01_Interior_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_Miami_OceanDrivePenthouse_01_Lighting.BP_Miami_OceanDrivePenthouse_01_Lighting_C'
+	}
+	return CreateShell(player, spawn, exit, shellData)
 end)
 
-exports('qb-interior', 'CreateLesterShell', function(spawn)
-	local exit = JSON.parse('{"x": -134.30, "y": 480.0, "z": 93.0, "h": 72.58}')
-	local model = '/Game/Shells/shell_lester/SM_shell_lester.SM_shell_lester'
-	return CreateShell(spawn, exit, model)
+exports('qb-interior', 'VillaApt_S', function(player, spawn)
+	local exit = { x = -5, y = 2020, z = 92 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Villa/BPP_Villa_06_Interior_B.BPP_Villa_06_Interior_B_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_Villa_06_Lighting.BP_Villa_06_Lighting_C'
+	}
+	return CreateShell(player, spawn, exit, shellData)
 end)
 
-exports('qb-interior', 'CreateOffice1', function(spawn)
-	local exit = JSON.parse('{"x": 105.0, "y": -402.0, "z": 93.0, "h": -84.68}')
-	local model = '/Game/Shells/shell_office1/SM_shell_office1.SM_shell_office1'
-	return CreateShell(spawn, exit, model)
+-- Garage Shells
+
+exports('qb-interior', 'StarterGarage_S', function(player, spawn)
+	local exit = { x = 416, y = -172, z = 107 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BPP_Miami_GarageStarterApartment_01_Interior.BPP_Miami_GarageStarterApartment_01_Interior_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_Miami_GarageStarterApartment_01_Lighting.BP_Miami_GarageStarterApartment_01_Lighting_C'
+	}
+	return CreateShell(player, spawn, exit, shellData)
 end)
 
-exports('qb-interior', 'CreateStore1', function(spawn)
-	local exit = JSON.parse('{"x": -223.0, "y": 358.0, "z": 93.0, "h": 86.02}')
-	local model = '/Game/Shells/shell_store1/SM_shell_store1.SM_shell_store1'
-	return CreateShell(spawn, exit, model)
+exports('qb-interior', 'MarinaGarage_S', function(player, spawn)
+	local exit = { x = 428, y = -153, z = 107 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BPP_Miami_GarageMarinaApartment_01_Interior.BPP_Miami_GarageMarinaApartment_01_Interior_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_Miami_GarageMarinaApartment_01_Lighting.BP_Miami_GarageMarinaApartment_01_Lighting_C'
+	}
+	return CreateShell(player, spawn, exit, shellData)
 end)
 
-exports('qb-interior', 'CreateTrailer', function(spawn)
-	local exit = JSON.parse('{"x": -107.0, "y": 164.0, "z": 93.0, "h": 93.35}')
-	local model = '/Game/Shells/shell_trailer/SM_shell_trailer.SM_shell_trailer'
-	return CreateShell(spawn, exit, model)
+exports('qb-interior', 'ResidentialGarage_S', function(player, spawn)
+	local exit = { x = -395.46, y = -192.80, z = 93.02 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BPP_Miami_GarageResidentialHouse_Mid_01_Interior.BPP_Miami_GarageResidentialHouse_Mid_01_Interior_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_Miami_GarageResidentialHouse_Mid_01_Lighting.BP_Miami_GarageResidentialHouse_Mid_01_Lighting_C'
+	}
+	return CreateShell(player, spawn, exit, shellData)
 end)
 
-exports('qb-interior', 'CreateWarehouse1', function(spawn)
-	local exit = JSON.parse('{"x": -730.0, "y": -18.0, "z": 93.0, "h": 169.90}')
-	local model = '/Game/Shells/shell_warehouse1/SM_shell_warehouse1.SM_shell_warehouse1'
-	return CreateShell(spawn, exit, model)
+exports('qb-interior', 'OceanDriveGarage_S', function(player, spawn)
+	local exit = { x = -736, y = -323, z = 97 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BPP_Miami_GarageOceanDrivePenthouse_01_Interior.BPP_Miami_GarageOceanDrivePenthouse_01_Interior_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_Miami_GarageOceanDrivePenthouse_01_Lighting_Final.BP_Miami_GarageOceanDrivePenthouse_01_Lighting_Final_C'
+	}
+	return CreateShell(player, spawn, exit, shellData)
 end)
 
-exports('qb-interior', 'CreateStandardMotel', function(spawn)
-	local exit = JSON.parse('{"x": 430.0, "y": 347.0, "z": 93.0, "h": 90.81}')
-	local model = '/Game/Shells/standardmotel_shell/SM_standardmotel_shell.SM_standardmotel_shell'
-	return CreateShell(spawn, exit, model)
+exports('qb-interior', 'VillaGarage_S', function(player, spawn)
+	local exit = { x = -736, y = -323, z = 97 }
+	local shellData = {
+		model = '/Game/Pacifica/Environment/PLA/City/Villa/BPP_GarageVilla_06_Interior.BPP_GarageVilla_06_Interior_C',
+		light = '/Game/Pacifica/Environment/PLA/City/Miami/Residential/BP_GarageVilla_06_Lighting.BP_GarageVilla_06_Lighting_C'
+	}
+	return CreateShell(player, spawn, exit, shellData)
 end)
