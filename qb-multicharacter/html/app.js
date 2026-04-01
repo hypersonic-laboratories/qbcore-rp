@@ -36,11 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 this.selectedCharacter = idx;
 
                 if (this.characters[idx] !== undefined) {
-                    hEvent('cDataPed', {
+                    hEvent("cDataPed", {
                         cData: this.characters[idx],
                     });
                 } else {
-                    hEvent('cDataPed', {});
+                    hEvent("cDataPed", {});
                     // For empty slots, immediately show the registration form
                     if (type === "empty") {
                         this.resetRegisterData();
@@ -64,11 +64,11 @@ document.addEventListener("DOMContentLoaded", () => {
             delete_character: function () {
                 if (this.show.delete) {
                     this.show.delete = false;
-                    hEvent('removeCharacter', {
+                    hEvent("removeCharacter", {
                         citizenid: this.characters[this.selectedCharacter].citizenid,
                     });
                     //setTimeout(() => {
-                        this.show.characters = true;
+                    this.show.characters = true;
                     //}, 500);
                 }
             },
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     var data = this.characters[this.selectedCharacter];
 
                     if (data !== undefined) {
-                        hEvent('selectCharacter', {
+                        hEvent("selectCharacter", {
                             cData: data,
                         });
                         setTimeout(() => {
@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (validationResult.isValid) {
                     this.show.register = false;
 
-                    hEvent('createNewCharacter', {
+                    hEvent("createNewCharacter", {
                         firstname: registerData.firstname,
                         lastname: registerData.lastname,
                         nationality: registerData.nationality,
@@ -148,6 +148,9 @@ document.addEventListener("DOMContentLoaded", () => {
             initializeValidator();
             var loadingProgress = 0;
             var loadingDots = 0;
+            const loadingTickMs = 700;
+            const loadingSetupDelayMs = 3500;
+            const loadingCompleteDelayMs = 3500;
             window.addEventListener("message", (event) => {
                 let args = event.data.args[0];
                 switch (event.data.name) {
@@ -182,19 +185,18 @@ document.addEventListener("DOMContentLoaded", () => {
                                 if (loadingDots == 4) {
                                     loadingDots = 0;
                                 }
-                            }, 500);
+                            }, loadingTickMs);
 
                             setTimeout(() => {
-                                hEvent('setupCharacters');
+                                hEvent("setupCharacters");
                                 setTimeout(() => {
                                     clearInterval(DotsInterval);
                                     loadingProgress = 0;
                                     this.loadingText = this.translate("retrieving_playerdata");
                                     this.show.loading = false;
                                     this.show.characters = true;
-                                    hEvent('removeBlur');
-                                }, 2000);
-                            }, 2000);
+                                }, loadingCompleteDelayMs);
+                            }, loadingSetupDelayMs);
                         }
                         break;
                     case "setupCharacters":
