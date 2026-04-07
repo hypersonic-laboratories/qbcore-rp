@@ -497,4 +497,4 @@ end
 --     TriggerClientEvent('QBCore:Notify', target.PlayerData.source, string.format(Lang:t('success.receive'), amount), 'success')
 -- end)
 
-StaticMesh(Vector(-6570, 2835.962, -390), Rotator(0, -90, 0), '/Game/QBCore/Meshes/SM_ATM.SM_ATM')
+StaticMesh(Vector(-6570, 2835.962, -390), Rotator(0, -90, 0), '/QBCoreAssets/Meshes/SM_ATM.SM_ATM')

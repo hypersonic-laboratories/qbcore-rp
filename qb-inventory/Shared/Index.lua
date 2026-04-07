@@ -20,7 +20,7 @@ Config = {
     CleanupDropTime = 15,    -- in minutes
     CleanupDropInterval = 1, -- in minutes
 
-    ItemDropObject = '/Game/QBCore/Meshes/SM_DuffelBag.SM_DuffelBag',
+    ItemDropObject = '/QBCoreAssets/Meshes/SM_DuffelBag.SM_DuffelBag',
 
     VendingObjects = { 'SM_Soda_Machine', 'SM_Snack_Machine', 'SM_Coffee_Machine', 'SM_Vending_Machine_01', 'SM_MM00200_Drinks_Vending_Machine' },
     VendingItems = {

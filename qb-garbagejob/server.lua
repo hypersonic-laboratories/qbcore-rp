@@ -35,7 +35,7 @@ for i = 1, #Config.Locations['Dumpsters'] do
     local dumpster = StaticMesh(
         Config.Locations['Dumpsters'][i].coords,
         Rotator(0, Config.Locations['Dumpsters'][i].heading, 0),
-        '/Game/QBCore/Meshes/SM_Dumpster.SM_Dumpster'
+        '/QBCoreAssets/Meshes/SM_Dumpster.SM_Dumpster'
     )
     dumpsters[dumpster.Object] = dumpster.Object
 end

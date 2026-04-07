@@ -135,7 +135,7 @@ for i = 1, #Config.Cityhalls do
         'cityhall_' .. i,
         coords,
         Rotator(0, heading, 0),
-        '/Game/QBCore/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
                 icon = 'fas fa-city',

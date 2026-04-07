@@ -21,10 +21,10 @@ Config = {
             { coords = Vector(0, 0, 0) }
         },
         ['jailbeds'] = {
-            { coords = Vector(0, 0, 0), taken = false, model = '/Game/QBCore/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            { coords = Vector(0, 0, 0), taken = false, model = '/Game/QBCore/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            { coords = Vector(0, 0, 0), taken = false, model = '/Game/QBCore/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            { coords = Vector(0, 0, 0), taken = false, model = '/Game/QBCore/Meshes/LP_HospitalBed.LP_HospitalBed' },
+            { coords = Vector(0, 0, 0), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
+            { coords = Vector(0, 0, 0), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
+            { coords = Vector(0, 0, 0), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
+            { coords = Vector(0, 0, 0), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
         },
         ['hospital'] = {
             {
@@ -42,9 +42,9 @@ Config = {
             --     ['name'] = Lang:t('info.paleto_hospital'),
             --     ['location'] = Vector(-254.54, 6331.78, 32.43),
             --     ['beds'] = {
-            --         { coords = Vector(-252.43, 6312.25, 32.34, 313.48), taken = false, model = '/Game/QBCore/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            --         { coords = Vector(-247.04, 6317.95, 32.34, 134.64), taken = false, model = '/Game/QBCore/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            --         { coords = Vector(-255.98, 6315.67, 32.34, 313.91), taken = false, model = '/Game/QBCore/Meshes/LP_HospitalBed.LP_HospitalBed' },
+            --         { coords = Vector(-252.43, 6312.25, 32.34, 313.48), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
+            --         { coords = Vector(-247.04, 6317.95, 32.34, 134.64), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
+            --         { coords = Vector(-255.98, 6315.67, 32.34, 313.91), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
             --     },
             -- },
         },

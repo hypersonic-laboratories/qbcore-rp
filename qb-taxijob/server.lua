@@ -34,7 +34,7 @@ for i = 1, #Config.Locations['Benches'] do
     local bench = StaticMesh(
         Config.Locations['Benches'][i].coords,
         Rotator(0, Config.Locations['Benches'][i].heading, 0),
-        '/Game/QBCore/Meshes/SM_BusStop.SM_BusStop'
+        '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop'
     )
     benches[bench.Object] = bench.Object
 end

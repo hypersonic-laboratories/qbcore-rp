@@ -133,7 +133,7 @@ Timer.SetTimeout(function()
             'bank_' .. i,
             Config.locations[i].coords,
             Rotator(0, Config.locations[i].heading, 0),
-            '/Game/QBCore/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+            '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
             {
                 {
                     icon = 'fas fa-university',

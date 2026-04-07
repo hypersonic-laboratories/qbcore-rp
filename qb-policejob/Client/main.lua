@@ -37,7 +37,7 @@ function onShutdown()
 end
 
 -- Handlers
---[[ 
+--[[
 --@TODO Add handler for package restart when logged in
 player_data = QBCore.Functions.GetPlayerData()
 setupPeds()
@@ -199,10 +199,10 @@ RegisterClientEvent('qb-policejob:client:checkCitizenInfo', function(args)
     local CharInfo = PlayerData.charinfo
     local CitizenId = PlayerData.citizenid
     local Gender = CharInfo.gender == 0 and 'Male' or 'Female'
-    
+
     -- Job Info
     local JobData = PlayerData.job
-    
+
     local menuItems = {
         {
             header = 'Citizen Info',
@@ -257,7 +257,7 @@ RegisterClientEvent('qb-policejob:client:checkCitizenInfo', function(args)
             }
         },
     }
-    
+
     exports['qb-menu']:openMenu(menuItems)
 end)
 
@@ -354,7 +354,7 @@ for i = 1, #Config.Locations['duty'] do
         'polduty_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
-        '/Game/QBCore/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
                 type = 'server',
@@ -374,7 +374,7 @@ for i = 1, #Config.Locations['vehicle'] do
         'polveh_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
-        '/Game/QBCore/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
                 event = 'qb-policejob:client:vehicleMenu',
@@ -394,7 +394,7 @@ for i = 1, #Config.Locations['stash'] do
         'polstash_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
-        '/Game/QBCore/Meshes/SM_DuffelBag.SM_DuffelBag', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        '/QBCoreAssets/Meshes/SM_DuffelBag.SM_DuffelBag', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
                 type = 'server',
@@ -410,7 +410,7 @@ end
 -- Evidence
 for i = 1, #Config.Locations['evidence'] do
     local pos = Config.Locations['evidence'][i]
-    AddTargetZone('Box', 'polevid_' .. i, pos.coords, 250.0, 100.0, { minZ = pos.coords.Z - 100, maxZ = pos.coords.Z + 100, heading = pos.heading or 0, debug = true},
+    AddTargetZone('Box', 'polevid_' .. i, pos.coords, 250.0, 100.0, { minZ = pos.coords.Z - 100, maxZ = pos.coords.Z + 100, heading = pos.heading or 0, debug = true },
         {
             {
                 type = 'client',
@@ -430,7 +430,7 @@ for i = 1, #Config.Locations['fingerprint'] do
         'polfprint_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
-        '/Game/QBCore/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
                 type = 'server',

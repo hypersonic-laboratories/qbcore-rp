@@ -125,25 +125,25 @@ RegisterClientEvent('qb-hospitaljob:client:openStatusMenu', function(limbData)
     }
     for _, limb in ipairs(limbData) do
         local healthPercent = math.floor((limb.currentHealth / limb.maxHealth) * 100)
-        local limbName = limb.limbTag:gsub("GameplayEffect%.DamageArea%.", "")
-        local damageText = ""
+        local limbName = limb.limbTag:gsub('GameplayEffect%.DamageArea%.', '')
+        local damageText = ''
         if #limb.damageTypes > 0 then
             local cleanedDamageTypes = {}
             for _, damageType in ipairs(limb.damageTypes) do
-                local cleanType = damageType:gsub("GameplayEffect%.DamageType%.", "")
+                local cleanType = damageType:gsub('GameplayEffect%.DamageType%.', '')
                 table.insert(cleanedDamageTypes, cleanType)
             end
-            damageText = "<br>Damage Types: " .. table.concat(cleanedDamageTypes, ", ")
+            damageText = '<br>Damage Types: ' .. table.concat(cleanedDamageTypes, ', ')
         end
-        local healthColor = "#00ff00"
+        local healthColor = '#00ff00'
         if healthPercent <= 0 then
-            healthColor = "#ff0000"
+            healthColor = '#ff0000'
         elseif healthPercent < 50 then
-            healthColor = "#ffff00"
+            healthColor = '#ffff00'
         end
         table.insert(statusMenu, {
             header = '<span style="color: ' .. healthColor .. ';">' .. limbName .. '</span>',
-            txt = string.format("Health: %d%% (%d/%d)%s",
+            txt = string.format('Health: %d%% (%d/%d)%s',
                 healthPercent,
                 limb.currentHealth,
                 limb.maxHealth,
@@ -191,7 +191,7 @@ for i = 1, #Config.Locations['checking'] do
         'ambchecking_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
-        '/Game/QBCore/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
                 icon = 'fas fa-clipboard-check',
@@ -211,7 +211,7 @@ for i = 1, #Config.Locations['duty'] do
         'ambduty_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
-        '/Game/QBCore/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
                 icon = 'fas fa-clipboard',
@@ -231,7 +231,7 @@ for i = 1, #Config.Locations['stash'] do
         'ambstash_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
-        '/Game/QBCore/Meshes/SM_MedicalBag.SM_MedicalBag', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        '/QBCoreAssets/Meshes/SM_MedicalBag.SM_MedicalBag', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
                 icon = 'fas fa-box',
@@ -251,7 +251,7 @@ for i = 1, #Config.Locations['vehicle'] do
         'ambvehicle_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
-        '/Game/QBCore/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
                 icon = 'fas fa-car',
@@ -270,7 +270,7 @@ for i = 1, #Config.Locations['helicopter'] do
         'ambhelicopter_' .. i,
         pos.coords,
         pos.rotation or Rotator(0, 0, 0),
-        '/Game/QBCore/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+        '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
                 icon = 'fas fa-helicopter',
