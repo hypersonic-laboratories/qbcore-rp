@@ -1326,6 +1326,21 @@ input[type="range"]:focus-visible {
     flex: 0 0 auto;
 }
 
+.developer-console-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.developer-console-row input {
+    margin-bottom: 0;
+}
+
+.developer-console-row .action-button {
+    white-space: nowrap;
+}
+
 .tool-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2212,6 +2227,10 @@ input[type="range"]:focus-visible {
 
     .weather-row {
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+
+    .developer-console-row {
+        grid-template-columns: 1fr;
     }
 
     .catalog-grid-3,

@@ -101,6 +101,27 @@ my_webui:RegisterEventHandler('developer:copyHeading', function()
     CopyToClipboard(('%s'):format(math.modf(heading)))
 end)
 
+my_webui:RegisterEventHandler('developer:runConsoleCommand', function(data)
+    local eventName = 'developer:runConsoleCommand'
+    print(('[qb-admin] %s payload: %s'):format(eventName, tostring(data)))
+
+    if type(data) ~= 'table' then
+        return
+    end
+
+    local command = tostring(data.command or '')
+    if command == '' then
+        return
+    end
+
+    local Console = GetActorByTag('HConsole')
+    if not Console then
+        return
+    end
+
+    Console:Execute(command)
+end)
+
 my_webui:RegisterEventHandler('players:context-action', function(data)
     local eventName = 'players:context-action'
     print(('[qb-admin] %s payload: %s'):format(eventName, tostring(data)))

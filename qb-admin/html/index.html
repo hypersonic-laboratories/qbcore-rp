@@ -314,6 +314,14 @@
                                         <button class="action-button" @click="copyCurrentHeading">Copy Current Heading</button>
                                     </div>
                                 </div>
+
+                                <div class="tool-card full-width">
+                                    <h3>Run Console Command</h3>
+                                    <div class="developer-console-row">
+                                        <input v-model="developerConsoleCommand" type="text" placeholder="Enter command..." @keydown.enter.prevent="runDeveloperConsoleCommand" />
+                                        <button class="action-button action-button-primary" @click="runDeveloperConsoleCommand">Run Command</button>
+                                    </div>
+                                </div>
                             </div>
                         </section>
 

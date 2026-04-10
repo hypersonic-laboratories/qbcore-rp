@@ -64,6 +64,7 @@ const app = createApp({
             spawnObjectOptions: [],
             selectedSpawnObject: null,
             teleportCoordinatesInput: "",
+            developerConsoleCommand: "",
             currentCoordinates: { x: 0.0, y: 0.0, z: 0.0 },
             currentRotation: { x: 0.0, y: 0.0, z: 0.0 },
             currentHeading: 0.0,
@@ -453,6 +454,18 @@ const app = createApp({
 
         copyCurrentHeading() {
             this.sendServerCallback("developer:copyHeading", {});
+        },
+
+        runDeveloperConsoleCommand() {
+            const command = this.developerConsoleCommand.trim();
+            if (!command) {
+                this.appendDisciplinaryLog("Console command cannot be empty.");
+                return;
+            }
+
+            this.sendServerCallback("developer:runConsoleCommand", { command });
+            this.appendDisciplinaryLog(`Executed console command: ${command}`);
+            this.developerConsoleCommand = "";
         },
 
         // Players
