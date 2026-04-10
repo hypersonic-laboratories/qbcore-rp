@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>qb-admin</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap" />
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="vue-select.css" />
+        <script src="vue.global.prod.js"></script>
+        <script src="vue-select.umd.js"></script>
+        <script src="https://unpkg.com/lucide@latest" defer></script>
+        <script src="script.js" defer></script>
+        <style>
+            [v-cloak] {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app" v-cloak>
+            <div class="panel" :class="{ 'panel-hidden': !isVisible }">
+                <div class="panel-shell">
+                    <aside class="panel-sidebar">
+                        <h1 class="panel-title sidebar-title"><i data-lucide="shield" class="ui-icon" aria-hidden="true"></i> Admin Panel</h1>
+                        <nav class="sidebar-nav" aria-label="Admin pages">
+                            <button v-for="page in pages" :key="page" class="nav-button sidebar-nav-button" :class="{ active: currentPage === page }" @click="setActivePage(page)">
+                                <i :data-lucide="getPageIcon(page)" class="ui-icon" aria-hidden="true"></i>
+                                <span>{{ formatPageName(page) }}</span>
+                            </button>
+                        </nav>
+                        <div class="sidebar-footer">
+                            <button class="action-button action-button-outline sidebar-close-button" @click="closePanel('button')">
+                                <i data-lucide="x" class="ui-icon" aria-hidden="true"></i>
+                                <span>Close Panel</span>
+                            </button>
+                        </div>
+                    </aside>
+                    <main class="panel-content">
+                        <!-- Dashboard Page -->
+                        <section v-if="currentPage === 'dashboard'" class="page" :class="{ active: currentPage === 'dashboard' }" id="page-dashboard">
+                            <div class="stats-grid">
+                                <article v-for="stat in stats" :key="stat.label" class="status-card">
+                                    <span class="status-label">{{ stat.label }}</span>
+                                    <strong class="status-value">{{ stat.value }}</strong>
+                                </article>
+                            </div>
+
+                            <div class="dashboard-grid">
+                                <div class="tool-card quick-actions-card">
+                                    <h3>Quick Actions</h3>
+
+                                    <div class="quick-actions">
+                                        <button v-for="quickAction in dashboardConfig.quickActions" :key="quickAction.id" class="action-button" :class="quickAction.style || 'action-button-primary'" @click="handleQuickAction(quickAction)">{{ quickAction.label }}</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tool-card full-width">
+                                <h3>Quick Announcement</h3>
+                                <textarea v-model="announcementText" rows="3" placeholder="Server Restarting in 15 Minutes"></textarea>
+                                <button class="action-button action-button-primary" @click="sendAnnouncement">Announce</button>
+                            </div>
+
+                            <div class="dashboard-lower-grid">
+                                <div class="tool-card report-feed-card">
+                                    <h3>Active Reports</h3>
+                                    <div class="report-feed" id="report-feed">
+                                        <button v-for="report in activeDashboardReports" :key="report.id" class="feed-row report-row" :class="{ claimed: report.claimed }" :data-report-id="report.id" :data-player-id="report.playerId" @click="toggleReportClaimed(report)">
+                                            <span>{{ report.id }}</span>
+                                            <span>{{ report.playerName }} - "{{ report.description }}"</span>
+                                            <span>{{ report.timeAgo }}</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="tool-card disciplinary-feed-card">
+                                    <h3>Recent Disciplinary Feed</h3>
+                                    <ul class="disciplinary-feed" id="disciplinary-feed">
+                                        <li v-for="(entry, idx) in disciplinaryFeed" :key="idx">{{ entry }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Players Page -->
+                        <section v-if="currentPage === 'players'" class="page" :class="{ active: currentPage === 'players' }" id="page-players">
+                            <div class="players-layout">
+                                <div class="player-list-column">
+                                    <input v-model="playerSearchQuery" type="search" id="player-search" class="player-search" placeholder="Search by ID or character..." />
+
+                                    <div class="player-table-wrap">
+                                        <ul class="player-list" aria-label="Players">
+                                            <li v-for="player in filteredPlayers" :key="player.id" class="player-list-item" :class="{ active: selectedPlayer?.id === player.id }" :data-player="player.id" @click="setActivePlayer(player)" @contextmenu.prevent="openContextMenu($event, player)">
+                                                <span class="status-dot" :class="player.isOnline ? 'online' : 'offline'" aria-hidden="true"></span>
+                                                <span class="player-id">#{{ player.id }}</span>
+                                                <span class="player-name">{{ player.character }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <aside class="player-panel" id="player-panel">
+                                    <div class="player-detail-header">
+                                        <div class="player-identity">
+                                            <h3>{{ selectedPlayer?.character || 'No Player Selected' }}</h3>
+                                            <p>#{{ selectedPlayer?.id || '--' }} | {{ selectedPlayer?.isOnline ? 'Online' : 'Offline' }}</p>
+                                        </div>
+                                        <div class="player-control-icons" aria-label="Quick player controls">
+                                            <button class="icon-action-button" title="Teleport to Player" @click="handlePlayerControlAction('teleport-to')"><i data-lucide="locate" class="ui-icon" aria-hidden="true"></i></button>
+                                            <button class="icon-action-button" title="Teleport Player to You" @click="handlePlayerControlAction('bring-to-you')"><i data-lucide="navigation" class="ui-icon" aria-hidden="true"></i></button>
+                                            <button class="icon-action-button" title="Spectate" @click="handlePlayerControlAction('spectate')"><i data-lucide="eye" class="ui-icon" aria-hidden="true"></i></button>
+                                            <button class="icon-action-button" title="Kick from Server" @click="handlePlayerControlAction('kick')"><i data-lucide="user-x" class="ui-icon" aria-hidden="true"></i></button>
+                                            <button class="icon-action-button" title="Ban from Server (Permanent)" @click="handlePlayerControlAction('ban')"><i data-lucide="gavel" class="ui-icon" aria-hidden="true"></i></button>
+                                            <button class="icon-action-button" title="Freeze Player" @click="handlePlayerControlAction('freeze')"><i data-lucide="snowflake" class="ui-icon" aria-hidden="true"></i></button>
+                                            <button class="icon-action-button" title="Give Clothing Menu" @click="handlePlayerControlAction('clothing')"><i data-lucide="shirt" class="ui-icon" aria-hidden="true"></i></button>
+                                            <button class="icon-action-button" title="Open Inventory" @click="handlePlayerControlAction('inventory')"><i data-lucide="package" class="ui-icon" aria-hidden="true"></i></button>
+                                            <button class="icon-action-button" title="Revive Player" @click="handlePlayerControlAction('revive')"><i data-lucide="heart-pulse" class="ui-icon" aria-hidden="true"></i></button>
+                                            <button class="icon-action-button" title="Kill Player" @click="handlePlayerControlAction('kill')"><i data-lucide="skull" class="ui-icon" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="selectedPlayer" class="player-info-rows">
+                                        <div class="player-info-row">
+                                            <i data-lucide="id-card" class="ui-icon" aria-hidden="true"></i>
+                                            <span class="player-info-label">Citizen ID</span>
+                                            <span class="player-info-value">{{ selectedPlayer.citizenId || '—' }}</span>
+                                            <button class="icon-action-button" title="Copy Citizen ID" @click="copyToClipboard(selectedPlayer.citizenId, 'Citizen ID copied.')"><i data-lucide="copy" class="ui-icon" aria-hidden="true"></i></button>
+                                        </div>
+                                        <div class="player-info-row">
+                                            <i data-lucide="smartphone" class="ui-icon" aria-hidden="true"></i>
+                                            <span class="player-info-label">Phone</span>
+                                            <span class="player-info-value">{{ selectedPlayer.phone || '—' }}</span>
+                                            <button class="icon-action-button" title="Copy phone number" @click="copyToClipboard(selectedPlayer.phone, 'Phone number copied.')"><i data-lucide="copy" class="ui-icon" aria-hidden="true"></i></button>
+                                        </div>
+                                        <div class="player-info-row">
+                                            <i data-lucide="credit-card" class="ui-icon" aria-hidden="true"></i>
+                                            <span class="player-info-label">Bank Account</span>
+                                            <span class="player-info-value">{{ selectedPlayer.bankAccount || '—' }}</span>
+                                            <button class="icon-action-button" title="Copy bank account" @click="copyToClipboard(selectedPlayer.bankAccount, 'Bank account copied.')"><i data-lucide="copy" class="ui-icon" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="fv-stack">
+                                        <div class="currency-chips-grid">
+                                            <div class="currency-chip">
+                                                <div class="currency-chip-top">
+                                                    <div class="currency-chip-label"><i data-lucide="wallet" class="ui-icon" aria-hidden="true"></i><span>Cash</span></div>
+                                                    <div class="currency-chip-actions">
+                                                        <button class="action-button" @click="adjustPlayerCurrency('cash', 500)">+</button>
+                                                        <button class="action-button" @click="adjustPlayerCurrency('cash', -500)">-</button>
+                                                    </div>
+                                                </div>
+                                                <span class="currency-chip-value">{{ formatMoney(selectedPlayer?.financials?.cash || 0) }}</span>
+                                            </div>
+                                            <div class="currency-chip">
+                                                <div class="currency-chip-top">
+                                                    <div class="currency-chip-label"><i data-lucide="landmark" class="ui-icon" aria-hidden="true"></i><span>Bank</span></div>
+                                                    <div class="currency-chip-actions">
+                                                        <button class="action-button" @click="adjustPlayerCurrency('bank', 1000)">+</button>
+                                                        <button class="action-button" @click="adjustPlayerCurrency('bank', -1000)">-</button>
+                                                    </div>
+                                                </div>
+                                                <span class="currency-chip-value">{{ formatMoney(selectedPlayer?.financials?.bank || 0) }}</span>
+                                            </div>
+                                            <div class="currency-chip">
+                                                <div class="currency-chip-top">
+                                                    <div class="currency-chip-label"><i data-lucide="coins" class="ui-icon" aria-hidden="true"></i><span>Crypto</span></div>
+                                                    <div class="currency-chip-actions">
+                                                        <button class="action-button" @click="adjustPlayerCurrency('crypto', 25)">+</button>
+                                                        <button class="action-button" @click="adjustPlayerCurrency('crypto', -25)">-</button>
+                                                    </div>
+                                                </div>
+                                                <span class="currency-chip-value">{{ (selectedPlayer?.financials?.crypto || 0).toLocaleString() }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="vital-chips-grid">
+                                            <div class="vital-chip">
+                                                <div class="vital-chip-top">
+                                                    <div class="vital-chip-label"><i data-lucide="heart" class="ui-icon" aria-hidden="true"></i><span>Health</span></div>
+                                                    <button class="vital-replenish" title="Replenish Health" @click="replenishVital('health')"><i data-lucide="plus" class="ui-icon" aria-hidden="true"></i></button>
+                                                </div>
+                                                <span class="vital-chip-value health">{{ selectedPlayer?.vitals?.health || 0 }}%</span>
+                                            </div>
+                                            <div class="vital-chip">
+                                                <div class="vital-chip-top">
+                                                    <div class="vital-chip-label"><i data-lucide="shield" class="ui-icon" aria-hidden="true"></i><span>Armor</span></div>
+                                                    <button class="vital-replenish" title="Replenish Armor" @click="replenishVital('armor')"><i data-lucide="plus" class="ui-icon" aria-hidden="true"></i></button>
+                                                </div>
+                                                <span class="vital-chip-value armor">{{ selectedPlayer?.vitals?.armor || 0 }}%</span>
+                                            </div>
+                                            <div class="vital-chip">
+                                                <div class="vital-chip-top">
+                                                    <div class="vital-chip-label"><i data-lucide="hamburger" class="ui-icon" aria-hidden="true"></i><span>Hunger</span></div>
+                                                    <button class="vital-replenish" title="Replenish Hunger" @click="replenishVital('hunger')"><i data-lucide="plus" class="ui-icon" aria-hidden="true"></i></button>
+                                                </div>
+                                                <span class="vital-chip-value hunger">{{ selectedPlayer?.vitals?.hunger || 0 }}%</span>
+                                            </div>
+                                            <div class="vital-chip">
+                                                <div class="vital-chip-top">
+                                                    <div class="vital-chip-label"><i data-lucide="droplets" class="ui-icon" aria-hidden="true"></i><span>Thirst</span></div>
+                                                    <button class="vital-replenish" title="Replenish Thirst" @click="replenishVital('thirst')"><i data-lucide="plus" class="ui-icon" aria-hidden="true"></i></button>
+                                                </div>
+                                                <span class="vital-chip-value thirst">{{ selectedPlayer?.vitals?.thirst || 0 }}%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="detail-grid">
+                                        <div class="detail-card">
+                                            <div class="mgmt-chip">
+                                                <div class="mgmt-chip-current">
+                                                    <i data-lucide="briefcase" class="ui-icon" aria-hidden="true"></i>
+                                                    <div class="mgmt-chip-info">
+                                                        <span class="mgmt-chip-type">Job</span>
+                                                        <strong class="mgmt-chip-name">{{ selectedPlayer?.currentJob?.name || 'Unemployed' }}</strong>
+                                                        <span class="mgmt-chip-grade">Grade {{ selectedPlayer?.currentJob?.grade ?? 0 }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="mgmt-chip-controls">
+                                                    <v-select :options="jobOptions" label="name" v-model="selectedJobOption" :searchable="true" placeholder="Select job" class="mgmt-select"></v-select>
+                                                    <input v-model.number="selectedJobGrade" type="number" min="0" placeholder="Grade" class="mgmt-grade-input" />
+                                                    <div class="mgmt-chip-actions">
+                                                        <button class="action-button action-button-primary" @click="handleJobQuickAction('change')">Assign</button>
+                                                        <button class="action-button action-button-danger" @click="handleJobQuickAction('fire')">Fire</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="detail-card">
+                                            <div class="mgmt-chip">
+                                                <div class="mgmt-chip-current">
+                                                    <i data-lucide="users" class="ui-icon" aria-hidden="true"></i>
+                                                    <div class="mgmt-chip-info">
+                                                        <span class="mgmt-chip-type">Gang</span>
+                                                        <strong class="mgmt-chip-name">{{ selectedPlayer?.currentGang?.name || 'None' }}</strong>
+                                                        <span class="mgmt-chip-grade">Grade {{ selectedPlayer?.currentGang?.grade ?? 0 }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="mgmt-chip-controls">
+                                                    <v-select :options="gangOptions" label="name" v-model="selectedGangOption" :searchable="true" placeholder="Select gang" class="mgmt-select"></v-select>
+                                                    <input v-model.number="selectedGangGrade" type="number" min="0" placeholder="Grade" class="mgmt-grade-input" />
+                                                    <div class="mgmt-chip-actions">
+                                                        <button class="action-button action-button-primary" @click="handleGangQuickAction('change')">Assign</button>
+                                                        <button class="action-button action-button-danger" @click="handleGangQuickAction('remove')">Remove</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="vehicle-chip">
+                                        <div class="vehicle-chip-header">
+                                            <div class="vehicle-chip-identity">
+                                                <i data-lucide="car" class="ui-icon" aria-hidden="true"></i>
+                                                <div class="vehicle-chip-info">
+                                                    <span class="vehicle-chip-model">{{ selectedPlayer?.currentVehicle?.model || 'Not in a vehicle' }}</span>
+                                                    <span class="vehicle-chip-plate" v-if="selectedPlayer?.currentVehicle">{{ selectedPlayer.currentVehicle.plate }}</span>
+                                                </div>
+                                            </div>
+                                            <span class="vehicle-status" :class="selectedPlayer?.currentVehicle ? 'in-vehicle' : 'on-foot'"> {{ selectedPlayer?.currentVehicle ? 'In Vehicle' : 'On Foot' }} </span>
+                                        </div>
+                                        <div class="vehicle-actions">
+                                            <button class="vehicle-action-btn" :disabled="!selectedPlayer?.currentVehicle" @click="handleVehicleAction('repair')"><i data-lucide="wrench" class="ui-icon" aria-hidden="true"></i>Repair</button>
+                                            <button class="vehicle-action-btn" :disabled="!selectedPlayer?.currentVehicle" @click="handleVehicleAction('refuel')"><i data-lucide="fuel" class="ui-icon" aria-hidden="true"></i>Refuel</button>
+                                            <button class="vehicle-action-btn" :disabled="!selectedPlayer?.currentVehicle" @click="handleVehicleAction('ownership')"><i data-lucide="key" class="ui-icon" aria-hidden="true"></i>Ownership</button>
+                                            <button class="vehicle-action-btn" :disabled="!selectedPlayer?.currentVehicle" @click="handleVehicleAction('glovebox')"><i data-lucide="archive" class="ui-icon" aria-hidden="true"></i>Glovebox</button>
+                                            <button class="vehicle-action-btn" :disabled="!selectedPlayer?.currentVehicle" @click="handleVehicleAction('trunk')"><i data-lucide="box" class="ui-icon" aria-hidden="true"></i>Trunk</button>
+                                            <button class="vehicle-action-btn danger" :disabled="!selectedPlayer?.currentVehicle" @click="handleVehicleAction('delete')"><i data-lucide="trash-2" class="ui-icon" aria-hidden="true"></i>Delete</button>
+                                        </div>
+                                    </div>
+                                </aside>
+                            </div>
+
+                            <div class="context-menu" id="player-context-menu" role="menu" aria-hidden="true" :class="{ open: contextMenuVisible }" :style="{ left: contextMenuX + 'px', top: contextMenuY + 'px' }">
+                                <button v-for="action in contextActions" :key="action" class="context-item" :data-action="action" @click="handleContextAction(action)">{{ formatActionName(action) }}</button>
+                            </div>
+                        </section>
+
+                        <!-- Developer Page -->
+                        <section v-if="currentPage === 'developer'" class="page" :class="{ active: currentPage === 'developer' }" id="page-developer">
+                            <div class="tool-grid">
+                                <div class="tool-card">
+                                    <h3>Teleport To Location</h3>
+                                    <v-select :options="teleportLocationOptions" label="name" v-model="selectedTeleportLocation" :searchable="true" placeholder="Select location"></v-select>
+                                    <button class="action-button action-button-primary" @click="teleportToSelectedLocation">Teleport To Selected</button>
+                                </div>
+
+                                <div class="tool-card">
+                                    <h3>Spawn Vehicle</h3>
+                                    <v-select :options="spawnVehicleOptions" label="name" v-model="selectedSpawnVehicle" :searchable="true" placeholder="Select vehicle"></v-select>
+                                    <button class="action-button action-button-primary" @click="spawnSelectedVehicle">Spawn Selected Vehicle</button>
+                                </div>
+
+                                <div class="tool-card">
+                                    <h3>Spawn Object</h3>
+                                    <v-select :options="spawnObjectOptions" label="name" v-model="selectedSpawnObject" :searchable="true" placeholder="Select object"></v-select>
+                                    <button class="action-button action-button-primary" @click="spawnSelectedObject">Spawn Selected Object</button>
+                                </div>
+
+                                <div class="tool-card">
+                                    <h3>Teleport To Coordinates</h3>
+                                    <input v-model="teleportCoordinatesInput" type="text" placeholder="x, y, z" />
+                                    <button class="action-button action-button-primary" @click="teleportToCoordinates">Teleport To Coords</button>
+                                </div>
+
+                                <div class="tool-card full-width">
+                                    <h3>Position Tools</h3>
+                                    <div class="button-row">
+                                        <button class="action-button" @click="copyCurrentCoordinates">Copy Current Coordinates</button>
+                                        <button class="action-button" @click="copyCurrentRotation">Copy Current Rotation</button>
+                                        <button class="action-button" @click="copyCurrentHeading">Copy Current Heading</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Environment Page -->
+                        <section v-if="currentPage === 'environment'" class="page" :class="{ active: currentPage === 'environment' }" id="page-environment">
+                            <div class="tool-grid">
+                                <div class="tool-card">
+                                    <h3>World State</h3>
+                                    <div class="button-row weather-row">
+                                        <button v-for="weather in environmentWeatherOptions" :key="weather.value" class="action-button" :class="{ 'action-button-primary': currentWeather === weather.value }" @click="setWeatherPreset(weather.value)">
+                                            <i :data-lucide="weather.icon || 'cloud'" class="ui-icon" aria-hidden="true"></i>
+                                            <span>{{ weather.label }}</span>
+                                        </button>
+                                    </div>
+                                    <label for="time-slider">Time: <span id="time-value">{{ formatHourLabel(timeValue) }}</span></label>
+                                    <input v-model.number="timeValue" id="time-slider" type="range" min="0" max="24" step="1" />
+                                    <div class="button-row">
+                                        <button class="action-button" @click="changeWeather">Change Weather</button>
+                                        <button class="action-button" @click="changeTime">Change Time</button>
+                                    </div>
+                                </div>
+
+                                <div class="tool-card">
+                                    <h3>World Actions</h3>
+                                    <div class="button-column">
+                                        <button class="action-button action-button-danger" @click="runCleanupAction('vehicles-50m')">Clear Vehicles in 50m</button>
+                                        <button class="action-button action-button-danger" @click="runCleanupAction('peds-50m')">Clear Peds in 50m</button>
+                                        <button class="action-button action-button-danger" @click="runCleanupAction('objects-50m')">Clear Objects in 50m</button>
+                                        <button class="action-button action-button-danger" @click="runCleanupAction('everything-100m')">Clear Everything in 100m</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Reports Page -->
+                        <section v-if="currentPage === 'reports'" class="page" :class="{ active: currentPage === 'reports' }" id="page-reports">
+                            <div class="kanban-board" id="reports-board">
+                                <div v-for="column in ['incoming', 'in-progress', 'resolved']" :key="column" class="kanban-column" :class="column + '-zone'" :data-column="column">
+                                    <div class="kanban-column-header">
+                                        <h3>{{ formatPageName(column) }}</h3>
+                                        <div class="column-header-actions">
+                                            <span class="column-count">{{ getColumnCount(column) }}</span>
+                                            <button v-if="column === 'resolved' && getColumnCount(column) > 0" class="action-button action-button-outline column-header-action" @click.stop="clearResolvedTickets">Clear Resolved</button>
+                                        </div>
+                                    </div>
+                                    <div class="kanban-dropzone" :data-column="column" :class="{ 'drag-over': dragOverColumn === column }" @dragover.prevent="dragOverColumn = column" @dragleave="dragOverColumn = null" @drop.prevent="handleDropTicket($event, column)">
+                                        <button
+                                            v-for="ticket in getTicketsByColumn(column)"
+                                            :key="ticket.id"
+                                            class="report-ticket"
+                                            :class="{
+                                        locked: isTicketLocked(ticket),
+                                        'ticket-resolved': ticket.column === 'resolved',
+                                    }"
+                                            :data-report-id="ticket.id"
+                                            draggable="true"
+                                            @dragstart="handleDragStart(ticket)"
+                                            @dragend="draggedTicket = null"
+                                            @click="handleTicketClick(ticket)"
+                                        >
+                                            <div class="ticket-top">
+                                                <strong>{{ ticket.reportId || ticket.id }}</strong>
+                                                <span>#{{ ticket.playerId }}</span>
+                                                <span class="ticket-category" :class="ticket.category.toLowerCase()">{{ ticket.category }}</span>
+                                            </div>
+                                            <p class="ticket-preview">{{ ticket.preview }}</p>
+                                            <p v-if="ticket.column === 'resolved' && ticket.resolution" class="ticket-resolution-note">Resolution: {{ ticket.resolution }}</p>
+                                            <div class="ticket-footer">
+                                                <span>{{ ticket.ageLabel }}</span>
+                                                <span class="ticket-meta-owner">{{ ticket.owner ? 'Owner: ' + ticket.owner : 'Unclaimed' }}</span>
+                                            </div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Chat Page -->
+                        <section v-if="currentPage === 'chat'" class="page" :class="{ active: currentPage === 'chat' }" id="page-chat">
+                            <div class="tool-card chat-card">
+                                <h3>Admin Chat</h3>
+                                <div class="chat-feed" id="chat-feed">
+                                    <article v-for="entry in chatMessages" :key="entry.id" class="chat-message">
+                                        <header class="chat-message-header">
+                                            <strong>{{ entry.author }}</strong>
+                                            <span>{{ entry.time }}</span>
+                                        </header>
+                                        <p>{{ entry.message }}</p>
+                                    </article>
+                                </div>
+                                <div class="chat-composer">
+                                    <textarea v-model="chatDraft" rows="3" placeholder="Send a message to online admins..." @keydown.enter.exact.prevent="sendChatMessage"></textarea>
+                                    <button class="action-button action-button-primary" @click="sendChatMessage">Send</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Items Page -->
+                        <section v-if="currentPage === 'items'" class="page" :class="{ active: currentPage === 'items' }" id="page-items">
+                            <div class="catalog-page">
+                                <div class="catalog-toolbar">
+                                    <p>{{ itemsCatalog.length }} registered items</p>
+                                </div>
+                                <div class="catalog-grid catalog-grid-3">
+                                    <article v-for="item in itemsCatalog" :key="item.name" class="catalog-card item-catalog-card">
+                                        <header class="catalog-card-header">
+                                            <strong>{{ item.label }}</strong>
+                                            <span class="catalog-tag">{{ item.type }}</span>
+                                        </header>
+                                        <div class="catalog-meta">
+                                            <span class="item-key">Name: {{ item.name }}</span>
+                                            <span>Weight: {{ item.weight }}g</span>
+                                            <span>Image: {{ item.image }}</span>
+                                        </div>
+                                        <div class="item-flags">
+                                            <span class="catalog-tag">Useable: {{ item.useable ? 'Yes' : 'No' }}</span>
+                                            <span class="catalog-tag">Unique: {{ item.unique ? 'Yes' : 'No' }}</span>
+                                            <span class="catalog-tag">Should Close: {{ item.shouldClose ? 'Yes' : 'No' }}</span>
+                                        </div>
+                                        <p class="item-description">{{ item.description }}</p>
+                                    </article>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Vehicles Page -->
+                        <section v-if="currentPage === 'vehicles'" class="page" :class="{ active: currentPage === 'vehicles' }" id="page-vehicles">
+                            <div class="catalog-page">
+                                <div class="catalog-toolbar">
+                                    <p>{{ vehiclesCatalog.length }} registered vehicles</p>
+                                </div>
+                                <div class="catalog-grid catalog-grid-3">
+                                    <article v-for="vehicle in vehiclesCatalog" :key="vehicle.key" class="catalog-card vehicle-catalog-card">
+                                        <header class="catalog-card-header">
+                                            <strong>{{ vehicle.label }}</strong>
+                                            <span class="catalog-tag">{{ vehicle.brand }}</span>
+                                        </header>
+                                        <div class="catalog-meta">
+                                            <span class="vehicle-key">Key: {{ vehicle.key }}</span>
+                                            <span>Brand: {{ vehicle.brand }}</span>
+                                            <span>Price: {{ vehicle.price ? ('$' + vehicle.price.toLocaleString()) : 'Service Vehicle' }}</span>
+                                        </div>
+                                    </article>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Jobs Page -->
+                        <section v-if="currentPage === 'jobs'" class="page" :class="{ active: currentPage === 'jobs' }" id="page-jobs">
+                            <div class="catalog-page">
+                                <div class="catalog-toolbar">
+                                    <p>{{ jobsCatalog.length }} configured jobs</p>
+                                </div>
+                                <div class="catalog-grid catalog-grid-2">
+                                    <article v-for="job in jobsCatalog" :key="job.key" class="catalog-card job-catalog-card">
+                                        <header class="catalog-card-header">
+                                            <strong>{{ job.label }}</strong>
+                                            <span class="catalog-tag">{{ job.grades.length }} Grades</span>
+                                        </header>
+                                        <div class="catalog-meta">
+                                            <span>Job Key: {{ job.key }}</span>
+                                            <span>Type: {{ job.type || 'civilian' }}</span>
+                                            <span>Default Duty: {{ job.defaultDuty ? 'Yes' : 'No' }} | Off Duty Pay: {{ job.offDutyPay ? 'Yes' : 'No' }}</span>
+                                            <span>Paycheck Range: ${{ getJobMinPay(job).toLocaleString() }} - ${{ getJobMaxPay(job).toLocaleString() }}</span>
+                                        </div>
+                                        <details class="job-grades-dropdown">
+                                            <summary>View Grade Pay Table</summary>
+                                            <ul class="job-grades-list">
+                                                <li v-for="(grade, gradeIndex) in job.grades" :key="`${job.key}-${gradeIndex}`" class="job-grade-row">
+                                                    <span class="job-grade-name">G{{ gradeIndex }} - {{ grade.name }}</span>
+                                                    <span class="job-grade-payment">${{ Number(grade.payment || 0).toLocaleString() }}</span>
+                                                    <span v-if="grade.isboss" class="catalog-tag">Boss</span>
+                                                </li>
+                                            </ul>
+                                        </details>
+                                    </article>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Gangs Page -->
+                        <section v-if="currentPage === 'gangs'" class="page" :class="{ active: currentPage === 'gangs' }" id="page-gangs">
+                            <div class="catalog-page">
+                                <div class="catalog-toolbar">
+                                    <p>{{ gangsCatalog.length }} configured gangs</p>
+                                </div>
+                                <div class="catalog-grid catalog-grid-2">
+                                    <article v-for="gang in gangsCatalog" :key="gang.key" class="catalog-card gang-catalog-card">
+                                        <header class="catalog-card-header">
+                                            <strong>{{ gang.label }}</strong>
+                                            <span class="catalog-tag">{{ gang.grades.length }} Grades</span>
+                                        </header>
+                                        <div class="catalog-meta">
+                                            <span>Gang Key: {{ gang.key }}</span>
+                                            <span>Hierarchy: {{ gang.grades.length }} levels</span>
+                                        </div>
+                                        <details class="gang-grades-dropdown">
+                                            <summary>View Gang Grades</summary>
+                                            <ul class="gang-grades-list">
+                                                <li v-for="(grade, gradeIndex) in gang.grades" :key="`${gang.key}-${gradeIndex}`" class="gang-grade-row">
+                                                    <span class="gang-grade-name">G{{ gradeIndex }} - {{ grade.name }}</span>
+                                                    <span v-if="grade.isboss" class="catalog-tag">Boss</span>
+                                                </li>
+                                            </ul>
+                                        </details>
+                                    </article>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Logs Page -->
+                        <section v-if="currentPage === 'logs'" class="page" :class="{ active: currentPage === 'logs' }" id="page-logs">
+                            <div class="catalog-page">
+                                <div class="catalog-toolbar">
+                                    <p>{{ logsHistory.length }} recent actions</p>
+                                </div>
+                                <div class="logs-feed">
+                                    <article v-for="entry in logsHistory" :key="entry.id" class="logs-entry">
+                                        <header class="logs-entry-top">
+                                            <strong>{{ entry.action }}</strong>
+                                            <span>{{ entry.time }}</span>
+                                        </header>
+                                        <p><span class="logs-label">Admin:</span> {{ entry.actor }}</p>
+                                        <p><span class="logs-label">Target:</span> {{ entry.target }}</p>
+                                        <p><span class="logs-label">Details:</span> {{ entry.details }}</p>
+                                    </article>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Leaderboard Page -->
+                        <section v-if="currentPage === 'leaderboard'" class="page" :class="{ active: currentPage === 'leaderboard' }" id="page-leaderboard">
+                            <div class="leaderboard-page">
+                                <div class="leaderboard-search-wrap">
+                                    <i data-lucide="search" class="ui-icon" aria-hidden="true"></i>
+                                    <input v-model="leaderboardSearchQuery" type="search" class="leaderboard-search" placeholder="Search player..." />
+                                </div>
+
+                                <div class="leaderboard-tabs" role="tablist" aria-label="Leaderboard metric filter">
+                                    <button class="leaderboard-tab" :class="{ active: leaderboardMetric === 'wealth' }" @click="leaderboardMetric = 'wealth'">Total Wealth</button>
+                                    <button class="leaderboard-tab" :class="{ active: leaderboardMetric === 'cash' }" @click="leaderboardMetric = 'cash'">Cash</button>
+                                    <button class="leaderboard-tab" :class="{ active: leaderboardMetric === 'bank' }" @click="leaderboardMetric = 'bank'">Bank</button>
+                                    <button class="leaderboard-tab" :class="{ active: leaderboardMetric === 'crypto' }" @click="leaderboardMetric = 'crypto'">Crypto</button>
+                                </div>
+
+                                <div class="leaderboard-table">
+                                    <div class="leaderboard-head leaderboard-row-grid">
+                                        <span>#</span>
+                                        <span>Player</span>
+                                        <span>Cash</span>
+                                        <span>Bank</span>
+                                        <span>Crypto</span>
+                                    </div>
+
+                                    <article v-for="entry in filteredLeaderboardPlayers" :key="entry.name" class="leaderboard-row leaderboard-row-grid">
+                                        <span class="rank-badge" :class="{ gold: entry.rank === 1, silver: entry.rank === 2, bronze: entry.rank === 3 }">{{ entry.rank }}</span>
+                                        <strong class="leaderboard-player">{{ entry.name }}</strong>
+                                        <span class="value-cash">${{ entry.cash.toLocaleString() }}</span>
+                                        <span class="value-bank">${{ entry.bank.toLocaleString() }}</span>
+                                        <span class="value-crypto">{{ entry.crypto.toLocaleString() }}</span>
+                                    </article>
+                                </div>
+
+                                <div class="leaderboard-stats">
+                                    <div class="stats-grid-3">
+                                        <article class="stat-card-compact">
+                                            <span>Avg. Cash</span>
+                                            <strong class="value-cash">${{ leaderboardStats.avgCash.toLocaleString() }}</strong>
+                                        </article>
+                                        <article class="stat-card-compact">
+                                            <span>Avg. Bank</span>
+                                            <strong class="value-bank">${{ leaderboardStats.avgBank.toLocaleString() }}</strong>
+                                        </article>
+                                        <article class="stat-card-compact">
+                                            <span>Avg. Crypto</span>
+                                            <strong class="value-crypto">{{ leaderboardStats.avgCrypto.toLocaleString() }}</strong>
+                                        </article>
+                                    </div>
+
+                                    <div class="stats-grid-3">
+                                        <article class="stat-card-compact">
+                                            <span>Total Cash</span>
+                                            <strong class="value-cash">${{ leaderboardStats.totalCash.toLocaleString() }}</strong>
+                                        </article>
+                                        <article class="stat-card-compact">
+                                            <span>Total Bank</span>
+                                            <strong class="value-bank">${{ leaderboardStats.totalBank.toLocaleString() }}</strong>
+                                        </article>
+                                        <article class="stat-card-compact">
+                                            <span>Total Crypto</span>
+                                            <strong class="value-crypto">{{ leaderboardStats.totalCrypto.toLocaleString() }}</strong>
+                                        </article>
+                                    </div>
+
+                                    <div class="stats-grid-wealth">
+                                        <article class="stat-card-compact">
+                                            <span>Avg. Wealth</span>
+                                            <strong class="value-wealth">${{ leaderboardStats.avgWealth.toLocaleString() }}</strong>
+                                        </article>
+                                        <article class="stat-card-compact">
+                                            <span>Total Wealth</span>
+                                            <strong class="value-wealth">${{ leaderboardStats.totalWealth.toLocaleString() }}</strong>
+                                        </article>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+                </div>
+
+                <!-- Modals -->
+                <div class="modal-overlay" id="report-detail-modal" :class="{ open: openModals['report-detail-modal'] }" aria-hidden="true" @click.self="closeModal('report-detail-modal')">
+                    <div class="modal-card">
+                        <div class="modal-header">
+                            <h3>Report Details</h3>
+                            <button class="action-button action-button-outline modal-close" @click="closeModal('report-detail-modal')">Close</button>
+                        </div>
+                        <p class="modal-meta">{{ detailModalMeta }}</p>
+                        <p class="modal-body">{{ detailModalText }}</p>
+                    </div>
+                </div>
+
+                <div class="modal-overlay" id="active-investigation-modal" :class="{ open: openModals['active-investigation-modal'] }" aria-hidden="true" @click.self="closeModal('active-investigation-modal')">
+                    <div class="modal-card">
+                        <div class="modal-header">
+                            <h3>Active Investigation</h3>
+                            <button class="action-button action-button-outline modal-close" @click="closeModal('active-investigation-modal')">Close</button>
+                        </div>
+                        <p class="modal-meta">{{ investigationMeta }}</p>
+                        <div class="quick-actions">
+                            <button v-for="action in ['goto', 'bring', 'heal', 'freeze']" :key="action" class="action-button" @click="handleInvestigationAction(action)">{{ formatActionName(action) }}</button>
+                        </div>
+                        <textarea v-model="investigationChat" rows="4" placeholder="Internal admin-to-player chat notes..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-overlay" id="resolution-modal" :class="{ open: openModals['resolution-modal'] }" aria-hidden="true" @click.self="closeModal('resolution-modal')">
+                    <div class="modal-card">
+                        <div class="modal-header">
+                            <h3>Add Resolution Note</h3>
+                            <button class="action-button action-button-outline modal-close" @click="closeModal('resolution-modal')">Close</button>
+                        </div>
+                        <p class="modal-meta">{{ resolutionMeta }}</p>
+                        <textarea v-model="resolutionNote" rows="4" placeholder="Summarize what happened and what action was taken..."></textarea>
+                        <button class="action-button action-button-primary" @click="submitResolution">Submit Resolution</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
