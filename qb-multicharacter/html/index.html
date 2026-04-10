@@ -14,10 +14,15 @@
         <script src="swal2.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
         <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet" />
+        <style>
+            [v-cloak] {
+                display: none;
+            }
+        </style>
     </head>
     <body>
         <v-app data-app>
-            <div id="app">
+            <div id="app" v-cloak>
                 <div class="container">
                     <div class="main-screen" v-if="show.loading || show.characters || show.register || show.delete">
                         <!-- Loading Screen -->

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -10,9 +10,14 @@
         <script src="vue.global.prod.js"></script>
         <script src="vue-select.umd.js"></script>
         <script src="script.js" defer></script>
+        <style>
+            [v-cloak] {
+                display: none;
+            }
+        </style>
     </head>
     <body>
-        <div id="app">
+        <div id="app" v-cloak>
             <div class="banking-container" v-show="isBankOpen">
                 <div class="sidebar">
                     <div class="sidebar-header">
