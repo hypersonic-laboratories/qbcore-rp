@@ -125,6 +125,9 @@ QBCore.Shared.Items = {
     steel                 = { name = 'steel', label = 'Steel', weight = 100, type = 'item', image = 'steel.png', unique = false, useable = false, shouldClose = false, description = 'Nice piece of metal that you can probably use for something' },
     rubber                = { name = 'rubber', label = 'Rubber', weight = 100, type = 'item', image = 'rubber.png', unique = false, useable = false, shouldClose = false, description = 'Rubber, I believe you can make your own rubber ducky with it :D' },
     glass                 = { name = 'glass', label = 'Glass', weight = 100, type = 'item', image = 'glass.png', unique = false, useable = false, shouldClose = false, description = 'It is very fragile, watch out' },
+    copper_ore            = { name = 'copper_ore', label = 'Copper Ore', weight = 500, type = 'item', image = 'copper_ore.png', unique = false, useable = false, shouldClose = false, description = 'Unrefined copper ore' },
+    iron_ore              = { name = 'iron_ore', label = 'Iron Ore', weight = 500, type = 'item', image = 'iron_ore.png', unique = false, useable = false, shouldClose = false, description = 'Unrefined iron ore' },
+    gold_ore              = { name = 'gold_ore', label = 'Gold Ore', weight = 800, type = 'item', image = 'gold_ore.png', unique = false, useable = false, shouldClose = false, description = 'Unrefined gold ore' },
 
     -- Tools
     lockpick              = { name = 'lockpick', label = 'Lockpick', weight = 300, type = 'item', image = 'lockpick.png', unique = false, useable = true, shouldClose = true, description = 'Very useful if you lose your keys a lot.. or if you want to use it for something else...' },
