@@ -1,5 +1,32 @@
 local isMining = false
 local localRocks = {}
+local currentTargetEntity = nil
+local currentRockItem = nil
+
+local mining_ui = WebUI('qb-mining', 'qb-mining/html/index.html')
+if mining_ui then
+    mining_ui:SetVisibility(UI_HIDDEN)
+
+    mining_ui:RegisterEventHandler('miningDone', function(success)
+        mining_ui:SetVisibility(UI_HIDDEN)
+        mining_ui:SetInputMode(0)
+
+        if success then
+            if Config.NetworkedRocks then
+                TriggerServerEvent('qb-mining:server:completeMine', { entity = currentTargetEntity })
+            else
+                TriggerServerEvent('qb-mining:server:completeMine', { entity = currentTargetEntity, item = currentRockItem })
+                if currentTargetEntity and currentTargetEntity:IsValid() then
+                    DeleteEntity(currentTargetEntity)
+                end
+                localRocks[currentTargetEntity] = nil
+            end
+        else
+            TriggerServerEvent('qb-mining:server:completeMine', nil)
+        end
+        isMining = false
+    end)
+end
 
 local TargetOptions = {
     options = {
@@ -102,28 +129,28 @@ RegisterClientEvent('qb-mining:client:startMining', function(data)
         if not localRocks[data.entity] then return end
     end
 
+    currentTargetEntity = data.entity
+    if not Config.NetworkedRocks then
+        currentRockItem = localRocks[data.entity].item
+    end
+
     isMining = true
     TriggerServerEvent('qb-mining:server:startMiningItem')
-    TriggerLocalClientEvent('QBCore:Notify', 'You started mining...', 'primary')
 
-    Timer.SetTimeout(function()
-        if Config.NetworkedRocks then
-            TriggerServerEvent('qb-mining:server:completeMine', { entity = data.entity })
-        else
-            local rData = localRocks[data.entity]
-            if rData then
-                TriggerServerEvent('qb-mining:server:completeMine', { entity = data.entity, item = rData.item })
-                if data.entity:IsValid() then
-                    DeleteEntity(data.entity)
-                end
-                localRocks[data.entity] = nil
-            end
-        end
-        isMining = false
-    end, Config.miningTime)
+    if mining_ui then
+        mining_ui:SendEvent('openUI')
+        mining_ui:SetVisibility(UI_VISIBLE)
+        mining_ui:BringToFront()
+        mining_ui:SetInputMode(1)
+    end
 end)
 
 function onShutdown()
+    if mining_ui then
+        mining_ui:Destroy()
+        mining_ui = nil
+    end
+
     if not Config.NetworkedRocks then
         for _, data in pairs(localRocks) do
             if data.actor and data.actor:IsValid() then
