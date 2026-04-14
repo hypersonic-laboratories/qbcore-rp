@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Fishing Minigame</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div id="card">
+            <canvas id="water"></canvas>
+            <div id="body">
+                <div id="mid">
+                    <div id="fish-info"></div>
+                    <div style="display: flex; align-items: center; gap: 10px">
+                        <div id="dots"></div>
+                        <div id="exclaim">!</div>
+                    </div>
+                </div>
+                <div id="status">cast your line to begin</div>
+            </div>
+        </div>
+
+        <div id="stats">
+            <div class="st">
+                <div class="sv" id="sc">0</div>
+                <div class="sl">caught</div>
+            </div>
+            <div class="st">
+                <div class="sv" id="sm">0</div>
+                <div class="sl">missed</div>
+            </div>
+            <div class="st">
+                <div class="sv" id="ss">0</div>
+                <div class="sl">streak</div>
+            </div>
+        </div>
+        <script src="script.js"></script>
+    </body>
+</html>
