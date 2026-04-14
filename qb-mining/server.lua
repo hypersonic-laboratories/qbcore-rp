@@ -101,10 +101,9 @@ RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
     end
 end)
 
-RegisterServerEvent('qb-mining:server:startMiningItem', function()
-    local src = source
-    HInventory.GiveAndEquipItemByName(src, TOOL_ID)
-    activeMiners[src] = true
+RegisterServerEvent('qb-mining:server:startMiningItem', function(source)
+    HInventory.GiveAndEquipItemByName(source, TOOL_ID)
+    activeMiners[source] = true
 end)
 
 RegisterServerEvent('qb-mining:server:completeMine', function(source, data)
