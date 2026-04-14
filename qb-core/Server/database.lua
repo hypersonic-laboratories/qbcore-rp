@@ -136,43 +136,6 @@ success = Database.Execute([[
 ]])
 
 success = Database.Execute([[
-    CREATE TABLE IF NOT EXISTS houselocations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name VARCHAR(255) DEFAULT NULL,
-        label VARCHAR(255) DEFAULT NULL,
-        coords TEXT DEFAULT NULL,
-        owned INTEGER DEFAULT NULL,
-        price INTEGER DEFAULT NULL,
-        tier INTEGER DEFAULT NULL,
-        garage TEXT DEFAULT NULL
-    )
-]])
-
-if success then
-    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_houselocations_name ON houselocations(name)]])
-end
-
-success = Database.Execute([[
-    CREATE TABLE IF NOT EXISTS player_houses (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        house VARCHAR(50) NOT NULL,
-        identifier VARCHAR(50) DEFAULT NULL,
-        citizenid VARCHAR(11) DEFAULT NULL,
-        keyholders TEXT DEFAULT NULL,
-        decorations TEXT DEFAULT NULL,
-        stash TEXT DEFAULT NULL,
-        outfit TEXT DEFAULT NULL,
-        logout TEXT DEFAULT NULL
-    )
-]])
-
-if success then
-    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_player_houses_house ON player_houses(house)]])
-    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_player_houses_citizenid ON player_houses(citizenid)]])
-    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_player_houses_identifier ON player_houses(identifier)]])
-end
-
-success = Database.Execute([[
     CREATE TABLE IF NOT EXISTS house_plants (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         building VARCHAR(50) DEFAULT NULL,
@@ -206,6 +169,51 @@ success = Database.Execute([[
 
 if success then
     Database.Execute([[CREATE INDEX IF NOT EXISTS idx_lapraces_raceid ON lapraces(raceid)]])
+end
+
+success = Database.Execute([[
+    CREATE TABLE IF NOT EXISTS properties (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        property_key TEXT NOT NULL UNIQUE,
+        entrance_id TEXT NOT NULL,
+        owner_citizenid TEXT NOT NULL,
+        owned INTEGER NOT NULL DEFAULT 1 CHECK (owned IN (0,1)),
+        interior_type TEXT NOT NULL CHECK (interior_type IN ('instanced', 'world')),
+        interior_ref TEXT DEFAULT NULL, -- instanced only
+        keyholders TEXT DEFAULT NULL,
+        scene_data TEXT DEFAULT NULL,
+        stash TEXT DEFAULT NULL,
+        outfit TEXT DEFAULT NULL,
+        logout TEXT DEFAULT NULL,
+        created_at INTEGER DEFAULT (strftime('%s', 'now')),
+        updated_at INTEGER DEFAULT (strftime('%s', 'now')),
+        UNIQUE(owner_citizenid, entrance_id)
+    )
+]])
+
+if success then
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_properties_owner ON properties(owner_citizenid)]])
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_properties_entrance ON properties(entrance_id)]])
+    Database.Execute([[CREATE UNIQUE INDEX IF NOT EXISTS idx_properties_key ON properties(property_key)]])
+end
+
+success = Database.Execute([[
+    CREATE TABLE IF NOT EXISTS property_entrances (
+        entrance_id TEXT PRIMARY KEY,
+        label TEXT NOT NULL,
+        entrance_type TEXT NOT NULL CHECK (entrance_type IN ('instanced', 'world')),
+        coords TEXT NOT NULL,
+        interior_ref TEXT DEFAULT NULL,
+        price INTEGER DEFAULT NULL,
+        active INTEGER DEFAULT 1 CHECK (active IN (0,1)),
+        created_by TEXT DEFAULT NULL,
+        created_at INTEGER DEFAULT (strftime('%s', 'now')),
+        updated_at INTEGER DEFAULT (strftime('%s', 'now'))
+    )
+]])
+
+if success then
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_entrances_coords ON property_entrances(coords)]])
 end
 
 success = Database.Execute([[
@@ -408,6 +416,7 @@ function DatabaseAction(ActionType, ...)
     end
     return (#ResultSet ~= 0 and ResultSet) or result
 end
+
 exports('qb-core', 'DatabaseAction', DatabaseAction)
 
 function onShutdown()
