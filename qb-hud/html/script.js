@@ -1,188 +1,237 @@
-const { createApp, ref, onMounted } = Vue;
+// ── Stat config ──────────────────────────────────────────
+// To add a new stat: add an entry to this array.
+// To remove one: delete its entry.
+// To reorder: change the order here — pill follows automatically.
+//
+// Each entry:
+//   id        — must match the key sent in UpdateHUD data from Lua
+//   icon      — any Lucide icon name (kebab-case): https://lucide.dev/icons
+//   color     — icon stroke color at normal value
+//   warnLow   — turn red when value <= this (null = disabled)
+//   warnHigh  — turn red when value >= this (null = disabled)
 
-const app = createApp({
-    setup() {
-        const showAll = ref(false);
-        // money
-        const cash = ref(0);
-        const bank = ref(0);
-        const amount = ref(0);
-        const plus = ref(false);
-        const minus = ref(false);
-        const showUpdate = ref(false);
-        const showCash = ref(false);
-        const showBank = ref(false);
-        // player hud
-        const health = ref(100);
-        const armor = ref(100);
-        const hunger = ref(100);
-        const thirst = ref(100);
-        const stress = ref(0);
-        const voice = ref(5);
-        const talking = ref(false);
-        const onRadio = ref(false);
-        // Color properties
-        const talkingColor = ref("#FFFFFF");
-        const healthColor = ref("#3FA554");
-        const armorColor = ref("#326dbf");
-        const hungerColor = ref("#dd6e14");
-        const thirstColor = ref("#1a7cad");
-        const stressColor = ref("#dc143c");
+const STAT_CONFIG = [
+    { id: "health", icon: "heart", color: "#3FA554", warnLow: 30, warnHigh: null },
+    { id: "armor", icon: "shield", color: "#326dbf", warnLow: 30, warnHigh: null },
+    { id: "hunger", icon: "coffee", color: "#dd6e14", warnLow: 30, warnHigh: null },
+    { id: "thirst", icon: "droplets", color: "#1a7cad", warnLow: 30, warnHigh: null },
+    { id: "stress", icon: "brain", color: "#9F7AEA", warnLow: null, warnHigh: 30 },
 
-        function formatMoney(value) {
-            const formatter = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-                minimumFractionDigits: 0,
-            });
-            return formatter.format(value);
-        }
+    // ── Adding a new stat is one object ───────────────────
+    // { id: "oxygen", icon: "wind", color: "#5DCAA5", warnLow: 25, warnHigh: null },
+];
 
-        function handleVisibility(refName, show, duration) {
-            if (refName.timeoutId) clearTimeout(refName.timeoutId);
-            refName.value = show;
-            if (show) {
-                refName.timeoutId = setTimeout(() => {
-                    refName.value = false;
-                }, duration);
-            }
-        }
+// ── Lucide icon helper ────────────────────────────────────
+// Lucide UMD structure: lucide[PascalName] = [defaultAttrs, children]
+// Returns the inner SVG path markup as an HTML string.
 
-        function updateHudData(newhealth, newarmor, newhunger, newthirst, newstress, playerDead) {
-            showAll.value = true;
+function lucideIcon(name) {
+    const key = name.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase());
+    const icon = lucide[key];
+    if (!icon) {
+        console.warn(`[HUD] Lucide icon "${name}" not found`);
+        return "";
+    }
+    // icon IS the children array — no destructuring needed
+    return (icon || [])
+        .map(
+            ([tag, attrs]) =>
+                `<${tag} ${Object.entries(attrs)
+                    .map(([k, v]) => `${k}="${v}"`)
+                    .join(" ")}/>`,
+        )
+        .join("");
+}
 
-            if (newhealth !== undefined) {
-                health.value = newhealth;
-                healthColor.value = playerDead ? "#ff0000" : "#3FA554";
-                if (playerDead) health.value = 100;
-            }
+// ── Cash formatter ───────────────────────────────────────
 
-            if (newarmor !== undefined) {
-                armor.value = newarmor;
-                armorColor.value = newarmor <= 0 ? "#FF0000" : "#326dbf";
-            }
+function formatCash(n) {
+    n = Math.round(n);
+    if (n >= 1e9) return "$" + (n / 1e9).toFixed(1).replace(/\.0$/, "") + "b";
+    if (n >= 1e6) return "$" + (n / 1e6).toFixed(1).replace(/\.0$/, "") + "m";
+    if (n >= 1e3) return "$" + (n / 1e3).toFixed(1).replace(/\.0$/, "") + "k";
+    return "$" + n;
+}
 
-            if (newhunger !== undefined) {
-                hunger.value = newhunger;
-                hungerColor.value = newhunger <= 30 ? "#ff0000" : "#dd6e14";
-            }
+// ── Build pill ───────────────────────────────────────────
 
-            if (newthirst !== undefined) {
-                thirst.value = newthirst;
-                thirstColor.value = newthirst <= 30 ? "#ff0000" : "#1a7cad";
-            }
+function buildPill() {
+    const pill = document.getElementById("hud-pill");
+    if (!pill) return;
 
-            if (newstress !== undefined) {
-                stress.value = newstress;
-            }
-        }
+    // Voice segment — SVG paths managed by setVoice()
+    pill.innerHTML = `
+        <div class="seg">
+            <svg id="voice-icon" class="voice-ico" viewBox="0 0 24 24" fill="none"
+                 stroke="rgba(255,255,255,0.3)" stroke-width="1.75"
+                 stroke-linecap="round" stroke-linejoin="round"></svg>
+            <div class="pvbars" id="voice-bars">
+                <div class="pvb" style="height:3px"></div>
+                <div class="pvb" style="height:5px"></div>
+                <div class="pvb" style="height:7px"></div>
+                <div class="pvb" style="height:9px"></div>
+                <div class="pvb" style="height:11px"></div>
+            </div>
+        </div>`;
 
-        function UpdateMoney(data) {
-            const { cashAmount, bankAmount, changeAmount, isMinus, type } = data;
-            amount.value = formatMoney(changeAmount);
-            plus.value = false;
-            minus.value = false;
+    // One segment per stat
+    STAT_CONFIG.forEach(({ id, icon, color }) => {
+        const seg = document.createElement("div");
+        seg.className = "seg";
+        seg.innerHTML = `
+            <svg class="stat-ico" viewBox="0 0 24 24" fill="none"
+                 stroke="${color}" stroke-width="1.75"
+                 stroke-linecap="round" stroke-linejoin="round">
+                ${lucideIcon(icon)}
+            </svg>
+            <span class="stat-num" id="val-${id}">100</span>`;
+        pill.appendChild(seg);
+    });
 
-            if (isMinus) {
-                minus.value = true;
-            } else {
-                plus.value = true;
-            }
+    // Divider + cash — always last
+    pill.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div class="seg-divider"></div>
+        <div class="seg">
+            <span class="cash-label">cash</span>
+            <span class="cash-val" id="val-cash">$0</span>
+        </div>`,
+    );
 
-            if (type === "cash") {
-                cash.value = formatMoney(cashAmount);
-                handleVisibility(showCash, true, 2000);
-            } else if (type === "bank") {
-                bank.value = formatMoney(bankAmount);
-                handleVisibility(showBank, true, 2000);
-            }
-            handleVisibility(showUpdate, true, 2000);
-        }
+    // Initialise voice icon to muted state
+    setVoice("mute");
+}
 
-        function ShowCashAmount(amount) {
-            if (amount !== undefined) {
-                cash.value = formatMoney(amount);
-                handleVisibility(showCash, true, 2000);
-            }
-        }
+// ── Stat rendering ───────────────────────────────────────
 
-        function ShowBankAmount(amount) {
-            if (amount !== undefined) {
-                bank.value = formatMoney(amount);
-                handleVisibility(showBank, true, 2000);
-            }
-        }
+function setStat(id, value) {
+    const el = document.getElementById("val-" + id);
+    if (!el) return;
+    const cfg = STAT_CONFIG.find((s) => s.id === id);
+    el.textContent = Math.round(value);
+    let warn = false;
+    if (cfg) {
+        if (cfg.warnLow !== null && value <= cfg.warnLow) warn = true;
+        if (cfg.warnHigh !== null && value >= cfg.warnHigh) warn = true;
+    }
+    el.classList.toggle("warn", warn);
+}
 
-        function IsTalking(bool) {
-            talking.value = bool;
-            talkingColor.value = talking.value ? "#FFFF3E" : "#FFFFFF";
-        }
+// ── Voice indicator ──────────────────────────────────────
 
-        function UpdateVoiceVolume(radius) {
-            voice.value = radius;
-        }
+let voiceAnimFrame = null;
 
-        function OnRadio(bool) {
-            onRadio.value = bool;
-        }
+const VOICE_PATHS = {
+    mic: [
+        ["path", { d: "M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" }],
+        ["path", { d: "M19 10v2a7 7 0 0 1-14 0v-2" }],
+        ["line", { x1: "12", y1: "19", x2: "12", y2: "22" }],
+    ],
+    radio: [
+        ["path", { d: "M4.9 19.1C1 15.2 1 8.8 4.9 4.9" }],
+        ["path", { d: "M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" }],
+        ["circle", { cx: "12", cy: "12", r: "2" }],
+        ["path", { d: "M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5" }],
+        ["path", { d: "M19.1 4.9C23 8.8 23 15.1 19.1 19" }],
+    ],
+};
 
-        onMounted(() => {
-            window.addEventListener("message", function (event) {
-                if (!event.data || !event.data.name) return;
+function setVoice(mode) {
+    // Cancel any running bar animation
+    if (voiceAnimFrame) {
+        cancelAnimationFrame(voiceAnimFrame);
+        voiceAnimFrame = null;
+    }
 
-                switch (event.data.name) {
-                    case "UpdateHUD":
-                        updateHudData(event.data.args[0]);
-                        break;
-                    case "UpdateMoney":
-                        UpdateMoney(event.data.args[0]);
-                        break;
-                    case "ShowCashAmount":
-                        ShowCashAmount(event.data.args[0]);
-                        break;
-                    case "ShowBankAmount":
-                        ShowBankAmount(event.data.args[0]);
-                        break;
-                    case "onRadio":
-                        OnRadio(event.data.args[0]);
-                        break;
-                    case "IsTalking":
-                        IsTalking(event.data.args[0]);
-                        break;
-                    case "UpdateVoiceVolume":
-                        UpdateVoiceVolume(event.data.args[0]);
-                        break;
-                }
-            });
+    const ico = document.getElementById("voice-icon");
+    const bars = [...document.querySelectorAll("#voice-bars .pvb")];
+
+    bars.forEach((b) => b.classList.remove("lit", "talking", "radio"));
+
+    if (!ico) return;
+
+    // Swap icon shape + stroke color
+    const paths = mode === "radio" ? VOICE_PATHS.radio : VOICE_PATHS.mic;
+    ico.innerHTML = paths
+        .map(
+            ([tag, attrs]) =>
+                `<${tag} ${Object.entries(attrs)
+                    .map(([k, v]) => `${k}="${v}"`)
+                    .join(" ")}/>`,
+        )
+        .join("");
+    ico.setAttribute("stroke", mode === "radio" ? "#5DCAA5" : mode === "talking" ? "#FFFF3E" : "rgba(255,255,255,0.3)");
+
+    if (mode === "mute") return;
+
+    // Animate bars
+    let t = 0;
+
+    function step() {
+        t += 0.2;
+        const level = Math.round(2.5 + 2.5 * Math.sin(t) * (0.5 + 0.5 * Math.random()));
+        bars.forEach((b, i) => {
+            const lit = i < level;
+            b.classList.toggle("lit", lit);
+            b.classList.toggle("talking", lit && mode === "talking");
+            b.classList.toggle("radio", lit && mode === "radio");
         });
+        voiceAnimFrame = requestAnimationFrame(step);
+    }
 
-        return {
-            showAll,
-            showCash,
-            showBank,
-            cash,
-            bank,
-            health,
-            armor,
-            voice,
-            talking,
-            onRadio,
-            hunger,
-            thirst,
-            stress,
-            talkingColor,
-            healthColor,
-            armorColor,
-            hungerColor,
-            thirstColor,
-            stressColor,
-            amount,
-            plus,
-            minus,
-            showUpdate,
-        };
-    },
+    step();
+}
+
+// ── Message listener ─────────────────────────────────────
+// Helix SendEvent(name, arg1, arg2, ...) arrives as:
+//   event.data = { name: "EventName", args: [arg1, arg2, ...] }
+
+window.addEventListener("message", function (event) {
+    const msg = event.data;
+    if (!msg || !msg.name) return;
+    const args = msg.args || [];
+
+    switch (msg.name) {
+        case "UpdateHUD": {
+            // Lua: SendEvent('UpdateHUD', health, armor, hunger, thirst, stress, playerDead)
+            const [health, armor, hunger, thirst, stress, playerDead] = args;
+            const pill = document.getElementById("hud-pill");
+            if (pill) pill.style.display = "flex";
+            const values = { health, armor, hunger, thirst, stress };
+            STAT_CONFIG.forEach(({ id }) => {
+                const value = values[id];
+                if (value !== undefined) setStat(id, id === "health" && playerDead ? 100 : value);
+            });
+            break;
+        }
+        case "UpdateMoney": {
+            // Lua: SendEvent('UpdateMoney', { cashAmount, bankAmount, type, ... })
+            const arg = args[0];
+            if (arg && arg.type === "cash" && arg.cashAmount !== undefined) {
+                const el = document.getElementById("val-cash");
+                if (el) el.textContent = formatCash(arg.cashAmount);
+            }
+            break;
+        }
+        case "ShowCashAmount": {
+            // Lua: SendEvent('ShowCashAmount', amount)
+            const el = document.getElementById("val-cash");
+            if (el && args[0] !== undefined) el.textContent = formatCash(args[0]);
+            break;
+        }
+        case "onRadio":
+            // Lua: SendEvent('onRadio', bool)
+            setVoice(args[0] ? "radio" : "mute");
+            break;
+        case "IsTalking":
+            // Lua: SendEvent('IsTalking', isTalking)
+            setVoice(args[0] ? "talking" : "mute");
+            break;
+        // ShowBankAmount / UpdateVoiceVolume — no-ops kept for Lua compatibility
+    }
 });
 
-app.use(Quasar);
-app.mount("#main-container");
+// ── Init ─────────────────────────────────────────────────
+
+buildPill();

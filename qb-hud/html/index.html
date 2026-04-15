@@ -1,86 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500&display=swap" rel="stylesheet" />
         <link rel="stylesheet" type="text/css" href="style.css" />
-        <link href="https://fonts.googleapis.com/css?family=Material+Icons+Outlined" rel="stylesheet" type="text/css" />
-        <link href="https://cdn.jsdelivr.net/npm/quasar@2.18.5/dist/quasar.prod.css" rel="stylesheet" type="text/css" />
         <title>qb-hud</title>
     </head>
     <body>
-        <div id="main-container">
-            <div id="money-container">
-                <div id="money-cash">
-                    <transition name="slide-fade">
-                        <p v-if="showCash"><span id="sign">&nbsp;</span><span id="money">{{cash}}</span></p>
-                    </transition>
-                </div>
-                <div id="money-bank">
-                    <transition name="slide-fade">
-                        <p v-if="showBank"><span id="sign">&nbsp;</span><span id="bank">{{bank}}</span></p>
-                    </transition>
-                </div>
-                <div id="money-change" v-if="showUpdate">
-                    <p v-if="plus" id="money"><span id="plus">+&nbsp;</span><span id="money">{{amount}}</span></p>
-                    <p v-else-if="minus" id="minus"><span id="minus">-&nbsp;</span><span id="money">{{amount}}</span></p>
-                </div>
-            </div>
-            <div id="ui-container">
-                <div id="playerHud" v-if="showAll">
-                    <transition name="fade">
-                        <div>
-                            <q-circular-progress class="q-ml-xl" style="opacity: 40%" :value="static" :thickness="0.18" :style="{color: talkingColor}" :min="0" :max="100"></q-circular-progress>
-                            <q-circular-progress class="q-ml-xl" style="left: -50%" show-value :value="voice" :thickness="0.18" :style="{color: talkingColor}" :min="0" :max="5" center-color="blue-grey-10" track-color="grey-8">
-                                <q-icon :name="onRadio ? 'o_radio' : 'o_mic_none'" size="sm" color="white" />
-                            </q-circular-progress>
-                        </div>
-                    </transition>
-                    <transition name="fade">
-                        <div>
-                            <q-circular-progress class="q-ml-xl" style="opacity: 40%" :value="static" :thickness="0.18" :style="{color: healthColor}" :min="0" :max="100"></q-circular-progress>
-                            <q-circular-progress class="q-ml-xl" style="left: -50%" show-value :value="health" :thickness="0.18" :style="{color: healthColor}" :min="0" :max="100" center-color="blue-grey-10" track-color="grey-8">
-                                <q-icon name="o_favorite_border" size="sm" color="white" />
-                            </q-circular-progress>
-                        </div>
-                    </transition>
-                    <transition name="fade">
-                        <div>
-                            <q-circular-progress class="q-ml-xl" style="opacity: 40%" :value="static" :thickness="0.18" :style="{color: armorColor}" :min="0" :max="100"></q-circular-progress>
-                            <q-circular-progress class="q-ml-xl" style="left: -50%" show-value :value="armor" :thickness="0.18" :style="{color: armorColor}" :min="0" :max="100" center-color="blue-grey-10" track-color="grey-8">
-                                <q-icon name="o_shield" size="sm" color="white" />
-                            </q-circular-progress>
-                        </div>
-                    </transition>
-                    <transition name="fade">
-                        <div>
-                            <q-circular-progress class="q-ml-xl" style="opacity: 40%" :value="static" :thickness="0.18" :style="{color: hungerColor}" :min="0" :max="100"></q-circular-progress>
-                            <q-circular-progress class="q-ml-xl" style="left: -50%" show-value :value="hunger" :thickness="0.18" :style="{color: hungerColor}" :min="0" :max="100" center-color="blue-grey-10" track-color="grey-8">
-                                <q-icon name="o_lunch_dining" size="sm" color="white" />
-                            </q-circular-progress>
-                        </div>
-                    </transition>
-                    <transition name="fade">
-                        <div>
-                            <q-circular-progress class="q-ml-xl" style="opacity: 40%" :value="static" :thickness="0.24" :style="{color: thirstColor}" :min="0" :max="100"></q-circular-progress>
-                            <q-circular-progress class="q-ml-xl" style="left: -50%" show-value :value="thirst" :thickness="0.18" :style="{color: thirstColor}" :min="0" :max="100" center-color="blue-grey-10" track-color="grey-8">
-                                <q-icon name="o_water_drop" size="sm" color="white" />
-                            </q-circular-progress>
-                        </div>
-                    </transition>
-                    <transition name="fade">
-                        <div>
-                            <q-circular-progress class="q-ml-xl" style="opacity: 40%" :value="static" :thickness="0.18" :style="{color: stressColor}" :max="100"></q-circular-progress>
-                            <q-circular-progress class="q-ml-xl" style="left: -50%" show-value :value="stress" :thickness="0.18" :style="{color: stressColor}" :min="0" :max="100" center-color="blue-grey-10" track-color="grey-8">
-                                <q-icon name="o_psychology" size="sm" color="white" />
-                            </q-circular-progress>
-                        </div>
-                    </transition>
-                </div>
-            </div>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/quasar@2.18.5/dist/quasar.umd.prod.js"></script>
+        <div id="hud-pill"></div>
+        <script src="lucide.min.js"></script>
         <script src="script.js"></script>
     </body>
 </html>
