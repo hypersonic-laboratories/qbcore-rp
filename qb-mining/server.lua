@@ -1,5 +1,4 @@
 local netRocks = {}
-local isInit = false
 local activeMiners = {}
 local TOOL_ID = 'ID_Misc_Jackhammer'
 
@@ -70,7 +69,6 @@ local function SpawnNetRocks()
 end
 
 SpawnNetRocks()
-isInit = true
 
 RegisterCallback('getRocks', function()
     local rocks = {}
@@ -91,7 +89,6 @@ function onShutdown()
     end
     activeMiners = {}
     netRocks = {}
-    isInit = false
 end
 
 RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
@@ -109,18 +106,17 @@ end)
 RegisterServerEvent('qb-mining:server:completeMine', function(source, data)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
-
     if activeMiners[source] then
         HInventory.RemoveItemByName(source, TOOL_ID, 1)
         activeMiners[source] = nil
     end
-
+    if not data then return end
     if Config.NetworkedRocks then
         if not data.entity then return end
         local rData = netRocks[data.entity]
         if rData then
-            exports['qb-core']:Player(source, 'AddItem', rData.item, 1)
-            TriggerClientEvent('QBCore:Notify', source, 'You successfully mined ' .. rData.item .. '!', 'success')
+            exports['qb-inventory']:AddItem(source, rData.item, 1)
+            TriggerClientEvent(source, 'QBCore:Notify', 'You successfully mined ' .. rData.item .. '!', 'success')
 
             if data.entity:IsValid() then
                 DeleteEntity(data.entity)
@@ -130,7 +126,7 @@ RegisterServerEvent('qb-mining:server:completeMine', function(source, data)
     else
         -- Local rocks event
         if not data.item then return end
-        exports['qb-core']:Player(source, 'AddItem', data.item, 1)
-        TriggerClientEvent('QBCore:Notify', source, 'You successfully mined ' .. data.item .. '!', 'success')
+        exports['qb-inventory']:AddItem(source, data.item, 1)
+        TriggerClientEvent(source, 'QBCore:Notify', 'You successfully mined ' .. data.item .. '!', 'success')
     end
 end)
