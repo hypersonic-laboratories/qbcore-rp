@@ -413,8 +413,11 @@ function DatabaseAction(ActionType, ...)
         for k, v in pairs(Rows) do
             ResultSet[k] = v.Columns:ToTable()
         end
+    elseif type(result) == 'boolean' then
+        return result
     end
-    return (#ResultSet ~= 0 and ResultSet) or result
+
+    return ResultSet
 end
 
 exports('qb-core', 'DatabaseAction', DatabaseAction)
