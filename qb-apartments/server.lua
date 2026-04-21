@@ -332,7 +332,7 @@ RegisterCallback('GetOwnedApartment', function(source, cid)
 		local Player = exports['qb-core']:GetPlayer(source)
 		if not Player then return nil end
 		local result = exports['qb-core']:DatabaseAction('Select', 'SELECT * FROM apartments WHERE citizenid = ?', { Player.PlayerData.citizenid })
-		if result[1] ~= nil then
+		if result and result[1] ~= nil then
 			return result[1]
 		end
 		return nil
