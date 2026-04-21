@@ -451,26 +451,32 @@ end)
 -- Threads
 
 local Jobs = exports['qb-core']:GetShared('Jobs')
+if Jobs then
+    for job in pairs(Jobs) do
+        if Accounts[job] == nil then
+            CreateJobAccount(job, 0)
+        end
+    end
+end
 
 local accounts = exports['qb-core']:DatabaseAction('Select', 'SELECT * FROM bank_accounts')
-for _, account in ipairs(accounts) do
-    Accounts[account.account_name] = account
-end
-for job in pairs(Jobs) do
-    if Accounts[job] == nil then
-        CreateJobAccount(job, 0)
+if accounts then
+    for _, account in ipairs(accounts) do
+        Accounts[account.account_name] = account
     end
 end
 
 local statements = exports['qb-core']:DatabaseAction('Select', 'SELECT * FROM bank_statements')
-for _, statement in ipairs(statements) do
-    if statement.account_name == 'checking' then
-        if not Statements[statement.citizenid] then Statements[statement.citizenid] = {} end
-        if not Statements[statement.citizenid][statement.account_name] then Statements[statement.citizenid][statement.account_name] = {} end
-        Statements[statement.citizenid][statement.account_name][#Statements[statement.citizenid][statement.account_name] + 1] = statement
-    else
-        if not Statements[statement.account_name] then Statements[statement.account_name] = {} end
-        Statements[statement.account_name][#Statements[statement.account_name] + 1] = statement
+if statements then
+    for _, statement in ipairs(statements) do
+        if statement.account_name == 'checking' then
+            if not Statements[statement.citizenid] then Statements[statement.citizenid] = {} end
+            if not Statements[statement.citizenid][statement.account_name] then Statements[statement.citizenid][statement.account_name] = {} end
+            Statements[statement.citizenid][statement.account_name][#Statements[statement.citizenid][statement.account_name] + 1] = statement
+        else
+            if not Statements[statement.account_name] then Statements[statement.account_name] = {} end
+            Statements[statement.account_name][#Statements[statement.account_name] + 1] = statement
+        end
     end
 end
 
