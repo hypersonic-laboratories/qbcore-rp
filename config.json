@@ -24,6 +24,8 @@
     "qb-deliveryjob",
     "qb-ambulancejob",
     "qb-fuel",
-    "qb-admin"
+    "qb-admin",
+    "qb-fishing",
+    "qb-mining"
   ]
 }
