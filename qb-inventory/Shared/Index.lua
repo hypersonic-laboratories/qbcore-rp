@@ -14,7 +14,7 @@ Config = {
 
     Keybinds = {
         Open = 'Tab',
-        Hotbar = 'X',
+        Hotbar = 'Q',
     },
 
     CleanupDropTime = 15,    -- in minutes

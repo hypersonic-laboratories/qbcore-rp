@@ -1,4 +1,4 @@
-local Lang = require("Shared/locales/en")
+local Lang = require('Shared/locales/en')
 local heldDrop = nil
 CurrentDropActor = nil
 CurrentDrop = nil
@@ -13,7 +13,7 @@ CurrentDrop = nil
 				AddTargetEntity(bag, {
 					options = {
 						{
-							icon = "fas fa-backpack",
+							icon = "backpack",
 							label = Lang:t("menu.o_bag"),
 							action = function()
 								TriggerServerEvent("qb-inventory:server:openDrop", k)
@@ -31,9 +31,9 @@ end ]]
 
 -- Events
 
-RegisterClientEvent("qb-inventory:client:openDrop", function(data)
+RegisterClientEvent('qb-inventory:client:openDrop', function(data)
 	CurrentDrop = data.dropId
-	TriggerServerEvent("qb-inventory:server:openDrop", data.dropId)
+	TriggerServerEvent('qb-inventory:server:openDrop', data.dropId)
 end)
 
 RegisterClientEvent('qb-inventory:client:holdDrop', function(dropId)
@@ -46,6 +46,6 @@ end)
 Input.BindKey('G', function()
 	if not heldDrop then return end
 	exports['qb-core']:HideText()
-	TriggerServerEvent("qb-inventory:server:updateDrop", heldDrop)
+	TriggerServerEvent('qb-inventory:server:updateDrop', heldDrop)
 	heldDrop = nil
 end)

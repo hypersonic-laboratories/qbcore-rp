@@ -27,7 +27,7 @@ end
 local TargetOptions = {
     options = {
         {
-            icon = 'fas fa-hammer',
+            icon = 'hammer',
             label = 'Mine Rock',
             type = 'client',
             event = 'qb-mining:client:startMining'

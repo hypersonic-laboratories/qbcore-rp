@@ -4,12 +4,12 @@ for i = 1, #Config.pumpModels do
         distance = 1000,
         options = {
             {
-                icon = 'fas fa-oil-can',
+                icon = 'oil-can',
                 label = 'Fuel Can',
                 event = 'qb-fuel:',
             },
             {
-                icon = 'fas fa-gas-pump',
+                icon = 'gas-pump',
                 label = 'Refuel',
                 event = 'qb-fuel:',
             }

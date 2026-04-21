@@ -22,7 +22,7 @@ local function RegisterApartmentEntranceTarget(apartmentName, apartmentData)
 	if apartmentName == ClosestApartment and IsOwned then
 		options = {
 			{
-				icon = 'fas fa-door-open',
+				icon = 'door-open',
 				label = Lang:t('text.enter'),
 				type = 'server',
 				event = 'qb-apartments:server:EnterApartment',
@@ -32,7 +32,7 @@ local function RegisterApartmentEntranceTarget(apartmentName, apartmentData)
 	else
 		options = {
 			{
-				icon = 'fas fa-hotel',
+				icon = 'hotel',
 				label = Lang:t('text.move_here'),
 				type = 'server',
 				event = 'qb-apartments:server:UpdateApartment',
@@ -44,7 +44,7 @@ local function RegisterApartmentEntranceTarget(apartmentName, apartmentData)
 	options[#options + 1] = {
 		type = 'client',
 		event = 'qb-apartments:client:DoorbellMenu',
-		icon = 'fas fa-concierge-bell',
+		icon = 'concierge-bell',
 		label = Lang:t('text.ring_doorbell'),
 	}
 
@@ -108,13 +108,13 @@ local function SetInApartmentTargets(apartmentName)
 	)
 	RegisterInApartmentTarget('entrancePos', entrancePos, 0, {
 		{
-			icon = 'fas fa-door-open',
+			icon = 'clipboard-list',
 			label = Lang:t('text.open_door'),
 			event = 'qb-apartments:client:DoorRequestMenu',
 			CurrentApartment = CurrentApartment,
 		},
 		{
-			icon = 'fas fa-door-open',
+			icon = 'door-open',
 			label = Lang:t('text.leave'),
 			type = 'server',
 			event = 'qb-apartments:server:LeaveApartment',
@@ -123,7 +123,7 @@ local function SetInApartmentTargets(apartmentName)
 	})
 	RegisterInApartmentTarget('stashPos', stashPos, 0, {
 		{
-			icon = 'fas fa-box-open',
+			icon = 'box',
 			label = Lang:t('text.open_stash'),
 			type = 'server',
 			event = 'qb-apartments:server:OpenStash',
@@ -134,13 +134,13 @@ local function SetInApartmentTargets(apartmentName)
 		{
 			type = 'client',
 			event = 'qb-apartments:client:ChangeOutfit',
-			icon = 'fas fa-tshirt',
+			icon = 'shirt',
 			label = Lang:t('text.change_outfit'),
 		},
 	})
 	RegisterInApartmentTarget('logoutPos', logoutPos, 0, {
 		{
-			icon = 'fas fa-sign-out-alt',
+			icon = 'log-out',
 			label = Lang:t('text.logout'),
 			type = 'server',
 			event = 'qb-apartments:server:LogoutApartment',

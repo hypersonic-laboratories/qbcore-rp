@@ -152,26 +152,44 @@ body {
 
 .button {
     width: auto;
-    height: 10%;
+    height: auto;
+    min-height: 48px;
     background: var(--md-surface-container);
     color: var(--md-on-surface);
-    margin: auto;
+    margin: 0.5rem 10px;
     position: relative;
-    top: 10%;
-    margin-top: 0.5rem;
     overflow: hidden;
-    padding: 0.45rem;
+    padding: 0.5rem 0.75rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
     box-shadow: var(--md-elevation-1);
+    border-radius: var(--md-radius-small);
     cursor: pointer;
 }
 
 .icon {
     display: flex;
     align-items: center;
-    position: relative;
-    justify-content: left;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.icon svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
 }
 
 .button:hover {

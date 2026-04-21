@@ -136,7 +136,7 @@ Timer.SetTimeout(function()
             '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
             {
                 {
-                    icon = 'fas fa-university',
+                    icon = 'university',
                     label = 'Open Bank',
                     event = 'qb-banking:client:openBank',
                 }
@@ -149,7 +149,7 @@ Timer.SetTimeout(function()
         exports['qb-target']:AddTargetModel(atmModel, {
             options = {
                 {
-                    icon = 'fas fa-university',
+                    icon = 'university',
                     label = 'Open ATM',
                     --item = 'bank_card',
                     event = 'qb-banking:client:openATM',

@@ -16,7 +16,7 @@ local function setupTargets()
             distance = 1000,
         }, {
             {
-                icon = 'fas fa-money-bill',
+                icon = 'money-bill',
                 label = 'Manage Financed Vehicles',
                 type = 'server',
                 event = 'qb-vehicleshop:server:manageFinancedVehicles',
@@ -31,20 +31,20 @@ local function setupTargets()
                 {
                     type = 'server',
                     event = 'qb-vehicleshop:server:testDrive',
-                    icon = 'fas fa-car',
+                    icon = 'car',
                     label = Lang:t('menus.test_header'),
                     shop = shop,
                     index = i
                 },
                 {
-                    icon = 'fas fa-shuffle',
+                    icon = 'shuffle',
                     label = 'Swap Vehicle',
                     event = 'qb-vehicleshop:client:vehMenu',
                     shop = shop,
                     index = i
                 },
                 {
-                    icon = 'fas fa-basket-shopping',
+                    icon = 'basket-shopping',
                     label = 'Purchase Vehicle',
                     type = 'server',
                     event = 'qb-vehicleshop:server:purchaseVehicle',
@@ -93,7 +93,7 @@ RegisterClientEvent('qb-vehicleshop:client:vehMenu', function(data)
         {
             isMenuHeader = true,
             header = 'Vehicles',
-            icon = 'fas fa-car',
+            icon = 'car',
         }
     }
 

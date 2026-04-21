@@ -20,7 +20,7 @@ local function setupPeds(peds)
             options = {
                 {
                     label = Lang:t('info.start_delivering'),
-                    icon = 'fas fa-boxes-stacked',
+                    icon = 'boxes-stacked',
                     job = Config.Job,
                     type = 'server',
                     event = 'qb-deliveryjob:server:startDelivering',
@@ -28,7 +28,7 @@ local function setupPeds(peds)
                 },
                 {
                     label = Lang:t('info.finish_delivering'),
-                    icon = 'fas fa-boxes-stacked',
+                    icon = 'boxes-stacked',
                     job = Config.Job,
                     type = 'client',
                     event = 'qb-deliveryjob:client:finishDelivering',
@@ -73,7 +73,7 @@ RegisterClientEvent('qb-deliveryjob:client:setupVehicleTarget', function(Vehicle
         options = {
             {
                 label = Lang:t('info.pickup_box'),
-                icon = 'fas fa-boxes-stacked',
+                icon = 'boxes-stacked',
                 job = Config.Job,
                 type = 'client',
                 event = 'qb-deliveryjob:client:pickupBox',
@@ -117,7 +117,7 @@ RegisterClientEvent('qb-deliveryjob:client:setCurrentLocation', function(Locatio
     CurrentLocation.Coords = Location
 
     -- Update UI
-    exports['qb-core']:DrawText(Lang:t('status.location_info', {Current = CurrentStop, Max = MaxStops}))
+    exports['qb-core']:DrawText(Lang:t('status.location_info', { Current = CurrentStop, Max = MaxStops }))
 end)
 
 RegisterClientEvent('qb-deliveryjob:client:finishDelivering', function()

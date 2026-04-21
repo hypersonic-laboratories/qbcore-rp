@@ -18,7 +18,7 @@ end
 local TargetOptions = {
     options = {
         {
-            icon = 'fas fa-fish',
+            icon = 'fish',
             label = 'Start Fishing',
             type = 'client',
             event = 'qb-fishing:client:startFishing'

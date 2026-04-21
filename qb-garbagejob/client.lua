@@ -3,7 +3,7 @@ local Lang = require('locales/en')
 exports['qb-target']:AddTargetModel('SM_Dumpster', {
     options = {
         {
-            icon = 'fas fa-box',
+            icon = 'box',
             label = Lang:t('target.collect_garbage'),
             type = 'server',
             event = 'qb-garbagejob:server:grabBag',
@@ -17,7 +17,7 @@ exports['qb-target']:AddTargetModel('GarbageTruck', {
     options = {
         {
             label = Lang:t('target.deposit_garbage'),
-            icon = 'fas fa-truck-ramp-box',
+            icon = 'truck-ramp-box',
             type = 'server',
             event = 'qb-garbagejob:server:loadBag',
             job = 'garbage',
@@ -37,14 +37,14 @@ local function setupPeds()
                     type = 'server',
                     event = 'QBCore:ToggleDuty',
                     label = Lang:t('target.toggle_duty'),
-                    icon = 'fas fa-clipboard',
+                    icon = 'clipboard',
                     job = 'garbage',
                 },
                 {
                     type = 'server',
                     event = 'qb-garbagejob:server:startJob',
                     label = Lang:t('target.start_job'),
-                    icon = 'fas fa-truck-field',
+                    icon = 'truck-field',
                     job = 'garbage',
                     depot = jobPeds[i].depot
                 },
@@ -52,7 +52,7 @@ local function setupPeds()
                     type = 'server',
                     event = 'qb-garbagejob:server:completeJob',
                     label = Lang:t('target.complete_route'),
-                    icon = 'fas fa-circle-check',
+                    icon = 'circle-check',
                     job = 'garbage',
                 }
             }

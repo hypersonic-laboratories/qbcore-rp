@@ -360,7 +360,7 @@ for i = 1, #Config.Locations['duty'] do
                 type = 'server',
                 event = 'QBCore:ToggleDuty',
                 label = 'Toggle Duty',
-                icon = 'fas fa-clipboard',
+                icon = 'clipboard',
                 --jobType = 'leo'
             },
         }
@@ -379,7 +379,7 @@ for i = 1, #Config.Locations['vehicle'] do
             {
                 event = 'qb-policejob:client:vehicleMenu',
                 label = Lang:t('menu.pol_garage'),
-                icon = 'fas fa-car',
+                icon = 'car',
                 locationIndex = i,
                 --jobType = 'leo'
             },
@@ -400,7 +400,7 @@ for i = 1, #Config.Locations['stash'] do
                 type = 'server',
                 event = 'qb-policejob:server:openStash',
                 label = Lang:t('target.open_personal_stash'),
-                icon = 'fas fa-box',
+                icon = 'box',
                 --jobType = 'leo'
             },
         }
@@ -416,7 +416,7 @@ for i = 1, #Config.Locations['evidence'] do
                 type = 'client',
                 event = 'qb-policejob:client:evidence',
                 label = Lang:t('target.open_evidence_stash'),
-                icon = 'fas fa-box-open',
+                icon = 'box-open',
                 --jobType = 'leo'
             },
         }
@@ -436,7 +436,7 @@ for i = 1, #Config.Locations['fingerprint'] do
                 type = 'server',
                 event = 'qb-policejob:server:openFingerprint',
                 label = Lang:t('target.open_fingerprint'),
-                icon = 'fas fa-fingerprint',
+                icon = 'fingerprint',
                 --jobType = 'leo'
             },
         }
@@ -447,7 +447,7 @@ exports['qb-target']:AddTargetModel('SM_Door_RR_PoliceCar', {
     options = {
         {
             label = 'Take Out Vehicle',
-            icon = 'fas fa-person',
+            icon = 'person',
             type = 'server',
             event = 'qb-policejob:server:takevehicle',
             jobType = 'leo',
@@ -461,7 +461,7 @@ exports['qb-target']:AddTargetModel('SM_Door_RL_PoliceCar', {
     options = {
         {
             label = 'Take Out Vehicle',
-            icon = 'fas fa-person',
+            icon = 'person',
             type = 'server',
             event = 'qb-policejob:server:takevehicle',
             jobType = 'leo',
@@ -477,49 +477,49 @@ exports['qb-target']:AddGlobalPlayer({
             type = 'client',
             event = 'qb-prison:client:jail',
             label = 'Jail',
-            icon = 'fas fa-user-lock',
+            icon = 'user-lock',
             jobType = 'leo',
         },
         {
             type = 'server',
             event = 'qb-policejob:server:info',
             label = 'View Info',
-            icon = 'fas fa-question',
+            icon = 'question',
             jobType = 'leo',
         },
         {
             type = 'server',
             event = 'qb-policejob:server:search',
             label = 'Search',
-            icon = 'fas fa-magnifying-glass',
+            icon = 'magnifying-glass',
             jobType = 'leo',
         },
         {
             type = 'client',
             event = 'qb-policejob:client:escort',
             label = 'Escort',
-            icon = 'fas fa-user-group',
+            icon = 'user-group',
             jobType = 'leo',
         },
         {
             type = 'server',
             event = 'qb-policejob:server:handcuff',
             label = 'Handcuff',
-            icon = 'fas fa-handcuffs',
+            icon = 'handcuffs',
             jobType = 'leo',
         },
         {
             type = 'server',
             event = 'qb-policejob:server:putvehicle',
             label = 'Put In Vehicle',
-            icon = 'fas fa-car',
+            icon = 'car',
             jobType = 'leo',
         },
         {
             type = 'client',
             event = 'qb-policejob:client:checkStatus',
             label = 'Check Status',
-            icon = 'fas fa-question',
+            icon = 'question',
             jobType = 'leo',
         }
     },

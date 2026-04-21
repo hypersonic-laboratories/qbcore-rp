@@ -2,6 +2,47 @@ document.addEventListener("DOMContentLoaded", function () {
     let buttonParams = [];
     let images = [];
 
+    // ── Lucide icon helper ────────────────────────────────
+    // Same pattern as qb-hud: converts kebab-case icon name
+    // to inline SVG children using the Lucide UMD bundle.
+    function lucideIcon(name) {
+        if (!name || typeof lucide === "undefined") return "";
+        const key = name.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase());
+        const icon = lucide[key];
+        if (!icon) {
+            console.warn(`[QB Menu] Lucide icon "${name}" not found`);
+            return "";
+        }
+        return (icon || [])
+            .map(
+                ([tag, attrs]) =>
+                    `<${tag} ${Object.entries(attrs)
+                        .map(([k, v]) => `${k}="${v}"`)
+                        .join(" ")}/>`,
+            )
+            .join("");
+    }
+
+    function renderIcon(icon) {
+        if (!icon) return "";
+
+        // URL / image path — render as <img>
+        if (icon.startsWith("http") || icon.includes("/") || icon.includes(".")) {
+            return `<img src="${icon}" width="20px" onerror="this.onerror=null; this.remove();">`;
+        }
+
+        // Lucide icon name (kebab-case, e.g. "shield", "map-pin")
+        const paths = lucideIcon(icon);
+        if (paths) {
+            return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.75"
+                stroke-linecap="round" stroke-linejoin="round"
+                style="flex-shrink:0;">${paths}</svg>`;
+        }
+
+        return "";
+    }
+
     function openMenu(buttons) {
         let html = "";
         buttons.forEach((item, index) => {
@@ -28,10 +69,10 @@ document.addEventListener("DOMContentLoaded", function () {
     function getButtonRender(header, message = null, id, isMenuHeader, isDisabled, icon) {
         return `
             <div class="${isMenuHeader ? "title" : "button"} ${isDisabled ? "disabled" : ""}" id="${id}">
-                <div class="icon"> <img src=${icon} width=30px onerror="this.onerror=null; this.remove();"> <i class="${icon}" onerror="this.onerror=null; this.remove();"></i> </div>
+                <div class="icon">${renderIcon(icon)}</div>
                 <div class="column">
-                <div class="header"> ${header}</div>
-                ${message ? `<div class="text">${message}</div>` : ""}
+                    <div class="header">${header}</div>
+                    ${message ? `<div class="text">${message}</div>` : ""}
                 </div>
             </div>
         `;

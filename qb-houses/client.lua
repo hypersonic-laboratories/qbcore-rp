@@ -132,7 +132,7 @@ local function RegisterEntranceTarget(entranceId, entranceData)
 
     if entranceId == ClosestEntranceId and OwnedEntrances[ClosestEntranceId] then
         options[#options + 1] = {
-            icon = 'fas fa-door-open',
+            icon = 'door-open',
             label = Lang:t('text.enter'),
             type = 'client',
             event = 'qb-houses:client:EnterEntrance',
@@ -141,7 +141,7 @@ local function RegisterEntranceTarget(entranceId, entranceData)
     else
         if entranceData.entranceType == 'instanced' then
             options[#options + 1] = {
-                icon = 'fas fa-hotel',
+                icon = 'hotel',
                 label = Lang:t('text.purchase'),
                 type = 'client',
                 event = 'qb-houses:client:PurchaseMenu',
@@ -150,7 +150,7 @@ local function RegisterEntranceTarget(entranceId, entranceData)
         else
             -- TO DO:
             options[#options + 1] = {
-                icon = 'fas fa-home',
+                icon = 'home',
                 label = Lang:t('text.open_door') or 'Property',
                 type = 'client',
                 event = 'qb-houses:client:WorldPropertyMenu',
@@ -177,7 +177,7 @@ local function RegisterEntranceTarget(entranceId, entranceData)
             local garageOptions = {
                 {
                     label = 'Return Vehicle',
-                    icon = 'fas fa-warehouse',
+                    icon = 'warehouse',
                     type = 'server',
                     event = 'qb-houses:server:StoreVehicle',
                     entranceId = entranceId
@@ -206,14 +206,14 @@ end
 local function SetInPropertyTargets(entrancePos, interiorRef)
     local options = {
         {
-            icon = 'fas fa-door-open',
+            icon = 'door-open',
             label = Lang:t('text.leave'),
             type = 'server',
             event = 'qb-houses:server:LeaveProperty',
             CurrentProperty = CurrentProperty,
         },
         {
-            icon = 'fas fa-car',
+            icon = 'car',
             label = Lang:t('text.go_to_garage'),
             type = 'server',
             event = 'qb-houses:server:GoToGarage',
@@ -223,7 +223,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
 
     if IsCurrentPropertyOwner then
         options[#options + 1] = {
-            icon = 'fas fa-couch',
+            icon = 'couch',
             label = Lang:t('text.furniture'),
             type = 'client',
             event = 'qb-houses:client:editFurniture',
@@ -231,7 +231,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
         }
 
         options[#options + 1] = {
-            icon = 'fas fa-users',
+            icon = 'users',
             label = Lang:t('text.default_property'),
             type = 'server',
             event = 'qb-houses:server:setDefaultProperty',
@@ -251,7 +251,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
         )
         RegisterInPropertyTarget('stashPos', stashPos, {
             {
-                icon = 'fas fa-box-open',
+                icon = 'box-open',
                 label = Lang:t('text.open_stash'),
                 type = 'server',
                 event = 'qb-houses:server:OpenStash',
@@ -268,7 +268,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
         )
         RegisterInPropertyTarget('furniturePos', furniturePos, {
             {
-                icon = 'fas fa-box-open',
+                icon = 'box-open',
                 label = Lang:t('text.open_furn_stash'),
                 type = 'server',
                 event = 'qb-houses:server:OpenFurnitureStash',
@@ -285,7 +285,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
         )
         RegisterInPropertyTarget('outfitsPos', outfitsPos, {
             {
-                icon = 'fas fa-tshirt',
+                icon = 'tshirt',
                 label = Lang:t('text.change_outfit'),
                 type = 'client',
                 event = 'qb-houses:client:ChangeOutfit',
@@ -301,7 +301,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
         )
         RegisterInPropertyTarget('logoutPos', logoutPos, {
             {
-                icon = 'fas fa-sign-out-alt',
+                icon = 'sign-out-alt',
                 label = Lang:t('text.logout'),
                 type = 'server',
                 event = 'qb-houses:server:LogoutProperty',
@@ -318,7 +318,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
         )
         RegisterInPropertyTarget('kitchenPos', kitchenPos, {
             {
-                icon = 'fas fa-utensils',
+                icon = 'utensils',
                 label = Lang:t('text.use_kitchen'),
                 type = 'client',
                 event = 'qb-houses:client:UseKitchen',
@@ -334,7 +334,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
         )
         RegisterInPropertyTarget('fridgePos', fridgePos, {
             {
-                icon = 'fas fa-ice-cream',
+                icon = 'ice-cream',
                 label = Lang:t('text.open_fridge'),
                 type = 'server',
                 event = 'hl-fishing:server:OpenFridge',
@@ -351,7 +351,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
         )
         RegisterInPropertyTarget('totemPos', totemPos, {
             {
-                icon = 'fas fa-spa',
+                icon = 'spa',
                 label = Lang:t('text.open_totem'),
                 type = 'server',
                 event = 'hl-crafting:server:OpenTotem',
@@ -676,14 +676,14 @@ end
 RegisterClientEvent('qb-houses:client:GarageInteractions', function(garageCoords)
     local options = {
         {
-            icon = 'fas fa-door-open',
+            icon = 'door-open',
             label = Lang:t('text.return_to_apartment'),
             type = 'server',
             event = 'qb-houses:server:ReturnToProperty',
             CurrentProperty = CurrentProperty,
         },
         {
-            icon = 'fas fa-door-open',
+            icon = 'door-open',
             label = Lang:t('text.exit_garage'),
             type = 'server',
             event = 'qb-houses:server:LeaveProperty',

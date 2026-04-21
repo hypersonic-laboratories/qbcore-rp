@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const config = {
-        StandardEyeIcon: "fas fa-eye",
+        StandardEyeIcon: "eye",
         StandardColor: "var(--md-on-surface, white)",
         SuccessColor: "var(--md-success, #386a20)",
     };
@@ -9,10 +9,43 @@ document.addEventListener("DOMContentLoaded", function () {
     const targetLabel = document.getElementById("target-label");
     const TargetEyeStyleObject = targetEye.style;
 
+    // ── Lucide icon helper ────────────────────────────────
+    function lucideIcon(name) {
+        if (!name || typeof lucide === "undefined") return "";
+        const key = name.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase());
+        const icon = lucide[key];
+        if (!icon) {
+            console.warn(`[Target] Lucide icon "${name}" not found`);
+            return "";
+        }
+        return (icon || [])
+            .map(
+                ([tag, attrs]) =>
+                    `<${tag} ${Object.entries(attrs)
+                        .map(([k, v]) => `${k}="${v}"`)
+                        .join(" ")}/>`,
+            )
+            .join("");
+    }
+
+    function makeSVG(name, extraStyle = "") {
+        const paths = lucideIcon(name);
+        if (!paths) return "";
+        return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1.75"
+            stroke-linecap="round" stroke-linejoin="round"
+            style="flex-shrink:0;${extraStyle}">${paths}</svg>`;
+    }
+
+    function setEyeIcon(iconName) {
+        targetEye.innerHTML = makeSVG(iconName, "width:1em;height:1em;");
+    }
+
     function OpenTarget() {
         targetLabel.textContent = "";
         targetEye.style.display = "block";
-        targetEye.className = config.StandardEyeIcon;
+        targetEye.classList.remove("target-success");
+        setEyeIcon(config.StandardEyeIcon);
         TargetEyeStyleObject.color = config.StandardColor;
     }
 
@@ -27,27 +60,27 @@ document.addEventListener("DOMContentLoaded", function () {
             const targetOption = document.createElement("div");
             targetOption.id = `target-option-${index}`;
             targetOption.className = "target-option";
+
             const targetIcon = document.createElement("span");
             targetIcon.id = `target-icon-${index}`;
-            const icon = document.createElement("i");
-            icon.className = itemData.icon;
-            targetIcon.appendChild(icon);
-            targetIcon.appendChild(document.createTextNode(" "));
+            targetIcon.className = "target-option-icon";
+            targetIcon.innerHTML = makeSVG(itemData.icon);
             targetOption.appendChild(targetIcon);
-            
+
             const labelContainer = document.createElement("div");
             labelContainer.className = "target-label-container";
-            const mainLabel = document.createElement("div")
+
+            const mainLabel = document.createElement("div");
             mainLabel.textContent = itemData.label;
             labelContainer.appendChild(mainLabel);
-            
+
             if (itemData.subLabel) {
                 const subLabel = document.createElement("div");
                 subLabel.className = "target-sublabel";
                 subLabel.textContent = itemData.subLabel;
                 labelContainer.appendChild(subLabel);
             }
-            
+
             targetOption.appendChild(labelContainer);
             targetLabel.appendChild(targetOption);
         }
@@ -56,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function FoundTarget(data) {
         if (!data) return;
         if (data.icon) {
-            targetEye.className = data.icon;
+            setEyeIcon(data.icon);
         }
         TargetEyeStyleObject.color = config.SuccessColor;
         targetEye.classList.add("target-success");
@@ -69,14 +102,14 @@ document.addEventListener("DOMContentLoaded", function () {
     function LeftTarget() {
         targetLabel.textContent = "";
         TargetEyeStyleObject.color = config.StandardColor;
-        targetEye.className = config.StandardEyeIcon;
+        setEyeIcon(config.StandardEyeIcon);
         targetEye.classList.remove("target-success");
     }
 
     function handleMouseDown(event) {
         // Left click
         if (event.button === 0) {
-            const targetOption = event.target.closest('.target-option');
+            const targetOption = event.target.closest(".target-option");
             if (targetOption && targetOption.id) {
                 const split = targetOption.id.split("-");
                 if (split[0] === "target" && split[1] !== "eye") {

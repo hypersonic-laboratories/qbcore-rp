@@ -138,7 +138,7 @@ for i = 1, #Config.Cityhalls do
         '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
-                icon = 'fas fa-city',
+                icon = 'city',
                 label = 'Open City Hall',
                 event = 'qb-cityhall:client:openCityhallMenu',
             }

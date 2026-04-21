@@ -194,7 +194,7 @@ for i = 1, #Config.Locations['checking'] do
         '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
-                icon = 'fas fa-clipboard-check',
+                icon = 'clipboard-check',
                 label = 'Check In',
                 type = 'server',
                 event = 'qb-ambulancejob:server:checkIn',
@@ -214,7 +214,7 @@ for i = 1, #Config.Locations['duty'] do
         '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
-                icon = 'fas fa-clipboard',
+                icon = 'clipboard',
                 label = 'Toggle Duty',
                 type = 'server',
                 event = 'QBCore:ToggleDuty',
@@ -234,7 +234,7 @@ for i = 1, #Config.Locations['stash'] do
         '/QBCoreAssets/Meshes/SM_MedicalBag.SM_MedicalBag', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
-                icon = 'fas fa-box',
+                icon = 'box',
                 label = 'Open Stash',
                 type = 'server',
                 event = 'qb-ambulancejob:server:openStash',
@@ -254,7 +254,7 @@ for i = 1, #Config.Locations['vehicle'] do
         '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
-                icon = 'fas fa-car',
+                icon = 'car',
                 label = 'Retrieve Vehicle',
                 event = 'qb-ambulancejob:client:vehicleMenu',
                 -- job = 'ambulance'
@@ -273,7 +273,7 @@ for i = 1, #Config.Locations['helicopter'] do
         '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
         {
             {
-                icon = 'fas fa-helicopter',
+                icon = 'helicopter',
                 label = 'Retrieve Helicopter',
                 event = 'qb-ambulancejob:client:helicopterMenu',
                 -- job = 'ambulance'
@@ -288,28 +288,28 @@ exports['qb-target']:AddGlobalPlayer({
     distance = 1000,
     options = {
         {
-            icon = 'fas fa-heart-pulse',
+            icon = 'heart-pulse',
             label = 'Check Health Status',
             type = 'server',
             event = 'qb-hospitaljob:server:status',
             -- job = 'ambulance'
         },
         {
-            icon = 'fas fa-user-doctor',
+            icon = 'user-doctor',
             label = 'Revive',
             type = 'server',
             event = 'qb-hospitaljob:server:revive',
             -- job = 'ambulance'
         },
         {
-            icon = 'fas fa-bandage',
+            icon = 'bandage',
             label = 'Bandage',
             type = 'server',
             event = 'qb-hospitaljob:server:bandage',
             -- job = 'ambulance'
         },
         {
-            icon = 'fas fa-user-group',
+            icon = 'user-group',
             label = 'Escort',
             type = 'server',
             event = 'qb-hospitaljob:server:escort',

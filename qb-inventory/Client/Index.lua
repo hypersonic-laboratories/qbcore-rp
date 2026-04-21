@@ -217,7 +217,7 @@ for _, model in pairs(Config.VendingObjects) do
 			{
 				type = 'server',
 				event = 'qb-inventory:server:openVending',
-				icon = 'fa-solid fa-cash-register',
+				icon = 'cash-register',
 				label = Lang:t('menu.vending'),
 			},
 		},
