@@ -95,25 +95,31 @@ function getContainer() {
 // ── Icon via Lucide ──────────────────────────────────────
 
 function makeSVG(iconName) {
-    const iconData = lucide.icons[iconName];
-    if (!iconData) return "";
-    const [tag, attrs, children] = iconData;
+    // Lucide UMD structure: lucide[PascalName] = [defaultAttrs, children]
+    const key = iconName.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase());
+    const iconData = lucide[key];
+
+    if (!iconData) return null;
+
     const svgNS = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(svgNS, "svg");
     svg.setAttribute("xmlns", svgNS);
-    svg.setAttribute("width", "15");
-    svg.setAttribute("height", "15");
+    svg.setAttribute("width", "18");
+    svg.setAttribute("height", "18");
     svg.setAttribute("viewBox", "0 0 24 24");
     svg.setAttribute("fill", "none");
     svg.setAttribute("stroke", "currentColor");
-    svg.setAttribute("stroke-width", "1.75");
+    svg.setAttribute("stroke-width", "2");
     svg.setAttribute("stroke-linecap", "round");
     svg.setAttribute("stroke-linejoin", "round");
-    (children || []).forEach(([childTag, childAttrs]) => {
+
+    // In the local UMD version, iconData IS the children array
+    (iconData || []).forEach(([childTag, childAttrs]) => {
         const child = document.createElementNS(svgNS, childTag);
         Object.entries(childAttrs || {}).forEach(([k, v]) => child.setAttribute(k, v));
         svg.appendChild(child);
     });
+
     return svg;
 }
 
