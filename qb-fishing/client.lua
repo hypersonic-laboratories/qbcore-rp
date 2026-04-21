@@ -4,12 +4,8 @@ local currentWaterType = nil
 
 local fishing_ui = WebUI('qb-fishing', 'qb-fishing/html/index.html')
 if fishing_ui then
-    fishing_ui:SetVisibility(UI_HIDDEN)
-
     fishing_ui:RegisterEventHandler('fishingDone', function(success)
-        fishing_ui:SetVisibility(UI_HIDDEN)
         fishing_ui:SetInputMode(0)
-
         if success then
             TriggerServerEvent('qb-fishing:server:completeFishing', currentWaterType)
         else
@@ -17,8 +13,6 @@ if fishing_ui then
         end
         isFishing = false
     end)
-
-
 end
 
 local TargetOptions = {
@@ -41,7 +35,7 @@ local function SpawnFishingMarkers()
                 Rotator(0, 0, 0),
                 '/Game/HL_assets/InventoryItems/SM_MarkerCylinder.SM_MarkerCylinder'
             )
-            
+
             if mesh and mesh.Object then
                 localMarkers[mesh.Object] = {
                     waterTypeId = waterType.id,
@@ -67,11 +61,10 @@ RegisterClientEvent('qb-fishing:client:startFishing', function(data)
 
     currentWaterType = mData.waterTypeId
     isFishing = true
-    
+
     TriggerServerEvent('qb-fishing:server:startFishingItem')
-    
+
     fishing_ui:SendEvent('openUI')
-    fishing_ui:SetVisibility(UI_VISIBLE)
     fishing_ui:BringToFront()
     fishing_ui:SetInputMode(1)
 end)

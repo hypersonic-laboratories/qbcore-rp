@@ -2,15 +2,11 @@ local isMining = false
 local localRocks = {}
 local currentTargetEntity = nil
 local currentRockItem = nil
-
 local mining_ui = WebUI('qb-mining', 'qb-mining/html/index.html')
+
 if mining_ui then
-    mining_ui:SetVisibility(UI_HIDDEN)
-
     mining_ui:RegisterEventHandler('miningDone', function(success)
-        mining_ui:SetVisibility(UI_HIDDEN)
         mining_ui:SetInputMode(0)
-
         if success then
             if Config.NetworkedRocks then
                 TriggerServerEvent('qb-mining:server:completeMine', { entity = currentTargetEntity })
@@ -139,7 +135,6 @@ RegisterClientEvent('qb-mining:client:startMining', function(data)
 
     if mining_ui then
         mining_ui:SendEvent('openUI')
-        mining_ui:SetVisibility(UI_VISIBLE)
         mining_ui:BringToFront()
         mining_ui:SetInputMode(1)
     end
