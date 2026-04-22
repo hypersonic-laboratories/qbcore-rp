@@ -15,51 +15,49 @@ if fishing_ui then
     end)
 end
 
-local TargetOptions = {
-    options = {
-        {
-            icon = 'fish',
-            label = 'Start Fishing',
-            type = 'client',
-            event = 'qb-fishing:client:startFishing'
-        }
-    },
-    distance = 400
-}
-
 local function SpawnFishingMarkers()
+    local zoneIndex = 0
     for _, waterType in pairs(Config.waterTypes) do
         for _, zone in ipairs(waterType.zones) do
+            zoneIndex = zoneIndex + 1
+            local zoneName = 'fishing_zone_' .. zoneIndex
+
             local mesh = StaticMesh(
                 zone.coords,
                 Rotator(0, 0, 0),
                 '/Game/HL_assets/InventoryItems/SM_MarkerCylinder.SM_MarkerCylinder'
             )
 
-            if mesh and mesh.Object then
-                localMarkers[mesh.Object] = {
+            exports['qb-target']:AddSphereZone(zoneName, zone.coords, 100, { distance = 400, debug = true }, {
+                {
+                    icon = 'fish',
+                    label = 'Start Fishing',
+                    type = 'client',
+                    event = 'qb-fishing:client:startFishing',
                     waterTypeId = waterType.id,
-                    actor = mesh.Object
                 }
-                exports['qb-target']:AddTargetEntity(mesh.Object, TargetOptions)
-            end
+            })
+
+            localMarkers[#localMarkers + 1] = {
+                actor = mesh and mesh.Object or nil,
+                zoneName = zoneName,
+            }
         end
     end
 end
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
-    SpawnFishingMarkers()
+    Timer.SetTimeout(function()
+        SpawnFishingMarkers()
+    end, 1000)
 end)
 
 RegisterClientEvent('qb-fishing:client:startFishing', function(data)
     if isFishing then return end
     if not fishing_ui then return end
-    if not data or not data.entity then return end
+    if not data or not data.waterTypeId then return end
 
-    local mData = localMarkers[data.entity]
-    if not mData then return end
-
-    currentWaterType = mData.waterTypeId
+    currentWaterType = data.waterTypeId
     isFishing = true
 
     TriggerServerEvent('qb-fishing:server:startFishingItem')
@@ -75,10 +73,11 @@ function onShutdown()
         fishing_ui = nil
     end
 
-    for _, data in pairs(localMarkers) do
-        if data.actor and data.actor:IsValid() then
-            DeleteEntity(data.actor)
+    for _, marker in ipairs(localMarkers) do
+        if marker.actor and marker.actor:IsValid() then
+            DeleteEntity(marker.actor)
         end
+        exports['qb-target']:RemoveZone(marker.zoneName)
     end
     localMarkers = {}
 end

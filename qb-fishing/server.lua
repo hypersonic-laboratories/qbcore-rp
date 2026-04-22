@@ -27,8 +27,8 @@ RegisterServerEvent('qb-fishing:server:completeFishing', function(source, waterT
 
     local caughtFish = waterConfig.reward
 
-    exports['qb-core']:Player(source, 'AddItem', caughtFish, 1)
-    TriggerClientEvent('QBCore:Notify', source, 'You caught a ' .. caughtFish .. '!', 'success')
+    exports['qb-inventory']:AddItem(source, caughtFish, 1)
+    TriggerClientEvent(source, 'QBCore:Notify', 'You caught a ' .. caughtFish .. '!', 'success')
 end)
 
 function onShutdown()
