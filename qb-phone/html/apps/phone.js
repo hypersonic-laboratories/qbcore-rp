@@ -244,6 +244,7 @@ const PhoneApp = {
             } else {
                 CONTACTS[editingContactIndex.value] = next;
             }
+            hEvent('saveContact', next);
             resetContactForm();
             showContactForm.value = false;
         }
@@ -252,6 +253,7 @@ const PhoneApp = {
             const contact = CONTACTS[index];
             if (!contact) return;
             if (!confirm(`Delete ${contact.name}?`)) return;
+            hEvent('deleteContact', { number: contact.number });
             CONTACTS.splice(index, 1);
         }
 

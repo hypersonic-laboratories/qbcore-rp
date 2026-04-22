@@ -12,6 +12,8 @@
         <link rel="stylesheet" href="apps/messages.css" />
         <link rel="stylesheet" href="apps/calculator.css" />
         <link rel="stylesheet" href="apps/gene.css" />
+        <link rel="stylesheet" href="apps/camera.css" />
+        <link rel="stylesheet" href="apps/gallery.css" />
 
         <style>
             svg[data-lucide] {
@@ -99,6 +101,8 @@
                         <messages-app   v-else-if="activeScreen === 'messages'"   @navigate="navigateTo"></messages-app>
                         <calculator-app v-else-if="activeScreen === 'calculator'" @navigate="navigateTo"></calculator-app>
                         <gene-app       v-else-if="activeScreen === 'h'"          @navigate="navigateTo"></gene-app>
+                        <camera-app     v-else-if="activeScreen === 'camera'"     @navigate="navigateTo"></camera-app>
+                        <photos-app     v-else-if="activeScreen === 'photos'"     @navigate="navigateTo"></photos-app>
 
                         <!-- ── Incoming call overlay ── -->
                         <div v-if="incomingCall" class="call-overlay">
@@ -145,6 +149,8 @@
         <script src="apps/messages.js"></script>
         <script src="apps/gene.js"></script>
         <script src="apps/calculator.js"></script>
+        <script src="apps/camera.js"></script>
+        <script src="apps/gallery.js"></script>
         <script src="script.js" defer></script>
     </body>
 </html>

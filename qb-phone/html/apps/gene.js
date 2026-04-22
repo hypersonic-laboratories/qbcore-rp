@@ -281,7 +281,7 @@ const GeneApp = {
 
         function createPost() {
             if (!newPostContent.value.trim()) return;
-            POSTS.unshift({
+            const post = {
                 id: Date.now(),
                 author: 'You',
                 handle: '@you',
@@ -293,7 +293,9 @@ const GeneApp = {
                 reposts: 0,
                 reposted: false,
                 comments: [],
-            });
+            };
+            POSTS.unshift(post);
+            hEvent('createPost', { content: post.content, image: post.image });
             newPostContent.value  = '';
             newPostImageUrl.value = '';
             showGeneComposer.value = false;
@@ -304,6 +306,7 @@ const GeneApp = {
             if (!post) return;
             post.liked = !post.liked;
             post.likes += post.liked ? 1 : -1;
+            hEvent('likePost', { postId: id, liked: post.liked });
         }
 
         function toggleRepost(id) {
@@ -311,6 +314,7 @@ const GeneApp = {
             if (!post) return;
             post.reposted = !post.reposted;
             post.reposts += post.reposted ? 1 : -1;
+            hEvent('repostPost', { postId: id, reposted: post.reposted });
         }
 
         function toggleFollow(authorName) {
@@ -318,18 +322,21 @@ const GeneApp = {
             if (!user) return;
             user.following = !user.following;
             user.followers += user.following ? 1 : -1;
+            hEvent('followUser', { handle: authorName, following: user.following });
         }
 
         function deletePost(id) {
             const idx = POSTS.findIndex(p => p.id === id);
             if (idx !== -1) POSTS.splice(idx, 1);
             if (geneThreadPostId.value === id) geneThreadPostId.value = null;
+            hEvent('deletePost', { postId: id });
         }
 
         function addComment(postId, text) {
             const post = POSTS.find(p => p.id === postId);
             if (!post || !text.trim()) return;
             post.comments.push({ id: Date.now(), author: 'You', handle: '@you', text: text.trim(), time: 'Now' });
+            hEvent('addComment', { postId, text: text.trim() });
             threadCommentDraft.value = '';
         }
 

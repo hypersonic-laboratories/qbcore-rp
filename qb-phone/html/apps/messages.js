@@ -140,6 +140,7 @@ const MessagesApp = {
             const conv = currentConversation.value;
             if (!conv) return;
             conv.messages.push({ id: Date.now(), sender: 'me', text, time: 'Now' });
+            hEvent('sendMessage', { number: conv.number, text });
             messageDraft.value = '';
         }
 

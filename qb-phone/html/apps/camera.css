@@ -1,0 +1,307 @@
+.camera-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+/* ── Flash overlay ── */
+.camera-flash {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 50;
+    transition: opacity 0.05s;
+    border-radius: inherit;
+}
+
+.camera-flash.flashing {
+    opacity: 1;
+}
+
+/* ── Top bar ── */
+.camera-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent);
+}
+
+.camera-top-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    color: #fff;
+    border-radius: 50%;
+    transition: background 0.15s;
+}
+
+.camera-top-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.camera-top-icon {
+    width: 22px;
+    height: 22px;
+}
+
+/* ── Viewfinder ── */
+.camera-viewfinder {
+    flex: 1;
+    background: transparent;
+    position: relative;
+    transition: filter 0.25s ease;
+}
+
+.camera-grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    pointer-events: none;
+}
+
+.camera-grid-cell {
+    border: 0.5px solid rgba(255, 255, 255, 0.18);
+}
+
+.camera-facing-badge {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-family: "Tomorrow", sans-serif;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(0, 0, 0, 0.35);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+}
+
+/* ── Bottom panel ── */
+.camera-bottom {
+    background: rgba(10, 10, 12, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 14px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ── Zoom pills ── */
+.camera-zoom-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.camera-zoom-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 5px 14px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    font-family: "Tomorrow", sans-serif;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.camera-zoom-btn.active {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: transparent;
+    color: #000;
+}
+
+.camera-zoom-btn:not(.active):hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* ── Controls row ── */
+.camera-controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px;
+}
+
+/* Gallery thumbnail */
+.camera-gallery-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.15s;
+}
+
+.camera-gallery-thumb:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.camera-gallery-icon {
+    width: 20px;
+    height: 20px;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.camera-gallery-captured {
+    width: 100%;
+    height: 100%;
+}
+
+/* Shutter button */
+.camera-shutter {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.9);
+    background: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.1s, transform 0.1s;
+}
+
+.camera-shutter:active {
+    transform: scale(0.93);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.camera-shutter-inner {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.1s, opacity 0.1s;
+}
+
+.camera-shutter:active .camera-shutter-inner {
+    transform: scale(0.87);
+    opacity: 0.75;
+}
+
+.camera-shutter--busy {
+    border-color: rgba(255, 255, 255, 0.35);
+    animation: shutter-pulse 0.9s ease-in-out infinite;
+}
+
+.camera-shutter--busy .camera-shutter-inner {
+    opacity: 0.35;
+}
+
+@keyframes shutter-pulse {
+    0%, 100% { border-color: rgba(255, 255, 255, 0.35); }
+    50%       { border-color: rgba(255, 255, 255, 0.7);  }
+}
+
+/* Flip button */
+.camera-flip-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #fff;
+    transition: background 0.15s;
+}
+
+.camera-flip-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.camera-flip-icon {
+    width: 22px;
+    height: 22px;
+}
+
+/* ── Filter pills ── */
+.camera-filter-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.camera-filter-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.camera-filter-dot {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2.5px solid transparent;
+    transition: border-color 0.15s, transform 0.15s;
+}
+
+.camera-filter-btn.active .camera-filter-dot {
+    border-color: #fff;
+    transform: scale(1.08);
+}
+
+.camera-filter-dot-natural {
+    background: linear-gradient(135deg, #c9b99a, #7a9e7e);
+}
+
+.camera-filter-dot-vivid {
+    background: linear-gradient(135deg, #f472b6, #38bdf8);
+}
+
+.camera-filter-dot-cinema {
+    background: linear-gradient(135deg, #c9a227, #1e4060);
+}
+
+.camera-filter-dot-film {
+    background: linear-gradient(135deg, #d4956a, #7c6248);
+}
+
+.camera-filter-label {
+    font-size: 10px;
+    font-family: "Tomorrow", sans-serif;
+    letter-spacing: 0.03em;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.15s;
+}
+
+.camera-filter-btn.active .camera-filter-label {
+    color: #fff;
+}

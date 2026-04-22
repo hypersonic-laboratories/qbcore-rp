@@ -1,0 +1,274 @@
+.gallery-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--md-surface, #18181b);
+    overflow: hidden;
+}
+
+/* ── Header ── */
+.gallery-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px 10px;
+    flex-shrink: 0;
+}
+
+/* ── Grid ── */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    overflow-y: auto;
+    flex: 1;
+    padding: 2px;
+    align-content: start;
+}
+
+.gallery-tile {
+    aspect-ratio: 1;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 0.15s, transform 0.15s;
+}
+
+.gallery-tile:hover {
+    opacity: 0.85;
+}
+
+.gallery-tile:active {
+    transform: scale(0.96);
+}
+
+/* ── Detail view ── */
+.gallery-detail {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.gallery-detail-photo {
+    position: relative;
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+}
+
+.gallery-detail-back {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.gallery-detail-back:hover {
+    background: rgba(0, 0, 0, 0.65);
+}
+
+.gallery-detail-back-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.gallery-detail-timestamp {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    font-size: 11px;
+    font-family: "Tomorrow", sans-serif;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(0, 0, 0, 0.4);
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+/* ── Action bar ── */
+.gallery-detail-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 18px 20px 24px;
+    background: rgba(10, 10, 12, 0.92);
+    flex-shrink: 0;
+}
+
+.gallery-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 14px 28px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: "Tomorrow", sans-serif;
+    color: rgba(255, 255, 255, 0.8);
+    transition: background 0.15s, color 0.15s;
+}
+
+.gallery-action-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+}
+
+.gallery-action-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.gallery-action-delete {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, 0.25);
+    background: rgba(248, 113, 113, 0.08);
+}
+
+.gallery-action-delete:hover {
+    background: rgba(248, 113, 113, 0.18);
+    color: #fca5a5;
+}
+
+/* ── Share sheet ── */
+.gallery-sheet-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: flex-end;
+    z-index: 20;
+}
+
+.gallery-sheet {
+    width: 100%;
+    background: #1c1c1e;
+    border-radius: 20px 20px 0 0;
+    padding: 8px 0 12px;
+    max-height: 70%;
+    display: flex;
+    flex-direction: column;
+}
+
+.gallery-sheet-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 auto 12px;
+}
+
+.gallery-sheet-title {
+    font-size: 13px;
+    font-family: "Tomorrow", sans-serif;
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0 20px 10px;
+    flex-shrink: 0;
+}
+
+.gallery-sheet-list {
+    overflow-y: auto;
+    flex: 1;
+}
+
+.gallery-sheet-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s;
+}
+
+.gallery-sheet-row:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.gallery-sheet-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Tomorrow", sans-serif;
+    font-size: 14px;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.gallery-sheet-contact-copy {
+    flex: 1;
+    min-width: 0;
+}
+
+.gallery-sheet-contact-name {
+    font-size: 14px;
+    font-family: "Tomorrow", sans-serif;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gallery-sheet-contact-number {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 1px;
+}
+
+.gallery-sheet-chevron {
+    width: 16px;
+    height: 16px;
+    color: rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+}
+
+.gallery-sheet-empty {
+    padding: 20px;
+    font-size: 13px;
+    font-family: "Tomorrow", sans-serif;
+    color: rgba(255, 255, 255, 0.35);
+    text-align: center;
+}
+
+.gallery-sheet-cancel {
+    margin: 10px 16px 0;
+    padding: 13px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    font-family: "Tomorrow", sans-serif;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.gallery-sheet-cancel:hover {
+    background: rgba(255, 255, 255, 0.12);
+}

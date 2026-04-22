@@ -25,6 +25,8 @@ createApp({
         MessagesApp,
         GeneApp,
         CalculatorApp,
+        CameraApp,
+        PhotosApp,
     },
 
     setup() {
@@ -67,10 +69,34 @@ createApp({
             if (callTimer) { clearInterval(callTimer); callTimer = null; }
         }
 
+        let captureWasVisible = false;
+
         window.addEventListener("message", (event) => {
             const { name, args = [] } = event.data;
             if (name === "open")  { phoneVisible.value = true;  return; }
             if (name === "close") { phoneVisible.value = false; return; }
+
+            // ── Camera capture lifecycle ──────────────────────────────────────
+            if (name === "hideForCapture") {
+                captureWasVisible     = phoneVisible.value;
+                phoneVisible.value    = false;
+                return;
+            }
+            if (name === "showAfterCapture") {
+                phoneVisible.value = captureWasVisible;
+                return;
+            }
+            if (name === "photoTaken") {
+                const url = args[0];
+                if (url) {
+                    window.PhoneStore.PHOTOS.unshift({
+                        id:       Date.now(),
+                        gradient: `url(${url}) center/cover no-repeat`,
+                        takenAt:  "Just now",
+                    });
+                }
+                return;
+            }
             if (name === "incomingCall") {
                 if (!phoneVisible.value) phoneVisible.value = true;
                 incomingCall.value = { name: args[0], number: args[1] };
@@ -88,6 +114,69 @@ createApp({
                 callTimer = setInterval(() => callDuration.value++, 1000);
                 return;
             }
+            if (name === "messageReceived") {
+                const [senderName, senderNumber, text, time] = args;
+                const { CONVERSATIONS } = window.PhoneStore;
+                let conv = CONVERSATIONS.find(c => c.number === senderNumber);
+                if (!conv) {
+                    conv = { id: Date.now(), name: senderName, number: senderNumber, image: '', messages: [] };
+                    CONVERSATIONS.unshift(conv);
+                }
+                conv.messages.push({ id: Date.now(), sender: 'them', text, time });
+                if (!phoneVisible.value) phoneVisible.value = true;
+                return;
+            }
+            if (name === "contactsLoaded") {
+                const contacts = JSON.parse(args[0] || '[]');
+                const { CONTACTS } = window.PhoneStore;
+                CONTACTS.splice(0, CONTACTS.length, ...contacts);
+                return;
+            }
+            if (name === "callLogged") {
+                window.PhoneStore.CALL_HISTORY.unshift({
+                    name: args[0], number: args[1], type: args[2], time: args[3], missed: args[4],
+                });
+                return;
+            }
+            if (name === "feedLoaded") {
+                const posts = JSON.parse(args[0] || '[]');
+                const { POSTS } = window.PhoneStore;
+                POSTS.splice(0, POSTS.length, ...posts);
+                return;
+            }
+            if (name === "postReceived") {
+                const post = JSON.parse(args[0] || 'null');
+                if (post) window.PhoneStore.POSTS.unshift(post);
+                return;
+            }
+            if (name === "photosLoaded") {
+                const photos = JSON.parse(args[0] || '[]');
+                const { PHOTOS } = window.PhoneStore;
+                PHOTOS.splice(0, PHOTOS.length, ...photos);
+                return;
+            }
+            if (name === "postDeleted") {
+                const { POSTS } = window.PhoneStore;
+                const idx = POSTS.findIndex(p => p.id === args[0]);
+                if (idx !== -1) POSTS.splice(idx, 1);
+                return;
+            }
+            if (name === "postLikeUpdated") {
+                const post = window.PhoneStore.POSTS.find(p => p.id === args[0]);
+                if (post) post.likes = args[1];
+                return;
+            }
+            if (name === "postRepostUpdated") {
+                const post = window.PhoneStore.POSTS.find(p => p.id === args[0]);
+                if (post) post.reposts = args[1];
+                return;
+            }
+            if (name === "commentAdded") {
+                const post    = window.PhoneStore.POSTS.find(p => p.id === args[0]);
+                const comment = JSON.parse(args[1] || 'null');
+                if (post && comment) post.comments.push(comment);
+                return;
+            }
             if (name === "callEnded" || name === "callFailed") {
                 incomingCall.value = null;
                 outgoingCall.value = null;
@@ -101,7 +190,7 @@ createApp({
         function getFormattedDate()        { return "Tue, Mar 27"; }
         function getWeatherTemperature()   { return "68°";         }
 
-        const OPENABLE = new Set(["calendar", "phone", "messages", "h", "calculator"]);
+        const OPENABLE = new Set(["calendar", "phone", "messages", "h", "calculator", "camera", "photos"]);
 
         function openApp(label) {
             const key = label.toLowerCase();

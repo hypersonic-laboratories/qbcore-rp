@@ -83,7 +83,7 @@ const CalendarApp = {
     emits: ['navigate'],
 
     setup(props, { emit }) {
-        const { ref, reactive, computed } = Vue;
+        const { ref, reactive, computed, onMounted, onUnmounted } = Vue;
 
         const currentMonthIndex = ref(TODAY_MONTH_INDEX);
         const selectedDay       = ref(TODAY_DAY);
@@ -153,19 +153,32 @@ const CalendarApp = {
             if (!eventsByMonth[mIdx])       eventsByMonth[mIdx]       = {};
             if (!eventsByMonth[mIdx][dIdx]) eventsByMonth[mIdx][dIdx] = [];
 
-            eventsByMonth[mIdx][dIdx].push({
+            const event = {
                 id:     `${mIdx}-${dIdx}-${Date.now()}`,
                 time,
                 title:  newEvent.title.trim(),
                 detail,
                 accent: 'bg-rose-500',
-            });
+            };
+            eventsByMonth[mIdx][dIdx].push(event);
+            hEvent('saveCalendarEvent', { month: mIdx, day: dIdx, title: event.title, time: event.time, detail: event.detail });
 
             newEvent.title  = '';
             newEvent.time   = '12:00 PM';
             newEvent.detail = '';
             showAddForm.value = false;
         }
+
+        function onMessage(e) {
+            if (e.data?.name !== 'calendarEventsLoaded') return;
+            const incoming = JSON.parse(e.data.args?.[0] || '{}');
+            Object.entries(incoming).forEach(([mIdx, days]) => {
+                eventsByMonth[mIdx] = days;
+            });
+        }
+
+        onMounted(()   => window.addEventListener('message', onMessage));
+        onUnmounted(() => window.removeEventListener('message', onMessage));
 
         function onBack() {
             showAddForm.value = false;

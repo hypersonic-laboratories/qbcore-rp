@@ -24,6 +24,15 @@
             },
         }),
 
+        PHOTOS: reactive([
+            { id: 1, gradient: "linear-gradient(135deg,#a78bfa,#60a5fa)", takenAt: "2h ago"  },
+            { id: 2, gradient: "linear-gradient(135deg,#fb923c,#fbbf24)", takenAt: "5h ago"  },
+            { id: 3, gradient: "linear-gradient(135deg,#34d399,#06b6d4)", takenAt: "1d ago"  },
+            { id: 4, gradient: "linear-gradient(135deg,#f472b6,#a78bfa)", takenAt: "2d ago"  },
+            { id: 5, gradient: "linear-gradient(135deg,#fbbf24,#f97316)", takenAt: "3d ago"  },
+            { id: 6, gradient: "linear-gradient(135deg,#6ee7b7,#93c5fd)", takenAt: "1w ago"  },
+        ]),
+
         POSTS: reactive([
             {
                 id: 1,
