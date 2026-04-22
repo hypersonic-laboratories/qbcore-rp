@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HELIX Phone</title>
+
+        <link href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="apps/calendar.css" />
+        <link rel="stylesheet" href="apps/phone.css" />
+        <link rel="stylesheet" href="apps/messages.css" />
+        <link rel="stylesheet" href="apps/calculator.css" />
+        <link rel="stylesheet" href="apps/gene.css" />
+
+        <style>
+            svg[data-lucide] {
+                pointer-events: none;
+            }
+        </style>
+
+        <script src="vendor/vue.global.prod.js"></script>
+        <script src="vendor/lucide.min.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <div>
+                <!-- ══ Phone Shell ══ -->
+                <div class="phone-shell" v-show="phoneVisible">
+                    <div class="phone-screen">
+                        <div class="phone-camera-ring"></div>
+
+                        <!-- Wallpaper (home only) -->
+                        <div v-if="!locked && activeScreen === 'home'" class="phone-wallpaper">
+                            <div class="wallpaper-glow wallpaper-glow-top"></div>
+                            <div class="wallpaper-glow wallpaper-glow-left"></div>
+                            <div class="wallpaper-glow wallpaper-glow-bottom"></div>
+                        </div>
+
+                        <!-- ── Lock Screen ── -->
+                        <div v-if="locked" id="lockScreen" class="lock-screen">
+                            <div class="lock-time">{{ getFormattedTime() }}</div>
+                            <div class="lock-meta">
+                                <span>{{ getFormattedDate() }}</span>
+                                <div class="lock-weather">
+                                    <i data-lucide="cloud-sun" class="meta-weather-icon"></i>
+                                    <span>{{ getWeatherTemperature() }}</span>
+                                </div>
+                            </div>
+                            <button type="button" aria-label="Unlock phone" class="unlock-button" @click="locked = false">
+                                <i data-lucide="dna" class="unlock-button-icon"></i>
+                            </button>
+                        </div>
+
+                        <!-- ── Home Screen ── -->
+                        <div v-else-if="activeScreen === 'home'" id="homeScreen" class="home-screen">
+                            <div class="status-bar">
+                                <span>{{ getFormattedTime() }}</span>
+                                <div class="status-right">
+                                    <i data-lucide="signal" class="status-icon"></i>
+                                    <i data-lucide="battery-full" class="status-icon"></i>
+                                </div>
+                            </div>
+                            <div class="home-header">
+                                <div class="home-date">{{ getFormattedDate() }}</div>
+                                <div class="home-weather">
+                                    <i data-lucide="cloud-sun" class="meta-weather-icon"></i>
+                                    <span class="home-weather-temp">{{ getWeatherTemperature() }}</span>
+                                </div>
+                            </div>
+                            <div class="home-apps-wrap">
+                                <div class="home-apps-grid">
+                                    <button v-for="app in HOME_APPS" :key="app.label" type="button" :aria-label="app.label" class="app-button" @click="openApp(app.label)">
+                                        <div :class="['app-button-icon', app.bgClass]">
+                                            <i :data-lucide="app.icon" :class="['app-button-symbol', app.iconClass]"></i>
+                                        </div>
+                                        <span class="app-button-label">{{ app.label }}</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="home-bottom">
+                                <div class="dock">
+                                    <button v-for="app in DOCK_APPS" :key="app.label" type="button" :aria-label="app.label" class="dock-button" @click="openApp(app.label)">
+                                        <div :class="['dock-button-icon', app.bgClass]">
+                                            <i :data-lucide="app.icon" :class="['dock-button-symbol', app.iconClass]"></i>
+                                        </div>
+                                        <span class="dock-button-label">{{ app.label }}</span>
+                                    </button>
+                                </div>
+                                <div class="home-indicator-wrap">
+                                    <div class="home-indicator"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── App Screens ── -->
+                        <calendar-app   v-else-if="activeScreen === 'calendar'"   @navigate="navigateTo"></calendar-app>
+                        <phone-app      v-else-if="activeScreen === 'phone'"      @navigate="navigateTo" @dial="onDial"></phone-app>
+                        <messages-app   v-else-if="activeScreen === 'messages'"   @navigate="navigateTo"></messages-app>
+                        <calculator-app v-else-if="activeScreen === 'calculator'" @navigate="navigateTo"></calculator-app>
+                        <gene-app       v-else-if="activeScreen === 'h'"          @navigate="navigateTo"></gene-app>
+
+                        <!-- ── Incoming call overlay ── -->
+                        <div v-if="incomingCall" class="call-overlay">
+                            <div class="call-overlay-info">
+                                <div class="call-overlay-label">Incoming Call</div>
+                                <div class="call-overlay-name">{{ incomingCall.name }}</div>
+                                <div class="call-overlay-number">{{ incomingCall.number }}</div>
+                            </div>
+                            <div class="call-overlay-actions">
+                                <button type="button" class="call-action-btn call-decline-btn" @click="hangup()">
+                                    <i data-lucide="phone-off" class="call-action-icon"></i>
+                                </button>
+                                <button type="button" class="call-action-btn call-accept-btn" @click="acceptCall()">
+                                    <i data-lucide="phone" class="call-action-icon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ── Outgoing / active call overlay ── -->
+                        <div v-else-if="activeCall || outgoingCall" class="call-overlay">
+                            <div class="call-overlay-info">
+                                <div class="call-overlay-label">{{ activeCall ? formatCallDuration(callDuration) : 'Calling…' }}</div>
+                                <div class="call-overlay-name">{{ (activeCall || outgoingCall).name }}</div>
+                                <div class="call-overlay-number">{{ (activeCall || outgoingCall).number }}</div>
+                            </div>
+                            <div class="call-overlay-actions">
+                                <button type="button" class="call-action-btn call-decline-btn" @click="hangup()">
+                                    <i data-lucide="phone-off" class="call-action-icon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="phone-side-button phone-side-button-right-top"></div>
+                        <div class="phone-side-button phone-side-button-right-bottom"></div>
+                        <div class="phone-side-button phone-side-button-left"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="store.js"></script>
+        <script src="apps/calendar.js"></script>
+        <script src="apps/phone.js"></script>
+        <script src="apps/messages.js"></script>
+        <script src="apps/gene.js"></script>
+        <script src="apps/calculator.js"></script>
+        <script src="script.js" defer></script>
+    </body>
+</html>

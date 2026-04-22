@@ -1,0 +1,443 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: transparent;
+    font-family: Inter, system-ui, sans-serif;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+}
+
+.tomorrow-font {
+    font-family: "Tomorrow", sans-serif;
+}
+
+.phone-shell {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 360px;
+    height: 760px;
+    border-radius: 42px;
+    background: rgb(24 24 27);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.35);
+    padding: 10px;
+}
+
+.phone-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 34px;
+    overflow: hidden;
+    border: 1px solid rgb(63 63 70);
+    background: linear-gradient(to bottom, rgb(125 211 252), rgb(96 165 250), rgb(67 56 202));
+}
+
+.phone-camera-ring {
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    background: rgb(9 9 11);
+    box-shadow: 0 0 0 4px rgb(255 255 255 / 0.25);
+    z-index: 10;
+}
+
+.phone-wallpaper {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.wallpaper-glow {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(48px);
+}
+
+.wallpaper-glow-top {
+    top: -3rem;
+    right: -2.5rem;
+    width: 14rem;
+    height: 14rem;
+    background: rgb(255 255 255 / 0.2);
+}
+
+.wallpaper-glow-left {
+    top: 10rem;
+    left: -5rem;
+    width: 16rem;
+    height: 16rem;
+    background: rgb(165 243 252 / 0.2);
+}
+
+.wallpaper-glow-bottom {
+    bottom: 6rem;
+    right: 0;
+    width: 18rem;
+    height: 18rem;
+    background: rgb(49 46 129 / 0.3);
+}
+
+.phone-side-button {
+    position: absolute;
+    width: 4px;
+    border-radius: 9999px;
+    background: rgb(63 63 70);
+}
+
+.phone-side-button-right-top {
+    right: -3px;
+    top: 9rem;
+    height: 4rem;
+}
+
+.phone-side-button-right-bottom {
+    right: -3px;
+    top: 14rem;
+    height: 6rem;
+}
+
+.phone-side-button-left {
+    left: -3px;
+    top: 11rem;
+    height: 5rem;
+}
+
+.lock-screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: "Tomorrow", sans-serif;
+    z-index: 1;
+}
+
+.lock-time {
+    font-size: 5.5rem;
+    line-height: 1;
+    font-weight: 300;
+    letter-spacing: -0.04em;
+}
+
+.lock-meta {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.lock-weather,
+.home-weather,
+.status-right {
+    display: flex;
+    align-items: center;
+}
+
+.lock-weather {
+    gap: 0.25rem;
+}
+
+.unlock-button {
+    margin-top: 3rem;
+    width: 4rem;
+    height: 4rem;
+    border: 1px solid rgb(255 255 255 / 0.3);
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.2);
+    backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
+    transition: transform 150ms ease;
+    cursor: pointer;
+}
+
+.unlock-button:hover {
+    transform: scale(1.05);
+}
+
+.unlock-button-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.home-screen {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 1.25rem 1.25rem;
+    color: white;
+    z-index: 1;
+}
+
+.status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-right {
+    gap: 0.25rem;
+    font-size: 0.75rem;
+}
+
+.status-icon,
+.meta-weather-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.home-header {
+    padding-top: 1.5rem;
+    padding-inline: 0.25rem;
+}
+
+.home-date {
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    opacity: 0.9;
+}
+
+.home-weather {
+    gap: 0.375rem;
+    margin-top: 0.25rem;
+    color: rgb(255 255 255 / 0.95);
+}
+
+.home-weather-temp {
+    font-size: 1.125rem;
+    font-weight: 300;
+}
+
+.home-apps-wrap {
+    margin-top: 2.5rem;
+    padding-inline: 0.25rem;
+}
+
+.home-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    justify-items: center;
+    column-gap: 1rem;
+    row-gap: 1.5rem;
+}
+
+.app-button,
+.dock-button {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+}
+
+.app-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dock-button {
+    min-width: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.app-button-icon,
+.dock-button-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(255 255 255 / 0.2);
+    border-radius: 9999px;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+    transition: transform 150ms ease;
+}
+
+.app-button-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
+.dock-button-icon {
+    width: 3rem;
+    height: 3rem;
+}
+
+.app-button:hover .app-button-icon,
+.dock-button:hover .dock-button-icon {
+    transform: scale(1.03);
+}
+
+.app-button:active .app-button-icon,
+.dock-button:active .dock-button-icon {
+    transform: scale(0.95);
+}
+
+.app-button-symbol {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.dock-button-symbol {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.app-button-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgb(255 255 255 / 0.95);
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
+}
+
+.dock-button-label {
+    font-size: 10px;
+    color: rgb(255 255 255 / 0.9);
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
+}
+
+.home-bottom {
+    margin-top: auto;
+}
+
+.dock {
+    border: 1px solid rgb(255 255 255 / 0.2);
+    border-radius: 30px;
+    background: rgb(255 255 255 / 0.18);
+    backdrop-filter: blur(20px);
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    box-shadow: 0 10px 15px rgb(0 0 0 / 0.15);
+}
+
+.home-indicator-wrap {
+    padding-top: 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.home-indicator {
+    width: 8rem;
+    height: 0.375rem;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.85);
+}
+
+/* ── App Icon Colors ────────────────────────────────────────── */
+
+.app-icon-calendar {
+    background: rgb(253 164 175);
+}
+.app-icon-camera {
+    background: rgb(196 181 253);
+}
+.app-icon-maps {
+    background: rgb(110 231 183);
+}
+.app-icon-settings {
+    background: rgb(203 213 225);
+}
+.app-icon-clock {
+    background: rgb(252 211 77);
+}
+.app-icon-photos {
+    background: rgb(125 211 252);
+}
+.app-icon-calculator {
+    background: rgb(253 186 116);
+}
+.app-icon-hmail {
+    background: rgb(252 165 165);
+}
+.app-icon-gene {
+    background: #0a0a0a;
+}
+
+.app-icon-calendar-symbol {
+    color: rgb(136 19 55);
+}
+.app-icon-camera-symbol {
+    color: rgb(91 33 182);
+}
+.app-icon-maps-symbol {
+    color: rgb(6 95 70);
+}
+.app-icon-settings-symbol {
+    color: rgb(15 23 42);
+}
+.app-icon-clock-symbol {
+    color: rgb(120 53 15);
+}
+.app-icon-photos-symbol {
+    color: rgb(12 74 110);
+}
+.app-icon-calculator-symbol {
+    color: rgb(124 45 18);
+}
+.app-icon-hmail-symbol {
+    color: rgb(127 29 29);
+}
+.app-icon-gene-symbol {
+    color: #e7e7e7;
+}
+
+.dock-icon-phone {
+    background: rgb(134 239 172);
+}
+.dock-icon-messages {
+    background: rgb(147 197 253);
+}
+.dock-icon-browser {
+    background: rgb(103 232 249);
+}
+.dock-icon-camera {
+    background: rgb(216 180 254);
+}
+
+.dock-icon-phone-symbol {
+    color: rgb(20 83 45);
+}
+.dock-icon-messages-symbol {
+    color: rgb(30 64 175);
+}
+.dock-icon-browser-symbol {
+    color: rgb(22 78 99);
+}
+.dock-icon-camera-symbol {
+    color: rgb(88 28 135);
+}
+
+.bg-rose-500 {
+    background: rgb(244 63 94);
+}

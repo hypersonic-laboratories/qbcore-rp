@@ -1,0 +1,334 @@
+/* ── Gene ─────────────────────────────────────────── */
+
+.gene-screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    color: rgb(24 24 27);
+}
+
+.gene-top {
+    padding: 3rem 1.25rem 0.75rem;
+    border-bottom: 1px solid rgb(228 228 231);
+    flex: 0 0 auto;
+}
+
+.gene-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.gene-compose-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 9999px;
+    background: rgb(244 63 94);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.gene-compose-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+}
+
+/* Composer */
+
+.gene-composer {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgb(228 228 231);
+    flex: 0 0 auto;
+}
+
+.gene-composer-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.gene-composer-textarea {
+    width: 100%;
+    border: 1px solid rgb(228 228 231);
+    border-radius: 1rem;
+    background: rgb(244 244 245);
+    padding: 0.75rem;
+    font: inherit;
+    font-size: 0.875rem;
+    resize: none;
+    min-height: 4.5rem;
+    outline: none;
+    color: rgb(24 24 27);
+}
+
+.gene-composer-image-input {
+    width: 100%;
+    border: 1px solid rgb(228 228 231);
+    border-radius: 1rem;
+    background: rgb(244 244 245);
+    padding: 0.6rem 0.75rem;
+    font: inherit;
+    font-size: 0.8rem;
+    outline: none;
+    color: rgb(24 24 27);
+}
+
+.gene-composer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.gene-composer-avatar {
+    flex: 0 0 auto;
+    margin-top: 0.15rem;
+}
+
+/* Feed */
+
+.gene-feed {
+    min-height: 0;
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Post card */
+
+.gene-post-card {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgb(228 228 231);
+}
+
+.gene-post-card-thread {
+    background: rgb(250 250 250);
+}
+
+.gene-post-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-bottom: 0.5rem;
+}
+
+.gene-avatar-btn {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    flex: 0 0 auto;
+    border-radius: 9999px;
+}
+
+.gene-post-avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex: 0 0 auto;
+}
+
+.gene-post-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.gene-post-author-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.gene-author-link {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgb(24 24 27);
+    cursor: pointer;
+}
+
+.gene-author-link:hover {
+    text-decoration: underline;
+}
+
+.gene-post-handle {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: rgb(113 113 122);
+}
+
+.gene-post-time {
+    font-size: 0.75rem;
+    color: rgb(113 113 122);
+    margin-top: 0.1rem;
+}
+
+.gene-follow-pill {
+    border: 1px solid rgb(244 63 94);
+    background: transparent;
+    color: rgb(244 63 94);
+    border-radius: 9999px;
+    padding: 0.1rem 0.6rem;
+    font: inherit;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+        background 100ms,
+        color 100ms;
+}
+
+.gene-follow-pill-active {
+    background: rgb(244 63 94);
+    color: white;
+}
+
+.gene-post-delete {
+    border: 0;
+    background: transparent;
+    color: rgb(161 161 170);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    flex: 0 0 auto;
+}
+
+.gene-post-delete:hover {
+    background: rgb(255 228 230);
+    color: rgb(225 29 72);
+}
+
+.gene-post-delete-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+}
+
+.gene-post-content {
+    font-size: 0.9rem;
+    color: rgb(24 24 27);
+    line-height: 1.5;
+    margin-bottom: 0.65rem;
+    padding-left: 2.9rem;
+}
+
+.gene-post-image-wrap {
+    padding-left: 2.9rem;
+    margin-bottom: 0.65rem;
+}
+
+.gene-post-image {
+    width: 100%;
+    border-radius: 1rem;
+    object-fit: cover;
+    max-height: 200px;
+    display: block;
+    background: rgb(228 228 231);
+}
+
+.gene-post-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding-left: 2.65rem;
+}
+
+.gene-action-btn {
+    border: 0;
+    background: transparent;
+    border-radius: 9999px;
+    padding: 0.3rem 0.55rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgb(113 113 122);
+    cursor: pointer;
+    transition:
+        background 100ms ease,
+        color 100ms ease;
+}
+
+.gene-action-btn:hover {
+    background: rgb(244 244 245);
+}
+
+.gene-action-icon {
+    width: 1rem;
+    height: 1rem;
+}
+
+.gene-action-liked {
+    color: rgb(225 29 72);
+}
+.gene-action-reposted {
+    color: rgb(34 197 94);
+}
+
+/* Thread */
+
+.gene-thread-divider {
+    padding: 0.6rem 1.25rem;
+    background: rgb(244 244 245);
+    border-bottom: 1px solid rgb(228 228 231);
+    flex: 0 0 auto;
+}
+
+.gene-thread-divider-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgb(113 113 122);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.gene-comment-card {
+    display: flex;
+    gap: 0.65rem;
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid rgb(228 228 231);
+}
+
+.gene-comment-avatar {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+    font-size: 0.75rem !important;
+    flex: 0 0 auto;
+}
+
+.gene-comment-body {
+    flex: 1;
+}
+
+.gene-comment-content {
+    font-size: 0.85rem;
+    margin-bottom: 0.35rem;
+    line-height: 1.4;
+}
+
+.gene-comment-actions {
+    display: flex;
+    gap: 0.15rem;
+}
