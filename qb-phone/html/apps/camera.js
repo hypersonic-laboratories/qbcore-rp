@@ -1,19 +1,27 @@
 const CAMERA_ZOOM_LEVELS = [
-    { label: "0.6×", value: 0.6 },
-    { label: "1×",   value: 1   },
-    { label: "2×",   value: 2   },
-    { label: "5×",   value: 5   },
+  { label: "0.6×", value: 0.6 },
+  { label: "1×", value: 1 },
+  { label: "2×", value: 2 },
+  { label: "5×", value: 5 },
 ];
 
 const CAMERA_FILTERS = [
-    { id: "natural",  label: "Natural",  css: "none"                                         },
-    { id: "vivid",    label: "Vivid",    css: "saturate(1.5) contrast(1.1)"                  },
-    { id: "cinema",   label: "Cinema",   css: "sepia(0.3) contrast(1.15) brightness(0.92)"   },
-    { id: "film",     label: "Film",     css: "sepia(0.45) saturate(0.85) brightness(1.06)"  },
+  { id: "natural", label: "Natural", css: "none" },
+  { id: "vivid", label: "Vivid", css: "saturate(1.5) contrast(1.1)" },
+  {
+    id: "cinema",
+    label: "Cinema",
+    css: "sepia(0.3) contrast(1.15) brightness(0.92)",
+  },
+  {
+    id: "film",
+    label: "Film",
+    css: "sepia(0.45) saturate(0.85) brightness(1.06)",
+  },
 ];
 
 const CameraApp = {
-    template: `
+  template: `
         <div class="camera-screen">
 
             <!-- flash overlay -->
@@ -85,61 +93,86 @@ const CameraApp = {
         </div>
     `,
 
-    emits: ["navigate"],
+  emits: ["navigate"],
 
-    setup(props, { emit }) {
-        const { ref, computed, onMounted, onUnmounted } = Vue;
-        const { PHOTOS } = window.PhoneStore;
+  setup(props, { emit }) {
+    const { ref, computed, onMounted, onUnmounted, watch } = Vue;
+    const { PHOTOS } = window.PhoneStore;
 
-        const activeZoom   = ref(1);
-        const activeFilter = ref("natural");
-        const isFront      = ref(false);
-        const isFlashing   = ref(false);
-        const isCapturing  = ref(false);
-        const flashMode    = ref("auto"); // off | auto | on
+    const activeZoom = ref(1);
+    const activeFilter = ref("natural");
+    const isFront = ref(false);
+    const isFlashing = ref(false);
+    const isCapturing = ref(false);
+    const flashMode = ref("auto"); // off | auto | on
 
-        const lastPhoto = computed(() => PHOTOS[0]?.gradient ?? null);
+    const lastPhoto = computed(() => PHOTOS[0]?.gradient ?? null);
 
-        const flashIcon = computed(() => {
-            if (flashMode.value === "off") return "zap-off";
-            return "zap";
-        });
+    const flashIcon = computed(() => {
+      if (flashMode.value === "off") return "zap-off";
+      return "zap";
+    });
 
-        const activeFilterCss = computed(() =>
-            CAMERA_FILTERS.find(f => f.id === activeFilter.value)?.css ?? "none"
-        );
+    const activeFilterCss = computed(
+      () =>
+        CAMERA_FILTERS.find((f) => f.id === activeFilter.value)?.css ?? "none",
+    );
 
-        function cycleFlash() {
-            const order = ["auto", "on", "off"];
-            const idx = order.indexOf(flashMode.value);
-            flashMode.value = order[(idx + 1) % order.length];
-        }
+    function cycleFlash() {
+      const order = ["auto", "on", "off"];
+      const idx = order.indexOf(flashMode.value);
+      flashMode.value = order[(idx + 1) % order.length];
+    }
 
-        function takePhoto() {
-            if (isCapturing.value || isFlashing.value) return;
-            isCapturing.value = true;
-            hEvent("takePhoto", { facing: isFront.value ? "front" : "rear" });
-        }
+    function takePhoto() {
+      if (isCapturing.value || isFlashing.value) return;
+      isCapturing.value = true;
+      hEvent("takePhoto", { facing: isFront.value ? "front" : "rear" });
+    }
 
-        function onMessage(e) {
-            const name = e.data?.name;
-            if (name === "photoTaken") {
-                isCapturing.value = false;
-                isFlashing.value  = true;
-                setTimeout(() => { isFlashing.value = false; }, 140);
-            } else if (name === "photoFailed") {
-                isCapturing.value = false;
-            }
-        }
+    // Notify Lua when the user flips between front/rear
+    watch(isFront, (front) => {
+      hEvent("cameraFlipped", { facing: front ? "front" : "rear" });
+    });
 
-        onMounted(()   => window.addEventListener("message", onMessage));
-        onUnmounted(() => window.removeEventListener("message", onMessage));
+    function onMessage(e) {
+      const name = e.data?.name;
+      if (name === "photoTaken") {
+        isCapturing.value = false;
+        isFlashing.value = true;
+        setTimeout(() => {
+          isFlashing.value = false;
+        }, 140);
+      } else if (name === "photoFailed") {
+        isCapturing.value = false;
+      }
+    }
 
-        return {
-            CAMERA_ZOOM_LEVELS, CAMERA_FILTERS,
-            activeZoom, activeFilter, isFront, isFlashing, isCapturing, flashMode,
-            lastPhoto, flashIcon, activeFilterCss,
-            cycleFlash, takePhoto, emit,
-        };
-    },
+    onMounted(() => {
+        window.addEventListener("message", onMessage);
+        hEvent("cameraOpened", { facing: isFront.value ? "front" : "rear" });
+    });
+
+    onUnmounted(() => {
+        window.removeEventListener("message", onMessage);
+        hEvent("cameraClosed", {});
+    });
+
+    return {
+      CAMERA_ZOOM_LEVELS,
+      CAMERA_FILTERS,
+      activeZoom,
+      activeFilter,
+      isFront,
+      isFlashing,
+      isCapturing,
+      flashMode,
+      lastPhoto,
+      flashIcon,
+      activeFilterCss,
+      cycleFlash,
+      takePhoto,
+      emit,
+    };
+  },
 };

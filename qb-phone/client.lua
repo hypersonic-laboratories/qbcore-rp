@@ -2,8 +2,135 @@
 local my_webui = WebUI('qb-phone', 'qb-phone/html/index.html')
 local phoneOpen = false
 
+-- ── Camera state ──────────────────────────────────────────────────────────────
+local PHONE_ITEM = "ID_Misc_Phone"
+local HAND_SOCKET = "hand_r"
+local phoneEquipped = false
+local cameraMode = nil   -- nil | "front" | "back"
+local sceneCap, camRoot, camFeed = nil, nil, nil
+local camUpdateTimerId = nil
+local localRotation = Rotator(0, 0, 0)
+local sensitivity = 0.2
+
+local offsets = {
+    front = {
+        location = Vector(-12, 4, 8),
+        rotation = Rotator(0, 90, 0),
+    },
+    back = {
+        location = Vector(-12, 0, 10),
+        rotation = Rotator(0, -90, 0),
+    },
+}
+
+local function getCharacter() return GetPlayerPawn() end
+
+local function applyCameraTransform(mode)
+    if not sceneCap or not sceneCap.Object then return end
+    local cfg = offsets[mode]
+    localRotation = Rotator(cfg.rotation.Pitch, cfg.rotation.Yaw, cfg.rotation.Roll)
+    sceneCap.Object:K2_SetActorRelativeLocation(cfg.location, false, nil, false)
+    sceneCap.Object:K2_SetActorRelativeRotation(localRotation, false, nil, false)
+end
+
+local function updateCameraRotation()
+    if not sceneCap or not sceneCap.Object then return end
+    local pc = UE.UGameplayStatics.GetPlayerController(sceneCap.Object, 0)
+    local dx, dy = pc:GetInputMouseDelta()
+    localRotation.Yaw = localRotation.Yaw + dx * sensitivity
+    localRotation.Pitch = math.max(-45, math.min(45, localRotation.Pitch - dy * sensitivity))
+    sceneCap.Object:K2_SetActorRelativeRotation(localRotation, false, nil, false)
+end
+
+local function buildCaptureAndUI(mode)
+    local character = getCharacter()
+    if not character then return end
+
+    sceneCap = SceneCapture(
+        Vector(0, 0, 0), Rotator(0, 0, 0),
+        1280, 720,
+        SceneCaptureSource.FinalColorLDR,
+        false
+    )
+
+    local mesh = character:GetComponentByClass(UE.USkeletalMeshComponent.StaticClass())
+    sceneCap.Object:K2_AttachToComponent(mesh, HAND_SOCKET, 0, 0, 0, true)
+    applyCameraTransform(mode)
+
+    camRoot = Widget(NativeWidget.CanvasPanel)
+    camRoot:AddToViewport()
+    camFeed = Widget(NativeWidget.Image)
+    camRoot:AddChild(camFeed)
+    camFeed:SetCanvasLayout(
+        Vector2D(1920 - 400 - 50, 1080 - 225 - 50),
+        Vector2D(400, 225)
+    )
+    camFeed.innerWidget:SetBrushResourceObject(sceneCap.RenderTarget)
+end
+
+local function destroyCaptureAndUI()
+    if camUpdateTimerId then
+        Timer.ClearInterval(camUpdateTimerId)
+        camUpdateTimerId = nil
+    end
+    if camRoot then camRoot:RemoveFromParent() end
+    if sceneCap and sceneCap.Object then sceneCap.Object:K2_DestroyActor() end
+    sceneCap, camRoot, camFeed = nil, nil, nil
+end
+
+local function closeCamera()
+    local character = getCharacter()
+    if character and cameraMode then
+        UE.UHRoleplaySystemGlobals.ClosePhoneCamera(character)
+    end
+    destroyCaptureAndUI()
+    cameraMode = nil
+end
+
+local function setCameraMode(mode)
+    local character = getCharacter()
+    if not character then return end
+
+    if cameraMode and cameraMode ~= mode then
+        UE.UHRoleplaySystemGlobals.ClosePhoneCamera(character)
+        cameraMode = nil
+    end
+
+    if cameraMode == mode then return end
+
+    local ok
+    if mode == "front" then
+        ok = UE.UHRoleplaySystemGlobals.OpenPhoneFrontCamera(character)
+    elseif mode == "back" then
+        ok = UE.UHRoleplaySystemGlobals.OpenPhoneBackCamera(character)
+    end
+
+    if not ok then
+        print('[PHONE] Failed to open ' .. mode .. ' camera')
+        return
+    end
+
+    cameraMode = mode
+
+    if not sceneCap then
+        buildCaptureAndUI(mode)
+        camUpdateTimerId = Timer.SetInterval(updateCameraRotation, 16)
+    else
+        applyCameraTransform(mode)
+    end
+end
+
+-- ── Phone open/close ──────────────────────────────────────────────────────────
+
 local function openPhone()
     phoneOpen = true
+
+    local character = getCharacter()
+    if character and not phoneEquipped then
+        HInventory.GiveAndEquipItemByName(character, PHONE_ITEM)
+        phoneEquipped = true
+    end
+
     my_webui:BringToFront()
     my_webui:SetInputMode(1)
     my_webui:SendEvent('open')
@@ -12,6 +139,16 @@ end
 
 local function closePhone()
     phoneOpen = false
+
+    -- Tear down camera if active
+    if cameraMode then closeCamera() end
+
+    local character = getCharacter()
+    if character and phoneEquipped then
+        HInventory.RemoveItemByName(character, PHONE_ITEM, 1)
+        phoneEquipped = false
+    end
+
     my_webui:SetInputMode(0)
     my_webui:SendEvent('close')
 end
@@ -161,7 +298,22 @@ RegisterClientEvent('qb-phone:client:photosLoaded', function(photosJson)
     my_webui:SendEvent('photosLoaded', photosJson)
 end)
 
--- Camera
+-- ── Camera events from JS ─────────────────────────────────────────────────────
+
+my_webui:RegisterEventHandler('cameraOpened', function(data)
+    -- JS defaults to rear on open
+    local facing = (data and data.facing) or "rear"
+    setCameraMode(facing == "front" and "front" or "back")
+end)
+
+my_webui:RegisterEventHandler('cameraFlipped', function(data)
+    local facing = (data and data.facing) or "rear"
+    setCameraMode(facing == "front" and "front" or "back")
+end)
+
+my_webui:RegisterEventHandler('cameraClosed', function()
+    if cameraMode then closeCamera() end
+end)
 
 my_webui:RegisterEventHandler('takePhoto', function(_)
     -- TODO: capture screenshot and upload
@@ -176,6 +328,11 @@ end)
 -- Lifecycle
 
 function onShutdown()
+    if cameraMode then closeCamera() end
+    local character = getCharacter()
+    if character and phoneEquipped then
+        HInventory.RemoveItemByName(character, PHONE_ITEM, 1)
+    end
     if my_webui then
         my_webui:Destroy()
         my_webui = nil
@@ -186,9 +343,5 @@ end
 
 Input.BindKey('O', function()
     if HPlayer:GetInputMode() == 1 and not phoneOpen then return end
-    if phoneOpen then
-        closePhone()
-    else
-        openPhone()
-    end
+    if phoneOpen then closePhone() else openPhone() end
 end, 'Pressed')
