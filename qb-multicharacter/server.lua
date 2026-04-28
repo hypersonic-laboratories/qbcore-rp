@@ -45,20 +45,6 @@ local function GetOwnedApartment(cid)
     return nil
 end
 
-local function readCountriesFile()
-	local fileHandle, msg = io.open(dir .. './countries.json', 'r')
-	if not fileHandle then
-		print("[qb-multicharacter] Error: Couldn't read countries list", msg)
-		return
-	end
-	local content = fileHandle:read('a')
-	fileHandle:close()
-
-	local countries = JSON.parse(content)
-	return countries
-end
-Countries = readCountriesFile() or {}
-
 -- Commands
 
 -- QBCore.Commands.Add('logout', Lang:t('commands.logout_description'), {}, false, function(source)
@@ -182,7 +168,7 @@ RegisterCallback('GetNumberOfCharacters', function(source)
         numOfChars = Config.DefaultNumberOfCharacters
     end
 
-    return {charCount = numOfChars, countries = Countries}
+    return {charCount = numOfChars}
 end)
 
 RegisterCallback('setupCharacters', function(source)

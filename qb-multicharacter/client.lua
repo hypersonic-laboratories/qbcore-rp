@@ -41,7 +41,6 @@ end
 local function openCharMenu()
     TriggerCallback('GetNumberOfCharacters', function(data)
         local charCount = data.charCount
-        local countries = data.countries
         local translations = {}
         for k in pairs(Lang.fallback and Lang.fallback.phrases or Lang.phrases) do
             if k:sub(0, ('ui.'):len()) then
@@ -57,7 +56,6 @@ local function openCharMenu()
                 nChar = charCount,
                 enableDeleteButton = Config.EnableDeleteButton,
                 translations = translations,
-                countries = countries,
             })
         end
     end)
