@@ -3,10 +3,10 @@ local my_webui = WebUI('qb-phone', 'qb-phone/html/index.html')
 local phoneOpen = false
 
 -- ── Camera state ──────────────────────────────────────────────────────────────
-local PHONE_ITEM = "ID_Misc_Phone"
-local HAND_SOCKET = "hand_r"
+local PHONE_ITEM = 'ID_Misc_Phone'
+local HAND_SOCKET = 'hand_r'
 local phoneEquipped = false
-local cameraMode = nil   -- nil | "front" | "back"
+local cameraMode = nil -- nil | "front" | "back"
 local sceneCap, camRoot, camFeed = nil, nil, nil
 local camUpdateTimerId = nil
 local localRotation = Rotator(0, 0, 0)
@@ -99,9 +99,9 @@ local function setCameraMode(mode)
     if cameraMode == mode then return end
 
     local ok
-    if mode == "front" then
+    if mode == 'front' then
         ok = UE.UHRoleplaySystemGlobals.OpenPhoneFrontCamera(character)
-    elseif mode == "back" then
+    elseif mode == 'back' then
         ok = UE.UHRoleplaySystemGlobals.OpenPhoneBackCamera(character)
     end
 
@@ -124,13 +124,7 @@ end
 
 local function openPhone()
     phoneOpen = true
-
-    local character = getCharacter()
-    if character and not phoneEquipped then
-        HInventory.GiveAndEquipItemByName(character, PHONE_ITEM)
-        phoneEquipped = true
-    end
-
+    TriggerServerEvent('qb-phone:server:givePhone')
     my_webui:BringToFront()
     my_webui:SetInputMode(1)
     my_webui:SendEvent('open')
@@ -139,16 +133,8 @@ end
 
 local function closePhone()
     phoneOpen = false
-
-    -- Tear down camera if active
+    TriggerServerEvent('qb-phone:server:takePhone')
     if cameraMode then closeCamera() end
-
-    local character = getCharacter()
-    if character and phoneEquipped then
-        HInventory.RemoveItemByName(character, PHONE_ITEM, 1)
-        phoneEquipped = false
-    end
-
     my_webui:SetInputMode(0)
     my_webui:SendEvent('close')
 end
@@ -302,13 +288,13 @@ end)
 
 my_webui:RegisterEventHandler('cameraOpened', function(data)
     -- JS defaults to rear on open
-    local facing = (data and data.facing) or "rear"
-    setCameraMode(facing == "front" and "front" or "back")
+    local facing = (data and data.facing) or 'rear'
+    setCameraMode(facing == 'front' and 'front' or 'back')
 end)
 
 my_webui:RegisterEventHandler('cameraFlipped', function(data)
-    local facing = (data and data.facing) or "rear"
-    setCameraMode(facing == "front" and "front" or "back")
+    local facing = (data and data.facing) or 'rear'
+    setCameraMode(facing == 'front' and 'front' or 'back')
 end)
 
 my_webui:RegisterEventHandler('cameraClosed', function()

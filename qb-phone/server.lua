@@ -25,9 +25,9 @@ RegisterServerEvent('qb-phone:server:dial', function(source, targetNumber)
         return
     end
 
-    local callerName   = caller.PlayerData.charinfo.firstname .. ' ' .. caller.PlayerData.charinfo.lastname
-    local callerNumber = caller.PlayerData.charinfo.phone
-    local targetName   = target.PlayerData.charinfo.firstname .. ' ' .. target.PlayerData.charinfo.lastname
+    local callerName           = caller.PlayerData.charinfo.firstname .. ' ' .. caller.PlayerData.charinfo.lastname
+    local callerNumber         = caller.PlayerData.charinfo.phone
+    local targetName           = target.PlayerData.charinfo.firstname .. ' ' .. target.PlayerData.charinfo.lastname
 
     pendingCalls[targetIntSrc] = {
         callerSrc    = source,
@@ -61,7 +61,7 @@ RegisterServerEvent('qb-phone:server:accept', function(source)
     pending.callerSrc:JoinVoiceChannel(pending.channel)
     source:JoinVoiceChannel(pending.channel)
 
-    TriggerClientEvent(pending.callerIntSrc,'qb-phone:client:callStarted', pending.channel)
+    TriggerClientEvent(pending.callerIntSrc, 'qb-phone:client:callStarted', pending.channel)
     TriggerClientEvent(targetIntSrc, 'qb-phone:client:callStarted', pending.channel)
 end)
 
@@ -78,7 +78,7 @@ RegisterServerEvent('qb-phone:server:hangup', function(source)
             activeCalls[channel] = nil
             call.callerSrc:LeaveVoiceChannel(channel)
             call.targetSrc:LeaveVoiceChannel(channel)
-            TriggerClientEvent(call.callerIntSrc,'qb-phone:client:callEnded')
+            TriggerClientEvent(call.callerIntSrc, 'qb-phone:client:callEnded')
             TriggerClientEvent(call.targetIntSrc, 'qb-phone:client:callEnded')
             return
         end
@@ -87,7 +87,7 @@ RegisterServerEvent('qb-phone:server:hangup', function(source)
     for targetSrc, pending in pairs(pendingCalls) do
         if pending.callerIntSrc == intSrc or targetSrc == intSrc then
             pendingCalls[targetSrc] = nil
-            TriggerClientEvent(pending.callerIntSrc,'qb-phone:client:callEnded')
+            TriggerClientEvent(pending.callerIntSrc, 'qb-phone:client:callEnded')
             TriggerClientEvent(targetSrc, 'qb-phone:client:callEnded')
             return
         end
@@ -95,6 +95,16 @@ RegisterServerEvent('qb-phone:server:hangup', function(source)
 end)
 
 -- Data Loading
+
+RegisterServerEvent('qb-phone:server:givePhone', function(source)
+    local ped = GetPlayerPawn(source)
+    HInventory.GiveAndEquipItemByName(ped, 'ID_Misc_Phone')
+end)
+
+RegisterServerEvent('qb-phone:server:takePhone', function(source)
+    local ped = GetPlayerPawn(source)
+    HInventory.RemoveItemByName(ped, 'ID_Misc_Phone')
+end)
 
 RegisterServerEvent('qb-phone:server:loadPlayerData', function(source)
     local player = exports['qb-core']:GetPlayer(source)
@@ -112,7 +122,7 @@ RegisterServerEvent('qb-phone:server:sendMessage', function(source, targetNumber
     local sender = exports['qb-core']:GetPlayer(source)
     if not sender then return end
 
-    local target = exports['qb-core']:GetPlayerByPhone(targetNumber)
+    local target       = exports['qb-core']:GetPlayerByPhone(targetNumber)
 
     local senderName   = sender.PlayerData.charinfo.firstname .. ' ' .. sender.PlayerData.charinfo.lastname
     local senderNumber = sender.PlayerData.charinfo.phone
@@ -145,7 +155,7 @@ RegisterServerEvent('qb-phone:server:createPost', function(source, content, imag
     local time       = os.date('%H:%M')
 
     -- TODO: persist post to DB and replace id with DB-assigned value
-    local post = {
+    local post       = {
         id       = os.time(),
         author   = authorName,
         handle   = '@' .. string.lower(string.gsub(authorName, '%s+', '')),
@@ -197,7 +207,7 @@ RegisterServerEvent('qb-phone:server:addComment', function(source, postId, text)
     local time       = os.date('%H:%M')
 
     -- TODO: persist comment to DB and replace id with DB-assigned value
-    local comment = {
+    local comment    = {
         id     = os.time(),
         author = authorName,
         handle = '@' .. string.lower(string.gsub(authorName, '%s+', '')),
