@@ -1,0 +1,223 @@
+﻿.settings-screen {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: rgb(244 244 245);
+    color: rgb(24 24 27);
+}
+
+.settings-header {
+    padding: 3rem 1.25rem 0.75rem;
+    border-bottom: 1px solid rgb(228 228 231);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.settings-body {
+    flex: 1;
+    overflow: auto;
+    padding: 1rem 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.settings-section-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgb(113 113 122);
+    padding: 0 0.25rem;
+}
+
+.settings-group {
+    background: white;
+    border-radius: 1.25rem;
+    overflow: hidden;
+}
+
+/* Profile row */
+.settings-profile-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: white;
+    border-radius: 1.25rem;
+    cursor: pointer;
+}
+
+.settings-profile-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, rgb(59 130 246), rgb(99 102 241));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.settings-profile-copy {
+    flex: 1;
+    min-width: 0;
+}
+
+.settings-profile-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgb(24 24 27);
+}
+
+.settings-profile-sub {
+    font-size: 0.75rem;
+    color: rgb(113 113 122);
+    margin-top: 0.125rem;
+}
+
+/* Generic row */
+.settings-row {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.75rem 1.25rem;
+    min-height: 3rem;
+}
+
+.settings-row-border {
+    border-top: 1px solid rgb(228 228 231);
+}
+
+.settings-row-info {
+    justify-content: space-between;
+}
+
+.settings-row-icon-wrap {
+    width: 1.875rem;
+    height: 1.875rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.settings-row-icon-svg {
+    width: 1rem;
+    height: 1rem;
+    color: white;
+}
+
+.settings-row-label {
+    flex: 1;
+    font-size: 0.9rem;
+    color: rgb(24 24 27);
+}
+
+.settings-row-value {
+    font-size: 0.875rem;
+    color: rgb(113 113 122);
+}
+
+.settings-chevron {
+    width: 1rem;
+    height: 1rem;
+    color: rgb(161 161 170);
+    flex-shrink: 0;
+}
+
+/* Toggle switch */
+.settings-toggle {
+    position: relative;
+    width: 2.75rem;
+    height: 1.625rem;
+    border-radius: 9999px;
+    background: rgb(212 212 216);
+    border: 0;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.settings-toggle-on {
+    background: rgb(34 197 94);
+}
+
+.settings-toggle-thumb {
+    position: absolute;
+    top: 0.1875rem;
+    left: 0.1875rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    background: white;
+    transition: transform 0.2s;
+    display: block;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+}
+
+.settings-toggle-on .settings-toggle-thumb {
+    transform: translateX(1.125rem);
+}
+
+/* â”€â”€ Dark mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+.dark .settings-screen {
+    background: rgb(18 18 22);
+    color: rgb(244 244 245);
+}
+
+.dark .settings-header {
+    background: rgb(28 28 33);
+    border-bottom-color: rgb(55 55 63);
+}
+
+.dark .settings-group {
+    background: rgb(28 28 33);
+}
+
+.dark .settings-profile-row {
+    background: rgb(28 28 33);
+}
+
+.dark .settings-profile-name {
+    color: rgb(244 244 245);
+}
+
+.dark .settings-profile-sub {
+    color: rgb(161 161 170);
+}
+
+.dark .settings-row-border {
+    border-top-color: rgb(55 55 63);
+}
+
+.dark .settings-row-label {
+    color: rgb(228 228 231);
+}
+
+.dark .settings-row-value {
+    color: rgb(161 161 170);
+}
+
+.dark .settings-chevron {
+    color: rgb(90 90 100);
+}
+
+.dark .settings-section-label {
+    color: rgb(113 113 122);
+}

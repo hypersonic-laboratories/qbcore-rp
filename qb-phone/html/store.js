@@ -2,27 +2,63 @@
     const { reactive, ref } = Vue;
 
     window.PhoneStore = {
+        darkMode: ref(false),
+
         CONTACTS: reactive([]),
         CONVERSATIONS: reactive([]),
         CALL_HISTORY: reactive([]),
         currentConversationId: ref(null),
 
-        USERS: reactive({
-            Ava: {
-                handle: "@ava",
-                bio: "Designer & dreamer ✨",
-                following: false,
-                followers: 142,
-                following_count: 38,
+        USERS: reactive({}),
+
+            currentEmailId: ref(null),
+
+        EMAILS: reactive([
+            {
+                id: 1,
+                from: 'Ava Martinez',
+                fromNumber: '5550101',
+                subject: 'Welcome to HELIX!',
+                snippet: 'Hey! Just wanted to reach out and say welcome to the city. If you need anything...',
+                body: 'Hey!\n\nJust wanted to reach out and say welcome to the city. It can be a bit overwhelming at first but you\'ll find your feet quick.\n\nIf you need anything at all, don\'t hesitate to reach out.\n\n— Ava',
+                time: '2m ago',
+                read: false,
+                starred: true,
             },
-            Marcus: {
-                handle: "@marcus",
-                bio: "Coffee first, code second ☕",
-                following: false,
-                followers: 89,
-                following_count: 61,
+            {
+                id: 2,
+                from: 'Marcus Webb',
+                fromNumber: '5550102',
+                subject: 'Re: Meeting up?',
+                snippet: 'Yeah, sounds good. I\'ll be at the usual spot around 7. Don\'t be late this time lol...',
+                body: 'Yeah, sounds good. I\'ll be at the usual spot around 7. Don\'t be late this time lol.\n\nAlso — did you hear about what happened downtown? Wild stuff.\n\nMarcus',
+                time: '14m ago',
+                read: false,
+                starred: false,
             },
-        }),
+            {
+                id: 3,
+                from: 'HELIX Bank',
+                fromNumber: '',
+                subject: 'Your account statement is ready',
+                snippet: 'Your monthly account statement is now available. Log in to view your balance and recent...',
+                body: 'Your monthly account statement is now available.\n\nLog in to HELIX Bank Online to view your balance, recent transactions, and download your statement.\n\nHELIX Bank Support Team',
+                time: '1h ago',
+                read: true,
+                starred: false,
+            },
+            {
+                id: 4,
+                from: 'Ava Martinez',
+                fromNumber: '5550101',
+                subject: 'The photos from last night',
+                snippet: 'OMG these came out so good. I\'ll send over the full album later but here\'s a preview...',
+                body: 'OMG these came out so good.\n\nI\'ll send over the full album later but here\'s a preview of a couple. Let me know which ones you want me to post.\n\n— Ava 📸',
+                time: '3h ago',
+                read: true,
+                starred: true,
+            },
+        ]),
 
         PHOTOS: reactive([
             { id: 1, gradient: "linear-gradient(135deg,#a78bfa,#60a5fa)", takenAt: "2h ago"  },
@@ -33,62 +69,6 @@
             { id: 6, gradient: "linear-gradient(135deg,#6ee7b7,#93c5fd)", takenAt: "1w ago"  },
         ]),
 
-        POSTS: reactive([
-            {
-                id: 1,
-                author: "Ava",
-                handle: "@ava",
-                content: "Just moved into my new place 🧬 First night in the new apartment and it already feels like home.",
-                image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&q=80",
-                time: "2m ago",
-                likes: 3,
-                liked: false,
-                reposts: 1,
-                reposted: false,
-                comments: [{ id: 101, author: "Marcus", handle: "@marcus", text: "Congrats! You'll love it.", time: "1m ago" }],
-            },
-            {
-                id: 2,
-                author: "Marcus",
-                handle: "@marcus",
-                content: "Nothing beats a good coffee and a blank canvas on a Monday morning.",
-                image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=80",
-                time: "14m ago",
-                likes: 7,
-                liked: false,
-                reposts: 2,
-                reposted: false,
-                comments: [],
-            },
-            {
-                id: 3,
-                author: "Ava",
-                handle: "@ava",
-                content: "Hot take: tabs are better than spaces and I will not be taking questions.",
-                image: "",
-                time: "1h ago",
-                likes: 12,
-                liked: false,
-                reposts: 5,
-                reposted: false,
-                comments: [
-                    { id: 102, author: "Marcus", handle: "@marcus", text: "Finally someone said it.", time: "58m ago" },
-                    { id: 103, author: "You", handle: "@you", text: "Controversial but correct.", time: "45m ago" },
-                ],
-            },
-            {
-                id: 4,
-                author: "Marcus",
-                handle: "@marcus",
-                content: "Golden hour hits different when you're out here exploring. 🌅",
-                image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-                time: "3h ago",
-                likes: 21,
-                liked: false,
-                reposts: 4,
-                reposted: false,
-                comments: [],
-            },
-        ]),
+        POSTS: reactive([]),
     };
 })();

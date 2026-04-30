@@ -1,7 +1,8 @@
 const GeneApp = {
     template: `
         <div style="height: 100%">
-            <!-- Profile view -->
+
+            <!-- ── Profile view ── -->
             <div v-if="geneProfileHandle !== null" class="gene-screen">
                 <div class="gene-top">
                     <div class="gene-top-row">
@@ -16,7 +17,7 @@ const GeneApp = {
                 </div>
                 <div class="gene-feed" v-if="geneProfileUser">
                     <div class="gene-profile-card">
-                        <div class="gene-profile-avatar" :style="{ background: geneAvatarColor(geneProfileHandle).bg, color: geneAvatarColor(geneProfileHandle).color }">{{ geneProfileHandle.charAt(0).toUpperCase() }}</div>
+                        <div class="gene-post-avatar gene-profile-avatar" :style="{ background: geneAvatarColor(geneProfileHandle).bg, color: geneAvatarColor(geneProfileHandle).color }">{{ geneProfileHandle.charAt(0).toUpperCase() }}</div>
                         <div class="gene-profile-info">
                             <div class="gene-profile-name">{{ geneProfileHandle }}</div>
                             <div class="gene-post-handle">{{ geneProfileUser.handle }}</div>
@@ -73,7 +74,7 @@ const GeneApp = {
                 </div>
             </div>
 
-            <!-- Thread view -->
+            <!-- ── Thread view ── -->
             <div v-else-if="geneThreadPost !== null" class="gene-screen">
                 <div class="gene-top">
                     <div class="gene-top-row">
@@ -154,7 +155,7 @@ const GeneApp = {
                 </div>
             </div>
 
-            <!-- Feed view -->
+            <!-- ── Feed view ── -->
             <div v-else class="gene-screen">
                 <div class="gene-top">
                     <div class="gene-top-row">
@@ -162,27 +163,13 @@ const GeneApp = {
                             <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
                         </button>
                         <div class="phone-app-top-copy">
-                            <div class="calendar-month-title">H</div>
+                            <div class="calendar-eyebrow">H</div>
+                            <div class="calendar-month-title">Feed</div>
                         </div>
-                        <button type="button" class="gene-compose-btn" aria-label="New post" @click="showGeneComposer = true">
-                            <i data-lucide="pencil" class="gene-compose-icon"></i>
-                        </button>
                     </div>
                     <div class="messages-search-wrap" style="margin-top: 0.75rem">
                         <i data-lucide="search" class="messages-search-icon"></i>
                         <input v-model="geneSearch" placeholder="Search posts" class="messages-search-input" />
-                    </div>
-                </div>
-
-                <div v-if="showGeneComposer" class="gene-composer">
-                    <div class="gene-post-avatar gene-composer-avatar" :style="{ background: geneAvatarColor('You').bg, color: geneAvatarColor('You').color }">Y</div>
-                    <div class="gene-composer-body">
-                        <textarea v-model="newPostContent" placeholder="What's on your mind?" class="gene-composer-textarea"></textarea>
-                        <input v-model="newPostImageUrl" placeholder="Image URL (optional)" class="gene-composer-image-input" />
-                        <div class="gene-composer-actions">
-                            <button type="button" class="calendar-button calendar-button-secondary" @click="showGeneComposer = false; newPostContent = ''; newPostImageUrl = ''">Cancel</button>
-                            <button type="button" class="calendar-button calendar-button-primary" @click="createPost">Post</button>
-                        </div>
                     </div>
                 </div>
 
@@ -227,9 +214,33 @@ const GeneApp = {
                             </div>
                         </div>
                     </template>
-                    <div v-else class="phone-empty-state">No posts found.</div>
+                    <div v-else class="phone-empty-state">No posts yet.</div>
+                </div>
+
+                <button type="button" class="gene-fab" aria-label="New post" @click="showGeneComposer = true">
+                    <i data-lucide="pencil" class="gene-fab-icon"></i>
+                </button>
+
+                <!-- Compose sheet -->
+                <div v-if="showGeneComposer" class="gene-compose-backdrop" @click.self="cancelCompose">
+                    <div class="gene-compose-sheet">
+                        <div class="gene-compose-sheet-handle"></div>
+                        <div class="gene-compose-sheet-header">
+                            <button type="button" class="gene-compose-sheet-cancel" @click="cancelCompose">Cancel</button>
+                            <span class="gene-compose-sheet-title">New Post</span>
+                            <button type="button" class="gene-compose-sheet-post" @click="createPost" :disabled="!newPostContent.trim()">Post</button>
+                        </div>
+                        <div class="gene-compose-sheet-body">
+                            <div class="gene-post-avatar" :style="{ background: geneAvatarColor('You').bg, color: geneAvatarColor('You').color }">Y</div>
+                            <div class="gene-compose-sheet-inputs">
+                                <textarea v-model="newPostContent" placeholder="What's on your mind?" class="gene-compose-sheet-textarea" rows="4"></textarea>
+                                <input v-model="newPostImageUrl" placeholder="Image URL (optional)" class="gene-compose-sheet-image-input" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </div>
     `,
 
@@ -249,11 +260,11 @@ const GeneApp = {
 
         function geneAvatarColor(author) {
             const colors = [
-                { bg: 'rgb(249 168 212)', color: 'rgb(131 24 67)' },
-                { bg: 'rgb(147 197 253)', color: 'rgb(30 64 175)' },
-                { bg: 'rgb(110 231 183)', color: 'rgb(6 78 59)'   },
-                { bg: 'rgb(253 186 116)', color: 'rgb(124 45 18)' },
-                { bg: 'rgb(196 181 253)', color: 'rgb(76 29 149)' },
+                { bg: 'rgb(249 168 212)', color: 'rgb(131 24 67)'  },
+                { bg: 'rgb(147 197 253)', color: 'rgb(30 64 175)'  },
+                { bg: 'rgb(110 231 183)', color: 'rgb(6 78 59)'    },
+                { bg: 'rgb(253 186 116)', color: 'rgb(124 45 18)'  },
+                { bg: 'rgb(196 181 253)', color: 'rgb(76 29 149)'  },
             ];
             const idx = (author.charCodeAt(0) || 0) % colors.length;
             return colors[idx];
@@ -264,41 +275,40 @@ const GeneApp = {
             return POSTS.filter(p => p.author.toLowerCase().includes(q) || p.content.toLowerCase().includes(q));
         });
 
-        const geneThreadPost = computed(() => {
-            if (geneThreadPostId.value === null) return null;
-            return POSTS.find(p => p.id === geneThreadPostId.value) || null;
-        });
+        const geneThreadPost = computed(() =>
+            geneThreadPostId.value === null ? null : (POSTS.find(p => p.id === geneThreadPostId.value) || null)
+        );
 
-        const geneProfileUser = computed(() => {
-            if (!geneProfileHandle.value) return null;
-            return USERS[geneProfileHandle.value] || null;
-        });
+        const geneProfileUser = computed(() =>
+            geneProfileHandle.value ? (USERS[geneProfileHandle.value] || null) : null
+        );
 
-        const geneProfilePosts = computed(() => {
-            if (!geneProfileHandle.value) return [];
-            return POSTS.filter(p => p.author === geneProfileHandle.value);
-        });
+        const geneProfilePosts = computed(() =>
+            geneProfileHandle.value ? POSTS.filter(p => p.author === geneProfileHandle.value) : []
+        );
+
+        function cancelCompose() {
+            showGeneComposer.value = false;
+            newPostContent.value   = '';
+            newPostImageUrl.value  = '';
+        }
 
         function createPost() {
             if (!newPostContent.value.trim()) return;
             const post = {
-                id: Date.now(),
-                author: 'You',
-                handle: '@you',
-                content: newPostContent.value,
-                image: newPostImageUrl.value.trim(),
-                time: 'Now',
-                likes: 0,
-                liked: false,
-                reposts: 0,
-                reposted: false,
+                id:       Date.now(),
+                author:   'You',
+                handle:   '@you',
+                content:  newPostContent.value.trim(),
+                image:    newPostImageUrl.value.trim(),
+                time:     'Now',
+                likes:    0,    liked:    false,
+                reposts:  0,    reposted: false,
                 comments: [],
             };
             POSTS.unshift(post);
             hEvent('createPost', { content: post.content, image: post.image });
-            newPostContent.value  = '';
-            newPostImageUrl.value = '';
-            showGeneComposer.value = false;
+            cancelCompose();
         }
 
         function toggleLike(id) {
@@ -322,7 +332,7 @@ const GeneApp = {
             if (!user) return;
             user.following = !user.following;
             user.followers += user.following ? 1 : -1;
-            hEvent('followUser', { handle: authorName, following: user.following });
+            hEvent('followUser', { handle: authorName, targetPhone: user.phone || '', following: user.following });
         }
 
         function deletePost(id) {
@@ -350,9 +360,7 @@ const GeneApp = {
         }
 
         function closeGene() {
-            showGeneComposer.value  = false;
-            newPostContent.value    = '';
-            newPostImageUrl.value   = '';
+            cancelCompose();
             geneSearch.value        = '';
             geneThreadPostId.value  = null;
             geneProfileHandle.value = null;
@@ -365,8 +373,8 @@ const GeneApp = {
             geneThreadPostId, threadCommentDraft, geneProfileHandle,
             filteredPosts, geneThreadPost, geneProfileUser, geneProfilePosts,
             geneAvatarColor,
-            createPost, toggleLike, toggleRepost, toggleFollow, deletePost,
-            addComment, openThread, openProfile, closeGene,
+            cancelCompose, createPost, toggleLike, toggleRepost, toggleFollow,
+            deletePost, addComment, openThread, openProfile, closeGene,
         };
     },
 };

@@ -252,7 +252,6 @@ const PhoneApp = {
         function deleteContact(index) {
             const contact = CONTACTS[index];
             if (!contact) return;
-            if (!confirm(`Delete ${contact.name}?`)) return;
             hEvent('deleteContact', { number: contact.number });
             CONTACTS.splice(index, 1);
         }

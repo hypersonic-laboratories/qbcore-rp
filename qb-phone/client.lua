@@ -186,6 +186,10 @@ my_webui:RegisterEventHandler('sendMessage', function(data)
     TriggerServerEvent('qb-phone:server:sendMessage', data.number, data.text)
 end)
 
+my_webui:RegisterEventHandler('deleteConversation', function(data)
+    TriggerServerEvent('qb-phone:server:deleteConversation', data.number)
+end)
+
 RegisterClientEvent('qb-phone:client:messageReceived', function(senderName, senderNumber, text, time)
     my_webui:SendEvent('messageReceived', senderName, senderNumber, text, time)
 end)
@@ -229,7 +233,7 @@ my_webui:RegisterEventHandler('repostPost', function(data)
 end)
 
 my_webui:RegisterEventHandler('followUser', function(data)
-    TriggerServerEvent('qb-phone:server:followUser', data.handle, data.following)
+    TriggerServerEvent('qb-phone:server:followUser', data.handle, data.following, data.targetPhone)
 end)
 
 my_webui:RegisterEventHandler('addComment', function(data)
@@ -262,6 +266,16 @@ end)
 
 RegisterClientEvent('qb-phone:client:newFollower', function(followerName, followerNumber)
     my_webui:SendEvent('newFollower', followerName, followerNumber)
+end)
+
+-- Email
+
+my_webui:RegisterEventHandler('sendEmail', function(data)
+    TriggerServerEvent('qb-phone:server:sendEmail', data.toNumber, data.subject, data.body)
+end)
+
+RegisterClientEvent('qb-phone:client:emailReceived', function(emailJson)
+    my_webui:SendEvent('emailReceived', emailJson)
 end)
 
 -- Calendar

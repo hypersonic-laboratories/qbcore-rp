@@ -1,4 +1,4 @@
-.calc-screen {
+﻿.calc-screen {
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -18,7 +18,7 @@
 
 .calc-back-button {
     position: absolute;
-    top: 1rem;
+    top: 3rem;
     left: 1rem;
     display: flex;
     align-items: center;

@@ -3,7 +3,7 @@ const { createApp } = Vue;
 const HOME_APPS = [
     { label: "Calendar",   bgClass: "app-icon-calendar",   iconClass: "app-icon-calendar-symbol",   icon: "calendar-days" },
     { label: "Camera",     bgClass: "app-icon-camera",     iconClass: "app-icon-camera-symbol",     icon: "camera"        },
-    { label: "Maps",       bgClass: "app-icon-maps",       iconClass: "app-icon-maps-symbol",       icon: "map-pin"       },
+    // { label: "Maps",       bgClass: "app-icon-maps",       iconClass: "app-icon-maps-symbol",       icon: "map-pin"       },
     { label: "Settings",   bgClass: "app-icon-settings",   iconClass: "app-icon-settings-symbol",   icon: "settings"      },
     { label: "Clock",      bgClass: "app-icon-clock",      iconClass: "app-icon-clock-symbol",      icon: "clock-3"       },
     { label: "Photos",     bgClass: "app-icon-photos",     iconClass: "app-icon-photos-symbol",     icon: "image"         },
@@ -27,6 +27,9 @@ createApp({
         CalculatorApp,
         CameraApp,
         PhotosApp,
+        ClockApp,
+        SettingsApp,
+        HmailApp,
     },
 
     setup() {
@@ -35,6 +38,7 @@ createApp({
         const phoneVisible = ref(false);
         const locked       = ref(true);
         const activeScreen = ref("home");
+        const darkMode     = window.PhoneStore.darkMode;
 
         const incomingCall = ref(null);
         const outgoingCall = ref(null);
@@ -190,7 +194,7 @@ createApp({
         function getFormattedDate()        { return "Tue, Mar 27"; }
         function getWeatherTemperature()   { return "68°";         }
 
-        const OPENABLE = new Set(["calendar", "phone", "messages", "h", "calculator", "camera", "photos"]);
+        const OPENABLE = new Set(["calendar", "phone", "messages", "h", "calculator", "camera", "photos", "clock", "settings", "hmail"]);
 
         function openApp(label) {
             const key = label.toLowerCase();
@@ -199,7 +203,7 @@ createApp({
 
         return {
             HOME_APPS, DOCK_APPS,
-            phoneVisible, locked, activeScreen,
+            phoneVisible, locked, activeScreen, darkMode,
             incomingCall, outgoingCall, activeCall, callDuration,
             formatCallDuration, acceptCall, hangup,
             navigateTo, onDial,

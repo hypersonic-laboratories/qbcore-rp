@@ -118,6 +118,10 @@ end)
 
 -- Messages
 
+RegisterServerEvent('qb-phone:server:deleteConversation', function(source, targetNumber)
+    -- TODO: soft-delete or archive the conversation thread for this player
+end)
+
 RegisterServerEvent('qb-phone:server:sendMessage', function(source, targetNumber, text)
     local sender = exports['qb-core']:GetPlayer(source)
     if not sender then return end
@@ -137,12 +141,12 @@ end)
 
 -- Contacts
 
-RegisterServerEvent('qb-phone:server:saveContact', function(_, _, _, _)
-    -- TODO: upsert contact row for source player; args: source, name, number, image
+RegisterServerEvent('qb-phone:server:saveContact', function(source, name, number, image)
+    -- TODO: upsert contact row for source player
 end)
 
-RegisterServerEvent('qb-phone:server:deleteContact', function(_, _)
-    -- TODO: delete contact row for source player; args: source, number
+RegisterServerEvent('qb-phone:server:deleteContact', function(source, number)
+    -- TODO: delete contact row for source player
 end)
 
 -- H (Social Feed)
@@ -172,31 +176,39 @@ RegisterServerEvent('qb-phone:server:createPost', function(source, content, imag
     TriggerClientEvent(-1, 'qb-phone:client:postReceived', json.encode(post))
 end)
 
-RegisterServerEvent('qb-phone:server:deletePost', function(_, postId)
+RegisterServerEvent('qb-phone:server:deletePost', function(source, postId)
     -- TODO: verify source player owns the post
     -- TODO: delete post and its comments from DB
     TriggerClientEvent(-1, 'qb-phone:client:postDeleted', postId)
 end)
 
-RegisterServerEvent('qb-phone:server:likePost', function(_, postId, _)
-    -- TODO: upsert/delete like row for source player; args: source, postId, liked
+RegisterServerEvent('qb-phone:server:likePost', function(source, postId, liked)
+    -- TODO: upsert/delete like row for source player
     local likeCount = 0 -- TODO: fetch updated count from DB
     TriggerClientEvent(-1, 'qb-phone:client:postLikeUpdated', postId, likeCount)
 end)
 
-RegisterServerEvent('qb-phone:server:repostPost', function(_, postId, _)
-    -- TODO: upsert/delete repost row for source player; args: source, postId, reposted
+RegisterServerEvent('qb-phone:server:repostPost', function(source, postId, reposted)
+    -- TODO: upsert/delete repost row for source player
     local repostCount = 0 -- TODO: fetch updated count from DB
     TriggerClientEvent(-1, 'qb-phone:client:postRepostUpdated', postId, repostCount)
 end)
 
-RegisterServerEvent('qb-phone:server:followUser', function(source, _, following)
+RegisterServerEvent('qb-phone:server:followUser', function(source, handle, following, targetPhone)
     local follower = exports['qb-core']:GetPlayer(source)
     if not follower then return end
 
-    -- TODO: upsert/delete follow row; args: source, handle, following
-    -- TODO: if following, look up target player by handle and send qb-phone:client:newFollower
-    _ = following
+    local followerName   = follower.PlayerData.charinfo.firstname .. ' ' .. follower.PlayerData.charinfo.lastname
+    local followerNumber = follower.PlayerData.charinfo.phone
+
+    -- TODO: upsert/delete follow row in DB
+
+    if following and targetPhone and targetPhone ~= '' then
+        local target = exports['qb-core']:GetPlayerByPhone(targetPhone)
+        if target then
+            TriggerClientEvent(target.PlayerData.source, 'qb-phone:client:newFollower', followerName, followerNumber)
+        end
+    end
 end)
 
 RegisterServerEvent('qb-phone:server:addComment', function(source, postId, text)
@@ -218,14 +230,44 @@ RegisterServerEvent('qb-phone:server:addComment', function(source, postId, text)
     TriggerClientEvent(-1, 'qb-phone:client:commentAdded', postId, json.encode(comment))
 end)
 
+-- Email
+
+RegisterServerEvent('qb-phone:server:sendEmail', function(source, toNumber, subject, body)
+    local sender = exports['qb-core']:GetPlayer(source)
+    if not sender then return end
+
+    local senderName   = sender.PlayerData.charinfo.firstname .. ' ' .. sender.PlayerData.charinfo.lastname
+    local senderNumber = sender.PlayerData.charinfo.phone
+    local time         = os.date('%H:%M')
+
+    -- TODO: persist email to DB
+
+    local target = exports['qb-core']:GetPlayerByPhone(toNumber)
+    if target then
+        -- TODO: replace id with DB-assigned value
+        local email = {
+            id         = os.time(),
+            from       = senderName,
+            fromNumber = senderNumber,
+            subject    = subject,
+            snippet    = string.sub(body, 1, 80),
+            body       = body,
+            time       = time,
+            read       = false,
+            starred    = false,
+        }
+        TriggerClientEvent(target.PlayerData.source, 'qb-phone:client:emailReceived', json.encode(email))
+    end
+end)
+
 -- Calendar
 
-RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(_, _, _, _, _, _)
-    -- TODO: upsert calendar event row for source player; args: source, month, day, title, time, detail
+RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, month, day, title, time, detail)
+    -- TODO: upsert calendar event row for source player
 end)
 
 -- Photos
 
-RegisterServerEvent('qb-phone:server:deletePhoto', function(_, _)
-    -- TODO: delete photo record from DB and storage; args: source, photoId
+RegisterServerEvent('qb-phone:server:deletePhoto', function(source, photoId)
+    -- TODO: delete photo record from DB and storage
 end)

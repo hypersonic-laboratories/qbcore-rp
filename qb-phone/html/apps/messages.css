@@ -1,15 +1,39 @@
-.messages-screen,
+﻿.messages-screen,
 .messages-thread-screen {
     height: 100%;
     display: flex;
     flex-direction: column;
     background: white;
     color: rgb(24 24 27);
+    position: relative;
+}
+
+.messages-fab {
+    position: absolute;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 9999px;
+    background: rgb(244 63 94);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgb(244 63 94 / 0.4);
+    z-index: 10;
+}
+
+.messages-fab-icon {
+    width: 1rem;
+    height: 1rem;
 }
 
 .messages-top,
 .messages-thread-header {
-    padding: 1rem 1.25rem 0.75rem;
+    padding: 3rem 1.25rem 0.75rem;
     border-bottom: 1px solid rgb(228 228 231);
 }
 
@@ -285,4 +309,67 @@
     justify-content: center;
     cursor: pointer;
     flex: 0 0 auto;
+}
+
+/* â”€â”€ Dark mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+.dark .messages-screen,
+.dark .messages-thread-screen {
+    background: rgb(18 18 22);
+    color: rgb(244 244 245);
+}
+
+.dark .messages-top,
+.dark .messages-thread-header {
+    border-bottom-color: rgb(55 55 63);
+}
+
+.dark .messages-search-input,
+.dark .messages-composer-input {
+    background: rgb(39 39 45);
+    border-color: rgb(55 55 63);
+    color: rgb(244 244 245);
+}
+
+.dark .messages-row-main {
+    background: rgb(39 39 45);
+    color: rgb(244 244 245);
+}
+
+.dark .messages-row-name {
+    color: rgb(244 244 245);
+}
+
+.dark .messages-row-time,
+.dark .messages-row-preview {
+    color: rgb(161 161 170);
+}
+
+.dark .messages-avatar {
+    background: rgb(50 62 84);
+    color: rgb(186 200 220);
+}
+
+.dark .messages-thread-contact-name {
+    color: rgb(244 244 245);
+}
+
+.dark .messages-header-action {
+    background: rgb(39 39 45);
+    color: rgb(212 212 216);
+}
+
+.dark .messages-composer {
+    background: rgb(18 18 22 / 0.97);
+    border-top-color: rgb(55 55 63);
+}
+
+.dark .messages-bubble-them {
+    background: rgb(39 39 45);
+    color: rgb(244 244 245);
+}
+
+.dark .message-bubble-them {
+    background: rgb(39 39 45);
+    color: rgb(244 244 245);
 }

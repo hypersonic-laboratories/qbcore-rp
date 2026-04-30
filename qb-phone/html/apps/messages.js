@@ -1,7 +1,61 @@
 const MessagesApp = {
     template: `
         <div style="height: 100%">
-            <div v-if="currentConversationId === null" class="messages-screen">
+
+            <!-- ── New conversation screen ── -->
+            <div v-if="composingNew" class="messages-screen">
+                <div class="messages-top">
+                    <div class="messages-title-row">
+                        <button type="button" aria-label="Cancel" class="calendar-icon-button" @click="composingNew = false; newQuery = ''">
+                            <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                        </button>
+                        <div class="phone-app-top-copy">
+                            <div class="calendar-eyebrow">Messages</div>
+                            <div class="calendar-month-title">New Message</div>
+                        </div>
+                    </div>
+                    <div class="messages-search-wrap" style="margin-top:1rem">
+                        <i data-lucide="user" class="messages-search-icon"></i>
+                        <input v-model="newQuery" placeholder="Search name or number" class="messages-search-input" autofocus />
+                    </div>
+                </div>
+                <div class="messages-list">
+                    <!-- Direct number entry row -->
+                    <div v-if="newQuery.trim()" class="messages-row">
+                        <button type="button" class="messages-row-main" @click="startConversation({ name: newQuery.trim(), number: newQuery.trim(), image: '' })">
+                            <div class="messages-avatar" style="background: rgb(99 102 241); color: white">
+                                <i data-lucide="hash" style="width:1rem;height:1rem"></i>
+                            </div>
+                            <div class="messages-row-copy">
+                                <div class="messages-row-top">
+                                    <div class="messages-row-name">{{ newQuery.trim() }}</div>
+                                </div>
+                                <div class="messages-row-preview">Send to this number</div>
+                            </div>
+                        </button>
+                    </div>
+                    <template v-if="contactSuggestions.length">
+                        <div v-for="c in contactSuggestions" :key="c.number" class="messages-row">
+                            <button type="button" class="messages-row-main" @click="startConversation(c)">
+                                <div v-if="c.image" class="messages-avatar messages-avatar-image">
+                                    <img :src="c.image" :alt="c.name" class="messages-avatar-image-tag" @error="e => { e.target.style.display='none'; e.target.parentElement.textContent = c.name.charAt(0).toUpperCase(); }" />
+                                </div>
+                                <div v-else class="messages-avatar">{{ c.name.charAt(0).toUpperCase() }}</div>
+                                <div class="messages-row-copy">
+                                    <div class="messages-row-top">
+                                        <div class="messages-row-name">{{ c.name }}</div>
+                                    </div>
+                                    <div class="messages-row-preview">{{ c.number }}</div>
+                                </div>
+                            </button>
+                        </div>
+                    </template>
+                    <div v-else-if="!newQuery.trim()" class="phone-empty-state">No contacts found.</div>
+                </div>
+            </div>
+
+            <!-- ── Inbox ── -->
+            <div v-else-if="currentConversationId === null" class="messages-screen">
                 <div class="messages-top">
                     <div class="messages-title-row">
                         <button type="button" aria-label="Back to home" class="calendar-icon-button" @click="onBack">
@@ -40,6 +94,10 @@ const MessagesApp = {
                     </template>
                     <div v-else class="phone-empty-state">No conversations found.</div>
                 </div>
+
+                <button type="button" class="messages-fab" aria-label="New message" @click="composingNew = true">
+                    <i data-lucide="pencil" class="messages-fab-icon"></i>
+                </button>
             </div>
 
             <div v-else-if="currentConversation" class="messages-thread-screen">
@@ -87,10 +145,20 @@ const MessagesApp = {
 
     setup(props, { emit }) {
         const { ref, computed } = Vue;
-        const { CONVERSATIONS, currentConversationId } = window.PhoneStore;
+        const { CONVERSATIONS, CONTACTS, currentConversationId } = window.PhoneStore;
 
-        const messageSearch = ref('');
-        const messageDraft  = ref('');
+        const messageSearch  = ref('');
+        const messageDraft   = ref('');
+        const composingNew   = ref(false);
+        const newQuery       = ref('');
+
+        const contactSuggestions = computed(() => {
+            const q = newQuery.value.trim().toLowerCase();
+            if (!q) return CONTACTS;
+            return CONTACTS.filter(c =>
+                c.name.toLowerCase().includes(q) || c.number.includes(q)
+            );
+        });
 
         const filteredConversations = computed(() => {
             const q = messageSearch.value.trim().toLowerCase();
@@ -129,9 +197,22 @@ const MessagesApp = {
         function deleteConversation(id) {
             const idx = CONVERSATIONS.findIndex(c => c.id === id);
             if (idx === -1) return;
-            if (!confirm(`Delete conversation with ${CONVERSATIONS[idx].name}?`)) return;
+            const conv = CONVERSATIONS[idx];
+            hEvent('deleteConversation', { number: conv.number });
             CONVERSATIONS.splice(idx, 1);
             if (currentConversationId.value === id) currentConversationId.value = null;
+        }
+
+        function startConversation(contact) {
+            let conv = CONVERSATIONS.find(c => c.number === contact.number);
+            if (!conv) {
+                conv = { id: Date.now(), name: contact.name, number: contact.number, image: contact.image || '', messages: [] };
+                CONVERSATIONS.unshift(conv);
+            }
+            currentConversationId.value = conv.id;
+            composingNew.value = false;
+            newQuery.value = '';
+            messageDraft.value = '';
         }
 
         function sendMessage() {
@@ -148,14 +229,18 @@ const MessagesApp = {
             currentConversationId.value = null;
             messageSearch.value = '';
             messageDraft.value = '';
+            composingNew.value = false;
+            newQuery.value = '';
             emit('navigate', 'home');
         }
 
         return {
             currentConversationId, messageSearch, messageDraft,
+            composingNew, newQuery, contactSuggestions,
             filteredConversations, currentConversation,
             getConversationPreview, getConversationTime,
-            openConversation, backToList, deleteConversation, sendMessage, onBack,
+            openConversation, backToList, deleteConversation,
+            startConversation, sendMessage, onBack,
         };
     },
 };

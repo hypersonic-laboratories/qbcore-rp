@@ -14,6 +14,9 @@
         <link rel="stylesheet" href="apps/gene.css" />
         <link rel="stylesheet" href="apps/camera.css" />
         <link rel="stylesheet" href="apps/gallery.css" />
+        <link rel="stylesheet" href="apps/clock.css" />
+        <link rel="stylesheet" href="apps/settings.css" />
+        <link rel="stylesheet" href="apps/hmail.css" />
 
         <style>
             svg[data-lucide] {
@@ -29,7 +32,7 @@
             <div>
                 <!-- ══ Phone Shell ══ -->
                 <div class="phone-shell" v-show="phoneVisible">
-                    <div class="phone-screen">
+                    <div class="phone-screen" :class="{ dark: darkMode }">
                         <div class="phone-camera-ring"></div>
 
                         <!-- Wallpaper (home only) -->
@@ -103,6 +106,9 @@
                         <gene-app       v-else-if="activeScreen === 'h'"          @navigate="navigateTo"></gene-app>
                         <camera-app     v-else-if="activeScreen === 'camera'"     @navigate="navigateTo"></camera-app>
                         <photos-app     v-else-if="activeScreen === 'photos'"     @navigate="navigateTo"></photos-app>
+                        <clock-app      v-else-if="activeScreen === 'clock'"      @navigate="navigateTo"></clock-app>
+                        <settings-app   v-else-if="activeScreen === 'settings'"   @navigate="navigateTo"></settings-app>
+                        <hmail-app      v-else-if="activeScreen === 'hmail'"      @navigate="navigateTo"></hmail-app>
 
                         <!-- ── Incoming call overlay ── -->
                         <div v-if="incomingCall" class="call-overlay">
@@ -151,6 +157,9 @@
         <script src="apps/calculator.js"></script>
         <script src="apps/camera.js"></script>
         <script src="apps/gallery.js"></script>
+        <script src="apps/clock.js"></script>
+        <script src="apps/settings.js"></script>
+        <script src="apps/hmail.js"></script>
         <script src="script.js" defer></script>
     </body>
 </html>

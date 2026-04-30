@@ -313,3 +313,67 @@
     width: 1rem;
     height: 1rem;
 }
+
+/* ── Dark mode ─────────────────────────────────────────────── */
+
+.dark .phone-list-row {
+    background: rgb(39 39 45);
+}
+
+.dark .phone-list-title {
+    color: rgb(244 244 245);
+}
+
+.dark .phone-list-avatar {
+    background: rgb(50 62 84);
+    color: rgb(186 200 220);
+}
+
+.dark .phone-list-subtitle {
+    color: rgb(161 161 170);
+}
+
+.dark .phone-list-meta {
+    color: rgb(161 161 170);
+}
+
+.dark .phone-dial-display {
+    color: rgb(244 244 245);
+}
+
+.dark .phone-key {
+    background: rgb(39 39 45);
+    color: rgb(244 244 245);
+}
+
+.dark .phone-key-letters {
+    color: rgb(161 161 170);
+}
+
+.dark .phone-secondary-action {
+    background: rgb(39 39 45);
+    color: rgb(212 212 216);
+}
+
+.dark .phone-contacts-title,
+.dark .phone-form-title {
+    color: rgb(244 244 245);
+}
+
+.dark .phone-contacts-subtitle {
+    color: rgb(161 161 170);
+}
+
+.dark .phone-tab-bar {
+    background: rgb(18 18 22 / 0.97);
+    border-top-color: rgb(55 55 63);
+}
+
+.dark .phone-tab-button {
+    color: rgb(161 161 170);
+}
+
+.dark .phone-tab-button-active {
+    background: rgb(44 44 52);
+    color: rgb(244 244 245);
+}

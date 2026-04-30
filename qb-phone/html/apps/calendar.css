@@ -1,4 +1,4 @@
-.calendar-screen,
+﻿.calendar-screen,
 .phone-app-screen {
     height: 100%;
     display: flex;
@@ -9,7 +9,7 @@
 
 .calendar-top,
 .phone-app-top {
-    padding: 1rem 1.25rem 0.75rem;
+    padding: 3rem 1.25rem 0.75rem;
     border-bottom: 1px solid rgb(228 228 231);
 }
 
@@ -281,4 +281,69 @@
     font-size: 0.875rem;
     font-weight: 600;
     color: rgb(24 24 27);
+}
+
+/* â”€â”€ Dark mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+.dark .calendar-screen,
+.dark .phone-app-screen {
+    background: rgb(18 18 22);
+    color: rgb(244 244 245);
+}
+
+.dark .calendar-top,
+.dark .phone-app-top {
+    border-bottom-color: rgb(55 55 63);
+}
+
+.dark .calendar-month-switcher {
+    background: rgb(39 39 45);
+}
+
+.dark .calendar-switcher-button {
+    background: rgb(50 50 58);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+.dark .calendar-day-has-events {
+    background: rgb(39 39 45);
+    color: rgb(244 244 245);
+}
+
+.dark .calendar-day-default {
+    color: rgb(212 212 216);
+}
+
+.dark .calendar-day-default:hover {
+    background: rgb(39 39 45);
+}
+
+.dark .calendar-form-card,
+.dark .calendar-empty-state,
+.dark .calendar-event-card,
+.dark .phone-form-card,
+.dark .phone-empty-state {
+    background: rgb(39 39 45);
+}
+
+.dark .calendar-input,
+.dark .phone-input {
+    background: rgb(28 28 33);
+    border-color: rgb(55 55 63);
+    color: rgb(244 244 245);
+}
+
+.dark .calendar-button-secondary,
+.dark .phone-form-button-secondary {
+    background: rgb(50 50 58);
+    color: rgb(212 212 216);
+}
+
+.dark .calendar-event-title {
+    color: rgb(244 244 245);
+}
+
+.dark .calendar-section-subtitle,
+.dark .calendar-event-detail {
+    color: rgb(161 161 170);
 }
