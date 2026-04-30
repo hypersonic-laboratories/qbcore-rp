@@ -128,7 +128,13 @@ local function openPhone()
     my_webui:BringToFront()
     my_webui:SetInputMode(1)
     my_webui:SendEvent('open')
-    TriggerServerEvent('qb-phone:server:loadPlayerData')
+    -- Load core data (contacts, conversations, call history) immediately on open
+    TriggerCallback('qb-phone:loadCoreData', function(data)
+        if not data then return end
+        my_webui:SendEvent('contactsLoaded', data.contacts)
+        my_webui:SendEvent('conversationsLoaded', data.conversations)
+        my_webui:SendEvent('callHistoryLoaded', data.callHistory)
+    end)
 end
 
 local function closePhone()
@@ -204,11 +210,7 @@ my_webui:RegisterEventHandler('deleteContact', function(data)
     TriggerServerEvent('qb-phone:server:deleteContact', data.number)
 end)
 
-RegisterClientEvent('qb-phone:client:contactsLoaded', function(contactsJson)
-    my_webui:SendEvent('contactsLoaded', contactsJson)
-end)
-
--- Call History
+-- Call History  (live push on call end; history is loaded via loadCoreData callback)
 
 RegisterClientEvent('qb-phone:client:callLogged', function(name, number, callType, time, missed)
     my_webui:SendEvent('callLogged', name, number, callType, time, missed)
@@ -240,8 +242,13 @@ my_webui:RegisterEventHandler('addComment', function(data)
     TriggerServerEvent('qb-phone:server:addComment', data.postId, data.text)
 end)
 
-RegisterClientEvent('qb-phone:client:feedLoaded', function(postsJson)
-    my_webui:SendEvent('feedLoaded', postsJson)
+-- H app opened — lazy-load the feed and user profiles
+my_webui:RegisterEventHandler('loadFeed', function()
+    TriggerCallback('qb-phone:loadFeed', function(data)
+        if not data then return end
+        my_webui:SendEvent('feedLoaded', data.feed)
+        my_webui:SendEvent('usersLoaded', data.users)
+    end)
 end)
 
 RegisterClientEvent('qb-phone:client:postReceived', function(postJson)
@@ -268,6 +275,14 @@ RegisterClientEvent('qb-phone:client:newFollower', function(followerName, follow
     my_webui:SendEvent('newFollower', followerName, followerNumber)
 end)
 
+-- Hmail app opened — lazy-load the inbox
+my_webui:RegisterEventHandler('loadEmails', function()
+    TriggerCallback('qb-phone:loadEmails', function(data)
+        if not data then return end
+        my_webui:SendEvent('emailsLoaded', data.emails)
+    end)
+end)
+
 -- Email
 
 my_webui:RegisterEventHandler('sendEmail', function(data)
@@ -278,24 +293,32 @@ RegisterClientEvent('qb-phone:client:emailReceived', function(emailJson)
     my_webui:SendEvent('emailReceived', emailJson)
 end)
 
+-- Calendar app opened — lazy-load events
+my_webui:RegisterEventHandler('loadCalendar', function()
+    TriggerCallback('qb-phone:loadCalendar', function(data)
+        if not data then return end
+        my_webui:SendEvent('calendarEventsLoaded', data.events)
+    end)
+end)
+
 -- Calendar
 
 my_webui:RegisterEventHandler('saveCalendarEvent', function(data)
     TriggerServerEvent('qb-phone:server:saveCalendarEvent', data.month, data.day, data.title, data.time, data.detail)
 end)
 
-RegisterClientEvent('qb-phone:client:calendarEventsLoaded', function(eventsJson)
-    my_webui:SendEvent('calendarEventsLoaded', eventsJson)
+-- Gallery app opened — lazy-load photos
+my_webui:RegisterEventHandler('loadPhotos', function()
+    TriggerCallback('qb-phone:loadPhotos', function(data)
+        if not data then return end
+        my_webui:SendEvent('photosLoaded', data.photos)
+    end)
 end)
 
 -- Photos
 
 my_webui:RegisterEventHandler('deletePhoto', function(data)
     TriggerServerEvent('qb-phone:server:deletePhoto', data.photoId)
-end)
-
-RegisterClientEvent('qb-phone:client:photosLoaded', function(photosJson)
-    my_webui:SendEvent('photosLoaded', photosJson)
 end)
 
 -- ── Camera events from JS ─────────────────────────────────────────────────────
