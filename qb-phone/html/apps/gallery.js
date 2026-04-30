@@ -91,21 +91,23 @@ const PhotosApp = {
     emits: ["navigate"],
 
     setup(props, { emit }) {
-        const { ref } = Vue;
+        const { ref, onMounted } = Vue;
         const { PHOTOS, CONTACTS, CONVERSATIONS, currentConversationId } = window.PhoneStore;
 
-        const selectedPhoto  = ref(null);
+        const selectedPhoto = ref(null);
         const shareSheetOpen = ref(false);
 
+        onMounted(() => hEvent("loadPhotos"));
+
         function closeDetail() {
-            selectedPhoto.value  = null;
+            selectedPhoto.value = null;
             shareSheetOpen.value = false;
         }
 
         function deletePhoto() {
-            const idx = PHOTOS.findIndex(p => p.id === selectedPhoto.value.id);
+            const idx = PHOTOS.findIndex((p) => p.id === selectedPhoto.value.id);
             if (idx === -1) return;
-            hEvent('deletePhoto', { photoId: selectedPhoto.value.id });
+            hEvent("deletePhoto", { photoId: selectedPhoto.value.id });
             PHOTOS.splice(idx, 1);
             closeDetail();
         }
@@ -113,13 +115,13 @@ const PhotosApp = {
         function shareToContact(contact) {
             shareSheetOpen.value = false;
 
-            let conv = CONVERSATIONS.find(c => c.number === contact.number);
+            let conv = CONVERSATIONS.find((c) => c.number === contact.number);
             if (!conv) {
                 conv = { id: Date.now(), name: contact.name, number: contact.number, image: contact.image || "", messages: [] };
                 CONVERSATIONS.unshift(conv);
             }
             conv.messages.push({ id: Date.now(), sender: "me", text: "📷 Photo", time: "Now" });
-            hEvent('sendMessage', { number: contact.number, text: '📷 Photo' });
+            hEvent("sendMessage", { number: contact.number, text: "📷 Photo" });
             currentConversationId.value = conv.id;
 
             closeDetail();
@@ -127,9 +129,14 @@ const PhotosApp = {
         }
 
         return {
-            PHOTOS, CONTACTS,
-            selectedPhoto, shareSheetOpen,
-            closeDetail, deletePhoto, shareToContact, emit,
+            PHOTOS,
+            CONTACTS,
+            selectedPhoto,
+            shareSheetOpen,
+            closeDetail,
+            deletePhoto,
+            shareToContact,
+            emit,
         };
     },
 };

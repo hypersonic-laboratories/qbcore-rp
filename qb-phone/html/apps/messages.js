@@ -141,78 +141,70 @@ const MessagesApp = {
         </div>
     `,
 
-    emits: ['navigate'],
+    emits: ["navigate"],
 
     setup(props, { emit }) {
         const { ref, computed } = Vue;
         const { CONVERSATIONS, CONTACTS, currentConversationId } = window.PhoneStore;
 
-        const messageSearch  = ref('');
-        const messageDraft   = ref('');
-        const composingNew   = ref(false);
-        const newQuery       = ref('');
+        const messageSearch = ref("");
+        const messageDraft = ref("");
+        const composingNew = ref(false);
+        const newQuery = ref("");
 
         const contactSuggestions = computed(() => {
             const q = newQuery.value.trim().toLowerCase();
             if (!q) return CONTACTS;
-            return CONTACTS.filter(c =>
-                c.name.toLowerCase().includes(q) || c.number.includes(q)
-            );
+            return CONTACTS.filter((c) => c.name.toLowerCase().includes(q) || c.number.includes(q));
         });
 
         const filteredConversations = computed(() => {
             const q = messageSearch.value.trim().toLowerCase();
             if (!q) return CONVERSATIONS;
-            return CONVERSATIONS.filter(c =>
-                c.name.toLowerCase().includes(q) ||
-                c.number.toLowerCase().includes(q) ||
-                c.messages.some(m => m.text.toLowerCase().includes(q))
-            );
+            return CONVERSATIONS.filter((c) => c.name.toLowerCase().includes(q) || c.number.toLowerCase().includes(q) || c.messages.some((m) => m.text.toLowerCase().includes(q)));
         });
 
-        const currentConversation = computed(() =>
-            CONVERSATIONS.find(c => c.id === currentConversationId.value) || null
-        );
+        const currentConversation = computed(() => CONVERSATIONS.find((c) => c.id === currentConversationId.value) || null);
 
         function getConversationPreview(c) {
             const last = c.messages[c.messages.length - 1];
-            return last ? last.text : 'No messages yet';
+            return last ? last.text : "No messages yet";
         }
 
         function getConversationTime(c) {
             const last = c.messages[c.messages.length - 1];
-            return last ? last.time : '';
+            return last ? last.time : "";
         }
 
         function openConversation(id) {
             currentConversationId.value = id;
-            messageDraft.value = '';
+            messageDraft.value = "";
         }
 
         function backToList() {
             currentConversationId.value = null;
-            messageDraft.value = '';
+            messageDraft.value = "";
         }
 
         function deleteConversation(id) {
-            const idx = CONVERSATIONS.findIndex(c => c.id === id);
+            const idx = CONVERSATIONS.findIndex((c) => c.id === id);
             if (idx === -1) return;
             const conv = CONVERSATIONS[idx];
-            hEvent('deleteConversation', { number: conv.number });
+            hEvent("deleteConversation", { number: conv.number });
             CONVERSATIONS.splice(idx, 1);
             if (currentConversationId.value === id) currentConversationId.value = null;
         }
 
         function startConversation(contact) {
-            let conv = CONVERSATIONS.find(c => c.number === contact.number);
+            let conv = CONVERSATIONS.find((c) => c.number === contact.number);
             if (!conv) {
-                conv = { id: Date.now(), name: contact.name, number: contact.number, image: contact.image || '', messages: [] };
+                conv = { id: Date.now(), name: contact.name, number: contact.number, image: contact.image || "", messages: [] };
                 CONVERSATIONS.unshift(conv);
             }
             currentConversationId.value = conv.id;
             composingNew.value = false;
-            newQuery.value = '';
-            messageDraft.value = '';
+            newQuery.value = "";
+            messageDraft.value = "";
         }
 
         function sendMessage() {
@@ -220,27 +212,37 @@ const MessagesApp = {
             if (!text || currentConversationId.value === null) return;
             const conv = currentConversation.value;
             if (!conv) return;
-            conv.messages.push({ id: Date.now(), sender: 'me', text, time: 'Now' });
-            hEvent('sendMessage', { number: conv.number, text });
-            messageDraft.value = '';
+            conv.messages.push({ id: Date.now(), sender: "me", text, time: "Now" });
+            hEvent("sendMessage", { number: conv.number, text });
+            messageDraft.value = "";
         }
 
         function onBack() {
             currentConversationId.value = null;
-            messageSearch.value = '';
-            messageDraft.value = '';
+            messageSearch.value = "";
+            messageDraft.value = "";
             composingNew.value = false;
-            newQuery.value = '';
-            emit('navigate', 'home');
+            newQuery.value = "";
+            emit("navigate", "home");
         }
 
         return {
-            currentConversationId, messageSearch, messageDraft,
-            composingNew, newQuery, contactSuggestions,
-            filteredConversations, currentConversation,
-            getConversationPreview, getConversationTime,
-            openConversation, backToList, deleteConversation,
-            startConversation, sendMessage, onBack,
+            currentConversationId,
+            messageSearch,
+            messageDraft,
+            composingNew,
+            newQuery,
+            contactSuggestions,
+            filteredConversations,
+            currentConversation,
+            getConversationPreview,
+            getConversationTime,
+            openConversation,
+            backToList,
+            deleteConversation,
+            startConversation,
+            sendMessage,
+            onBack,
         };
     },
 };

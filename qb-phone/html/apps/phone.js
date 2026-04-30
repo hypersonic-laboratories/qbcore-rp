@@ -139,21 +139,21 @@ const PhoneApp = {
         const { ref, reactive } = Vue;
         const { CONTACTS, CALL_HISTORY, CONVERSATIONS, currentConversationId } = window.PhoneStore;
 
-        const currentPhoneTab    = ref("history");
-        const dialedNumber       = ref("");
-        const showContactForm    = ref(false);
+        const currentPhoneTab = ref("history");
+        const dialedNumber = ref("");
+        const showContactForm = ref(false);
         const editingContactIndex = ref(null);
-        const contactForm        = reactive({ name: "", number: "", image: "" });
+        const contactForm = reactive({ name: "", number: "", image: "" });
 
         function getPhoneTabLabel(tab) {
             if (tab === "history") return "Recents";
-            if (tab === "keypad")  return "Keypad";
+            if (tab === "keypad") return "Keypad";
             return "Contacts";
         }
 
         function getPhoneTabIcon(tab) {
             if (tab === "history") return "history";
-            if (tab === "keypad")  return "grid-3x3";
+            if (tab === "keypad") return "grid-3x3";
             return "users";
         }
 
@@ -171,12 +171,16 @@ const PhoneApp = {
             return editingContactIndex.value === null ? "New contact" : "Edit contact";
         }
 
-        function pressKey(key)  { dialedNumber.value += key; }
-        function clearKey()     { dialedNumber.value = dialedNumber.value.slice(0, -1); }
+        function pressKey(key) {
+            dialedNumber.value += key;
+        }
+        function clearKey() {
+            dialedNumber.value = dialedNumber.value.slice(0, -1);
+        }
 
         function placeCall() {
             if (!dialedNumber.value) return;
-            const contact = CONTACTS.find(c => c.number === dialedNumber.value);
+            const contact = CONTACTS.find((c) => c.number === dialedNumber.value);
             emit("dial", { name: contact ? contact.name : dialedNumber.value, number: dialedNumber.value });
             hEvent("dial", { number: dialedNumber.value });
             dialedNumber.value = "";
@@ -191,7 +195,7 @@ const PhoneApp = {
 
         function openConversationFromContact(contact) {
             if (!contact?.name || !contact?.number) return;
-            let conv = CONVERSATIONS.find(c => c.number === contact.number);
+            let conv = CONVERSATIONS.find((c) => c.number === contact.number);
             if (!conv) {
                 conv = { id: Date.now(), name: contact.name, number: contact.number, image: contact.image || "", messages: [] };
                 CONVERSATIONS.unshift(conv);
@@ -229,7 +233,7 @@ const PhoneApp = {
         function openEditContactForm(index) {
             const contact = CONTACTS[index];
             if (!contact) return;
-            contactForm.name  = contact.name  || "";
+            contactForm.name = contact.name || "";
             contactForm.number = contact.number || "";
             contactForm.image = contact.image || "";
             editingContactIndex.value = index;
@@ -244,7 +248,7 @@ const PhoneApp = {
             } else {
                 CONTACTS[editingContactIndex.value] = next;
             }
-            hEvent('saveContact', next);
+            hEvent("saveContact", next);
             resetContactForm();
             showContactForm.value = false;
         }
@@ -252,7 +256,7 @@ const PhoneApp = {
         function deleteContact(index) {
             const contact = CONTACTS[index];
             if (!contact) return;
-            hEvent('deleteContact', { number: contact.number });
+            hEvent("deleteContact", { number: contact.number });
             CONTACTS.splice(index, 1);
         }
 
@@ -262,12 +266,31 @@ const PhoneApp = {
         }
 
         return {
-            CONTACTS, CALL_HISTORY, PHONE_TABS, KEYPAD_KEYS,
-            currentPhoneTab, dialedNumber, showContactForm, contactForm,
-            getPhoneTabLabel, getPhoneTabIcon, getCallTypeIcon, getCallTypeClass, getContactFormTitle,
-            pressKey, clearKey, placeCall, callContact, switchPhoneTab,
-            openNewContactForm, openEditContactForm, cancelContactForm, saveContact, deleteContact,
-            openConversationFromContact, onBack,
+            CONTACTS,
+            CALL_HISTORY,
+            PHONE_TABS,
+            KEYPAD_KEYS,
+            currentPhoneTab,
+            dialedNumber,
+            showContactForm,
+            contactForm,
+            getPhoneTabLabel,
+            getPhoneTabIcon,
+            getCallTypeIcon,
+            getCallTypeClass,
+            getContactFormTitle,
+            pressKey,
+            clearKey,
+            placeCall,
+            callContact,
+            switchPhoneTab,
+            openNewContactForm,
+            openEditContactForm,
+            cancelContactForm,
+            saveContact,
+            deleteContact,
+            openConversationFromContact,
+            onBack,
         };
     },
 };

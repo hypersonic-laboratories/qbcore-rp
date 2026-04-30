@@ -124,7 +124,9 @@
     font-size: 12px;
     font-family: "Tomorrow", sans-serif;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition:
+        background 0.15s,
+        color 0.15s;
 }
 
 .camera-zoom-btn.active {
@@ -188,7 +190,9 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: border-color 0.1s, transform 0.1s;
+    transition:
+        border-color 0.1s,
+        transform 0.1s;
 }
 
 .camera-shutter:active {
@@ -201,7 +205,9 @@
     height: 58px;
     border-radius: 50%;
     background: #fff;
-    transition: transform 0.1s, opacity 0.1s;
+    transition:
+        transform 0.1s,
+        opacity 0.1s;
 }
 
 .camera-shutter:active .camera-shutter-inner {
@@ -219,8 +225,13 @@
 }
 
 @keyframes shutter-pulse {
-    0%, 100% { border-color: rgba(255, 255, 255, 0.35); }
-    50%       { border-color: rgba(255, 255, 255, 0.7);  }
+    0%,
+    100% {
+        border-color: rgba(255, 255, 255, 0.35);
+    }
+    50% {
+        border-color: rgba(255, 255, 255, 0.7);
+    }
 }
 
 /* Flip button */
@@ -270,7 +281,9 @@
     height: 38px;
     border-radius: 50%;
     border: 2.5px solid transparent;
-    transition: border-color 0.15s, transform 0.15s;
+    transition:
+        border-color 0.15s,
+        transform 0.15s;
 }
 
 .camera-filter-btn.active .camera-filter-dot {

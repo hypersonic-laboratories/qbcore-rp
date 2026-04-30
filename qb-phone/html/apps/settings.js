@@ -110,26 +110,28 @@ const SettingsApp = {
         </div>
     `,
 
-    emits: ['navigate'],
+    emits: ["navigate"],
 
     setup(props, { emit }) {
         const { ref, reactive, computed } = Vue;
 
-        const profileName    = ref('Player');
+        const profileName = ref("Player");
         const profileInitial = computed(() => profileName.value.charAt(0).toUpperCase());
 
         const notifications = reactive([
-            { key: 'messages', label: 'Messages', icon: 'message-circle', color: 'rgb(59 130 246)',  on: true  },
-            { key: 'phone',    label: 'Phone',    icon: 'phone',          color: 'rgb(34 197 94)',   on: true  },
-            { key: 'hmail',    label: 'Hmail',    icon: 'mail',           color: 'rgb(249 115 22)',  on: true  },
-            { key: 'gene',     label: 'H (Gene)', icon: 'dna',            color: 'rgb(168 85 247)',  on: false },
+            { key: "messages", label: "Messages", icon: "message-circle", color: "rgb(59 130 246)", on: true },
+            { key: "phone", label: "Phone", icon: "phone", color: "rgb(34 197 94)", on: true },
+            { key: "hmail", label: "Hmail", icon: "mail", color: "rgb(249 115 22)", on: true },
+            { key: "gene", label: "H (Gene)", icon: "dna", color: "rgb(168 85 247)", on: false },
         ]);
 
-        const darkMode   = window.PhoneStore.darkMode;
-        const dnd        = ref(false);
+        const darkMode = window.PhoneStore.darkMode;
+        const dnd = ref(false);
         const locationOn = ref(true);
 
-        function onBack() { emit('navigate', 'home'); }
+        function onBack() {
+            emit("navigate", "home");
+        }
 
         return { profileName, profileInitial, notifications, darkMode, dnd, locationOn, onBack };
     },

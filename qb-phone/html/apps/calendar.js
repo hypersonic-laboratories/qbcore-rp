@@ -1,7 +1,7 @@
-const MONTH_NAMES      = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const WEEK_DAYS        = ["S","M","T","W","T","F","S"];
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const WEEK_DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const TODAY_MONTH_INDEX = 2;
-const TODAY_DAY         = 27;
+const TODAY_DAY = 27;
 
 const CalendarApp = {
     template: `
@@ -80,16 +80,16 @@ const CalendarApp = {
         </div>
     `,
 
-    emits: ['navigate'],
+    emits: ["navigate"],
 
     setup(props, { emit }) {
         const { ref, reactive, computed, onMounted, onUnmounted } = Vue;
 
         const currentMonthIndex = ref(TODAY_MONTH_INDEX);
-        const selectedDay       = ref(TODAY_DAY);
-        const showAddForm       = ref(false);
-        const newEvent          = reactive({ title: '', time: '12:00 PM', detail: '' });
-        const eventsByMonth     = reactive({});
+        const selectedDay = ref(TODAY_DAY);
+        const showAddForm = ref(false);
+        const newEvent = reactive({ title: "", time: "12:00 PM", detail: "" });
+        const eventsByMonth = reactive({});
 
         const monthLabel = computed(() => `${MONTH_NAMES[currentMonthIndex.value]} 2026`);
 
@@ -99,27 +99,27 @@ const CalendarApp = {
 
         const eventCountLabel = computed(() => {
             const n = selectedEvents.value.length;
-            return n ? `${n} event${n === 1 ? '' : 's'}` : 'No events yet';
+            return n ? `${n} event${n === 1 ? "" : "s"}` : "No events yet";
         });
 
         const calendarDays = computed(() => {
-            const year        = 2026;
+            const year = 2026;
             const daysInMonth = new Date(year, currentMonthIndex.value + 1, 0).getDate();
             const startOffset = new Date(year, currentMonthIndex.value, 1).getDay();
-            const days        = [];
+            const days = [];
 
             for (let i = 0; i < startOffset; i++) days.push(null);
 
             for (let day = 1; day <= daysInMonth; day++) {
-                const isToday    = currentMonthIndex.value === TODAY_MONTH_INDEX && day === TODAY_DAY;
+                const isToday = currentMonthIndex.value === TODAY_MONTH_INDEX && day === TODAY_DAY;
                 const isSelected = day === selectedDay.value;
-                const hasEvents  = (monthEvents.value[day] || []).length > 0;
+                const hasEvents = (monthEvents.value[day] || []).length > 0;
 
-                let cls = 'calendar-day ';
-                if      (isSelected) cls += 'calendar-day-selected';
-                else if (isToday)    cls += 'calendar-day-today';
-                else if (hasEvents)  cls += 'calendar-day-has-events';
-                else                 cls += 'calendar-day-default';
+                let cls = "calendar-day ";
+                if (isSelected) cls += "calendar-day-selected";
+                else if (isToday) cls += "calendar-day-today";
+                else if (hasEvents) cls += "calendar-day-has-events";
+                else cls += "calendar-day-default";
 
                 days.push({ day, cls, hasEvents, isSelected });
             }
@@ -129,14 +129,14 @@ const CalendarApp = {
 
         function prevMonth() {
             currentMonthIndex.value = (currentMonthIndex.value + 11) % 12;
-            selectedDay.value       = 1;
-            showAddForm.value       = false;
+            selectedDay.value = 1;
+            showAddForm.value = false;
         }
 
         function nextMonth() {
             currentMonthIndex.value = (currentMonthIndex.value + 1) % 12;
-            selectedDay.value       = 1;
-            showAddForm.value       = false;
+            selectedDay.value = 1;
+            showAddForm.value = false;
         }
 
         function selectDay(day) {
@@ -145,51 +145,65 @@ const CalendarApp = {
 
         function saveCalendarEvent() {
             if (!newEvent.title.trim()) return;
-            const mIdx   = currentMonthIndex.value;
-            const dIdx   = selectedDay.value;
-            const time   = newEvent.time.trim()   || '12:00 PM';
-            const detail = newEvent.detail.trim() || 'No details';
+            const mIdx = currentMonthIndex.value;
+            const dIdx = selectedDay.value;
+            const time = newEvent.time.trim() || "12:00 PM";
+            const detail = newEvent.detail.trim() || "No details";
 
-            if (!eventsByMonth[mIdx])       eventsByMonth[mIdx]       = {};
+            if (!eventsByMonth[mIdx]) eventsByMonth[mIdx] = {};
             if (!eventsByMonth[mIdx][dIdx]) eventsByMonth[mIdx][dIdx] = [];
 
             const event = {
-                id:     `${mIdx}-${dIdx}-${Date.now()}`,
+                id: `${mIdx}-${dIdx}-${Date.now()}`,
                 time,
-                title:  newEvent.title.trim(),
+                title: newEvent.title.trim(),
                 detail,
-                accent: 'bg-rose-500',
+                accent: "bg-rose-500",
             };
             eventsByMonth[mIdx][dIdx].push(event);
-            hEvent('saveCalendarEvent', { month: mIdx, day: dIdx, title: event.title, time: event.time, detail: event.detail });
+            hEvent("saveCalendarEvent", { month: mIdx, day: dIdx, title: event.title, time: event.time, detail: event.detail });
 
-            newEvent.title  = '';
-            newEvent.time   = '12:00 PM';
-            newEvent.detail = '';
+            newEvent.title = "";
+            newEvent.time = "12:00 PM";
+            newEvent.detail = "";
             showAddForm.value = false;
         }
 
         function onMessage(e) {
-            if (e.data?.name !== 'calendarEventsLoaded') return;
-            const incoming = JSON.parse(e.data.args?.[0] || '{}');
+            if (e.data?.name !== "calendarEventsLoaded") return;
+            const incoming = JSON.parse(e.data.args?.[0] || "{}");
             Object.entries(incoming).forEach(([mIdx, days]) => {
                 eventsByMonth[mIdx] = days;
             });
         }
 
-        onMounted(()   => window.addEventListener('message', onMessage));
-        onUnmounted(() => window.removeEventListener('message', onMessage));
+        onMounted(() => {
+            window.addEventListener("message", onMessage);
+            hEvent("loadCalendar");
+        });
+        onUnmounted(() => window.removeEventListener("message", onMessage));
 
         function onBack() {
             showAddForm.value = false;
-            emit('navigate', 'home');
+            emit("navigate", "home");
         }
 
         return {
-            WEEK_DAYS, MONTH_NAMES,
-            currentMonthIndex, selectedDay, showAddForm, newEvent,
-            monthLabel, selectedEvents, eventCountLabel, calendarDays,
-            prevMonth, nextMonth, selectDay, saveCalendarEvent, onBack,
+            WEEK_DAYS,
+            MONTH_NAMES,
+            currentMonthIndex,
+            selectedDay,
+            showAddForm,
+            newEvent,
+            monthLabel,
+            selectedEvents,
+            eventCountLabel,
+            calendarDays,
+            prevMonth,
+            nextMonth,
+            selectDay,
+            saveCalendarEvent,
+            onBack,
         };
     },
 };

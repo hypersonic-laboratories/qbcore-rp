@@ -115,22 +115,19 @@ const HmailApp = {
         </div>
     `,
 
-    emits: ['navigate'],
+    emits: ["navigate"],
 
     setup(props, { emit }) {
         const { ref, computed, onMounted, onUnmounted } = Vue;
         const { EMAILS, currentEmailId } = window.PhoneStore;
 
-        const view         = ref('inbox');
-        const searchQuery  = ref('');
-        const composeTo    = ref('');
-        const composeSubject = ref('');
-        const composeBody  = ref('');
+        const view = ref("inbox");
+        const searchQuery = ref("");
+        const composeTo = ref("");
+        const composeSubject = ref("");
+        const composeBody = ref("");
 
-        const AVATAR_COLORS = [
-            'rgb(59 130 246)', 'rgb(168 85 247)', 'rgb(34 197 94)',
-            'rgb(249 115 22)', 'rgb(239 68 68)',  'rgb(20 184 166)',
-        ];
+        const AVATAR_COLORS = ["rgb(59 130 246)", "rgb(168 85 247)", "rgb(34 197 94)", "rgb(249 115 22)", "rgb(239 68 68)", "rgb(20 184 166)"];
         function avatarColor(name) {
             let hash = 0;
             for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -140,57 +137,51 @@ const HmailApp = {
         const filteredEmails = computed(() => {
             const q = searchQuery.value.trim().toLowerCase();
             if (!q) return EMAILS;
-            return EMAILS.filter(e =>
-                e.from.toLowerCase().includes(q) ||
-                e.subject.toLowerCase().includes(q) ||
-                e.body.toLowerCase().includes(q)
-            );
+            return EMAILS.filter((e) => e.from.toLowerCase().includes(q) || e.subject.toLowerCase().includes(q) || e.body.toLowerCase().includes(q));
         });
 
-        const currentEmail = computed(() =>
-            EMAILS.find(e => e.id === currentEmailId.value) || null
-        );
+        const currentEmail = computed(() => EMAILS.find((e) => e.id === currentEmailId.value) || null);
 
         function openEmail(id) {
             currentEmailId.value = id;
-            const email = EMAILS.find(e => e.id === id);
+            const email = EMAILS.find((e) => e.id === id);
             if (email) email.read = true;
-            view.value = 'thread';
+            view.value = "thread";
         }
 
         function openCompose() {
-            composeTo.value      = '';
-            composeSubject.value = '';
-            composeBody.value    = '';
-            view.value = 'compose';
+            composeTo.value = "";
+            composeSubject.value = "";
+            composeBody.value = "";
+            view.value = "compose";
         }
 
         function openReply() {
             if (!currentEmail.value) return;
-            composeTo.value      = currentEmail.value.fromNumber;
+            composeTo.value = currentEmail.value.fromNumber;
             composeSubject.value = `Re: ${currentEmail.value.subject}`;
-            composeBody.value    = '';
-            view.value = 'compose';
+            composeBody.value = "";
+            view.value = "compose";
         }
 
         function sendEmail() {
             const toNumber = composeTo.value.trim();
-            const subject  = composeSubject.value.trim();
-            const body     = composeBody.value.trim();
+            const subject = composeSubject.value.trim();
+            const body = composeBody.value.trim();
             if (!toNumber || !subject) return;
-            hEvent('sendEmail', { toNumber, subject, body });
+            hEvent("sendEmail", { toNumber, subject, body });
             EMAILS.unshift({
-                id:         Date.now(),
-                from:       'Me',
-                fromNumber: '',
+                id: Date.now(),
+                from: "Me",
+                fromNumber: "",
                 subject,
-                snippet:    body.substring(0, 80),
+                snippet: body.substring(0, 80),
                 body,
-                time:       'Just now',
-                read:       true,
-                starred:    false,
+                time: "Just now",
+                read: true,
+                starred: false,
             });
-            view.value = 'inbox';
+            view.value = "inbox";
         }
 
         function toggleStar(email) {
@@ -198,25 +189,44 @@ const HmailApp = {
         }
 
         function onMessage(e) {
-            if (e.data?.name !== 'emailReceived') return;
-            const email = JSON.parse(e.data.args?.[0] || '{}');
-            if (email.id) EMAILS.unshift(email);
+            const { name, args = [] } = e.data || {};
+            if (name === "emailsLoaded") {
+                const incoming = JSON.parse(args[0] || "[]");
+                EMAILS.splice(0, EMAILS.length, ...incoming);
+            } else if (name === "emailReceived") {
+                const email = JSON.parse(args[0] || "{}");
+                if (email.id) EMAILS.unshift(email);
+            }
         }
 
-        onMounted(()   => window.addEventListener('message', onMessage));
-        onUnmounted(() => window.removeEventListener('message', onMessage));
+        onMounted(() => {
+            window.addEventListener("message", onMessage);
+            hEvent("loadEmails");
+        });
+        onUnmounted(() => window.removeEventListener("message", onMessage));
 
         function onBack() {
             currentEmailId.value = null;
-            searchQuery.value    = '';
-            view.value = 'inbox';
-            emit('navigate', 'home');
+            searchQuery.value = "";
+            view.value = "inbox";
+            emit("navigate", "home");
         }
 
         return {
-            view, searchQuery, composeTo, composeSubject, composeBody,
-            filteredEmails, currentEmail,
-            avatarColor, openEmail, openCompose, openReply, sendEmail, toggleStar, onBack,
+            view,
+            searchQuery,
+            composeTo,
+            composeSubject,
+            composeBody,
+            filteredEmails,
+            currentEmail,
+            avatarColor,
+            openEmail,
+            openCompose,
+            openReply,
+            sendEmail,
+            toggleStar,
+            onBack,
         };
     },
 };

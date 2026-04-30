@@ -244,27 +244,27 @@ const GeneApp = {
         </div>
     `,
 
-    emits: ['navigate'],
+    emits: ["navigate"],
 
     setup(props, { emit }) {
-        const { ref, computed } = Vue;
+        const { ref, computed, onMounted } = Vue;
         const { USERS, POSTS } = window.PhoneStore;
 
-        const geneSearch          = ref('');
-        const showGeneComposer    = ref(false);
-        const newPostContent      = ref('');
-        const newPostImageUrl     = ref('');
-        const geneThreadPostId    = ref(null);
-        const threadCommentDraft  = ref('');
-        const geneProfileHandle   = ref(null);
+        const geneSearch = ref("");
+        const showGeneComposer = ref(false);
+        const newPostContent = ref("");
+        const newPostImageUrl = ref("");
+        const geneThreadPostId = ref(null);
+        const threadCommentDraft = ref("");
+        const geneProfileHandle = ref(null);
 
         function geneAvatarColor(author) {
             const colors = [
-                { bg: 'rgb(249 168 212)', color: 'rgb(131 24 67)'  },
-                { bg: 'rgb(147 197 253)', color: 'rgb(30 64 175)'  },
-                { bg: 'rgb(110 231 183)', color: 'rgb(6 78 59)'    },
-                { bg: 'rgb(253 186 116)', color: 'rgb(124 45 18)'  },
-                { bg: 'rgb(196 181 253)', color: 'rgb(76 29 149)'  },
+                { bg: "rgb(249 168 212)", color: "rgb(131 24 67)" },
+                { bg: "rgb(147 197 253)", color: "rgb(30 64 175)" },
+                { bg: "rgb(110 231 183)", color: "rgb(6 78 59)" },
+                { bg: "rgb(253 186 116)", color: "rgb(124 45 18)" },
+                { bg: "rgb(196 181 253)", color: "rgb(76 29 149)" },
             ];
             const idx = (author.charCodeAt(0) || 0) % colors.length;
             return colors[idx];
@@ -272,59 +272,57 @@ const GeneApp = {
 
         const filteredPosts = computed(() => {
             const q = geneSearch.value.toLowerCase();
-            return POSTS.filter(p => p.author.toLowerCase().includes(q) || p.content.toLowerCase().includes(q));
+            return POSTS.filter((p) => p.author.toLowerCase().includes(q) || p.content.toLowerCase().includes(q));
         });
 
-        const geneThreadPost = computed(() =>
-            geneThreadPostId.value === null ? null : (POSTS.find(p => p.id === geneThreadPostId.value) || null)
-        );
+        const geneThreadPost = computed(() => (geneThreadPostId.value === null ? null : POSTS.find((p) => p.id === geneThreadPostId.value) || null));
 
-        const geneProfileUser = computed(() =>
-            geneProfileHandle.value ? (USERS[geneProfileHandle.value] || null) : null
-        );
+        const geneProfileUser = computed(() => (geneProfileHandle.value ? USERS[geneProfileHandle.value] || null : null));
 
-        const geneProfilePosts = computed(() =>
-            geneProfileHandle.value ? POSTS.filter(p => p.author === geneProfileHandle.value) : []
-        );
+        const geneProfilePosts = computed(() => (geneProfileHandle.value ? POSTS.filter((p) => p.author === geneProfileHandle.value) : []));
+
+        onMounted(() => hEvent("loadFeed"));
 
         function cancelCompose() {
             showGeneComposer.value = false;
-            newPostContent.value   = '';
-            newPostImageUrl.value  = '';
+            newPostContent.value = "";
+            newPostImageUrl.value = "";
         }
 
         function createPost() {
             if (!newPostContent.value.trim()) return;
             const post = {
-                id:       Date.now(),
-                author:   'You',
-                handle:   '@you',
-                content:  newPostContent.value.trim(),
-                image:    newPostImageUrl.value.trim(),
-                time:     'Now',
-                likes:    0,    liked:    false,
-                reposts:  0,    reposted: false,
+                id: Date.now(),
+                author: "You",
+                handle: "@you",
+                content: newPostContent.value.trim(),
+                image: newPostImageUrl.value.trim(),
+                time: "Now",
+                likes: 0,
+                liked: false,
+                reposts: 0,
+                reposted: false,
                 comments: [],
             };
             POSTS.unshift(post);
-            hEvent('createPost', { content: post.content, image: post.image });
+            hEvent("createPost", { content: post.content, image: post.image });
             cancelCompose();
         }
 
         function toggleLike(id) {
-            const post = POSTS.find(p => p.id === id);
+            const post = POSTS.find((p) => p.id === id);
             if (!post) return;
             post.liked = !post.liked;
             post.likes += post.liked ? 1 : -1;
-            hEvent('likePost', { postId: id, liked: post.liked });
+            hEvent("likePost", { postId: id, liked: post.liked });
         }
 
         function toggleRepost(id) {
-            const post = POSTS.find(p => p.id === id);
+            const post = POSTS.find((p) => p.id === id);
             if (!post) return;
             post.reposted = !post.reposted;
             post.reposts += post.reposted ? 1 : -1;
-            hEvent('repostPost', { postId: id, reposted: post.reposted });
+            hEvent("repostPost", { postId: id, reposted: post.reposted });
         }
 
         function toggleFollow(authorName) {
@@ -332,27 +330,27 @@ const GeneApp = {
             if (!user) return;
             user.following = !user.following;
             user.followers += user.following ? 1 : -1;
-            hEvent('followUser', { handle: authorName, targetPhone: user.phone || '', following: user.following });
+            hEvent("followUser", { handle: authorName, targetPhone: user.phone || "", following: user.following });
         }
 
         function deletePost(id) {
-            const idx = POSTS.findIndex(p => p.id === id);
+            const idx = POSTS.findIndex((p) => p.id === id);
             if (idx !== -1) POSTS.splice(idx, 1);
             if (geneThreadPostId.value === id) geneThreadPostId.value = null;
-            hEvent('deletePost', { postId: id });
+            hEvent("deletePost", { postId: id });
         }
 
         function addComment(postId, text) {
-            const post = POSTS.find(p => p.id === postId);
+            const post = POSTS.find((p) => p.id === postId);
             if (!post || !text.trim()) return;
-            post.comments.push({ id: Date.now(), author: 'You', handle: '@you', text: text.trim(), time: 'Now' });
-            hEvent('addComment', { postId, text: text.trim() });
-            threadCommentDraft.value = '';
+            post.comments.push({ id: Date.now(), author: "You", handle: "@you", text: text.trim(), time: "Now" });
+            hEvent("addComment", { postId, text: text.trim() });
+            threadCommentDraft.value = "";
         }
 
         function openThread(id) {
-            geneThreadPostId.value   = id;
-            threadCommentDraft.value = '';
+            geneThreadPostId.value = id;
+            threadCommentDraft.value = "";
         }
 
         function openProfile(authorName) {
@@ -361,20 +359,37 @@ const GeneApp = {
 
         function closeGene() {
             cancelCompose();
-            geneSearch.value        = '';
-            geneThreadPostId.value  = null;
+            geneSearch.value = "";
+            geneThreadPostId.value = null;
             geneProfileHandle.value = null;
-            emit('navigate', 'home');
+            emit("navigate", "home");
         }
 
         return {
-            USERS, POSTS,
-            geneSearch, showGeneComposer, newPostContent, newPostImageUrl,
-            geneThreadPostId, threadCommentDraft, geneProfileHandle,
-            filteredPosts, geneThreadPost, geneProfileUser, geneProfilePosts,
+            USERS,
+            POSTS,
+            geneSearch,
+            showGeneComposer,
+            newPostContent,
+            newPostImageUrl,
+            geneThreadPostId,
+            threadCommentDraft,
+            geneProfileHandle,
+            filteredPosts,
+            geneThreadPost,
+            geneProfileUser,
+            geneProfilePosts,
             geneAvatarColor,
-            cancelCompose, createPost, toggleLike, toggleRepost, toggleFollow,
-            deletePost, addComment, openThread, openProfile, closeGene,
+            cancelCompose,
+            createPost,
+            toggleLike,
+            toggleRepost,
+            toggleFollow,
+            deletePost,
+            addComment,
+            openThread,
+            openProfile,
+            closeGene,
         };
     },
 };

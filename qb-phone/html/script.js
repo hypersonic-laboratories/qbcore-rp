@@ -136,6 +136,18 @@ createApp({
                 CONTACTS.splice(0, CONTACTS.length, ...contacts);
                 return;
             }
+            if (name === "conversationsLoaded") {
+                const convs = JSON.parse(args[0] || '[]');
+                const { CONVERSATIONS } = window.PhoneStore;
+                CONVERSATIONS.splice(0, CONVERSATIONS.length, ...convs);
+                return;
+            }
+            if (name === "callHistoryLoaded") {
+                const history = JSON.parse(args[0] || '[]');
+                const { CALL_HISTORY } = window.PhoneStore;
+                CALL_HISTORY.splice(0, CALL_HISTORY.length, ...history);
+                return;
+            }
             if (name === "callLogged") {
                 window.PhoneStore.CALL_HISTORY.unshift({
                     name: args[0], number: args[1], type: args[2], time: args[3], missed: args[4],
@@ -146,6 +158,13 @@ createApp({
                 const posts = JSON.parse(args[0] || '[]');
                 const { POSTS } = window.PhoneStore;
                 POSTS.splice(0, POSTS.length, ...posts);
+                return;
+            }
+            if (name === "usersLoaded") {
+                const users = JSON.parse(args[0] || '{}');
+                const { USERS } = window.PhoneStore;
+                for (const k in USERS) delete USERS[k];
+                Object.assign(USERS, users);
                 return;
             }
             if (name === "postReceived") {

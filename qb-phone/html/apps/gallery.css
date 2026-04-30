@@ -37,7 +37,9 @@
     border-radius: 4px;
     background-size: cover;
     background-position: center;
-    transition: opacity 0.15s, transform 0.15s;
+    transition:
+        opacity 0.15s,
+        transform 0.15s;
 }
 
 .gallery-tile:hover {
@@ -124,7 +126,9 @@
     font-size: 12px;
     font-family: "Tomorrow", sans-serif;
     color: rgba(255, 255, 255, 0.8);
-    transition: background 0.15s, color 0.15s;
+    transition:
+        background 0.15s,
+        color 0.15s;
 }
 
 .gallery-action-btn:hover {

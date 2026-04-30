@@ -36,31 +36,29 @@ const CalculatorApp = {
         </div>
     `,
 
-    emits: ['navigate'],
+    emits: ["navigate"],
 
     setup(props, { emit }) {
         const { ref } = Vue;
 
-        const calcDisplay     = ref('0');
-        const calcPrev        = ref(null);
-        const calcOp          = ref(null);
+        const calcDisplay = ref("0");
+        const calcPrev = ref(null);
+        const calcOp = ref(null);
         const calcShouldReset = ref(false);
 
         function calcInput(digit) {
             if (calcShouldReset.value) {
-                calcDisplay.value     = digit === '.' ? '0.' : digit;
+                calcDisplay.value = digit === "." ? "0." : digit;
                 calcShouldReset.value = false;
                 return;
             }
-            if (digit === '.' && calcDisplay.value.includes('.')) return;
-            calcDisplay.value = calcDisplay.value === '0' && digit !== '.'
-                ? digit
-                : calcDisplay.value + digit;
+            if (digit === "." && calcDisplay.value.includes(".")) return;
+            calcDisplay.value = calcDisplay.value === "0" && digit !== "." ? digit : calcDisplay.value + digit;
         }
 
         function calcSetOp(op) {
-            calcPrev.value        = parseFloat(calcDisplay.value);
-            calcOp.value          = op;
+            calcPrev.value = parseFloat(calcDisplay.value);
+            calcOp.value = op;
             calcShouldReset.value = true;
         }
 
@@ -68,32 +66,30 @@ const CalculatorApp = {
             if (calcOp.value === null || calcPrev.value === null) return;
             const a = calcPrev.value;
             const b = parseFloat(calcDisplay.value);
-            const ops = { '+': a + b, '−': a - b, '×': a * b, '÷': b !== 0 ? a / b : 'Error' };
+            const ops = { "+": a + b, "−": a - b, "×": a * b, "÷": b !== 0 ? a / b : "Error" };
             const result = ops[calcOp.value];
             calcDisplay.value = String(parseFloat(Number.isFinite(result) ? result.toPrecision(10) : result));
-            calcPrev.value        = null;
-            calcOp.value          = null;
+            calcPrev.value = null;
+            calcOp.value = null;
             calcShouldReset.value = true;
         }
 
         function calcBackspace() {
-            if (calcShouldReset.value || calcDisplay.value === 'Error') return;
-            const stripped = calcDisplay.value.startsWith('-') ? calcDisplay.value.slice(1) : calcDisplay.value;
-            calcDisplay.value = stripped.length <= 1 ? '0' : calcDisplay.value.slice(0, -1);
+            if (calcShouldReset.value || calcDisplay.value === "Error") return;
+            const stripped = calcDisplay.value.startsWith("-") ? calcDisplay.value.slice(1) : calcDisplay.value;
+            calcDisplay.value = stripped.length <= 1 ? "0" : calcDisplay.value.slice(0, -1);
         }
 
         function calcClear() {
-            calcDisplay.value     = '0';
-            calcPrev.value        = null;
-            calcOp.value          = null;
+            calcDisplay.value = "0";
+            calcPrev.value = null;
+            calcOp.value = null;
             calcShouldReset.value = false;
         }
 
         function calcToggleSign() {
-            if (calcDisplay.value === '0' || calcDisplay.value === 'Error') return;
-            calcDisplay.value = calcDisplay.value.startsWith('-')
-                ? calcDisplay.value.slice(1)
-                : '-' + calcDisplay.value;
+            if (calcDisplay.value === "0" || calcDisplay.value === "Error") return;
+            calcDisplay.value = calcDisplay.value.startsWith("-") ? calcDisplay.value.slice(1) : "-" + calcDisplay.value;
         }
 
         function calcPercent() {
@@ -103,13 +99,20 @@ const CalculatorApp = {
 
         function onBack() {
             calcClear();
-            emit('navigate', 'home');
+            emit("navigate", "home");
         }
 
         return {
-            calcDisplay, calcOp,
-            calcInput, calcSetOp, calcEquals, calcBackspace,
-            calcClear, calcToggleSign, calcPercent, onBack,
+            calcDisplay,
+            calcOp,
+            calcInput,
+            calcSetOp,
+            calcEquals,
+            calcBackspace,
+            calcClear,
+            calcToggleSign,
+            calcPercent,
+            onBack,
         };
     },
 };
