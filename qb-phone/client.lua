@@ -344,6 +344,9 @@ my_webui:RegisterEventHandler('takePhoto', function(_)
 end)
 
 RegisterClientEvent('qb-phone:client:photoUploaded', function(url)
+    if url then
+        TriggerServerEvent('qb-phone:server:savePhoto', url)
+    end
     my_webui:SendEvent('showAfterCapture')
     my_webui:SendEvent(url and 'photoTaken' or 'photoFailed', url)
 end)

@@ -158,70 +158,147 @@ CREATE TABLE IF NOT EXISTS occasion_vehicles (
 
 CREATE INDEX idx_occasion_vehicles_occasionid ON occasion_vehicles (occasionid);
 
-CREATE TABLE IF NOT EXISTS phone_invoices (
-  id SERIAL PRIMARY KEY,
-  citizenid VARCHAR(11) DEFAULT NULL,
-  amount INT NOT NULL DEFAULT 0,
-  society TEXT DEFAULT NULL,
-  sender VARCHAR(50) DEFAULT NULL,
-  sendercitizenid VARCHAR(50) DEFAULT NULL
+CREATE TABLE IF NOT EXISTS phone_accounts (
+  citizenid TEXT PRIMARY KEY,
+  phone TEXT NOT NULL,
+  name TEXT NOT NULL,
+  first_name TEXT DEFAULT '',
+  last_name TEXT DEFAULT '',
+  handle TEXT DEFAULT '',
+  bio TEXT DEFAULT '',
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_phone_invoices_citizenid ON phone_invoices (citizenid);
+CREATE INDEX IF NOT EXISTS idx_phone_accounts_phone ON phone_accounts (phone);
 
 CREATE TABLE IF NOT EXISTS phone_gallery (
-   citizenid VARCHAR(11) NOT NULL,
-   image VARCHAR(255) NOT NULL,
-   date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  citizenid TEXT NOT NULL,
+  image TEXT NOT NULL,
+  date TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX IF NOT EXISTS idx_phone_gallery_citizenid ON phone_gallery (citizenid);
+
 CREATE TABLE IF NOT EXISTS player_mails (
-  id SERIAL PRIMARY KEY,
-  citizenid VARCHAR(11) DEFAULT NULL,
-  sender VARCHAR(50) DEFAULT NULL,
-  subject VARCHAR(50) DEFAULT NULL,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  citizenid TEXT DEFAULT NULL,
+  sender TEXT DEFAULT NULL,
+  sender_number TEXT DEFAULT NULL,
+  subject TEXT DEFAULT NULL,
   message TEXT DEFAULT NULL,
-  read SMALLINT DEFAULT 0,
-  mailid INT DEFAULT NULL,
-  date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  read INTEGER DEFAULT 0,
+  starred INTEGER DEFAULT 0,
+  mailid TEXT DEFAULT NULL,
+  date TEXT DEFAULT CURRENT_TIMESTAMP,
   button TEXT DEFAULT NULL
 );
 
-CREATE INDEX idx_player_mails_citizenid ON player_mails (citizenid);
+CREATE INDEX IF NOT EXISTS idx_player_mails_citizenid ON player_mails (citizenid);
 
 CREATE TABLE IF NOT EXISTS phone_messages (
-  id SERIAL PRIMARY KEY,
-  citizenid VARCHAR(11) DEFAULT NULL,
-  number VARCHAR(50) DEFAULT NULL,
-  messages TEXT DEFAULT NULL
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  citizenid TEXT DEFAULT NULL,
+  number TEXT DEFAULT NULL,
+  display_name TEXT DEFAULT NULL,
+  image TEXT DEFAULT '',
+  messages TEXT DEFAULT '[]',
+  updated_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_phone_messages_citizenid ON phone_messages (citizenid);
-CREATE INDEX idx_phone_messages_number ON phone_messages (number);
+CREATE INDEX IF NOT EXISTS idx_phone_messages_citizenid ON phone_messages (citizenid);
+CREATE INDEX IF NOT EXISTS idx_phone_messages_number ON phone_messages (number);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_phone_messages_owner_number ON phone_messages (citizenid, number);
 
 CREATE TABLE IF NOT EXISTS phone_tweets (
-  id SERIAL PRIMARY KEY,
-  citizenid VARCHAR(11) DEFAULT NULL,
-  firstName VARCHAR(25) DEFAULT NULL,
-  lastName VARCHAR(25) DEFAULT NULL,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  citizenid TEXT DEFAULT NULL,
+  firstName TEXT DEFAULT NULL,
+  lastName TEXT DEFAULT NULL,
+  handle TEXT DEFAULT NULL,
   message TEXT DEFAULT NULL,
-  date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  date TEXT DEFAULT CURRENT_TIMESTAMP,
   url TEXT DEFAULT NULL,
-  picture VARCHAR(512) DEFAULT './img/default.png',
-  tweetId VARCHAR(25) NOT NULL
+  picture TEXT DEFAULT './img/default.png',
+  tweetId TEXT NOT NULL UNIQUE
 );
 
-CREATE INDEX idx_phone_tweets_citizenid ON phone_tweets (citizenid);
+CREATE INDEX IF NOT EXISTS idx_phone_tweets_citizenid ON phone_tweets (citizenid);
+CREATE INDEX IF NOT EXISTS idx_phone_tweets_tweetId ON phone_tweets (tweetId);
 
 CREATE TABLE IF NOT EXISTS player_contacts (
-  id SERIAL PRIMARY KEY,
-  citizenid VARCHAR(11) DEFAULT NULL,
-  name VARCHAR(50) DEFAULT NULL,
-  number VARCHAR(50) DEFAULT NULL,
-  iban VARCHAR(50) NOT NULL DEFAULT '0'
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  citizenid TEXT DEFAULT NULL,
+  name TEXT DEFAULT NULL,
+  number TEXT DEFAULT NULL,
+  image TEXT DEFAULT '',
+  iban TEXT NOT NULL DEFAULT '0'
 );
 
-CREATE INDEX idx_player_contacts_citizenid ON player_contacts (citizenid);
+CREATE INDEX IF NOT EXISTS idx_player_contacts_citizenid ON player_contacts (citizenid);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_player_contacts_owner_number ON player_contacts (citizenid, number);
+
+CREATE TABLE IF NOT EXISTS phone_call_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  citizenid TEXT NOT NULL,
+  name TEXT DEFAULT '',
+  number TEXT DEFAULT '',
+  type TEXT DEFAULT '',
+  missed INTEGER DEFAULT 0,
+  time TEXT DEFAULT '',
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_phone_call_history_citizenid ON phone_call_history (citizenid);
+
+CREATE TABLE IF NOT EXISTS phone_calendar_events (
+  id TEXT PRIMARY KEY,
+  citizenid TEXT NOT NULL,
+  month INTEGER NOT NULL,
+  day INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  event_time TEXT DEFAULT '',
+  detail TEXT DEFAULT '',
+  accent TEXT DEFAULT 'bg-rose-500',
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_phone_calendar_events_citizenid ON phone_calendar_events (citizenid);
+
+CREATE TABLE IF NOT EXISTS phone_tweet_reactions (
+  tweet_id TEXT NOT NULL,
+  citizenid TEXT NOT NULL,
+  type TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (tweet_id, citizenid, type)
+);
+
+CREATE INDEX IF NOT EXISTS idx_phone_tweet_reactions_tweet ON phone_tweet_reactions (tweet_id);
+
+CREATE TABLE IF NOT EXISTS phone_tweet_comments (
+  id TEXT PRIMARY KEY,
+  tweet_id TEXT NOT NULL,
+  citizenid TEXT NOT NULL,
+  firstName TEXT DEFAULT '',
+  lastName TEXT DEFAULT '',
+  handle TEXT DEFAULT '',
+  message TEXT NOT NULL,
+  date TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_phone_tweet_comments_tweet ON phone_tweet_comments (tweet_id);
+
+CREATE TABLE IF NOT EXISTS phone_tweet_follows (
+  follower_citizenid TEXT NOT NULL,
+  target_citizenid TEXT DEFAULT '',
+  target_name TEXT DEFAULT '',
+  target_handle TEXT DEFAULT '',
+  target_phone TEXT DEFAULT '',
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (follower_citizenid, target_name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_phone_tweet_follows_target ON phone_tweet_follows (target_name);
 
 CREATE TABLE IF NOT EXISTS players (
   id SERIAL PRIMARY KEY,
