@@ -3,16 +3,14 @@ QBCore.Player_Buckets = {}
 QBCore.Entity_Buckets = {}
 QBCore.UsableItems = {}
 
--- Getter Functions
-
 function QBCore.Functions.GetIdentifier(source)
 	local PlayerState = source:GetLyraPlayerState()
 	return PlayerState:GetHelixUserId()
 end
 
 function QBCore.Functions.GetSource(identifier)
-	for src in pairs(QBCore.Players) do
-		if QBCore.Players[src].PlayerData.license == identifier then
+	for src, player in pairs(QBCore.Players) do
+		if player.PlayerData.license == identifier then
 			return src
 		end
 	end
@@ -21,7 +19,7 @@ end
 
 function QBCore.Functions.GetPlayer(source)
 	if not source then return end
-	if type(source) == number then
+	if type(source) == 'number' then
 		local player = GetPlayerById(source)
 		if not player then return nil end
 		return QBCore.Players[player]
@@ -31,7 +29,7 @@ end
 
 function QBCore.Functions.GetPlayerName(source)
 	if not source then return end
-	if type(source) == number then
+	if type(source) == 'number' then
 		local player = GetPlayerById(source)
 		if not player then return nil end
 		local PlayerState = player:GetLyraPlayerState()
@@ -42,9 +40,9 @@ function QBCore.Functions.GetPlayerName(source)
 end
 
 function QBCore.Functions.GetPlayerByCitizenId(citizenid)
-	for src in pairs(QBCore.Players) do
-		if QBCore.Players[src].PlayerData.citizenid == citizenid then
-			return QBCore.Players[src]
+	for _, player in pairs(QBCore.Players) do
+		if player.PlayerData.citizenid == citizenid then
+			return player
 		end
 	end
 	return nil
@@ -59,28 +57,28 @@ function QBCore.Functions.GetPlayerByLicense(license)
 end
 
 function QBCore.Functions.GetPlayerByPhone(number)
-	for src in pairs(QBCore.Players) do
-		if QBCore.Players[src].PlayerData.charinfo.phone == number then
-			return QBCore.Players[src]
+	for _, player in pairs(QBCore.Players) do
+		if player.PlayerData.charinfo.phone == number then
+			return player
 		end
 	end
 	return nil
 end
 
 function QBCore.Functions.GetPlayerByAccount(account)
-	for src in pairs(QBCore.Players) do
-		if QBCore.Players[src].PlayerData.charinfo.account == account then
-			return QBCore.Players[src]
+	for _, player in pairs(QBCore.Players) do
+		if player.PlayerData.charinfo.account == account then
+			return player
 		end
 	end
 	return nil
 end
 
 function QBCore.Functions.GetPlayerByCharInfo(property, value)
-	for src in pairs(QBCore.Players) do
-		local charinfo = QBCore.Players[src].PlayerData.charinfo
-		if charinfo[property] ~= nil and charinfo[property] == value then
-			return QBCore.Players[src]
+	for _, player in pairs(QBCore.Players) do
+		local charinfo = player.PlayerData.charinfo
+		if charinfo[property] == value then
+			return player
 		end
 	end
 	return nil
@@ -102,11 +100,9 @@ function QBCore.Functions.GetPlayersOnDuty(job)
 	local players = {}
 	local count = 0
 	for src, Player in pairs(QBCore.Players) do
-		if Player.PlayerData.job.name == job then
-			if Player.PlayerData.job.onduty then
-				players[#players + 1] = src
-				count = count + 1
-			end
+		if Player.PlayerData.job.name == job and Player.PlayerData.job.onduty then
+			players[#players + 1] = src
+			count = count + 1
 		end
 	end
 	return players, count
@@ -115,10 +111,8 @@ end
 function QBCore.Functions.GetDutyCount(job)
 	local count = 0
 	for _, Player in pairs(QBCore.Players) do
-		if Player.PlayerData.job.name == job then
-			if Player.PlayerData.job.onduty then
-				count = count + 1
-			end
+		if Player.PlayerData.job.name == job and Player.PlayerData.job.onduty then
+			count = count + 1
 		end
 	end
 	return count
@@ -193,8 +187,6 @@ function QBCore.Functions.GeneratePlate()
 	)
 end
 
--- Spawn Vehicle
-
 function QBCore.Functions.CreateWeapon(weapon_name, coords, rotation, itemInfo)
 
 end
@@ -208,8 +200,6 @@ function QBCore.Functions.CreateVehicle(vehicle_name, coords, rotation, plate, f
 	vehicle:SetEngineHealth(1.0)
 	return vehicle
 end
-
--- Shared Update Functions
 
 function QBCore.Functions.SetMethod(methodName, handler)
 	if type(methodName) ~= 'string' then
@@ -427,8 +417,6 @@ function QBCore.Functions.UpdateGang(gangName, gang)
 	return true, 'success'
 end
 
--- Player Functions
-
 function QBCore.Functions.SetPlayerBucket(source, bucket)
 	if source and bucket then
 		local plicense = QBCore.Functions.GetIdentifier(source)
@@ -449,11 +437,9 @@ function QBCore.Functions.AddPlayerMethod(ids, methodName, handler)
 				v.Functions.AddMethod(methodName, handler)
 			end
 		else
-			if not QBCore.Players[ids] then
-				return
-			end
-
-			QBCore.Players[ids].Functions.AddMethod(methodName, handler)
+			local p = QBCore.Players[ids]
+			if not p then return end
+			p.Functions.AddMethod(methodName, handler)
 		end
 	elseif idType == 'table' and table.type(ids) == 'array' then
 		for i = 1, #ids do
@@ -470,11 +456,9 @@ function QBCore.Functions.AddPlayerField(ids, fieldName, data)
 				v.Functions.AddField(fieldName, data)
 			end
 		else
-			if not QBCore.Players[ids] then
-				return
-			end
-
-			QBCore.Players[ids].Functions.AddField(fieldName, data)
+			local p = QBCore.Players[ids]
+			if not p then return end
+			p.Functions.AddField(fieldName, data)
 		end
 	elseif idType == 'table' and table.type(ids) == 'array' then
 		for i = 1, #ids do
