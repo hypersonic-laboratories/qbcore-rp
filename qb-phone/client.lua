@@ -351,7 +351,7 @@ function onShutdown()
     end
 end
 
-Input.BindKey('O', function()
+Input.BindKey(Config.OpenKey, function()
     if HPlayer:GetInputMode() == 1 and not phoneOpen then return end
     if phoneOpen then closePhone() else openPhone() end
 end, 'Pressed')
