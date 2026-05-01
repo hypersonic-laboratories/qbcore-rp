@@ -21,6 +21,57 @@
     justify-content: space-between;
 }
 
+.gene-icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.gene-eyebrow {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgb(113 113 122);
+}
+
+.gene-view-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+/* Search */
+
+.gene-search-wrap {
+    position: relative;
+    margin-top: 0.75rem;
+}
+
+.gene-search-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    width: 1rem;
+    height: 1rem;
+    color: rgb(113 113 122);
+    transform: translateY(-50%);
+}
+
+.gene-search-input {
+    width: 100%;
+    border: 1px solid rgb(228 228 231);
+    border-radius: 9999px;
+    background: rgb(244 244 245);
+    color: rgb(24 24 27);
+    outline: none;
+    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    font-size: 0.875rem;
+}
+
 /* FAB */
 
 .gene-fab {
@@ -176,6 +227,23 @@
     padding: 0.85rem 1rem;
     font: inherit;
     font-size: 0.875rem;
+}
+
+.gene-send-button {
+    border: 0;
+    background: none;
+    color: rgb(244 63 94);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    flex-shrink: 0;
+}
+
+.gene-send-icon {
+    width: 1.25rem;
+    height: 1.25rem;
 }
 
 /* Feed */
@@ -373,6 +441,57 @@
     color: rgb(34 197 94);
 }
 
+/* Profile card */
+
+.gene-profile-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-bottom: 1px solid rgb(228 228 231);
+}
+
+.gene-profile-avatar {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    font-size: 1.25rem !important;
+    flex-shrink: 0;
+}
+
+.gene-profile-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.gene-profile-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: rgb(24 24 27);
+}
+
+.gene-profile-bio {
+    font-size: 0.8rem;
+    color: rgb(63 63 70);
+    line-height: 1.4;
+    margin-top: 0.15rem;
+}
+
+.gene-profile-stats {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.4rem;
+    font-size: 0.775rem;
+    color: rgb(113 113 122);
+}
+
+.gene-profile-follow-btn {
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+}
+
 /* Thread */
 
 .gene-thread-divider {
@@ -408,15 +527,24 @@
     flex: 1;
 }
 
-.gene-comment-content {
-    font-size: 0.85rem;
-    margin-bottom: 0.35rem;
-    line-height: 1.4;
+.gene-post-author {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgb(24 24 27);
 }
 
-.gene-comment-actions {
+.gene-comment-header {
     display: flex;
-    gap: 0.15rem;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.2rem;
+}
+
+.gene-comment-text {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: rgb(39 39 42);
 }
 
 /* ── Dark mode ─────────────────────────────────────────────── */
@@ -512,4 +640,38 @@
 
 .dark .gene-post-delete {
     color: rgb(113 113 122);
+}
+
+.dark .gene-eyebrow {
+    color: rgb(161 161 170);
+}
+
+.dark .gene-search-input {
+    background: rgb(39 39 45);
+    border-color: rgb(55 55 63);
+    color: rgb(244 244 245);
+}
+
+.dark .gene-profile-card {
+    border-bottom-color: rgb(55 55 63);
+}
+
+.dark .gene-profile-name {
+    color: rgb(244 244 245);
+}
+
+.dark .gene-profile-bio {
+    color: rgb(212 212 216);
+}
+
+.dark .gene-profile-stats {
+    color: rgb(161 161 170);
+}
+
+.dark .gene-post-author {
+    color: rgb(244 244 245);
+}
+
+.dark .gene-comment-text {
+    color: rgb(212 212 216);
 }

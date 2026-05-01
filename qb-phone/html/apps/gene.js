@@ -6,12 +6,12 @@ const GeneApp = {
             <div v-if="geneProfileHandle !== null" class="gene-screen">
                 <div class="gene-top">
                     <div class="gene-top-row">
-                        <button type="button" aria-label="Back" class="calendar-icon-button" @click="geneProfileHandle = null">
-                            <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                        <button type="button" aria-label="Back" class="gene-icon-button" @click="geneProfileHandle = null">
+                            <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                         </button>
                         <div class="phone-app-top-copy">
-                            <div class="calendar-eyebrow">H</div>
-                            <div class="calendar-month-title">Profile</div>
+                            <div class="gene-eyebrow">H</div>
+                            <div class="gene-view-title">Profile</div>
                         </div>
                     </div>
                 </div>
@@ -46,7 +46,7 @@ const GeneApp = {
                                     </div>
                                     <div class="gene-post-time">{{ post.time }}</div>
                                 </div>
-                                <button v-if="post.author === 'You'" type="button" class="gene-post-delete" aria-label="Delete post" @click="deletePost(post.id)">
+                                <button v-if="post.author === 'You' || post.author === playerName" type="button" class="gene-post-delete" aria-label="Delete post" @click="deletePost(post.id)">
                                     <i data-lucide="trash-2" class="gene-post-delete-icon"></i>
                                 </button>
                             </div>
@@ -78,12 +78,12 @@ const GeneApp = {
             <div v-else-if="geneThreadPost !== null" class="gene-screen">
                 <div class="gene-top">
                     <div class="gene-top-row">
-                        <button type="button" aria-label="Back to feed" class="calendar-icon-button" @click="geneThreadPostId = null; threadCommentDraft = ''">
-                            <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                        <button type="button" aria-label="Back to feed" class="gene-icon-button" @click="geneThreadPostId = null; threadCommentDraft = ''">
+                            <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                         </button>
                         <div class="phone-app-top-copy">
-                            <div class="calendar-eyebrow">H</div>
-                            <div class="calendar-month-title">Thread</div>
+                            <div class="gene-eyebrow">H</div>
+                            <div class="gene-view-title">Thread</div>
                         </div>
                     </div>
                 </div>
@@ -103,7 +103,7 @@ const GeneApp = {
                                 </div>
                                 <div class="gene-post-time">{{ geneThreadPost.time }}</div>
                             </div>
-                            <button v-if="geneThreadPost.author === 'You'" type="button" class="gene-post-delete" aria-label="Delete post" @click="deletePost(geneThreadPost.id)">
+                            <button v-if="geneThreadPost.author === 'You' || geneThreadPost.author === playerName" type="button" class="gene-post-delete" aria-label="Delete post" @click="deletePost(geneThreadPost.id)">
                                 <i data-lucide="trash-2" class="gene-post-delete-icon"></i>
                             </button>
                         </div>
@@ -149,8 +149,8 @@ const GeneApp = {
                 <div class="gene-reply-composer">
                     <div class="gene-post-avatar gene-composer-avatar" :style="{ background: geneAvatarColor('You').bg, color: geneAvatarColor('You').color }">Y</div>
                     <input v-model="threadCommentDraft" placeholder="Add a comment…" class="gene-reply-input" @keyup.enter="addComment(geneThreadPostId, threadCommentDraft)" />
-                    <button type="button" class="messages-send-button" aria-label="Send comment" @click="addComment(geneThreadPostId, threadCommentDraft)">
-                        <i data-lucide="send-horizontal" class="messages-send-icon"></i>
+                    <button type="button" class="gene-send-button" aria-label="Send comment" @click="addComment(geneThreadPostId, threadCommentDraft)">
+                        <i data-lucide="send-horizontal" class="gene-send-icon"></i>
                     </button>
                 </div>
             </div>
@@ -159,17 +159,17 @@ const GeneApp = {
             <div v-else class="gene-screen">
                 <div class="gene-top">
                     <div class="gene-top-row">
-                        <button type="button" aria-label="Back to home" class="calendar-icon-button" @click="closeGene">
-                            <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                        <button type="button" aria-label="Back to home" class="gene-icon-button" @click="closeGene">
+                            <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                         </button>
                         <div class="phone-app-top-copy">
-                            <div class="calendar-eyebrow">H</div>
-                            <div class="calendar-month-title">Feed</div>
+                            <div class="gene-eyebrow">H</div>
+                            <div class="gene-view-title">Feed</div>
                         </div>
                     </div>
-                    <div class="messages-search-wrap" style="margin-top: 0.75rem">
-                        <i data-lucide="search" class="messages-search-icon"></i>
-                        <input v-model="geneSearch" placeholder="Search posts" class="messages-search-input" />
+                    <div class="gene-search-wrap">
+                        <i data-lucide="search" class="gene-search-icon"></i>
+                        <input v-model="geneSearch" placeholder="Search posts" class="gene-search-input" />
                     </div>
                 </div>
 
@@ -190,7 +190,7 @@ const GeneApp = {
                                     </div>
                                     <div class="gene-post-time">{{ post.time }}</div>
                                 </div>
-                                <button v-if="post.author === 'You'" type="button" class="gene-post-delete" aria-label="Delete post" @click="deletePost(post.id)">
+                                <button v-if="post.author === 'You' || post.author === playerName" type="button" class="gene-post-delete" aria-label="Delete post" @click="deletePost(post.id)">
                                     <i data-lucide="trash-2" class="gene-post-delete-icon"></i>
                                 </button>
                             </div>
@@ -248,7 +248,7 @@ const GeneApp = {
 
     setup(props, { emit }) {
         const { ref, computed, onMounted } = Vue;
-        const { USERS, POSTS } = window.PhoneStore;
+        const { USERS, POSTS, playerName } = window.PhoneStore;
 
         const geneSearch = ref("");
         const showGeneComposer = ref(false);
@@ -271,7 +271,7 @@ const GeneApp = {
         }
 
         const filteredPosts = computed(() => {
-            const q = geneSearch.value.toLowerCase();
+            const q = geneSearch.value.trim().toLowerCase();
             return POSTS.filter((p) => p.author.toLowerCase().includes(q) || p.content.toLowerCase().includes(q));
         });
 
@@ -291,21 +291,7 @@ const GeneApp = {
 
         function createPost() {
             if (!newPostContent.value.trim()) return;
-            const post = {
-                id: Date.now(),
-                author: "You",
-                handle: "@you",
-                content: newPostContent.value.trim(),
-                image: newPostImageUrl.value.trim(),
-                time: "Now",
-                likes: 0,
-                liked: false,
-                reposts: 0,
-                reposted: false,
-                comments: [],
-            };
-            POSTS.unshift(post);
-            hEvent("createPost", { content: post.content, image: post.image });
+            hEvent("createPost", { content: newPostContent.value.trim(), image: newPostImageUrl.value.trim() });
             cancelCompose();
         }
 
@@ -341,9 +327,7 @@ const GeneApp = {
         }
 
         function addComment(postId, text) {
-            const post = POSTS.find((p) => p.id === postId);
-            if (!post || !text.trim()) return;
-            post.comments.push({ id: Date.now(), author: "You", handle: "@you", text: text.trim(), time: "Now" });
+            if (!text.trim()) return;
             hEvent("addComment", { postId, text: text.trim() });
             threadCommentDraft.value = "";
         }
@@ -368,6 +352,7 @@ const GeneApp = {
         return {
             USERS,
             POSTS,
+            playerName,
             geneSearch,
             showGeneComposer,
             newPostContent,
