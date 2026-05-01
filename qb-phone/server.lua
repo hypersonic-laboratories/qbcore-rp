@@ -1,9 +1,5 @@
 ---@diagnostic disable: undefined-global
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Call state  (session-only, cleared on server restart)
--- ─────────────────────────────────────────────────────────────────────────────
-
 local pendingCalls = {}
 local activeCalls  = {}
 
@@ -11,53 +7,19 @@ local function genChannel()
     return math.random(50000, 99999)
 end
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Data tables  (in-memory, keyed by phone number where applicable)
--- ─────────────────────────────────────────────────────────────────────────────
-
--- contacts[ownerPhone]        = { {name, number, image}, ... }
-local contacts       = {}
-
--- messages[pairKey]           = { {id, senderNumber, senderName, text, time}, ... }
--- pairKey = two phone numbers sorted and joined with '|'
-local messages       = {}
-
--- callHistory[phone]          = { {name, number, callType, time, missed}, ... }
-local callHistory    = {}
-
--- posts                       = { {id, authorName, authorNumber, handle, content, image, time}, ... }
--- likes[postId]               = { [phone] = true, ... }
--- reposts[postId]             = { [phone] = true, ... }
--- comments[postId]            = { {id, authorName, authorNumber, handle, text, time}, ... }
-local posts          = {}
-local likes          = {}
-local reposts        = {}
-local comments       = {}
-
--- follows[followerPhone]      = { [targetHandle] = true, ... }
-local follows        = {}
-
--- playerProfiles[phone]       = {name, handle, bio}
--- populated whenever a player creates a post; used to build USERS for the feed
-local playerProfiles = {}
-
--- emails[recipientPhone]      = { {id, from, fromNumber, subject, body, snippet, time, read, starred}, ... }
-local emails         = {}
-
--- photos[ownerPhone]          = { {id, url, takenAt}, ... }
-local photos         = {}
-
--- ─────────────────────────────────────────────────────────────────────────────
--- Helpers
--- ─────────────────────────────────────────────────────────────────────────────
+local contacts    = {}
+local messages    = {}
+local callHistory = {}
+local posts       = {}
+local likes       = {}
+local reposts     = {}
+local comments    = {}
+local follows     = {}
+local emails      = {}
+local photos      = {}
 
 local function getPlayer(source)
     return exports['qb-core']:GetPlayer(source)
-end
-
-local function getPhone(source)
-    local p = getPlayer(source)
-    return p and p.PlayerData.charinfo.phone or nil
 end
 
 local function getFullName(player)
@@ -68,25 +30,21 @@ local function makeHandle(fullName)
     return '@' .. string.lower(string.gsub(fullName, '%s+', ''))
 end
 
--- Canonical key for a message thread; always the same regardless of who is sender/receiver
 local function pairKey(a, b)
     if a < b then return a .. '|' .. b else return b .. '|' .. a end
 end
 
--- Count entries in a boolean-set table  { [key] = true, ... }
 local function countSet(t)
     local n = 0
     for _ in pairs(t) do n = n + 1 end
     return n
 end
 
--- Initialise a sub-table if it does not exist yet
 local function ensureTable(t, key)
     if not t[key] then t[key] = {} end
     return t[key]
 end
 
--- Monotonic-ish ID counter so every record has a unique numeric id across restarts.
 local _nextId = math.random(1000, 9999)
 local function genId()
     local id = tonumber(os.time() .. string.format('%04d', _nextId % 10000))
@@ -151,10 +109,6 @@ local function getCitizenIdFromPlayer(player)
     return player.PlayerData.citizenid
         or (player.PlayerData.charinfo and player.PlayerData.charinfo.citizenid)
         or (player.PlayerData.charinfo and player.PlayerData.charinfo.phone)
-end
-
-local function getCitizenId(source)
-    return getCitizenIdFromPlayer(getPlayer(source))
 end
 
 local function getFirstName(player)
@@ -429,11 +383,6 @@ local function loadPhotos(citizenid, phone)
     return result
 end
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Payload builders  (assemble client-facing JSON from the tables above)
--- ─────────────────────────────────────────────────────────────────────────────
-
--- Build the feed with per-player liked/reposted flags
 local function buildFeedForPhone(phone, viewerCitizenId)
     local reactionRows = dbSelect('SELECT tweet_id, citizenid, type FROM phone_tweet_reactions', {})
     local reactions = {}
@@ -502,7 +451,6 @@ local function buildFeedForPhone(phone, viewerCitizenId)
     return feed
 end
 
--- Build the USERS map (author profiles) as seen by a specific viewer
 local function buildUsersForPhone(viewerPhone, viewerCitizenId)
     local users = {}
     local accounts = dbSelect('SELECT citizenid, phone, name, handle, bio FROM phone_accounts', {})
@@ -540,7 +488,7 @@ local function buildUsersForPhone(viewerPhone, viewerCitizenId)
         end
     end
 
-    -- If an old tweet exists before the author has opened this phone, still expose a profile.
+    -- Expose profiles for authors who posted before ever opening this phone.
     local tweetAuthors = dbSelect('SELECT DISTINCT citizenid, firstName, lastName, handle FROM phone_tweets', {})
     for _, row in ipairs(tweetAuthors) do
         local firstName = row.firstName or row.firstname or ''
@@ -560,10 +508,6 @@ local function buildUsersForPhone(viewerPhone, viewerCitizenId)
 
     return users
 end
-
--- ─────────────────────────────────────────────────────────────────────────────
--- Call events
--- ─────────────────────────────────────────────────────────────────────────────
 
 RegisterServerEvent('qb-phone:server:dial', function(source, targetNumber)
     local caller = getPlayer(source)
@@ -585,9 +529,9 @@ RegisterServerEvent('qb-phone:server:dial', function(source, targetNumber)
         return
     end
 
-    local callerName           = getFullName(caller)
-    local callerNumber         = caller.PlayerData.charinfo.phone
-    local targetName           = getFullName(target)
+    local callerName   = getFullName(caller)
+    local callerNumber = caller.PlayerData.charinfo.phone
+    local targetName   = getFullName(target)
 
     pendingCalls[targetIntSrc] = {
         callerSrc    = source,
@@ -633,7 +577,6 @@ RegisterServerEvent('qb-phone:server:hangup', function(source)
     local intSrc = player.PlayerData.source
     local time   = os.date('%H:%M')
 
-    -- Hung up on an active call
     for channel, call in pairs(activeCalls) do
         if call.callerIntSrc == intSrc or call.targetIntSrc == intSrc then
             activeCalls[channel] = nil
@@ -664,7 +607,6 @@ RegisterServerEvent('qb-phone:server:hangup', function(source)
         end
     end
 
-    -- Cancelled a pending/ringing call
     for targetSrc, pending in pairs(pendingCalls) do
         if pending.callerIntSrc == intSrc or targetSrc == intSrc then
             pendingCalls[targetSrc] = nil
@@ -694,10 +636,6 @@ RegisterServerEvent('qb-phone:server:hangup', function(source)
     end
 end)
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Data loading  (sends full player state on phone open)
--- ─────────────────────────────────────────────────────────────────────────────
-
 RegisterServerEvent('qb-phone:server:givePhone', function(source)
     local ped = GetPlayerPawn(source)
     HInventory.GiveAndEquipItemByName(ped, 'ID_Misc_Phone')
@@ -708,7 +646,6 @@ RegisterServerEvent('qb-phone:server:takePhone', function(source)
     HInventory.RemoveItemByName(ped, 'ID_Misc_Phone')
 end)
 
--- Core data loaded on every phone open (contacts, conversations, call history)
 RegisterCallback('qb-phone:loadCoreData', function(source)
     local player = getPlayer(source)
     if not player then return nil end
@@ -726,7 +663,6 @@ RegisterCallback('qb-phone:loadCoreData', function(source)
     }
 end)
 
--- Lazy-loaded when the player opens the H (social feed) app
 RegisterCallback('qb-phone:loadFeed', function(source)
     local player = getPlayer(source)
     if not player then return nil end
@@ -739,7 +675,6 @@ RegisterCallback('qb-phone:loadFeed', function(source)
     }
 end)
 
--- Lazy-loaded when the player opens the Hmail app
 RegisterCallback('qb-phone:loadEmails', function(source)
     local player = getPlayer(source)
     if not player then return nil end
@@ -751,7 +686,6 @@ RegisterCallback('qb-phone:loadEmails', function(source)
     }
 end)
 
--- Lazy-loaded when the player opens the Calendar app
 RegisterCallback('qb-phone:loadCalendar', function(source)
     local player = getPlayer(source)
     if not player then return nil end
@@ -763,7 +697,6 @@ RegisterCallback('qb-phone:loadCalendar', function(source)
     }
 end)
 
--- Lazy-loaded when the player opens the Gallery app
 RegisterCallback('qb-phone:loadPhotos', function(source)
     local player = getPlayer(source)
     if not player then return nil end
@@ -774,10 +707,6 @@ RegisterCallback('qb-phone:loadPhotos', function(source)
         photos = json.encode(loadPhotos(citizenid, phone)),
     }
 end)
-
--- ─────────────────────────────────────────────────────────────────────────────
--- Messages
--- ─────────────────────────────────────────────────────────────────────────────
 
 RegisterServerEvent('qb-phone:server:deleteConversation', function(source, targetNumber)
     local player = getPlayer(source)
@@ -838,10 +767,6 @@ RegisterServerEvent('qb-phone:server:sendMessage', function(source, targetNumber
     })
 end)
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Contacts
--- ─────────────────────────────────────────────────────────────────────────────
-
 RegisterServerEvent('qb-phone:server:saveContact', function(source, name, number, image)
     local player = getPlayer(source)
     if not player then return end
@@ -894,10 +819,6 @@ RegisterServerEvent('qb-phone:server:deleteContact', function(source, number)
     end
 end)
 
--- ─────────────────────────────────────────────────────────────────────────────
--- H (Social Feed)
--- ─────────────────────────────────────────────────────────────────────────────
-
 RegisterServerEvent('qb-phone:server:createPost', function(source, content, image)
     local player = getPlayer(source)
     if not player then return end
@@ -911,11 +832,6 @@ RegisterServerEvent('qb-phone:server:createPost', function(source, content, imag
     local handle    = makeHandle(authorName)
     local time      = os.date('%H:%M')
     local postId    = genId()
-
-    -- Upsert author profile so they appear in USERS on other players' phones
-    if not playerProfiles[authorNumber] then
-        playerProfiles[authorNumber] = { name = authorName, handle = handle, bio = '' }
-    end
 
     local post = {
         id           = postId,
@@ -936,7 +852,6 @@ RegisterServerEvent('qb-phone:server:createPost', function(source, content, imag
         VALUES (?, ?, ?, ?, ?, ?, './img/default.png', ?)
     ]], { authorCitizenId, firstName, lastName, handle, content, image or '', tostring(postId) })
 
-    -- Broadcast to all; liked/reposted are false for a brand-new post
     local payload = {
         id       = postId,
         author   = authorName,
@@ -1102,10 +1017,6 @@ RegisterServerEvent('qb-phone:server:addComment', function(source, postId, text)
     TriggerClientEvent(-1, 'qb-phone:client:commentAdded', postId, json.encode(payload))
 end)
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Email
--- ─────────────────────────────────────────────────────────────────────────────
-
 RegisterServerEvent('qb-phone:server:sendEmail', function(source, toNumber, subject, body)
     local sender = getPlayer(source)
     if not sender then return end
@@ -1150,10 +1061,6 @@ RegisterServerEvent('qb-phone:server:deleteEmail', function(source, emailId)
     dbExecute('DELETE FROM player_mails WHERE mailid = ? AND citizenid = ?', { tostring(emailId), citizenid })
 end)
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Calendar
--- ─────────────────────────────────────────────────────────────────────────────
-
 RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, month, day, title, time, detail)
     local player = getPlayer(source)
     if not player then return end
@@ -1165,17 +1072,12 @@ RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, month,
     ]], { tostring(genId()), citizenid, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
 end)
 
--- ─────────────────────────────────────────────────────────────────────────────
--- Photos
--- ─────────────────────────────────────────────────────────────────────────────
-
 RegisterServerEvent('qb-phone:server:savePhoto', function(source, url)
     if not url or url == '' then return end
     local player = getPlayer(source)
     if not player then return end
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return end
-
     dbExecute('INSERT INTO phone_gallery (citizenid, image) VALUES (?, ?)', { citizenid, url })
 end)
 
