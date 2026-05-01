@@ -3,6 +3,7 @@
 
     window.PhoneStore = {
         darkMode: ref(false),
+        playerName: ref(""),
 
         CONTACTS: reactive([]),
         CONVERSATIONS: reactive([]),

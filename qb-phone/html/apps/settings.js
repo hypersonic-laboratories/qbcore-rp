@@ -2,12 +2,12 @@ const SettingsApp = {
     template: `
         <div class="settings-screen">
             <div class="settings-header">
-                <button type="button" aria-label="Back to home" class="calendar-icon-button" @click="onBack">
-                    <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                <button type="button" aria-label="Back to home" class="settings-icon-button" @click="onBack">
+                    <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                 </button>
                 <div class="phone-app-top-copy">
-                    <div class="calendar-eyebrow">HELIX</div>
-                    <div class="calendar-month-title">Settings</div>
+                    <div class="settings-eyebrow">HELIX</div>
+                    <div class="settings-title">Settings</div>
                 </div>
             </div>
 
@@ -115,8 +115,8 @@ const SettingsApp = {
     setup(props, { emit }) {
         const { ref, reactive, computed } = Vue;
 
-        const profileName = ref("Player");
-        const profileInitial = computed(() => profileName.value.charAt(0).toUpperCase());
+        const profileName = window.PhoneStore.playerName;
+        const profileInitial = computed(() => profileName.value ? profileName.value.charAt(0).toUpperCase() : "?");
 
         const notifications = reactive([
             { key: "messages", label: "Messages", icon: "message-circle", color: "rgb(59 130 246)", on: true },

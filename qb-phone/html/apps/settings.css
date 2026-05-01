@@ -16,6 +16,29 @@
     flex-shrink: 0;
 }
 
+.settings-icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.settings-eyebrow {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgb(113 113 122);
+}
+
+.settings-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
 .settings-body {
     flex: 1;
     overflow: auto;
@@ -216,6 +239,10 @@
 
 .dark .settings-chevron {
     color: rgb(90 90 100);
+}
+
+.dark .settings-eyebrow {
+    color: rgb(161 161 170);
 }
 
 .dark .settings-section-label {

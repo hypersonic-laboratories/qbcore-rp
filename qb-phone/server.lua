@@ -716,10 +716,13 @@ RegisterCallback('qb-phone:loadCoreData', function(source)
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return nil end
     local contactList = loadContacts(citizenid, phone)
+    local firstName = player.PlayerData.charinfo.firstname or ''
+    local lastName  = player.PlayerData.charinfo.lastname  or ''
     return {
         contacts      = json.encode(contactList),
         conversations = json.encode(loadConversations(citizenid, phone, contactList)),
         callHistory   = json.encode(loadCallHistory(citizenid, phone)),
+        playerName    = (firstName .. ' ' .. lastName):match('^%s*(.-)%s*$'),
     }
 end)
 
