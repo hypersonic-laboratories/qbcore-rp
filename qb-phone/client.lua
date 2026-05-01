@@ -2,11 +2,10 @@
 local my_webui = WebUI('qb-phone', 'qb-phone/html/index.html')
 local phoneOpen = false
 
--- ── Camera state ──────────────────────────────────────────────────────────────
 local PHONE_ITEM = 'ID_Misc_Phone'
 local HAND_SOCKET = 'hand_r'
 local phoneEquipped = false
-local cameraMode = nil -- nil | "front" | "back"
+local cameraMode = nil
 local sceneCap, camRoot, camFeed = nil, nil, nil
 local camUpdateTimerId = nil
 local localRotation = Rotator(0, 0, 0)
@@ -120,20 +119,18 @@ local function setCameraMode(mode)
     end
 end
 
--- ── Phone open/close ──────────────────────────────────────────────────────────
-
 local function openPhone()
     phoneOpen = true
     TriggerServerEvent('qb-phone:server:givePhone')
     my_webui:BringToFront()
     my_webui:SetInputMode(1)
     my_webui:SendEvent('open')
-    -- Load core data (contacts, conversations, call history) immediately on open
     TriggerCallback('qb-phone:loadCoreData', function(data)
         if not data then return end
         my_webui:SendEvent('contactsLoaded', data.contacts)
         my_webui:SendEvent('conversationsLoaded', data.conversations)
         my_webui:SendEvent('callHistoryLoaded', data.callHistory)
+        my_webui:SendEvent('profileLoaded', data.playerName)
     end)
 end
 
@@ -144,8 +141,6 @@ local function closePhone()
     my_webui:SetInputMode(0)
     my_webui:SendEvent('close')
 end
-
--- WebUI Events
 
 my_webui:RegisterEventHandler('close', function()
     closePhone()
@@ -162,8 +157,6 @@ end)
 my_webui:RegisterEventHandler('hangup', function()
     TriggerServerEvent('qb-phone:server:hangup')
 end)
-
--- Call Events
 
 RegisterClientEvent('qb-phone:client:incomingCall', function(callerName, callerNumber)
     if not phoneOpen then openPhone() end
@@ -186,8 +179,6 @@ RegisterClientEvent('qb-phone:client:callFailed', function(reason)
     my_webui:SendEvent('callFailed', reason)
 end)
 
--- Messages
-
 my_webui:RegisterEventHandler('sendMessage', function(data)
     TriggerServerEvent('qb-phone:server:sendMessage', data.number, data.text)
 end)
@@ -200,8 +191,6 @@ RegisterClientEvent('qb-phone:client:messageReceived', function(senderName, send
     my_webui:SendEvent('messageReceived', senderName, senderNumber, text, time)
 end)
 
--- Contacts
-
 my_webui:RegisterEventHandler('saveContact', function(data)
     TriggerServerEvent('qb-phone:server:saveContact', data.name, data.number, data.image)
 end)
@@ -210,13 +199,9 @@ my_webui:RegisterEventHandler('deleteContact', function(data)
     TriggerServerEvent('qb-phone:server:deleteContact', data.number)
 end)
 
--- Call History  (live push on call end; history is loaded via loadCoreData callback)
-
 RegisterClientEvent('qb-phone:client:callLogged', function(name, number, callType, time, missed)
     my_webui:SendEvent('callLogged', name, number, callType, time, missed)
 end)
-
--- H (Social Feed)
 
 my_webui:RegisterEventHandler('createPost', function(data)
     TriggerServerEvent('qb-phone:server:createPost', data.content, data.image)
@@ -242,7 +227,6 @@ my_webui:RegisterEventHandler('addComment', function(data)
     TriggerServerEvent('qb-phone:server:addComment', data.postId, data.text)
 end)
 
--- H app opened — lazy-load the feed and user profiles
 my_webui:RegisterEventHandler('loadFeed', function()
     TriggerCallback('qb-phone:loadFeed', function(data)
         if not data then return end
@@ -275,7 +259,6 @@ RegisterClientEvent('qb-phone:client:newFollower', function(followerName, follow
     my_webui:SendEvent('newFollower', followerName, followerNumber)
 end)
 
--- Hmail app opened — lazy-load the inbox
 my_webui:RegisterEventHandler('loadEmails', function()
     TriggerCallback('qb-phone:loadEmails', function(data)
         if not data then return end
@@ -283,17 +266,18 @@ my_webui:RegisterEventHandler('loadEmails', function()
     end)
 end)
 
--- Email
-
 my_webui:RegisterEventHandler('sendEmail', function(data)
     TriggerServerEvent('qb-phone:server:sendEmail', data.toNumber, data.subject, data.body)
+end)
+
+my_webui:RegisterEventHandler('deleteEmail', function(data)
+    TriggerServerEvent('qb-phone:server:deleteEmail', data.emailId)
 end)
 
 RegisterClientEvent('qb-phone:client:emailReceived', function(emailJson)
     my_webui:SendEvent('emailReceived', emailJson)
 end)
 
--- Calendar app opened — lazy-load events
 my_webui:RegisterEventHandler('loadCalendar', function()
     TriggerCallback('qb-phone:loadCalendar', function(data)
         if not data then return end
@@ -301,13 +285,10 @@ my_webui:RegisterEventHandler('loadCalendar', function()
     end)
 end)
 
--- Calendar
-
 my_webui:RegisterEventHandler('saveCalendarEvent', function(data)
     TriggerServerEvent('qb-phone:server:saveCalendarEvent', data.month, data.day, data.title, data.time, data.detail)
 end)
 
--- Gallery app opened — lazy-load photos
 my_webui:RegisterEventHandler('loadPhotos', function()
     TriggerCallback('qb-phone:loadPhotos', function(data)
         if not data then return end
@@ -315,16 +296,11 @@ my_webui:RegisterEventHandler('loadPhotos', function()
     end)
 end)
 
--- Photos
-
 my_webui:RegisterEventHandler('deletePhoto', function(data)
     TriggerServerEvent('qb-phone:server:deletePhoto', data.photoId)
 end)
 
--- ── Camera events from JS ─────────────────────────────────────────────────────
-
 my_webui:RegisterEventHandler('cameraOpened', function(data)
-    -- JS defaults to rear on open
     local facing = (data and data.facing) or 'rear'
     setCameraMode(facing == 'front' and 'front' or 'back')
 end)
@@ -343,15 +319,25 @@ my_webui:RegisterEventHandler('takePhoto', function(_)
     -- JS expects: hideForCapture → showAfterCapture + photoTaken(url) or photoFailed
 end)
 
-RegisterClientEvent('qb-phone:client:photoUploaded', function(url)
-    if url then
+local function handlePhotoUploaded(url)
+    if url and url ~= '' then
         TriggerServerEvent('qb-phone:server:savePhoto', url)
     end
     my_webui:SendEvent('showAfterCapture')
-    my_webui:SendEvent(url and 'photoTaken' or 'photoFailed', url)
+    my_webui:SendEvent((url and url ~= '') and 'photoTaken' or 'photoFailed', url)
+end
+
+my_webui:RegisterEventHandler('photoUploaded', function(data)
+    local url = data
+    if type(data) == 'table' then
+        url = data.url or data.image
+    end
+    handlePhotoUploaded(url)
 end)
 
--- Lifecycle
+RegisterClientEvent('qb-phone:client:photoUploaded', function(url)
+    handlePhotoUploaded(url)
+end)
 
 function onShutdown()
     if cameraMode then closeCamera() end
@@ -364,8 +350,6 @@ function onShutdown()
         my_webui = nil
     end
 end
-
--- Input
 
 Input.BindKey('O', function()
     if HPlayer:GetInputMode() == 1 and not phoneOpen then return end
