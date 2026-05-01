@@ -44,9 +44,6 @@ local playerProfiles = {}
 -- emails[recipientPhone]      = { {id, from, fromNumber, subject, body, snippet, time, read, starred}, ... }
 local emails         = {}
 
--- calendarEvents[ownerPhone]  = { [month] = { [day] = { {id, title, time, detail}, ... } } }
-local calendarEvents = {}
-
 -- photos[ownerPhone]          = { {id, url, takenAt}, ... }
 local photos         = {}
 
@@ -402,7 +399,7 @@ local function loadCalendarEvents(citizenid, phone)
         table.insert(result[month][day], {
             id = row.id,
             title = row.title or '',
-            time = row.event_time or row.eventTime or '',
+            time = row.event_time or '',
             detail = row.detail or '',
             accent = row.accent or 'bg-rose-500',
         })
@@ -1149,18 +1146,12 @@ end)
 RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, month, day, title, time, detail)
     local player = getPlayer(source)
     if not player then return end
-    local phone = player.PlayerData.charinfo.phone
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return end
-    ensureTable(calendarEvents, phone)
-    ensureTable(calendarEvents[phone], month)
-    ensureTable(calendarEvents[phone][month], day)
-    local event = { id = genId(), title = title, time = time, detail = detail }
-    table.insert(calendarEvents[phone][month][day], event)
     dbExecute([[
         INSERT INTO phone_calendar_events (id, citizenid, month, day, title, event_time, detail)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    ]], { tostring(event.id), citizenid, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
+    ]], { tostring(genId()), citizenid, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
 end)
 
 -- ─────────────────────────────────────────────────────────────────────────────

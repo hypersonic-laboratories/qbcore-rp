@@ -5,12 +5,12 @@ const PhotosApp = {
             <!-- ── Grid view ── -->
             <template v-if="!selectedPhoto">
                 <div class="gallery-header">
-                    <button type="button" class="calendar-icon-button" aria-label="Back" @click="emit('navigate', 'home')">
-                        <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                    <button type="button" class="gallery-icon-button" aria-label="Back" @click="onBack">
+                        <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                     </button>
                     <div class="phone-app-top-copy">
-                        <div class="calendar-eyebrow">Photos</div>
-                        <div class="calendar-month-title">{{ PHOTOS.length }} photo{{ PHOTOS.length !== 1 ? 's' : '' }}</div>
+                        <div class="gallery-eyebrow">Photos</div>
+                        <div class="gallery-title">{{ PHOTOS.length }} photo{{ PHOTOS.length !== 1 ? 's' : '' }}</div>
                     </div>
                 </div>
 
@@ -99,6 +99,10 @@ const PhotosApp = {
 
         onMounted(() => hEvent("loadPhotos"));
 
+        function onBack() {
+            emit("navigate", "home");
+        }
+
         function closeDetail() {
             selectedPhoto.value = null;
             shareSheetOpen.value = false;
@@ -120,8 +124,10 @@ const PhotosApp = {
                 conv = { id: Date.now(), name: contact.name, number: contact.number, image: contact.image || "", messages: [] };
                 CONVERSATIONS.unshift(conv);
             }
-            conv.messages.push({ id: Date.now(), sender: "me", text: "📷 Photo", time: "Now" });
-            hEvent("sendMessage", { number: contact.number, text: "📷 Photo" });
+            const photoText = selectedPhoto.value.url || "📷 Photo";
+            const timeLabel = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+            conv.messages.push({ id: Date.now(), sender: "me", text: photoText, time: timeLabel });
+            hEvent("sendMessage", { number: contact.number, text: photoText });
             currentConversationId.value = conv.id;
 
             closeDetail();
@@ -133,10 +139,10 @@ const PhotosApp = {
             CONTACTS,
             selectedPhoto,
             shareSheetOpen,
+            onBack,
             closeDetail,
             deletePhoto,
             shareToContact,
-            emit,
         };
     },
 };

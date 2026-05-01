@@ -2,12 +2,12 @@ const ClockApp = {
     template: `
         <div class="clock-screen">
             <div class="clock-header">
-                <button type="button" aria-label="Back to home" class="calendar-icon-button" @click="onBack">
-                    <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                <button type="button" aria-label="Back to home" class="clock-icon-button" @click="onBack">
+                    <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                 </button>
                 <div class="phone-app-top-copy">
-                    <div class="calendar-eyebrow">HELIX</div>
-                    <div class="calendar-month-title">Clock</div>
+                    <div class="clock-eyebrow">HELIX</div>
+                    <div class="clock-title">Clock</div>
                 </div>
             </div>
 
@@ -39,14 +39,15 @@ const ClockApp = {
 
         const now = ref(new Date());
 
-        let timer;
+        let timer, alignTimer;
         onMounted(() => {
             now.value = new Date();
-            timer = setInterval(() => {
+            alignTimer = setTimeout(() => {
                 now.value = new Date();
-            }, 1000);
+                timer = setInterval(() => { now.value = new Date(); }, 1000);
+            }, 1000 - new Date().getMilliseconds());
         });
-        onUnmounted(() => clearInterval(timer));
+        onUnmounted(() => { clearTimeout(alignTimer); clearInterval(timer); });
 
         const timeStr = computed(() => {
             const d = now.value;
@@ -66,21 +67,27 @@ const ClockApp = {
         });
 
         const WORLD_CLOCK_DEFS = [
-            { city: "Los Angeles", tz: "PST", offset: -8 },
-            { city: "New York", tz: "EST", offset: -5 },
-            { city: "London", tz: "GMT", offset: 0 },
-            { city: "Tokyo", tz: "JST", offset: 9 },
+            { city: "Los Angeles", ianaZone: "America/Los_Angeles" },
+            { city: "New York",    ianaZone: "America/New_York" },
+            { city: "London",      ianaZone: "Europe/London" },
+            { city: "Tokyo",       ianaZone: "Asia/Tokyo" },
         ];
 
         const worldClocks = computed(() =>
             WORLD_CLOCK_DEFS.map((wc) => {
-                const d = now.value;
-                const utcMs = d.getTime() + d.getTimezoneOffset() * 60000;
-                const local = new Date(utcMs + wc.offset * 3600000);
-                const h = local.getHours() % 12 || 12;
-                const m = String(local.getMinutes()).padStart(2, "0");
-                const suffix = local.getHours() >= 12 ? "PM" : "AM";
-                return { ...wc, time: `${h}:${m} ${suffix}` };
+                const parts = new Intl.DateTimeFormat("en-US", {
+                    timeZone: wc.ianaZone,
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                    timeZoneName: "short",
+                }).formatToParts(now.value);
+                const get = (type) => parts.find((p) => p.type === type)?.value ?? "";
+                return {
+                    city: wc.city,
+                    tz: get("timeZoneName"),
+                    time: `${get("hour")}:${get("minute")} ${get("dayPeriod")}`,
+                };
             }),
         );
 

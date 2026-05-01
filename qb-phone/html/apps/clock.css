@@ -51,6 +51,29 @@
     color: rgb(113 113 122);
 }
 
+.clock-icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.clock-eyebrow {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgb(113 113 122);
+}
+
+.clock-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
 .clock-world-section {
     flex: 1;
     overflow: auto;
@@ -117,6 +140,7 @@
     color: rgb(244 244 245);
 }
 
+.dark .clock-eyebrow,
 .dark .clock-date-label,
 .dark .clock-ampm {
     color: rgb(161 161 170);

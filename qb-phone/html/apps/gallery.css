@@ -19,6 +19,29 @@
     border-bottom: 1px solid rgb(228 228 231);
 }
 
+.gallery-icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.gallery-eyebrow {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgb(113 113 122);
+}
+
+.gallery-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
 /* â”€â”€ Grid â”€â”€ */
 .gallery-grid {
     display: grid;
@@ -284,4 +307,12 @@
 .dark .gallery-screen {
     background: rgb(18 18 22);
     color: rgb(244 244 245);
+}
+
+.dark .gallery-header {
+    border-bottom-color: rgb(55 55 63);
+}
+
+.dark .gallery-eyebrow {
+    color: rgb(161 161 170);
 }

@@ -1,7 +1,5 @@
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const WEEK_DAYS = ["S", "M", "T", "W", "T", "F", "S"];
-const TODAY_MONTH_INDEX = 2;
-const TODAY_DAY = 27;
 
 const CalendarApp = {
     template: `
@@ -29,7 +27,7 @@ const CalendarApp = {
 
             <div class="calendar-grid-wrap">
                 <div class="calendar-week-header">
-                    <div v-for="d in WEEK_DAYS" :key="d">{{ d }}</div>
+                    <div v-for="(d, i) in WEEK_DAYS" :key="i">{{ d }}</div>
                 </div>
                 <div class="calendar-days-grid">
                     <template v-for="(item, i) in calendarDays" :key="i">
@@ -85,13 +83,19 @@ const CalendarApp = {
     setup(props, { emit }) {
         const { ref, reactive, computed, onMounted, onUnmounted } = Vue;
 
-        const currentMonthIndex = ref(TODAY_MONTH_INDEX);
-        const selectedDay = ref(TODAY_DAY);
+        const _now = new Date();
+        const todayYear = _now.getFullYear();
+        const todayMonthIndex = _now.getMonth();
+        const todayDay = _now.getDate();
+
+        const currentYear = ref(todayYear);
+        const currentMonthIndex = ref(todayMonthIndex);
+        const selectedDay = ref(todayDay);
         const showAddForm = ref(false);
         const newEvent = reactive({ title: "", time: "12:00 PM", detail: "" });
         const eventsByMonth = reactive({});
 
-        const monthLabel = computed(() => `${MONTH_NAMES[currentMonthIndex.value]} 2026`);
+        const monthLabel = computed(() => `${MONTH_NAMES[currentMonthIndex.value]} ${currentYear.value}`);
 
         const monthEvents = computed(() => eventsByMonth[currentMonthIndex.value] || {});
 
@@ -103,7 +107,7 @@ const CalendarApp = {
         });
 
         const calendarDays = computed(() => {
-            const year = 2026;
+            const year = currentYear.value;
             const daysInMonth = new Date(year, currentMonthIndex.value + 1, 0).getDate();
             const startOffset = new Date(year, currentMonthIndex.value, 1).getDay();
             const days = [];
@@ -111,7 +115,7 @@ const CalendarApp = {
             for (let i = 0; i < startOffset; i++) days.push(null);
 
             for (let day = 1; day <= daysInMonth; day++) {
-                const isToday = currentMonthIndex.value === TODAY_MONTH_INDEX && day === TODAY_DAY;
+                const isToday = currentYear.value === todayYear && currentMonthIndex.value === todayMonthIndex && day === todayDay;
                 const isSelected = day === selectedDay.value;
                 const hasEvents = (monthEvents.value[day] || []).length > 0;
 
@@ -128,13 +132,23 @@ const CalendarApp = {
         });
 
         function prevMonth() {
-            currentMonthIndex.value = (currentMonthIndex.value + 11) % 12;
+            if (currentMonthIndex.value === 0) {
+                currentMonthIndex.value = 11;
+                currentYear.value -= 1;
+            } else {
+                currentMonthIndex.value -= 1;
+            }
             selectedDay.value = 1;
             showAddForm.value = false;
         }
 
         function nextMonth() {
-            currentMonthIndex.value = (currentMonthIndex.value + 1) % 12;
+            if (currentMonthIndex.value === 11) {
+                currentMonthIndex.value = 0;
+                currentYear.value += 1;
+            } else {
+                currentMonthIndex.value += 1;
+            }
             selectedDay.value = 1;
             showAddForm.value = false;
         }
@@ -191,6 +205,7 @@ const CalendarApp = {
         return {
             WEEK_DAYS,
             MONTH_NAMES,
+            currentYear,
             currentMonthIndex,
             selectedDay,
             showAddForm,

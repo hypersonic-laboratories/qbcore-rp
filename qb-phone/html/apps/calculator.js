@@ -3,7 +3,7 @@ const CalculatorApp = {
         <div class="calc-screen">
             <div class="calc-display-area">
                 <button type="button" aria-label="Back to home" class="calc-back-button" @click="onBack">
-                    <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                    <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                 </button>
                 <div class="calc-display">{{ calcDisplay }}</div>
             </div>
@@ -57,6 +57,7 @@ const CalculatorApp = {
         }
 
         function calcSetOp(op) {
+            if (calcOp.value !== null && !calcShouldReset.value) calcEquals();
             calcPrev.value = parseFloat(calcDisplay.value);
             calcOp.value = op;
             calcShouldReset.value = true;
@@ -66,6 +67,7 @@ const CalculatorApp = {
             if (calcOp.value === null || calcPrev.value === null) return;
             const a = calcPrev.value;
             const b = parseFloat(calcDisplay.value);
+            if (isNaN(b)) { calcClear(); return; }
             const ops = { "+": a + b, "−": a - b, "×": a * b, "÷": b !== 0 ? a / b : "Error" };
             const result = ops[calcOp.value];
             calcDisplay.value = String(parseFloat(Number.isFinite(result) ? result.toPrecision(10) : result));
