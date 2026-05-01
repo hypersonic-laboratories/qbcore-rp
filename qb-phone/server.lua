@@ -1142,6 +1142,14 @@ RegisterServerEvent('qb-phone:server:sendEmail', function(source, toNumber, subj
     end
 end)
 
+RegisterServerEvent('qb-phone:server:deleteEmail', function(source, emailId)
+    local player = getPlayer(source)
+    if not player then return end
+    local citizenid = syncPlayerAccount(player)
+    if not citizenid then return end
+    dbExecute('DELETE FROM player_mails WHERE mailid = ? AND citizenid = ?', { tostring(emailId), citizenid })
+end)
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Calendar
 -- ─────────────────────────────────────────────────────────────────────────────

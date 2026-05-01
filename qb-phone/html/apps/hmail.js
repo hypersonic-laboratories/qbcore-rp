@@ -6,12 +6,12 @@ const HmailApp = {
             <div v-if="view === 'inbox'" class="hmail-screen">
                 <div class="hmail-top">
                     <div class="hmail-title-row">
-                        <button type="button" aria-label="Back to home" class="calendar-icon-button" @click="onBack">
-                            <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                        <button type="button" aria-label="Back to home" class="hmail-nav-button" @click="onBack">
+                            <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                         </button>
                         <div class="phone-app-top-copy">
-                            <div class="calendar-eyebrow">Hmail</div>
-                            <div class="calendar-month-title">Inbox</div>
+                            <div class="hmail-eyebrow">Hmail</div>
+                            <div class="hmail-header-title">Inbox</div>
                         </div>
                     </div>
                     <div class="hmail-search-wrap">
@@ -41,7 +41,7 @@ const HmailApp = {
                             </div>
                             <div class="hmail-row-aside">
                                 <button type="button" class="hmail-star-btn" @click.stop="toggleStar(email)" :aria-label="email.starred ? 'Unstar' : 'Star'">
-                                    <i :data-lucide="email.starred ? 'star' : 'star'" :class="['hmail-star-icon', email.starred ? 'hmail-star-on' : '']"></i>
+                                    <i data-lucide="star" :class="['hmail-star-icon', email.starred ? 'hmail-star-on' : '']"></i>
                                 </button>
                                 <div v-if="!email.read" class="hmail-unread-dot"></div>
                             </div>
@@ -58,11 +58,11 @@ const HmailApp = {
             <!-- ── Thread view ── -->
             <div v-else-if="view === 'thread' && currentEmail" class="hmail-thread-screen">
                 <div class="hmail-thread-header">
-                    <button type="button" aria-label="Back to inbox" class="calendar-icon-button" @click="view = 'inbox'">
-                        <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                    <button type="button" aria-label="Back to inbox" class="hmail-nav-button" @click="view = 'inbox'">
+                        <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                     </button>
                     <div class="hmail-thread-actions">
-                        <button type="button" class="hmail-icon-btn" aria-label="Delete">
+                        <button type="button" class="hmail-icon-btn" aria-label="Delete" @click="deleteEmail">
                             <i data-lucide="trash-2" class="hmail-icon-btn-svg"></i>
                         </button>
                         <button type="button" class="hmail-icon-btn" aria-label="Reply" @click="openReply">
@@ -89,8 +89,8 @@ const HmailApp = {
             <!-- ── Compose ── -->
             <div v-else-if="view === 'compose'" class="hmail-compose-screen">
                 <div class="hmail-compose-header">
-                    <button type="button" class="calendar-icon-button" @click="view = 'inbox'" aria-label="Discard">
-                        <i data-lucide="x" class="calendar-nav-icon"></i>
+                    <button type="button" class="hmail-nav-button" @click="view = 'inbox'" aria-label="Discard">
+                        <i data-lucide="x" style="width:1.25rem;height:1.25rem"></i>
                     </button>
                     <span class="hmail-compose-title">New Message</span>
                     <button type="button" class="hmail-send-btn" @click="sendEmail" aria-label="Send">
@@ -170,17 +170,27 @@ const HmailApp = {
             const body = composeBody.value.trim();
             if (!toNumber || !subject) return;
             hEvent("sendEmail", { toNumber, subject, body });
+            const timeLabel = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
             EMAILS.unshift({
                 id: Date.now(),
-                from: "Me",
+                from: window.PhoneStore.playerName.value || "Me",
                 fromNumber: "",
                 subject,
                 snippet: body.substring(0, 80),
                 body,
-                time: "Just now",
+                time: timeLabel,
                 read: true,
                 starred: false,
             });
+            view.value = "inbox";
+        }
+
+        function deleteEmail() {
+            if (!currentEmail.value) return;
+            const idx = EMAILS.findIndex((e) => e.id === currentEmail.value.id);
+            if (idx !== -1) EMAILS.splice(idx, 1);
+            hEvent("deleteEmail", { emailId: currentEmail.value.id });
+            currentEmailId.value = null;
             view.value = "inbox";
         }
 
@@ -225,6 +235,7 @@ const HmailApp = {
             openCompose,
             openReply,
             sendEmail,
+            deleteEmail,
             toggleStar,
             onBack,
         };
