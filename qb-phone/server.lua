@@ -563,8 +563,10 @@ RegisterServerEvent('qb-phone:server:accept', function(source)
         targetIntSrc = targetIntSrc,
     }
 
-    pending.callerSrc:JoinVoiceChannel(pending.channel)
-    source:JoinVoiceChannel(pending.channel)
+    local callerTalker = GetVoipTalker(pending.callerSrc)
+    local targetTalker = GetVoipTalker(source)
+    if callerTalker then callerTalker:SetVoiceChannel(pending.channel, true) end
+    if targetTalker then targetTalker:SetVoiceChannel(pending.channel, true) end
 
     TriggerClientEvent(pending.callerIntSrc, 'qb-phone:client:callStarted', pending.channel)
     TriggerClientEvent(targetIntSrc, 'qb-phone:client:callStarted', pending.channel)
@@ -580,8 +582,10 @@ RegisterServerEvent('qb-phone:server:hangup', function(source)
     for channel, call in pairs(activeCalls) do
         if call.callerIntSrc == intSrc or call.targetIntSrc == intSrc then
             activeCalls[channel] = nil
-            call.callerSrc:LeaveVoiceChannel(channel)
-            call.targetSrc:LeaveVoiceChannel(channel)
+            local callerTalker = GetVoipTalker(call.callerSrc)
+            local targetTalker = GetVoipTalker(call.targetSrc)
+            if callerTalker then callerTalker:SetVoiceChannel(channel, false) end
+            if targetTalker then targetTalker:SetVoiceChannel(channel, false) end
             TriggerClientEvent(call.callerIntSrc, 'qb-phone:client:callEnded')
             TriggerClientEvent(call.targetIntSrc, 'qb-phone:client:callEnded')
 
