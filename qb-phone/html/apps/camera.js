@@ -127,6 +127,10 @@ const CameraApp = {
             hEvent("takePhoto", { facing: isFront.value ? "front" : "rear" });
         }
 
+        function photoUploaded(url) {
+            hEvent("photoUploaded", { url: url || "" });
+        }
+
         // Notify Lua when the user flips between front/rear
         watch(isFront, (front) => {
             hEvent("cameraFlipped", { facing: front ? "front" : "rear" });
@@ -147,11 +151,13 @@ const CameraApp = {
 
         onMounted(() => {
             window.addEventListener("message", onMessage);
+            window.photoUploaded = photoUploaded;
             hEvent("cameraOpened", { facing: isFront.value ? "front" : "rear" });
         });
 
         onUnmounted(() => {
             window.removeEventListener("message", onMessage);
+            if (window.photoUploaded === photoUploaded) delete window.photoUploaded;
             hEvent("cameraClosed", {});
         });
 

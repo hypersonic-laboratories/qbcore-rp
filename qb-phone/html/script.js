@@ -130,6 +130,10 @@ createApp({
                 if (!phoneVisible.value) phoneVisible.value = true;
                 return;
             }
+            if (name === "profileLoaded") {
+                if (args[0]) window.PhoneStore.playerName.value = args[0];
+                return;
+            }
             if (name === "contactsLoaded") {
                 const contacts = JSON.parse(args[0] || '[]');
                 const { CONTACTS } = window.PhoneStore;
