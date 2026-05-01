@@ -101,7 +101,7 @@
                         <!-- ── App Screens ── -->
                         <calendar-app v-else-if="activeScreen === 'calendar'" @navigate="navigateTo"></calendar-app>
                         <phone-app v-else-if="activeScreen === 'phone'" @navigate="navigateTo" @dial="onDial"></phone-app>
-                        <messages-app v-else-if="activeScreen === 'messages'" @navigate="navigateTo"></messages-app>
+                        <messages-app v-else-if="activeScreen === 'messages'" @navigate="navigateTo" @dial="onDial"></messages-app>
                         <calculator-app v-else-if="activeScreen === 'calculator'" @navigate="navigateTo"></calculator-app>
                         <gene-app v-else-if="activeScreen === 'h'" @navigate="navigateTo"></gene-app>
                         <camera-app v-else-if="activeScreen === 'camera'" @navigate="navigateTo"></camera-app>

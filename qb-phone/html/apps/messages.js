@@ -6,15 +6,15 @@ const MessagesApp = {
             <div v-if="composingNew" class="messages-screen">
                 <div class="messages-top">
                     <div class="messages-title-row">
-                        <button type="button" aria-label="Cancel" class="calendar-icon-button" @click="composingNew = false; newQuery = ''">
-                            <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                        <button type="button" aria-label="Cancel" class="messages-nav-button" @click="composingNew = false; newQuery = ''">
+                            <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                         </button>
                         <div class="phone-app-top-copy">
-                            <div class="calendar-eyebrow">Messages</div>
-                            <div class="calendar-month-title">New Message</div>
+                            <div class="messages-eyebrow">Messages</div>
+                            <div class="messages-view-title">New Message</div>
                         </div>
                     </div>
-                    <div class="messages-search-wrap" style="margin-top:1rem">
+                    <div class="messages-search-wrap">
                         <i data-lucide="user" class="messages-search-icon"></i>
                         <input v-model="newQuery" placeholder="Search name or number" class="messages-search-input" autofocus />
                     </div>
@@ -58,12 +58,12 @@ const MessagesApp = {
             <div v-else-if="currentConversationId === null" class="messages-screen">
                 <div class="messages-top">
                     <div class="messages-title-row">
-                        <button type="button" aria-label="Back to home" class="calendar-icon-button" @click="onBack">
-                            <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                        <button type="button" aria-label="Back to home" class="messages-nav-button" @click="onBack">
+                            <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                         </button>
                         <div class="phone-app-top-copy">
-                            <div class="calendar-eyebrow">Messages</div>
-                            <div class="calendar-month-title">Conversations</div>
+                            <div class="messages-eyebrow">Messages</div>
+                            <div class="messages-view-title">Conversations</div>
                         </div>
                     </div>
                     <div class="messages-search-wrap">
@@ -103,8 +103,8 @@ const MessagesApp = {
             <div v-else-if="currentConversation" class="messages-thread-screen">
                 <div class="messages-thread-header">
                     <div class="messages-thread-header-left">
-                        <button type="button" aria-label="Back to messages" class="calendar-icon-button" @click="backToList">
-                            <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                        <button type="button" aria-label="Back to messages" class="messages-nav-button" @click="backToList">
+                            <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                         </button>
                         <div v-if="currentConversation.image" class="messages-avatar messages-avatar-image">
                             <img :src="currentConversation.image" :alt="currentConversation.name" class="messages-avatar-image-tag" @error="e => { e.target.style.display='none'; e.target.parentElement.textContent = currentConversation.name.charAt(0).toUpperCase(); }" />
@@ -115,7 +115,7 @@ const MessagesApp = {
                         </div>
                     </div>
                     <div class="messages-thread-actions">
-                        <button type="button" class="messages-header-action" aria-label="Call contact">
+                        <button type="button" class="messages-header-action" aria-label="Call contact" @click="callContact">
                             <i data-lucide="phone" class="messages-header-action-icon"></i>
                         </button>
                         <button type="button" class="messages-header-action" aria-label="More options">
@@ -141,7 +141,7 @@ const MessagesApp = {
         </div>
     `,
 
-    emits: ["navigate"],
+    emits: ["navigate", "dial"],
 
     setup(props, { emit }) {
         const { ref, computed } = Vue;
@@ -184,6 +184,13 @@ const MessagesApp = {
         function backToList() {
             currentConversationId.value = null;
             messageDraft.value = "";
+        }
+
+        function callContact() {
+            const conv = currentConversation.value;
+            if (!conv) return;
+            emit("dial", { name: conv.name, number: conv.number });
+            hEvent("dial", { number: conv.number });
         }
 
         function deleteConversation(id) {
@@ -239,6 +246,7 @@ const MessagesApp = {
             getConversationTime,
             openConversation,
             backToList,
+            callContact,
             deleteConversation,
             startConversation,
             sendMessage,

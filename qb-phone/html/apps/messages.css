@@ -43,6 +43,29 @@
     justify-content: space-between;
 }
 
+.messages-nav-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.messages-eyebrow {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgb(113 113 122);
+}
+
+.messages-view-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
 .messages-search-wrap {
     margin-top: 1rem;
     position: relative;
@@ -364,12 +387,15 @@
     border-top-color: rgb(55 55 63);
 }
 
-.dark .messages-bubble-them {
+.dark .message-bubble-them {
     background: rgb(39 39 45);
     color: rgb(244 244 245);
 }
 
-.dark .message-bubble-them {
-    background: rgb(39 39 45);
-    color: rgb(244 244 245);
+.dark .messages-avatar-image {
+    background: rgb(50 62 84);
+}
+
+.dark .messages-eyebrow {
+    color: rgb(161 161 170);
 }
