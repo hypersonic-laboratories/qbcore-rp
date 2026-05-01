@@ -19,12 +19,12 @@ const PhoneApp = {
         <div class="phone-app-screen">
             <div class="phone-app-top">
                 <div class="phone-app-top-row">
-                    <button type="button" aria-label="Back to home" class="calendar-icon-button" @click="onBack">
-                        <i data-lucide="arrow-left" class="calendar-nav-icon"></i>
+                    <button type="button" aria-label="Back to home" class="phone-nav-button" @click="onBack">
+                        <i data-lucide="arrow-left" style="width:1.25rem;height:1.25rem"></i>
                     </button>
                     <div class="phone-app-top-copy">
-                        <div class="calendar-eyebrow">Phone</div>
-                        <div class="calendar-month-title">{{ getPhoneTabLabel(currentPhoneTab) }}</div>
+                        <div class="phone-nav-eyebrow">Phone</div>
+                        <div class="phone-nav-title">{{ getPhoneTabLabel(currentPhoneTab) }}</div>
                     </div>
                 </div>
             </div>
@@ -94,7 +94,7 @@ const PhoneApp = {
                         </div>
 
                         <div v-if="CONTACTS.length" class="phone-list">
-                            <div v-for="(contact, index) in CONTACTS" :key="index" class="phone-list-row">
+                            <div v-for="(contact, index) in CONTACTS" :key="contact.number" class="phone-list-row">
                                 <div v-if="contact.image" class="phone-list-avatar phone-list-avatar-image">
                                     <img :src="contact.image" :alt="contact.name" class="phone-avatar-image" @error="e => { e.target.style.display='none'; e.target.parentElement.textContent = contact.name.charAt(0).toUpperCase(); }" />
                                 </div>

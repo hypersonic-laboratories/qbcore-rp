@@ -1,3 +1,26 @@
+.phone-nav-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.phone-nav-eyebrow {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgb(113 113 122);
+}
+
+.phone-nav-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
 .phone-app-body {
     min-height: 0;
     flex: 1;
@@ -252,6 +275,7 @@
 .phone-contact-actions {
     display: flex;
     align-items: center;
+    gap: 0.4rem;
     flex: 0 0 auto;
 }
 
@@ -376,4 +400,12 @@
 .dark .phone-tab-button-active {
     background: rgb(44 44 52);
     color: rgb(244 244 245);
+}
+
+.dark .phone-nav-eyebrow {
+    color: rgb(161 161 170);
+}
+
+.dark .phone-list-avatar-image {
+    background: rgb(50 62 84);
 }
