@@ -14,7 +14,7 @@ local success = Database.Execute([[
         position TEXT NOT NULL,
         metadata TEXT NOT NULL,
         inventory TEXT DEFAULT NULL,
-        last_updated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        last_updated TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
 ]])
 
@@ -66,7 +66,7 @@ success = Database.Execute([[
         amount INTEGER DEFAULT NULL,
         reason VARCHAR(50) DEFAULT NULL,
         statement_type VARCHAR(10) DEFAULT NULL CHECK (statement_type IN ('deposit','withdraw')),
-        date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
 ]])
 
@@ -117,7 +117,7 @@ success = Database.Execute([[
         citizenid VARCHAR(11) DEFAULT NULL,
         title VARCHAR(50) DEFAULT NULL,
         message VARCHAR(50) DEFAULT NULL,
-        date DATETIME DEFAULT CURRENT_TIMESTAMP
+        date TEXT DEFAULT CURRENT_TIMESTAMP
     )
 ]])
 
@@ -179,7 +179,7 @@ success = Database.Execute([[
         owner_citizenid TEXT NOT NULL,
         owned INTEGER NOT NULL DEFAULT 1 CHECK (owned IN (0,1)),
         interior_type TEXT NOT NULL CHECK (interior_type IN ('instanced', 'world')),
-        interior_ref TEXT DEFAULT NULL, -- instanced only
+        interior_ref TEXT DEFAULT NULL,
         keyholders TEXT DEFAULT NULL,
         scene_data TEXT DEFAULT NULL,
         stash TEXT DEFAULT NULL,
@@ -249,23 +249,47 @@ if success then
 end
 
 success = Database.Execute([[
-    CREATE TABLE IF NOT EXISTS phone_gallery (
-        citizenid VARCHAR(11) NOT NULL,
-        image VARCHAR(255) NOT NULL,
-        date DATETIME DEFAULT CURRENT_TIMESTAMP
+    CREATE TABLE IF NOT EXISTS phone_accounts (
+        citizenid TEXT PRIMARY KEY,
+        phone TEXT NOT NULL,
+        name TEXT NOT NULL,
+        first_name TEXT DEFAULT '',
+        last_name TEXT DEFAULT '',
+        handle TEXT DEFAULT '',
+        bio TEXT DEFAULT '',
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
 ]])
+
+if success then
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_accounts_phone ON phone_accounts(phone)]])
+end
+
+success = Database.Execute([[
+    CREATE TABLE IF NOT EXISTS phone_gallery (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        citizenid TEXT NOT NULL,
+        image TEXT NOT NULL,
+        date TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+]])
+
+if success then
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_gallery_citizenid ON phone_gallery(citizenid)]])
+end
 
 success = Database.Execute([[
     CREATE TABLE IF NOT EXISTS player_mails (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        citizenid VARCHAR(11) DEFAULT NULL,
-        sender VARCHAR(50) DEFAULT NULL,
-        subject VARCHAR(50) DEFAULT NULL,
+        citizenid TEXT DEFAULT NULL,
+        sender TEXT DEFAULT NULL,
+        sender_number TEXT DEFAULT NULL,
+        subject TEXT DEFAULT NULL,
         message TEXT DEFAULT NULL,
         read INTEGER DEFAULT 0,
-        mailid INTEGER DEFAULT NULL,
-        date DATETIME DEFAULT CURRENT_TIMESTAMP,
+        starred INTEGER DEFAULT 0,
+        mailid TEXT DEFAULT NULL,
+        date TEXT DEFAULT CURRENT_TIMESTAMP,
         button TEXT DEFAULT NULL
     )
 ]])
@@ -277,47 +301,137 @@ end
 success = Database.Execute([[
     CREATE TABLE IF NOT EXISTS phone_messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        citizenid VARCHAR(11) DEFAULT NULL,
-        number VARCHAR(50) DEFAULT NULL,
-        messages TEXT DEFAULT NULL
+        citizenid TEXT DEFAULT NULL,
+        number TEXT DEFAULT NULL,
+        display_name TEXT DEFAULT NULL,
+        image TEXT DEFAULT '',
+        messages TEXT DEFAULT '[]',
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
 ]])
 
 if success then
     Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_messages_citizenid ON phone_messages(citizenid)]])
     Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_messages_number ON phone_messages(number)]])
+    Database.Execute([[CREATE UNIQUE INDEX IF NOT EXISTS idx_phone_messages_owner_number ON phone_messages(citizenid, number)]])
 end
 
 success = Database.Execute([[
     CREATE TABLE IF NOT EXISTS phone_tweets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        citizenid VARCHAR(11) DEFAULT NULL,
-        firstName VARCHAR(25) DEFAULT NULL,
-        lastName VARCHAR(25) DEFAULT NULL,
+        citizenid TEXT DEFAULT NULL,
+        firstName TEXT DEFAULT NULL,
+        lastName TEXT DEFAULT NULL,
+        handle TEXT DEFAULT NULL,
         message TEXT DEFAULT NULL,
-        date DATETIME DEFAULT CURRENT_TIMESTAMP,
+        date TEXT DEFAULT CURRENT_TIMESTAMP,
         url TEXT DEFAULT NULL,
-        picture VARCHAR(512) DEFAULT './img/default.png',
-        tweetId VARCHAR(25) NOT NULL
+        picture TEXT DEFAULT './img/default.png',
+        tweetId TEXT NOT NULL UNIQUE
     )
 ]])
 
 if success then
     Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_tweets_citizenid ON phone_tweets(citizenid)]])
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_tweets_tweetId ON phone_tweets(tweetId)]])
 end
 
 success = Database.Execute([[
     CREATE TABLE IF NOT EXISTS player_contacts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        citizenid VARCHAR(11) DEFAULT NULL,
-        name VARCHAR(50) DEFAULT NULL,
-        number VARCHAR(50) DEFAULT NULL,
-        iban VARCHAR(50) NOT NULL DEFAULT '0'
+        citizenid TEXT DEFAULT NULL,
+        name TEXT DEFAULT NULL,
+        number TEXT DEFAULT NULL,
+        image TEXT DEFAULT '',
+        iban TEXT NOT NULL DEFAULT '0'
     )
 ]])
 
 if success then
     Database.Execute([[CREATE INDEX IF NOT EXISTS idx_player_contacts_citizenid ON player_contacts(citizenid)]])
+    Database.Execute([[CREATE UNIQUE INDEX IF NOT EXISTS idx_player_contacts_owner_number ON player_contacts(citizenid, number)]])
+end
+
+success = Database.Execute([[
+    CREATE TABLE IF NOT EXISTS phone_call_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        citizenid TEXT NOT NULL,
+        name TEXT DEFAULT '',
+        number TEXT DEFAULT '',
+        type TEXT DEFAULT '',
+        missed INTEGER DEFAULT 0,
+        time TEXT DEFAULT '',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+]])
+
+if success then
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_call_history_citizenid ON phone_call_history(citizenid)]])
+end
+
+success = Database.Execute([[
+    CREATE TABLE IF NOT EXISTS phone_calendar_events (
+        id TEXT PRIMARY KEY,
+        citizenid TEXT NOT NULL,
+        month INTEGER NOT NULL,
+        day INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        event_time TEXT DEFAULT '',
+        detail TEXT DEFAULT '',
+        accent TEXT DEFAULT 'bg-rose-500',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+]])
+
+if success then
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_calendar_events_citizenid ON phone_calendar_events(citizenid)]])
+end
+
+success = Database.Execute([[
+    CREATE TABLE IF NOT EXISTS phone_tweet_reactions (
+        tweet_id TEXT NOT NULL,
+        citizenid TEXT NOT NULL,
+        type TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (tweet_id, citizenid, type)
+    )
+]])
+
+if success then
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_tweet_reactions_tweet ON phone_tweet_reactions(tweet_id)]])
+end
+
+success = Database.Execute([[
+    CREATE TABLE IF NOT EXISTS phone_tweet_comments (
+        id TEXT PRIMARY KEY,
+        tweet_id TEXT NOT NULL,
+        citizenid TEXT NOT NULL,
+        firstName TEXT DEFAULT '',
+        lastName TEXT DEFAULT '',
+        handle TEXT DEFAULT '',
+        message TEXT NOT NULL,
+        date TEXT DEFAULT CURRENT_TIMESTAMP
+    )
+]])
+
+if success then
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_tweet_comments_tweet ON phone_tweet_comments(tweet_id)]])
+end
+
+success = Database.Execute([[
+    CREATE TABLE IF NOT EXISTS phone_tweet_follows (
+        follower_citizenid TEXT NOT NULL,
+        target_citizenid TEXT DEFAULT '',
+        target_name TEXT DEFAULT '',
+        target_handle TEXT DEFAULT '',
+        target_phone TEXT DEFAULT '',
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (follower_citizenid, target_name)
+    )
+]])
+
+if success then
+    Database.Execute([[CREATE INDEX IF NOT EXISTS idx_phone_tweet_follows_target ON phone_tweet_follows(target_name)]])
 end
 
 success = Database.Execute([[
