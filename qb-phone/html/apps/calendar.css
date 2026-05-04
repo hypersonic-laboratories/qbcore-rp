@@ -9,8 +9,9 @@
 
 .calendar-top,
 .phone-app-top {
-    padding: 3rem 1.25rem 0.75rem;
+    padding: 1.25rem 1.25rem 0.75rem;
     border-bottom: 1px solid rgb(228 228 231);
+    flex-shrink: 0;
 }
 
 .calendar-top-row,
@@ -82,7 +83,8 @@
 }
 
 .calendar-grid-wrap {
-    padding: 1rem 1.25rem 0;
+    padding: 0.5rem 1.25rem 0;
+    flex-shrink: 0;
 }
 
 .calendar-week-header {
@@ -99,14 +101,14 @@
 .calendar-days-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 0.5rem;
+    gap: 0.25rem;
     text-align: center;
     font-size: 0.875rem;
 }
 
 .calendar-day {
     position: relative;
-    height: 2.5rem;
+    height: 2rem;
     border: 0;
     border-radius: 1rem;
     display: flex;
@@ -160,7 +162,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 1.25rem 1.25rem 1rem;
+    padding: 0.75rem 1.25rem 1rem;
 }
 
 .calendar-section-header {
@@ -275,6 +277,22 @@
     border-radius: 9999px;
 }
 
+.calendar-event-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.calendar-event-delete {
+    color: rgb(161 161 170);
+    padding: 0.25rem;
+    align-self: center;
+    flex-shrink: 0;
+}
+
+.calendar-event-delete:hover {
+    color: rgb(244 63 94);
+}
+
 .calendar-event-time {
     font-size: 0.75rem;
     font-weight: 500;
@@ -342,6 +360,14 @@
 .dark .phone-form-button-secondary {
     background: rgb(50 50 58);
     color: rgb(212 212 216);
+}
+
+.dark .calendar-event-delete {
+    color: rgb(113 113 122);
+}
+
+.dark .calendar-event-delete:hover {
+    color: rgb(244 63 94);
 }
 
 .dark .calendar-event-title {

@@ -949,6 +949,14 @@ RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, month,
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_calendar_events (citizenid, month, day, title, event_time, detail) VALUES (?, ?, ?, ?, ?, ?)', { citizenid, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
 end)
 
+RegisterServerEvent('qb-phone:server:deleteCalendarEvent', function(source, eventId)
+    local player = getPlayer(source)
+    if not player then return end
+    local citizenid = syncPlayerAccount(player)
+    if not citizenid then return end
+    exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_calendar_events WHERE id = ? AND citizenid = ?', { tonumber(eventId), citizenid })
+end)
+
 RegisterServerEvent('qb-phone:server:savePhoto', function(source, url)
     if not url or url == '' then return end
     local player = getPlayer(source)

@@ -66,11 +66,14 @@ const CalendarApp = {
                     <template v-if="selectedEvents.length">
                         <div v-for="event in selectedEvents" :key="event.id" class="calendar-event-card">
                             <div class="calendar-event-accent bg-rose-500"></div>
-                            <div>
+                            <div class="calendar-event-body">
                                 <div class="calendar-event-time">{{ event.time }}</div>
                                 <div class="calendar-event-title">{{ event.title }}</div>
                                 <div class="calendar-event-detail">{{ event.detail }}</div>
                             </div>
+                            <button type="button" class="calendar-icon-button calendar-event-delete" @click="deleteCalendarEvent(event.id)" aria-label="Delete event">
+                                <i data-lucide="trash-2" class="calendar-switcher-icon"></i>
+                            </button>
                         </div>
                     </template>
                     <div v-else class="calendar-empty-state">Nothing scheduled. Tap the plus button to add an event for this date.</div>
@@ -184,6 +187,14 @@ const CalendarApp = {
             showAddForm.value = false;
         }
 
+        function deleteCalendarEvent(eventId) {
+            const mIdx = currentMonthIndex.value;
+            const dIdx = selectedDay.value;
+            if (!eventsByMonth[mIdx]?.[dIdx]) return;
+            eventsByMonth[mIdx][dIdx] = eventsByMonth[mIdx][dIdx].filter(e => e.id !== eventId);
+            hEvent("deleteCalendarEvent", { eventId });
+        }
+
         function onMessage(e) {
             if (e.data?.name !== "calendarEventsLoaded") return;
             const incoming = JSON.parse(e.data.args?.[0] || "{}");
@@ -219,6 +230,7 @@ const CalendarApp = {
             nextMonth,
             selectDay,
             saveCalendarEvent,
+            deleteCalendarEvent,
             onBack,
         };
     },
