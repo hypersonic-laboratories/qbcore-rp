@@ -30,13 +30,6 @@ CREATE TABLE IF NOT EXISTS bank_statements (
 
 CREATE INDEX IF NOT EXISTS idx_bank_statements_citizenid ON bank_statements (citizenid);
 
-CREATE TRIGGER IF NOT EXISTS bank_statements_update_date
-AFTER UPDATE ON bank_statements
-FOR EACH ROW
-BEGIN
-    UPDATE bank_statements SET date = CURRENT_TIMESTAMP WHERE id = NEW.id;
-END;
-
 CREATE TABLE IF NOT EXISTS bans (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name VARCHAR(50) DEFAULT NULL,
@@ -246,7 +239,7 @@ CREATE TABLE IF NOT EXISTS phone_call_history (
 CREATE INDEX IF NOT EXISTS idx_phone_call_history_citizenid ON phone_call_history (citizenid);
 
 CREATE TABLE IF NOT EXISTS phone_calendar_events (
-  id TEXT PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   citizenid TEXT NOT NULL,
   month INTEGER NOT NULL,
   day INTEGER NOT NULL,
@@ -312,13 +305,6 @@ CREATE TABLE IF NOT EXISTS players (
 
 CREATE INDEX IF NOT EXISTS idx_players_last_updated ON players (last_updated);
 CREATE INDEX IF NOT EXISTS idx_players_license ON players (license);
-
-CREATE TRIGGER IF NOT EXISTS players_update_last_updated
-AFTER UPDATE ON players
-FOR EACH ROW
-BEGIN
-    UPDATE players SET last_updated = CURRENT_TIMESTAMP WHERE id = NEW.id;
-END;
 
 CREATE TABLE IF NOT EXISTS playerskins (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
