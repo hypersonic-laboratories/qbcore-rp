@@ -131,6 +131,7 @@ local function openPhone()
         my_webui:SendEvent('conversationsLoaded', data.conversations)
         my_webui:SendEvent('callHistoryLoaded', data.callHistory)
         my_webui:SendEvent('profileLoaded', data.playerName)
+        TriggerServerEvent('qb-phone:server:loadCalendar')
     end)
 end
 
@@ -279,14 +280,19 @@ RegisterClientEvent('qb-phone:client:emailReceived', function(emailJson)
 end)
 
 my_webui:RegisterEventHandler('loadCalendar', function()
-    TriggerCallback('qb-phone:loadCalendar', function(data)
-        if not data then return end
-        my_webui:SendEvent('calendarEventsLoaded', data.events)
-    end)
+    TriggerServerEvent('qb-phone:server:loadCalendar')
+end)
+
+RegisterClientEvent('qb-phone:client:calendarEventsLoaded', function(eventsJson)
+    my_webui:SendEvent('calendarEventsLoaded', eventsJson or '{}')
 end)
 
 my_webui:RegisterEventHandler('saveCalendarEvent', function(data)
     TriggerServerEvent('qb-phone:server:saveCalendarEvent', data.month, data.day, data.title, data.time, data.detail)
+end)
+
+my_webui:RegisterEventHandler('deleteCalendarEvent', function(data)
+    TriggerServerEvent('qb-phone:server:deleteCalendarEvent', data.eventId)
 end)
 
 my_webui:RegisterEventHandler('loadPhotos', function()

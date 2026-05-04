@@ -12,6 +12,8 @@
 
         USERS: reactive({}),
 
+        CALENDAR_EVENTS: reactive({}),
+
         currentEmailId: ref(null),
 
         EMAILS: reactive([

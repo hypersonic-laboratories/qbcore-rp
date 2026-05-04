@@ -73,11 +73,42 @@ createApp({
             if (callTimer) { clearInterval(callTimer); callTimer = null; }
         }
 
+        function parsePayload(raw, fallback) {
+            if (raw && typeof raw === "object") return raw;
+            if (typeof raw !== "string") return fallback;
+            try {
+                return JSON.parse(raw || "");
+            } catch (_) {
+                return fallback;
+            }
+        }
+
+        function replaceCalendarEvents(raw) {
+            const incoming = parsePayload(raw, {});
+            const { CALENDAR_EVENTS } = window.PhoneStore;
+
+            Object.keys(CALENDAR_EVENTS).forEach((mIdx) => {
+                delete CALENDAR_EVENTS[mIdx];
+            });
+
+            Object.entries(incoming || {}).forEach(([mIdxStr, days]) => {
+                const mIdx = Number(mIdxStr);
+                CALENDAR_EVENTS[mIdx] = {};
+                Object.entries(days || {}).forEach(([dIdxStr, events]) => {
+                    CALENDAR_EVENTS[mIdx][Number(dIdxStr)] = Array.isArray(events) ? events : [];
+                });
+            });
+        }
+
         let captureWasVisible = false;
 
         window.addEventListener("message", (event) => {
             const { name, args = [] } = event.data;
-            if (name === "open")  { phoneVisible.value = true;  return; }
+            if (name === "open")  {
+                phoneVisible.value = true;
+                if (activeScreen.value === "calendar") hEvent("loadCalendar", {});
+                return;
+            }
             if (name === "close") { phoneVisible.value = false; return; }
 
             // ── Camera capture lifecycle ──────────────────────────────────────
@@ -182,6 +213,10 @@ createApp({
                 PHOTOS.splice(0, PHOTOS.length, ...photos);
                 return;
             }
+            if (name === "calendarEventsLoaded") {
+                replaceCalendarEvents(args[0]);
+                return;
+            }
             if (name === "postDeleted") {
                 const { POSTS } = window.PhoneStore;
                 const idx = POSTS.findIndex(p => p.id === args[0]);
@@ -221,7 +256,10 @@ createApp({
 
         function openApp(label) {
             const key = label.toLowerCase();
-            if (OPENABLE.has(key)) activeScreen.value = key;
+            if (OPENABLE.has(key)) {
+                activeScreen.value = key;
+                if (key === "calendar") hEvent("loadCalendar", {});
+            }
         }
 
         return {

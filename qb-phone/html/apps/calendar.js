@@ -86,7 +86,7 @@ const CalendarApp = {
     emits: ["navigate"],
 
     setup(props, { emit }) {
-        const { ref, reactive, computed, onMounted, onUnmounted } = Vue;
+        const { ref, reactive, computed, onMounted } = Vue;
 
         const _now = new Date();
         const todayYear = _now.getFullYear();
@@ -98,7 +98,7 @@ const CalendarApp = {
         const selectedDay = ref(todayDay);
         const showAddForm = ref(false);
         const newEvent = reactive({ title: "", time: "12:00 PM", detail: "" });
-        const eventsByMonth = reactive({});
+        const eventsByMonth = window.PhoneStore.CALENDAR_EVENTS;
 
         const monthLabel = computed(() => `${MONTH_NAMES[currentMonthIndex.value]} ${currentYear.value}`);
 
@@ -195,19 +195,9 @@ const CalendarApp = {
             hEvent("deleteCalendarEvent", { eventId });
         }
 
-        function onMessage(e) {
-            if (e.data?.name !== "calendarEventsLoaded") return;
-            const incoming = JSON.parse(e.data.args?.[0] || "{}");
-            Object.entries(incoming).forEach(([mIdx, days]) => {
-                eventsByMonth[mIdx] = days;
-            });
-        }
-
         onMounted(() => {
-            window.addEventListener("message", onMessage);
             hEvent("loadCalendar");
         });
-        onUnmounted(() => window.removeEventListener("message", onMessage));
 
         function onBack() {
             showAddForm.value = false;

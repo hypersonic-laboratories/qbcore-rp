@@ -111,7 +111,7 @@ end
 
 local function decodeJsonArray(value)
     if not value or value == '' then return {} end
-    local ok, decoded = pcall(json.decode, value)
+    local ok, decoded = pcall(JSON.parse, value)
     if ok and type(decoded) == 'table' then return decoded end
     return {}
 end
@@ -197,7 +197,7 @@ end
 local function saveConversationMessages(ownerKey, otherNumber, displayName, image, messageList)
     if not ownerKey or ownerKey == '' or not otherNumber or otherNumber == '' then return end
     exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_messages WHERE citizenid = ? AND number = ?', { ownerKey, otherNumber })
-    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_messages (citizenid, number, display_name, image, messages, updated_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)', { ownerKey, otherNumber, displayName or otherNumber, image or '', json.encode(messageList or {}) })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_messages (citizenid, number, display_name, image, messages, updated_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)', { ownerKey, otherNumber, displayName or otherNumber, image or '', JSON.stringify(messageList or {}) })
 end
 
 local function appendConversationMessage(ownerKey, otherNumber, displayName, image, message)
@@ -255,18 +255,24 @@ local function loadCalendarEvents(citizenid, phone)
 
     local result = {}
     for _, row in ipairs(rows) do
-        local month = tonumber(row.month) or 0
-        local day = tonumber(row.day) or 1
-        ensureTable(result, month)
-        ensureTable(result[month], day)
-        table.insert(result[month][day], {
-            id = row.id,
-            title = row.title or '',
-            time = row.event_time or '',
-            detail = row.detail or '',
+        local month = tonumber(row.month or row.Month) or 0
+        local day   = tonumber(row.day   or row.Day)   or 1
+        local monthKey = tostring(month)
+        local dayKey = tostring(day)
+        ensureTable(result, monthKey)
+        ensureTable(result[monthKey], dayKey)
+        table.insert(result[monthKey][dayKey], {
+            id     = row.id     or row.Id,
+            title  = row.title  or row.Title  or '',
+            time   = row.event_time or row.Event_time or row.EventTime or '',
+            detail = row.detail or row.Detail or '',
         })
     end
     return result
+end
+
+local function sendCalendarEvents(player, citizenid, phone)
+    TriggerClientEvent(player.PlayerData.source, 'qb-phone:client:calendarEventsLoaded', JSON.stringify(loadCalendarEvents(citizenid, phone)))
 end
 
 local function loadPhotos(citizenid, phone)
@@ -554,9 +560,9 @@ RegisterCallback('qb-phone:loadCoreData', function(source)
     local firstName = player.PlayerData.charinfo.firstname or ''
     local lastName  = player.PlayerData.charinfo.lastname  or ''
     return {
-        contacts      = json.encode(contactList),
-        conversations = json.encode(loadConversations(citizenid, phone, contactList)),
-        callHistory   = json.encode(loadCallHistory(citizenid, phone)),
+        contacts      = JSON.stringify(contactList),
+        conversations = JSON.stringify(loadConversations(citizenid, phone, contactList)),
+        callHistory   = JSON.stringify(loadCallHistory(citizenid, phone)),
         playerName    = (firstName .. ' ' .. lastName):match('^%s*(.-)%s*$'),
     }
 end)
@@ -568,8 +574,8 @@ RegisterCallback('qb-phone:loadFeed', function(source)
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return nil end
     return {
-        feed  = json.encode(buildFeedForPhone(phone, citizenid)),
-        users = json.encode(buildUsersForPhone(phone, citizenid)),
+        feed  = JSON.stringify(buildFeedForPhone(phone, citizenid)),
+        users = JSON.stringify(buildUsersForPhone(phone, citizenid)),
     }
 end)
 
@@ -580,18 +586,7 @@ RegisterCallback('qb-phone:loadEmails', function(source)
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return nil end
     return {
-        emails = json.encode(loadEmails(citizenid, phone)),
-    }
-end)
-
-RegisterCallback('qb-phone:loadCalendar', function(source)
-    local player = getPlayer(source)
-    if not player then return nil end
-    local phone = player.PlayerData.charinfo.phone
-    local citizenid = syncPlayerAccount(player)
-    if not citizenid then return nil end
-    return {
-        events = json.encode(loadCalendarEvents(citizenid, phone)),
+        emails = JSON.stringify(loadEmails(citizenid, phone)),
     }
 end)
 
@@ -602,7 +597,7 @@ RegisterCallback('qb-phone:loadPhotos', function(source)
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return nil end
     return {
-        photos = json.encode(loadPhotos(citizenid, phone)),
+        photos = JSON.stringify(loadPhotos(citizenid, phone)),
     }
 end)
 
@@ -754,7 +749,7 @@ RegisterServerEvent('qb-phone:server:createPost', function(source, content, imag
         reposted = false,
         comments = {},
     }
-    TriggerClientEvent(-1, 'qb-phone:client:postReceived', json.encode(payload))
+    TriggerClientEvent(-1, 'qb-phone:client:postReceived', JSON.stringify(payload))
 end)
 
 RegisterServerEvent('qb-phone:server:deletePost', function(source, postId)
@@ -897,7 +892,7 @@ RegisterServerEvent('qb-phone:server:addComment', function(source, postId, text)
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_tweet_comments (id, tweet_id, citizenid, firstName, lastName, handle, message) VALUES (?, ?, ?, ?, ?, ?, ?)', { tostring(comment.id), tostring(postId), authorCitizenId, firstName, lastName, handle, text })
 
     local payload = { id = comment.id, author = authorName, handle = handle, text = text, time = time }
-    TriggerClientEvent(-1, 'qb-phone:client:commentAdded', postId, json.encode(payload))
+    TriggerClientEvent(-1, 'qb-phone:client:commentAdded', postId, JSON.stringify(payload))
 end)
 
 RegisterServerEvent('qb-phone:server:sendEmail', function(source, toNumber, subject, body)
@@ -929,7 +924,7 @@ RegisterServerEvent('qb-phone:server:sendEmail', function(source, toNumber, subj
 
     local target = exports['qb-core']:GetPlayerByPhone(toNumber)
     if target then
-        TriggerClientEvent(target.PlayerData.source, 'qb-phone:client:emailReceived', json.encode(email))
+        TriggerClientEvent(target.PlayerData.source, 'qb-phone:client:emailReceived', JSON.stringify(email))
     end
 end)
 
@@ -941,20 +936,33 @@ RegisterServerEvent('qb-phone:server:deleteEmail', function(source, emailId)
     exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_mails WHERE mailid = ? AND citizenid = ?', { tostring(emailId), citizenid })
 end)
 
+RegisterServerEvent('qb-phone:server:loadCalendar', function(source)
+    local player = getPlayer(source)
+    if not player then return end
+    local phone = player.PlayerData.charinfo.phone
+    local citizenid = syncPlayerAccount(player)
+    if not citizenid then return end
+    sendCalendarEvents(player, citizenid, phone)
+end)
+
 RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, month, day, title, time, detail)
     local player = getPlayer(source)
     if not player then return end
+    local phone = player.PlayerData.charinfo.phone
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return end
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_calendar_events (citizenid, month, day, title, event_time, detail) VALUES (?, ?, ?, ?, ?, ?)', { citizenid, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
+    sendCalendarEvents(player, citizenid, phone)
 end)
 
 RegisterServerEvent('qb-phone:server:deleteCalendarEvent', function(source, eventId)
     local player = getPlayer(source)
     if not player then return end
+    local phone = player.PlayerData.charinfo.phone
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return end
     exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_calendar_events WHERE id = ? AND citizenid = ?', { tonumber(eventId), citizenid })
+    sendCalendarEvents(player, citizenid, phone)
 end)
 
 RegisterServerEvent('qb-phone:server:savePhoto', function(source, url)
