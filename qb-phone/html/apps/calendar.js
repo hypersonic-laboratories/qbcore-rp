@@ -1,3 +1,13 @@
+function parseTimeMinutes(t) {
+    const m = t && t.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!m) return 0;
+    let h = parseInt(m[1]);
+    const min = parseInt(m[2]);
+    if (m[3].toUpperCase() === "PM" && h !== 12) h += 12;
+    else if (m[3].toUpperCase() === "AM" && h === 12) h = 0;
+    return h * 60 + min;
+}
+
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const WEEK_DAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
@@ -57,7 +67,7 @@ const CalendarApp = {
                     <input v-model="newEvent.time" placeholder="Time" class="calendar-input" />
                     <input v-model="newEvent.detail" placeholder="Details" class="calendar-input" />
                     <div class="calendar-form-actions">
-                        <button type="button" class="calendar-button calendar-button-secondary" @click="showAddForm = false">Cancel</button>
+                        <button type="button" class="calendar-button calendar-button-secondary" @click="cancelAddForm">Cancel</button>
                         <button type="button" class="calendar-button calendar-button-primary" @click="saveCalendarEvent">Save</button>
                     </div>
                 </div>
@@ -69,7 +79,7 @@ const CalendarApp = {
                             <div class="calendar-event-body">
                                 <div class="calendar-event-time">{{ event.time }}</div>
                                 <div class="calendar-event-title">{{ event.title }}</div>
-                                <div class="calendar-event-detail">{{ event.detail }}</div>
+                                <div v-if="event.detail" class="calendar-event-detail">{{ event.detail }}</div>
                             </div>
                             <button type="button" class="calendar-icon-button calendar-event-delete" @click="deleteCalendarEvent(event.id)" aria-label="Delete event">
                                 <i data-lucide="trash-2" class="calendar-switcher-icon"></i>
@@ -104,7 +114,10 @@ const CalendarApp = {
 
         const monthEvents = computed(() => (eventsByMonth[currentYear.value] || {})[currentMonthIndex.value] || {});
 
-        const selectedEvents = computed(() => monthEvents.value[selectedDay.value] || []);
+        const selectedEvents = computed(() => {
+            const evts = monthEvents.value[selectedDay.value] || [];
+            return [...evts].sort((a, b) => parseTimeMinutes(a.time) - parseTimeMinutes(b.time));
+        });
 
         const eventCountLabel = computed(() => {
             const n = selectedEvents.value.length;
@@ -158,8 +171,21 @@ const CalendarApp = {
             showAddForm.value = false;
         }
 
+        function resetForm() {
+            newEvent.title = "";
+            newEvent.time = "12:00 PM";
+            newEvent.detail = "";
+        }
+
+        function cancelAddForm() {
+            showAddForm.value = false;
+            resetForm();
+        }
+
         function selectDay(day) {
             selectedDay.value = day;
+            showAddForm.value = false;
+            resetForm();
         }
 
         function saveCalendarEvent() {
@@ -168,7 +194,7 @@ const CalendarApp = {
             const mIdx = currentMonthIndex.value;
             const dIdx = selectedDay.value;
             const time = newEvent.time.trim() || "12:00 PM";
-            const detail = newEvent.detail.trim() || "No details";
+            const detail = newEvent.detail.trim();
 
             if (!eventsByMonth[year]) eventsByMonth[year] = {};
             if (!eventsByMonth[year][mIdx]) eventsByMonth[year][mIdx] = {};
@@ -183,9 +209,7 @@ const CalendarApp = {
             eventsByMonth[year][mIdx][dIdx].push(event);
             hEvent("saveCalendarEvent", { year, month: mIdx, day: dIdx, title: event.title, time: event.time, detail: event.detail });
 
-            newEvent.title = "";
-            newEvent.time = "12:00 PM";
-            newEvent.detail = "";
+            resetForm();
             showAddForm.value = false;
         }
 
@@ -222,6 +246,7 @@ const CalendarApp = {
             prevMonth,
             nextMonth,
             selectDay,
+            cancelAddForm,
             saveCalendarEvent,
             deleteCalendarEvent,
             onBack,
