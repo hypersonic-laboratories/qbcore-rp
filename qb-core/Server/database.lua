@@ -371,7 +371,7 @@ end
 
 success = Database.Execute([[
     CREATE TABLE IF NOT EXISTS phone_calendar_events (
-        id TEXT PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         citizenid TEXT NOT NULL,
         month INTEGER NOT NULL,
         day INTEGER NOT NULL,

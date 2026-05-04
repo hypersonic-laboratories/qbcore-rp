@@ -45,11 +45,10 @@ local function ensureTable(t, key)
     return t[key]
 end
 
-local _nextId = math.random(1000, 9999)
+local _nextId = math.random(100000, 999999)
 local function genId()
-    local id = tonumber(os.time() .. string.format('%04d', _nextId % 10000))
     _nextId = _nextId + 1
-    return id
+    return _nextId
 end
 
 local function getCitizenIdFromPlayer(player)
@@ -948,7 +947,7 @@ RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, month,
     if not player then return end
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return end
-    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_calendar_events (id, citizenid, month, day, title, event_time, detail) VALUES (?, ?, ?, ?, ?, ?, ?)', { tostring(genId()), citizenid, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_calendar_events (citizenid, month, day, title, event_time, detail) VALUES (?, ?, ?, ?, ?, ?)', { citizenid, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
 end)
 
 RegisterServerEvent('qb-phone:server:savePhoto', function(source, url)
