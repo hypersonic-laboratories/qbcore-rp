@@ -52,58 +52,6 @@ local function genId()
     return id
 end
 
-local function dbAction(action, ...)
-    local ok, result = pcall(function(...)
-        if Database and Database[action] then
-            return Database[action](...)
-        end
-        return exports['qb-core']:DatabaseAction(action, ...)
-    end, ...)
-
-    if not ok then
-        print(('[qb-phone] Database %s failed: %s'):format(tostring(action), tostring(result)))
-        if action == 'Execute' or action == 'ExecuteAsync' then return false end
-        return {}
-    end
-
-    if type(result) == 'userdata' and result.__name == 'TArray' then
-        local rows = {}
-        local okRows, rawRows = pcall(function() return result:ToTable() end)
-        if not okRows then return rows end
-        for k, row in pairs(rawRows) do
-            if row.Columns and row.Columns.ToTable then
-                rows[k] = row.Columns:ToTable()
-            else
-                rows[k] = row
-            end
-        end
-        return rows
-    end
-
-    if type(result) ~= 'table' then return result end
-
-    local rows = {}
-    for k, row in pairs(result) do
-        if type(row) == 'table' and row.Columns and type(row.Columns) == 'table' then
-            rows[k] = row.Columns
-        elseif type(row) == 'table' and row.Columns and row.Columns.ToTable then
-            rows[k] = row.Columns:ToTable()
-        else
-            rows[k] = row
-        end
-    end
-    return rows
-end
-
-local function dbExecute(query, params)
-    return dbAction('Execute', query, params or {})
-end
-
-local function dbSelect(query, params)
-    local rows = dbAction('Select', query, params or {})
-    return type(rows) == 'table' and rows or {}
-end
-
 local function getCitizenIdFromPlayer(player)
     if not player or not player.PlayerData then return nil end
     return player.PlayerData.citizenid
@@ -129,32 +77,22 @@ local function syncPlayerAccount(player)
     local name = getFullName(player)
     local handle = makeHandle(name)
 
-    dbExecute([[
-        INSERT INTO phone_accounts (citizenid, phone, name, first_name, last_name, handle, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-        ON CONFLICT(citizenid) DO UPDATE SET
-            phone = excluded.phone,
-            name = excluded.name,
-            first_name = excluded.first_name,
-            last_name = excluded.last_name,
-            handle = excluded.handle,
-            updated_at = CURRENT_TIMESTAMP
-    ]], { citizenid, phone, name, firstName, lastName, handle })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_accounts (citizenid, phone, name, first_name, last_name, handle, updated_at) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(citizenid) DO UPDATE SET phone = excluded.phone, name = excluded.name, first_name = excluded.first_name, last_name = excluded.last_name, handle = excluded.handle, updated_at = CURRENT_TIMESTAMP', { citizenid, phone, name, firstName, lastName, handle })
 
     if phone ~= citizenid then
-        dbExecute('UPDATE OR IGNORE phone_messages SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
-        dbExecute('UPDATE OR IGNORE player_contacts SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
-        dbExecute('UPDATE OR IGNORE player_mails SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
-        dbExecute('UPDATE OR IGNORE phone_gallery SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
-        dbExecute('UPDATE OR IGNORE phone_call_history SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
-        dbExecute('UPDATE OR IGNORE phone_calendar_events SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
+        exports['qb-core']:DatabaseAction('Execute', 'UPDATE OR IGNORE phone_messages SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
+        exports['qb-core']:DatabaseAction('Execute', 'UPDATE OR IGNORE player_contacts SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
+        exports['qb-core']:DatabaseAction('Execute', 'UPDATE OR IGNORE player_mails SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
+        exports['qb-core']:DatabaseAction('Execute', 'UPDATE OR IGNORE phone_gallery SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
+        exports['qb-core']:DatabaseAction('Execute', 'UPDATE OR IGNORE phone_call_history SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
+        exports['qb-core']:DatabaseAction('Execute', 'UPDATE OR IGNORE phone_calendar_events SET citizenid = ? WHERE citizenid = ?', { citizenid, phone })
     end
 
     return citizenid
 end
 
 local function getKnownAccountByPhone(number)
-    local rows = dbSelect('SELECT citizenid, phone, name, handle FROM phone_accounts WHERE phone = ? LIMIT 1', { number })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT citizenid, phone, name, handle FROM phone_accounts WHERE phone = ? LIMIT 1', { number }) or {}
     return rows[1]
 end
 
@@ -201,7 +139,7 @@ local function contactNameMap(contactList)
 end
 
 local function loadContacts(citizenid, phone)
-    local rows = dbSelect('SELECT name, number, image FROM player_contacts WHERE citizenid = ? OR citizenid = ? ORDER BY rowid DESC', { citizenid, phone or citizenid })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT name, number, image FROM player_contacts WHERE citizenid = ? OR citizenid = ? ORDER BY rowid DESC', { citizenid, phone or citizenid }) or {}
     local result = {}
     local seen = {}
     for _, row in ipairs(rows) do
@@ -219,12 +157,7 @@ local function loadContacts(citizenid, phone)
 end
 
 local function loadConversations(citizenid, phone, contactList)
-    local rows = dbSelect([[
-        SELECT number, display_name, image, messages
-        FROM phone_messages
-        WHERE citizenid = ? OR citizenid = ?
-        ORDER BY updated_at DESC, rowid DESC
-    ]], { citizenid, phone })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT number, display_name, image, messages FROM phone_messages WHERE citizenid = ? OR citizenid = ? ORDER BY updated_at DESC, rowid DESC', { citizenid, phone }) or {}
 
     local contactsByNumber = contactNameMap(contactList)
     local result = {}
@@ -264,29 +197,20 @@ end
 
 local function saveConversationMessages(ownerKey, otherNumber, displayName, image, messageList)
     if not ownerKey or ownerKey == '' or not otherNumber or otherNumber == '' then return end
-    dbExecute('DELETE FROM phone_messages WHERE citizenid = ? AND number = ?', { ownerKey, otherNumber })
-    dbExecute([[
-        INSERT INTO phone_messages (citizenid, number, display_name, image, messages, updated_at)
-        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-    ]], { ownerKey, otherNumber, displayName or otherNumber, image or '', json.encode(messageList or {}) })
+    exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_messages WHERE citizenid = ? AND number = ?', { ownerKey, otherNumber })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_messages (citizenid, number, display_name, image, messages, updated_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)', { ownerKey, otherNumber, displayName or otherNumber, image or '', json.encode(messageList or {}) })
 end
 
 local function appendConversationMessage(ownerKey, otherNumber, displayName, image, message)
     if not ownerKey or ownerKey == '' then return end
-    local rows = dbSelect('SELECT messages FROM phone_messages WHERE citizenid = ? AND number = ? LIMIT 1', { ownerKey, otherNumber })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT messages FROM phone_messages WHERE citizenid = ? AND number = ? LIMIT 1', { ownerKey, otherNumber }) or {}
     local messageList = rows[1] and decodeJsonArray(rows[1].messages or rows[1].Messages) or {}
     table.insert(messageList, message)
     saveConversationMessages(ownerKey, otherNumber, displayName, image, messageList)
 end
 
 local function loadCallHistory(citizenid, phone)
-    local rows = dbSelect([[
-        SELECT name, number, type, missed, time, created_at
-        FROM phone_call_history
-        WHERE citizenid = ? OR citizenid = ?
-        ORDER BY rowid DESC
-        LIMIT 100
-    ]], { citizenid, phone })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT name, number, type, missed, time, created_at FROM phone_call_history WHERE citizenid = ? OR citizenid = ? ORDER BY rowid DESC LIMIT 100', { citizenid, phone }) or {}
 
     local result = {}
     for _, row in ipairs(rows) do
@@ -303,20 +227,11 @@ end
 
 local function saveCallHistory(ownerKey, name, number, callType, time, missed)
     if not ownerKey or ownerKey == '' then return end
-    dbExecute([[
-        INSERT INTO phone_call_history (citizenid, name, number, type, missed, time)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ]], { ownerKey, name or number or '', number or '', callType or '', missed and 1 or 0, time or os.date('%H:%M') })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_call_history (citizenid, name, number, type, missed, time) VALUES (?, ?, ?, ?, ?, ?)', { ownerKey, name or number or '', number or '', callType or '', missed and 1 or 0, time or os.date('%H:%M') })
 end
 
 local function loadEmails(citizenid, phone)
-    local rows = dbSelect([[
-        SELECT rowid AS row_id, id, mailid, sender, sender_number, subject, message, read, starred, date
-        FROM player_mails
-        WHERE citizenid = ? OR citizenid = ?
-        ORDER BY rowid DESC
-        LIMIT 100
-    ]], { citizenid, phone })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT rowid AS row_id, id, mailid, sender, sender_number, subject, message, read, starred, date FROM player_mails WHERE citizenid = ? OR citizenid = ? ORDER BY rowid DESC LIMIT 100', { citizenid, phone }) or {}
 
     local result = {}
     for _, row in ipairs(rows) do
@@ -337,12 +252,7 @@ local function loadEmails(citizenid, phone)
 end
 
 local function loadCalendarEvents(citizenid, phone)
-    local rows = dbSelect([[
-        SELECT id, month, day, title, event_time, detail, accent
-        FROM phone_calendar_events
-        WHERE citizenid = ? OR citizenid = ?
-        ORDER BY created_at ASC
-    ]], { citizenid, phone })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT id, month, day, title, event_time, detail, accent FROM phone_calendar_events WHERE citizenid = ? OR citizenid = ? ORDER BY created_at ASC', { citizenid, phone }) or {}
 
     local result = {}
     for _, row in ipairs(rows) do
@@ -362,13 +272,7 @@ local function loadCalendarEvents(citizenid, phone)
 end
 
 local function loadPhotos(citizenid, phone)
-    local rows = dbSelect([[
-        SELECT rowid AS id, image, date
-        FROM phone_gallery
-        WHERE citizenid = ? OR citizenid = ?
-        ORDER BY rowid DESC
-        LIMIT 200
-    ]], { citizenid, phone })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT rowid AS id, image, date FROM phone_gallery WHERE citizenid = ? OR citizenid = ? ORDER BY rowid DESC LIMIT 200', { citizenid, phone }) or {}
 
     local result = {}
     for _, row in ipairs(rows) do
@@ -384,7 +288,7 @@ local function loadPhotos(citizenid, phone)
 end
 
 local function buildFeedForPhone(phone, viewerCitizenId)
-    local reactionRows = dbSelect('SELECT tweet_id, citizenid, type FROM phone_tweet_reactions', {})
+    local reactionRows = exports['qb-core']:DatabaseAction('Select', 'SELECT tweet_id, citizenid, type FROM phone_tweet_reactions', {}) or {}
     local reactions = {}
     for _, row in ipairs(reactionRows) do
         local tweetId = tostring(row.tweet_id or row.tweetId or '')
@@ -397,11 +301,7 @@ local function buildFeedForPhone(phone, viewerCitizenId)
         end
     end
 
-    local commentRows = dbSelect([[
-        SELECT id, tweet_id, firstName, lastName, handle, message, date
-        FROM phone_tweet_comments
-        ORDER BY date ASC
-    ]], {})
+    local commentRows = exports['qb-core']:DatabaseAction('Select', 'SELECT id, tweet_id, firstName, lastName, handle, message, date FROM phone_tweet_comments ORDER BY date ASC', {}) or {}
     local commentsByTweet = {}
     for _, row in ipairs(commentRows) do
         local tweetId = tostring(row.tweet_id or row.tweetId or '')
@@ -418,11 +318,7 @@ local function buildFeedForPhone(phone, viewerCitizenId)
         })
     end
 
-    local tweetRows = dbSelect([[
-        SELECT rowid AS row_id, tweetId, citizenid, firstName, lastName, handle, message, url, date
-        FROM phone_tweets
-        ORDER BY date DESC, rowid DESC
-    ]], {})
+    local tweetRows = exports['qb-core']:DatabaseAction('Select', 'SELECT rowid AS row_id, tweetId, citizenid, firstName, lastName, handle, message, url, date FROM phone_tweets ORDER BY date DESC, rowid DESC', {}) or {}
 
     local feed = {}
     for _, row in ipairs(tweetRows) do
@@ -453,8 +349,8 @@ end
 
 local function buildUsersForPhone(viewerPhone, viewerCitizenId)
     local users = {}
-    local accounts = dbSelect('SELECT citizenid, phone, name, handle, bio FROM phone_accounts', {})
-    local followsRows = dbSelect('SELECT follower_citizenid, target_citizenid, target_name, target_handle FROM phone_tweet_follows', {})
+    local accounts = exports['qb-core']:DatabaseAction('Select', 'SELECT citizenid, phone, name, handle, bio FROM phone_accounts', {}) or {}
+    local followsRows = exports['qb-core']:DatabaseAction('Select', 'SELECT follower_citizenid, target_citizenid, target_name, target_handle FROM phone_tweet_follows', {}) or {}
 
     local followersByTarget = {}
     local followingByFollower = {}
@@ -489,7 +385,7 @@ local function buildUsersForPhone(viewerPhone, viewerCitizenId)
     end
 
     -- Expose profiles for authors who posted before ever opening this phone.
-    local tweetAuthors = dbSelect('SELECT DISTINCT citizenid, firstName, lastName, handle FROM phone_tweets', {})
+    local tweetAuthors = exports['qb-core']:DatabaseAction('Select', 'SELECT DISTINCT citizenid, firstName, lastName, handle FROM phone_tweets', {}) or {}
     for _, row in ipairs(tweetAuthors) do
         local firstName = row.firstName or row.firstname or ''
         local lastName = row.lastName or row.lastname or ''
@@ -719,9 +615,9 @@ RegisterServerEvent('qb-phone:server:deleteConversation', function(source, targe
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return end
     messages[pairKey(phone, targetNumber)] = nil
-    dbExecute('DELETE FROM phone_messages WHERE citizenid = ? AND number = ?', { citizenid, targetNumber })
+    exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_messages WHERE citizenid = ? AND number = ?', { citizenid, targetNumber })
     if phone ~= citizenid then
-        dbExecute('DELETE FROM phone_messages WHERE citizenid = ? AND number = ?', { phone, targetNumber })
+        exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_messages WHERE citizenid = ? AND number = ?', { phone, targetNumber })
     end
 end)
 
@@ -781,26 +677,20 @@ RegisterServerEvent('qb-phone:server:saveContact', function(source, name, number
     for i, c in ipairs(contacts[phone]) do
         if c.number == number then
             contacts[phone][i] = { name = name, number = number, image = image }
-            dbExecute('DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { citizenid, number })
+            exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { citizenid, number })
             if phone ~= citizenid then
-                dbExecute('DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { phone, number })
+                exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { phone, number })
             end
-            dbExecute([[
-                INSERT INTO player_contacts (citizenid, name, number, image, iban)
-                VALUES (?, ?, ?, ?, '0')
-            ]], { citizenid, name, number, image or '' })
+            exports['qb-core']:DatabaseAction('Execute', "INSERT INTO player_contacts (citizenid, name, number, image, iban) VALUES (?, ?, ?, ?, '0')", { citizenid, name, number, image or '' })
             return
         end
     end
     table.insert(contacts[phone], { name = name, number = number, image = image })
-    dbExecute('DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { citizenid, number })
+    exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { citizenid, number })
     if phone ~= citizenid then
-        dbExecute('DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { phone, number })
+        exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { phone, number })
     end
-    dbExecute([[
-        INSERT INTO player_contacts (citizenid, name, number, image, iban)
-        VALUES (?, ?, ?, ?, '0')
-    ]], { citizenid, name, number, image or '' })
+    exports['qb-core']:DatabaseAction('Execute', "INSERT INTO player_contacts (citizenid, name, number, image, iban) VALUES (?, ?, ?, ?, '0')", { citizenid, name, number, image or '' })
 end)
 
 RegisterServerEvent('qb-phone:server:deleteContact', function(source, number)
@@ -817,9 +707,9 @@ RegisterServerEvent('qb-phone:server:deleteContact', function(source, number)
             end
         end
     end
-    dbExecute('DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { citizenid, number })
+    exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { citizenid, number })
     if phone ~= citizenid then
-        dbExecute('DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { phone, number })
+        exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { phone, number })
     end
 end)
 
@@ -851,10 +741,7 @@ RegisterServerEvent('qb-phone:server:createPost', function(source, content, imag
     reposts[postId]  = {}
     comments[postId] = {}
 
-    dbExecute([[
-        INSERT INTO phone_tweets (citizenid, firstName, lastName, handle, message, url, picture, tweetId)
-        VALUES (?, ?, ?, ?, ?, ?, './img/default.png', ?)
-    ]], { authorCitizenId, firstName, lastName, handle, content, image or '', tostring(postId) })
+    exports['qb-core']:DatabaseAction('Execute', "INSERT INTO phone_tweets (citizenid, firstName, lastName, handle, message, url, picture, tweetId) VALUES (?, ?, ?, ?, ?, ?, './img/default.png', ?)", { authorCitizenId, firstName, lastName, handle, content, image or '', tostring(postId) })
 
     local payload = {
         id       = postId,
@@ -884,19 +771,19 @@ RegisterServerEvent('qb-phone:server:deletePost', function(source, postId)
             likes[postId]    = nil
             reposts[postId]  = nil
             comments[postId] = nil
-            dbExecute('DELETE FROM phone_tweet_reactions WHERE tweet_id = ?', { tostring(postId) })
-            dbExecute('DELETE FROM phone_tweet_comments WHERE tweet_id = ?', { tostring(postId) })
-            dbExecute('DELETE FROM phone_tweets WHERE tweetId = ? AND citizenid = ?', { tostring(postId), citizenid })
+            exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_reactions WHERE tweet_id = ?', { tostring(postId) })
+            exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_comments WHERE tweet_id = ?', { tostring(postId) })
+            exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweets WHERE tweetId = ? AND citizenid = ?', { tostring(postId), citizenid })
             TriggerClientEvent(-1, 'qb-phone:client:postDeleted', postId)
             return
         end
     end
 
-    local rows = dbSelect('SELECT citizenid FROM phone_tweets WHERE tweetId = ? LIMIT 1', { tostring(postId) })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT citizenid FROM phone_tweets WHERE tweetId = ? LIMIT 1', { tostring(postId) }) or {}
     if rows[1] and rows[1].citizenid == citizenid then
-        dbExecute('DELETE FROM phone_tweet_reactions WHERE tweet_id = ?', { tostring(postId) })
-        dbExecute('DELETE FROM phone_tweet_comments WHERE tweet_id = ?', { tostring(postId) })
-        dbExecute('DELETE FROM phone_tweets WHERE tweetId = ?', { tostring(postId) })
+        exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_reactions WHERE tweet_id = ?', { tostring(postId) })
+        exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_comments WHERE tweet_id = ?', { tostring(postId) })
+        exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweets WHERE tweetId = ?', { tostring(postId) })
         TriggerClientEvent(-1, 'qb-phone:client:postDeleted', postId)
     end
 end)
@@ -913,11 +800,11 @@ RegisterServerEvent('qb-phone:server:likePost', function(source, postId, liked)
     else
         likes[postId][phone] = nil
     end
-    dbExecute('DELETE FROM phone_tweet_reactions WHERE tweet_id = ? AND citizenid = ? AND type = ?', { tostring(postId), citizenid, 'like' })
+    exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_reactions WHERE tweet_id = ? AND citizenid = ? AND type = ?', { tostring(postId), citizenid, 'like' })
     if liked then
-        dbExecute('INSERT INTO phone_tweet_reactions (tweet_id, citizenid, type) VALUES (?, ?, ?)', { tostring(postId), citizenid, 'like' })
+        exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_tweet_reactions (tweet_id, citizenid, type) VALUES (?, ?, ?)', { tostring(postId), citizenid, 'like' })
     end
-    local rows = dbSelect('SELECT citizenid FROM phone_tweet_reactions WHERE tweet_id = ? AND type = ?', { tostring(postId), 'like' })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT citizenid FROM phone_tweet_reactions WHERE tweet_id = ? AND type = ?', { tostring(postId), 'like' }) or {}
     TriggerClientEvent(-1, 'qb-phone:client:postLikeUpdated', postId, #rows)
 end)
 
@@ -933,11 +820,11 @@ RegisterServerEvent('qb-phone:server:repostPost', function(source, postId, repos
     else
         reposts[postId][phone] = nil
     end
-    dbExecute('DELETE FROM phone_tweet_reactions WHERE tweet_id = ? AND citizenid = ? AND type = ?', { tostring(postId), citizenid, 'repost' })
+    exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_reactions WHERE tweet_id = ? AND citizenid = ? AND type = ?', { tostring(postId), citizenid, 'repost' })
     if reposted then
-        dbExecute('INSERT INTO phone_tweet_reactions (tweet_id, citizenid, type) VALUES (?, ?, ?)', { tostring(postId), citizenid, 'repost' })
+        exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_tweet_reactions (tweet_id, citizenid, type) VALUES (?, ?, ?)', { tostring(postId), citizenid, 'repost' })
     end
-    local rows = dbSelect('SELECT citizenid FROM phone_tweet_reactions WHERE tweet_id = ? AND type = ?', { tostring(postId), 'repost' })
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT citizenid FROM phone_tweet_reactions WHERE tweet_id = ? AND type = ?', { tostring(postId), 'repost' }) or {}
     TriggerClientEvent(-1, 'qb-phone:client:postRepostUpdated', postId, #rows)
 end)
 
@@ -972,13 +859,10 @@ RegisterServerEvent('qb-phone:server:followUser', function(source, handle, follo
     ensureTable(follows, followerNumber)
     if following then
         follows[followerNumber][targetName] = true
-        dbExecute([[
-            INSERT OR REPLACE INTO phone_tweet_follows (follower_citizenid, target_citizenid, target_name, target_handle, target_phone)
-            VALUES (?, ?, ?, ?, ?)
-        ]], { followerCitizenId, targetCitizenId, targetName, targetHandle, targetPhone or '' })
+        exports['qb-core']:DatabaseAction('Execute', 'INSERT OR REPLACE INTO phone_tweet_follows (follower_citizenid, target_citizenid, target_name, target_handle, target_phone) VALUES (?, ?, ?, ?, ?)', { followerCitizenId, targetCitizenId, targetName, targetHandle, targetPhone or '' })
     else
         follows[followerNumber][targetName] = nil
-        dbExecute('DELETE FROM phone_tweet_follows WHERE follower_citizenid = ? AND target_name = ?', { followerCitizenId, targetName })
+        exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_follows WHERE follower_citizenid = ? AND target_name = ?', { followerCitizenId, targetName })
     end
 
     if following and targetPhone and targetPhone ~= '' then
@@ -1012,10 +896,7 @@ RegisterServerEvent('qb-phone:server:addComment', function(source, postId, text)
     ensureTable(comments, postId)
     table.insert(comments[postId], comment)
 
-    dbExecute([[
-        INSERT INTO phone_tweet_comments (id, tweet_id, citizenid, firstName, lastName, handle, message)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ]], { tostring(comment.id), tostring(postId), authorCitizenId, firstName, lastName, handle, text })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_tweet_comments (id, tweet_id, citizenid, firstName, lastName, handle, message) VALUES (?, ?, ?, ?, ?, ?, ?)', { tostring(comment.id), tostring(postId), authorCitizenId, firstName, lastName, handle, text })
 
     local payload = { id = comment.id, author = authorName, handle = handle, text = text, time = time }
     TriggerClientEvent(-1, 'qb-phone:client:commentAdded', postId, json.encode(payload))
@@ -1046,10 +927,7 @@ RegisterServerEvent('qb-phone:server:sendEmail', function(source, toNumber, subj
     }
     table.insert(emails[toNumber], 1, email)
 
-    dbExecute([[
-        INSERT INTO player_mails (citizenid, sender, sender_number, subject, message, read, starred, mailid)
-        VALUES (?, ?, ?, ?, ?, 0, 0, ?)
-    ]], { recipientCitizenId, senderName, senderNumber, subject, body, tostring(emailId) })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO player_mails (citizenid, sender, sender_number, subject, message, read, starred, mailid) VALUES (?, ?, ?, ?, ?, 0, 0, ?)', { recipientCitizenId, senderName, senderNumber, subject, body, tostring(emailId) })
 
     local target = exports['qb-core']:GetPlayerByPhone(toNumber)
     if target then
@@ -1062,7 +940,7 @@ RegisterServerEvent('qb-phone:server:deleteEmail', function(source, emailId)
     if not player then return end
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return end
-    dbExecute('DELETE FROM player_mails WHERE mailid = ? AND citizenid = ?', { tostring(emailId), citizenid })
+    exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_mails WHERE mailid = ? AND citizenid = ?', { tostring(emailId), citizenid })
 end)
 
 RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, month, day, title, time, detail)
@@ -1070,10 +948,7 @@ RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, month,
     if not player then return end
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return end
-    dbExecute([[
-        INSERT INTO phone_calendar_events (id, citizenid, month, day, title, event_time, detail)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ]], { tostring(genId()), citizenid, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_calendar_events (id, citizenid, month, day, title, event_time, detail) VALUES (?, ?, ?, ?, ?, ?, ?)', { tostring(genId()), citizenid, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
 end)
 
 RegisterServerEvent('qb-phone:server:savePhoto', function(source, url)
@@ -1082,7 +957,7 @@ RegisterServerEvent('qb-phone:server:savePhoto', function(source, url)
     if not player then return end
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return end
-    dbExecute('INSERT INTO phone_gallery (citizenid, image) VALUES (?, ?)', { citizenid, url })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_gallery (citizenid, image) VALUES (?, ?)', { citizenid, url })
 end)
 
 RegisterServerEvent('qb-phone:server:deletePhoto', function(source, photoId)
@@ -1101,5 +976,5 @@ RegisterServerEvent('qb-phone:server:deletePhoto', function(source, photoId)
         end
     end
 
-    dbExecute('DELETE FROM phone_gallery WHERE citizenid = ? AND rowid = ?', { citizenid, photoId })
+    exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_gallery WHERE citizenid = ? AND rowid = ?', { citizenid, photoId })
 end)

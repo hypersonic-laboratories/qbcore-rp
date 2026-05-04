@@ -51,6 +51,7 @@ const CalendarApp = {
                     </button>
                 </div>
 
+                <div class="calendar-scroll-area">
                 <div v-if="showAddForm" class="calendar-form-card">
                     <input v-model="newEvent.title" placeholder="Event title" class="calendar-input" />
                     <input v-model="newEvent.time" placeholder="Time" class="calendar-input" />
@@ -73,6 +74,7 @@ const CalendarApp = {
                         </div>
                     </template>
                     <div v-else class="calendar-empty-state">Nothing scheduled. Tap the plus button to add an event for this date.</div>
+                </div>
                 </div>
             </div>
         </div>

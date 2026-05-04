@@ -243,9 +243,14 @@
     color: white;
 }
 
-.calendar-events-list {
+.calendar-scroll-area {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
     padding-right: 0.25rem;
-    overflow: auto;
+}
+
+.calendar-events-list {
     display: grid;
     gap: 0.75rem;
 }
