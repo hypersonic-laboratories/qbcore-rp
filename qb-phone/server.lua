@@ -251,7 +251,7 @@ local function loadEmails(citizenid, phone)
 end
 
 local function loadCalendarEvents(citizenid, phone)
-    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT id, month, day, title, event_time, detail, accent FROM phone_calendar_events WHERE citizenid = ? OR citizenid = ? ORDER BY created_at ASC', { citizenid, phone }) or {}
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT id, month, day, title, event_time, detail FROM phone_calendar_events WHERE citizenid = ? OR citizenid = ? ORDER BY created_at ASC', { citizenid, phone }) or {}
 
     local result = {}
     for _, row in ipairs(rows) do
@@ -264,7 +264,6 @@ local function loadCalendarEvents(citizenid, phone)
             title = row.title or '',
             time = row.event_time or '',
             detail = row.detail or '',
-            accent = row.accent or 'bg-rose-500',
         })
     end
     return result

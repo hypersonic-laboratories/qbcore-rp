@@ -65,7 +65,7 @@ const CalendarApp = {
                 <div class="calendar-events-list">
                     <template v-if="selectedEvents.length">
                         <div v-for="event in selectedEvents" :key="event.id" class="calendar-event-card">
-                            <div :class="['calendar-event-accent', event.accent]"></div>
+                            <div class="calendar-event-accent bg-rose-500"></div>
                             <div>
                                 <div class="calendar-event-time">{{ event.time }}</div>
                                 <div class="calendar-event-title">{{ event.title }}</div>
@@ -174,7 +174,6 @@ const CalendarApp = {
                 time,
                 title: newEvent.title.trim(),
                 detail,
-                accent: "bg-rose-500",
             };
             eventsByMonth[mIdx][dIdx].push(event);
             hEvent("saveCalendarEvent", { month: mIdx, day: dIdx, title: event.title, time: event.time, detail: event.detail });
