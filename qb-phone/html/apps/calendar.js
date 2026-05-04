@@ -65,7 +65,7 @@ const CalendarApp = {
                 <div class="calendar-events-list">
                     <template v-if="selectedEvents.length">
                         <div v-for="event in selectedEvents" :key="event.id" class="calendar-event-card">
-                            <div class="calendar-event-accent bg-rose-500"></div>
+                            <div class="calendar-event-accent"></div>
                             <div class="calendar-event-body">
                                 <div class="calendar-event-time">{{ event.time }}</div>
                                 <div class="calendar-event-title">{{ event.title }}</div>
@@ -102,7 +102,7 @@ const CalendarApp = {
 
         const monthLabel = computed(() => `${MONTH_NAMES[currentMonthIndex.value]} ${currentYear.value}`);
 
-        const monthEvents = computed(() => eventsByMonth[currentMonthIndex.value] || {});
+        const monthEvents = computed(() => (eventsByMonth[currentYear.value] || {})[currentMonthIndex.value] || {});
 
         const selectedEvents = computed(() => monthEvents.value[selectedDay.value] || []);
 
@@ -164,22 +164,24 @@ const CalendarApp = {
 
         function saveCalendarEvent() {
             if (!newEvent.title.trim()) return;
+            const year = currentYear.value;
             const mIdx = currentMonthIndex.value;
             const dIdx = selectedDay.value;
             const time = newEvent.time.trim() || "12:00 PM";
             const detail = newEvent.detail.trim() || "No details";
 
-            if (!eventsByMonth[mIdx]) eventsByMonth[mIdx] = {};
-            if (!eventsByMonth[mIdx][dIdx]) eventsByMonth[mIdx][dIdx] = [];
+            if (!eventsByMonth[year]) eventsByMonth[year] = {};
+            if (!eventsByMonth[year][mIdx]) eventsByMonth[year][mIdx] = {};
+            if (!eventsByMonth[year][mIdx][dIdx]) eventsByMonth[year][mIdx][dIdx] = [];
 
             const event = {
-                id: `${mIdx}-${dIdx}-${Date.now()}`,
+                id: `${year}-${mIdx}-${dIdx}-${Date.now()}`,
                 time,
                 title: newEvent.title.trim(),
                 detail,
             };
-            eventsByMonth[mIdx][dIdx].push(event);
-            hEvent("saveCalendarEvent", { month: mIdx, day: dIdx, title: event.title, time: event.time, detail: event.detail });
+            eventsByMonth[year][mIdx][dIdx].push(event);
+            hEvent("saveCalendarEvent", { year, month: mIdx, day: dIdx, title: event.title, time: event.time, detail: event.detail });
 
             newEvent.title = "";
             newEvent.time = "12:00 PM";
@@ -188,10 +190,11 @@ const CalendarApp = {
         }
 
         function deleteCalendarEvent(eventId) {
+            const year = currentYear.value;
             const mIdx = currentMonthIndex.value;
             const dIdx = selectedDay.value;
-            if (!eventsByMonth[mIdx]?.[dIdx]) return;
-            eventsByMonth[mIdx][dIdx] = eventsByMonth[mIdx][dIdx].filter(e => e.id !== eventId);
+            if (!eventsByMonth[year]?.[mIdx]?.[dIdx]) return;
+            eventsByMonth[year][mIdx][dIdx] = eventsByMonth[year][mIdx][dIdx].filter(e => e.id !== eventId);
             hEvent("deleteCalendarEvent", { eventId });
         }
 

@@ -275,6 +275,7 @@
     width: 0.5rem;
     align-self: stretch;
     border-radius: 9999px;
+    background: rgb(244 63 94);
 }
 
 .calendar-event-body {
