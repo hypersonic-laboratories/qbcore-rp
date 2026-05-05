@@ -288,7 +288,7 @@ RegisterClientEvent('qb-phone:client:calendarEventsLoaded', function(eventsJson)
 end)
 
 my_webui:RegisterEventHandler('saveCalendarEvent', function(data)
-    TriggerServerEvent('qb-phone:server:saveCalendarEvent', data.month, data.day, data.title, data.time, data.detail)
+    TriggerServerEvent('qb-phone:server:saveCalendarEvent', data.year, data.month, data.day, data.title, data.time, data.detail)
 end)
 
 my_webui:RegisterEventHandler('deleteCalendarEvent', function(data)

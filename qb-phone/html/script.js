@@ -87,15 +87,17 @@ createApp({
             const incoming = parsePayload(raw, {});
             const { CALENDAR_EVENTS } = window.PhoneStore;
 
-            Object.keys(CALENDAR_EVENTS).forEach((mIdx) => {
-                delete CALENDAR_EVENTS[mIdx];
-            });
+            Object.keys(CALENDAR_EVENTS).forEach((k) => { delete CALENDAR_EVENTS[k]; });
 
-            Object.entries(incoming || {}).forEach(([mIdxStr, days]) => {
-                const mIdx = Number(mIdxStr);
-                CALENDAR_EVENTS[mIdx] = {};
-                Object.entries(days || {}).forEach(([dIdxStr, events]) => {
-                    CALENDAR_EVENTS[mIdx][Number(dIdxStr)] = Array.isArray(events) ? events : [];
+            Object.entries(incoming || {}).forEach(([yearStr, months]) => {
+                const year = Number(yearStr);
+                CALENDAR_EVENTS[year] = {};
+                Object.entries(months || {}).forEach(([mIdxStr, days]) => {
+                    const mIdx = Number(mIdxStr);
+                    CALENDAR_EVENTS[year][mIdx] = {};
+                    Object.entries(days || {}).forEach(([dIdxStr, events]) => {
+                        CALENDAR_EVENTS[year][mIdx][Number(dIdxStr)] = Array.isArray(events) ? events : [];
+                    });
                 });
             });
         }

@@ -251,17 +251,20 @@ local function loadEmails(citizenid, phone)
 end
 
 local function loadCalendarEvents(citizenid, phone)
-    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT id, month, day, title, event_time, detail FROM phone_calendar_events WHERE citizenid = ? OR citizenid = ? ORDER BY created_at ASC', { citizenid, phone }) or {}
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT id, year, month, day, title, event_time, detail FROM phone_calendar_events WHERE citizenid = ? OR citizenid = ? ORDER BY created_at ASC', { citizenid, phone }) or {}
 
     local result = {}
     for _, row in ipairs(rows) do
+        local year  = tonumber(row.year  or row.Year)  or 0
         local month = tonumber(row.month or row.Month) or 0
         local day   = tonumber(row.day   or row.Day)   or 1
+        local yearKey  = tostring(year)
         local monthKey = tostring(month)
-        local dayKey = tostring(day)
-        ensureTable(result, monthKey)
-        ensureTable(result[monthKey], dayKey)
-        table.insert(result[monthKey][dayKey], {
+        local dayKey   = tostring(day)
+        ensureTable(result, yearKey)
+        ensureTable(result[yearKey], monthKey)
+        ensureTable(result[yearKey][monthKey], dayKey)
+        table.insert(result[yearKey][monthKey][dayKey], {
             id     = row.id     or row.Id,
             title  = row.title  or row.Title  or '',
             time   = row.event_time or row.Event_time or row.EventTime or '',
@@ -407,6 +410,17 @@ local function buildUsersForPhone(viewerPhone, viewerCitizenId)
     end
 
     return users
+end
+
+do
+    local cols = exports['qb-core']:DatabaseAction('Select', 'PRAGMA table_info(phone_calendar_events)', {}) or {}
+    local hasYear = false
+    for _, col in ipairs(cols) do
+        if (col.name or '') == 'year' then hasYear = true; break end
+    end
+    if not hasYear then
+        exports['qb-core']:DatabaseAction('Execute', 'ALTER TABLE phone_calendar_events ADD COLUMN year INTEGER DEFAULT 0', {})
+    end
 end
 
 RegisterServerEvent('qb-phone:server:dial', function(source, targetNumber)
@@ -945,13 +959,13 @@ RegisterServerEvent('qb-phone:server:loadCalendar', function(source)
     sendCalendarEvents(player, citizenid, phone)
 end)
 
-RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, month, day, title, time, detail)
+RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, year, month, day, title, time, detail)
     local player = getPlayer(source)
     if not player then return end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
     if not citizenid then return end
-    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_calendar_events (citizenid, month, day, title, event_time, detail) VALUES (?, ?, ?, ?, ?, ?)', { citizenid, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_calendar_events (citizenid, year, month, day, title, event_time, detail) VALUES (?, ?, ?, ?, ?, ?, ?)', { citizenid, tonumber(year) or 0, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
     sendCalendarEvents(player, citizenid, phone)
 end)
 

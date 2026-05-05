@@ -373,12 +373,12 @@ success = Database.Execute([[
     CREATE TABLE IF NOT EXISTS phone_calendar_events (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         citizenid TEXT NOT NULL,
+        year INTEGER NOT NULL DEFAULT 0,
         month INTEGER NOT NULL,
         day INTEGER NOT NULL,
         title TEXT NOT NULL,
         event_time TEXT DEFAULT '',
         detail TEXT DEFAULT '',
-        accent TEXT DEFAULT 'bg-rose-500',
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
 ]])
