@@ -101,7 +101,7 @@ const HmailApp = {
                 <div class="hmail-compose-fields">
                     <div class="hmail-compose-field">
                         <span class="hmail-compose-field-label">To</span>
-                        <input v-model="composeTo" class="hmail-compose-field-input" placeholder="Recipient phone number" />
+                        <input v-model="composeTo" class="hmail-compose-field-input" placeholder="Recipient email" />
                     </div>
                     <div class="hmail-compose-field hmail-compose-field-border">
                         <span class="hmail-compose-field-label">Subject</span>
@@ -187,9 +187,10 @@ const HmailApp = {
 
         function deleteEmail() {
             if (!currentEmail.value) return;
-            const idx = EMAILS.findIndex((e) => e.id === currentEmail.value.id);
+            const emailId = currentEmail.value.id;
+            const idx = EMAILS.findIndex((e) => e.id === emailId);
             if (idx !== -1) EMAILS.splice(idx, 1);
-            hEvent("deleteEmail", { emailId: currentEmail.value.id });
+            hEvent("deleteEmail", { emailId });
             currentEmailId.value = null;
             view.value = "inbox";
         }

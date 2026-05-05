@@ -1,7 +1,17 @@
 (function () {
     const { reactive, ref } = Vue;
     const DARK_MODE_STORAGE_KEY = "helix-phone:dark-mode";
-    const WALLPAPER_STORAGE_KEY = "helix-phone:wallpaper";
+    const WALLPAPER_STORAGE_KEY  = "helix-phone:wallpaper";
+    const CASE_COLOR_STORAGE_KEY = "helix-phone:case-color";
+
+    window.CASE_COLORS = [
+        { id: "black",  label: "Space Black", main: "rgb(24 24 27)",    light: "rgb(63 63 70)"    },
+        { id: "silver", label: "Silver",      main: "rgb(168 168 175)", light: "rgb(205 205 212)"  },
+        { id: "purple", label: "Deep Purple", main: "rgb(55 35 85)",    light: "rgb(90 65 120)"    },
+        { id: "blue",   label: "Midnight",    main: "rgb(15 28 62)",    light: "rgb(35 55 105)"    },
+        { id: "red",    label: "Product Red", main: "rgb(155 22 12)",   light: "rgb(200 42 28)"    },
+        { id: "gold",   label: "Gold",        main: "rgb(155 125 68)",  light: "rgb(195 165 108)"  },
+    ];
 
     function loadStoredDarkMode() {
         try {
@@ -37,11 +47,21 @@
         } catch (_) {}
     }
 
+    function loadStoredCaseColor() {
+        try { return window.localStorage.getItem(CASE_COLOR_STORAGE_KEY) || "black"; } catch (_) { return "black"; }
+    }
+
+    function saveStoredCaseColor(id) {
+        try { window.localStorage.setItem(CASE_COLOR_STORAGE_KEY, id); } catch (_) {}
+    }
+
     window.PhoneStore = {
         darkMode: ref(loadStoredDarkMode()),
         saveDarkMode: saveStoredDarkMode,
         wallpaperUrl: ref(loadStoredWallpaper()),
         saveWallpaper: saveStoredWallpaper,
+        caseColorId: ref(loadStoredCaseColor()),
+        saveCaseColor: saveStoredCaseColor,
         playerName: ref(""),
         playerPhone: ref(""),
         playerCitizenId: ref(""),

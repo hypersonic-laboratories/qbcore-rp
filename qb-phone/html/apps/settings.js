@@ -64,6 +64,24 @@ const SettingsApp = {
                                 <span class="settings-toggle-thumb"></span>
                             </button>
                         </div>
+                        <div class="settings-row settings-row-border settings-case-row">
+                            <div class="settings-row-icon-wrap" style="background: rgb(113 113 122)">
+                                <i data-lucide="smartphone" class="settings-row-icon-svg"></i>
+                            </div>
+                            <span class="settings-row-label">Case Color</span>
+                            <div class="settings-case-swatches">
+                                <button
+                                    v-for="color in CASE_COLORS"
+                                    :key="color.id"
+                                    type="button"
+                                    class="settings-case-swatch"
+                                    :style="{ background: color.main }"
+                                    :class="{ 'settings-case-swatch-active': caseColorId === color.id }"
+                                    :aria-label="color.label"
+                                    @click="caseColorId = color.id"
+                                ></button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -132,13 +150,15 @@ const SettingsApp = {
             { key: "gene", label: "H (Gene)", icon: "dna", color: "rgb(168 85 247)", on: false },
         ]);
 
-        const darkMode = window.PhoneStore.darkMode;
+        const darkMode    = window.PhoneStore.darkMode;
+        const caseColorId = window.PhoneStore.caseColorId;
+        const CASE_COLORS = window.CASE_COLORS;
         const dnd = ref(false);
 
         function onBack() {
             emit("navigate", "home");
         }
 
-        return { profileDisplayName, profilePhoneDisplay, playerPhone, profileInitial, notifications, darkMode, dnd, copyPhoneNumber, onBack };
+        return { profileDisplayName, profilePhoneDisplay, playerPhone, profileInitial, notifications, darkMode, dnd, caseColorId, CASE_COLORS, copyPhoneNumber, onBack };
     },
 };

@@ -230,6 +230,33 @@
     transform: translateX(1.125rem);
 }
 
+/* Case color swatches */
+.settings-case-swatches {
+    display: flex;
+    gap: 0.375rem;
+    align-items: center;
+}
+
+.settings-case-swatch {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    outline: none;
+    transition: transform 0.12s;
+}
+
+.settings-case-swatch:hover {
+    transform: scale(1.15);
+}
+
+.settings-case-swatch-active {
+    box-shadow: 0 0 0 2px white, 0 0 0 4px rgb(113 113 122);
+}
+
 /* â”€â”€ Dark mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .dark .settings-screen {
@@ -289,4 +316,8 @@
 
 .dark .settings-section-label {
     color: rgb(113 113 122);
+}
+
+.dark .settings-case-swatch-active {
+    box-shadow: 0 0 0 2px rgb(28 28 33), 0 0 0 4px rgb(161 161 170);
 }

@@ -32,7 +32,7 @@ createApp({
     },
 
     setup() {
-        const { ref, watch } = Vue;
+        const { ref, computed, watch } = Vue;
 
         const phoneVisible = ref(false);
         const locked       = ref(true);
@@ -41,6 +41,9 @@ createApp({
         watch(darkMode, (enabled) => window.PhoneStore.saveDarkMode(enabled));
         const wallpaperUrl = window.PhoneStore.wallpaperUrl;
         watch(wallpaperUrl, (url) => window.PhoneStore.saveWallpaper(url));
+        const caseColorId   = window.PhoneStore.caseColorId;
+        watch(caseColorId, (id) => window.PhoneStore.saveCaseColor(id));
+        const activeCaseColor = computed(() => window.CASE_COLORS.find((c) => c.id === caseColorId.value) ?? window.CASE_COLORS[0]);
 
         const incomingCall = ref(null);
         const outgoingCall = ref(null);
@@ -274,7 +277,7 @@ createApp({
 
         return {
             HOME_APPS, DOCK_APPS,
-            phoneVisible, locked, activeScreen, darkMode, wallpaperUrl,
+            phoneVisible, locked, activeScreen, darkMode, wallpaperUrl, activeCaseColor,
             incomingCall, outgoingCall, activeCall, callDuration,
             formatCallDuration, acceptCall, hangup,
             navigateTo, onDial,

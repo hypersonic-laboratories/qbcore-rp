@@ -31,7 +31,7 @@
         <div id="app">
             <div>
                 <!-- ══ Phone Shell ══ -->
-                <div class="phone-shell" v-show="phoneVisible">
+                <div class="phone-shell" v-show="phoneVisible" :style="{ background: activeCaseColor.main }">
                     <div class="phone-screen" :class="{ dark: darkMode }" :style="wallpaperUrl && !locked && activeScreen === 'home' ? { background: 'url(' + wallpaperUrl + ') center/cover no-repeat' } : {}">
                         <div class="phone-camera-ring"></div>
 
@@ -142,9 +142,9 @@
                         </div>
 
                     </div>
-                    <div class="phone-side-button phone-side-button-right-top"></div>
-                    <div class="phone-side-button phone-side-button-right-bottom"></div>
-                    <div class="phone-side-button phone-side-button-left"></div>
+                    <div class="phone-side-button phone-side-button-right-top" :style="{ background: 'linear-gradient(to right, ' + activeCaseColor.main + ', ' + activeCaseColor.light + ')' }"></div>
+                    <div class="phone-side-button phone-side-button-right-bottom" :style="{ background: 'linear-gradient(to right, ' + activeCaseColor.main + ', ' + activeCaseColor.light + ')' }"></div>
+                    <div class="phone-side-button phone-side-button-left" :style="{ background: 'linear-gradient(to left, ' + activeCaseColor.main + ', ' + activeCaseColor.light + ')' }"></div>
                 </div>
             </div>
         </div>

@@ -1,9 +1,9 @@
-﻿.calc-screen {
+.calc-screen {
     height: 100%;
     display: flex;
     flex-direction: column;
-    background: rgb(24 24 27);
-    color: white;
+    background: white;
+    color: rgb(24 24 27);
 }
 
 .calc-display-area {
@@ -24,7 +24,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: white;
+    color: rgb(24 24 27);
     background: transparent;
     border: none;
     padding: 0;
@@ -35,11 +35,11 @@
 }
 
 .calc-back-button:hover {
-    background: rgb(255 255 255 / 0.1);
+    background: rgb(0 0 0 / 0.07);
 }
 
 .calc-back-button:active {
-    background: rgb(255 255 255 / 0.15);
+    background: rgb(0 0 0 / 0.12);
 }
 
 .calc-display {
@@ -47,7 +47,7 @@
     font-size: 3rem;
     font-weight: 300;
     letter-spacing: -0.02em;
-    color: white;
+    color: rgb(24 24 27);
     word-break: break-all;
 }
 
@@ -64,8 +64,8 @@
 .calc-btn {
     border: 0;
     border-radius: 50%;
-    background: rgb(50 50 52);
-    color: white;
+    background: rgb(228 228 231);
+    color: rgb(24 24 27);
     font-size: 1.35rem;
     font-weight: 500;
     cursor: pointer;
@@ -86,29 +86,29 @@
 }
 
 .calc-btn-fn {
-    background: rgb(50 50 52);
-    color: white;
+    background: rgb(212 212 216);
+    color: rgb(24 24 27);
 }
 
 .calc-btn-fn:hover {
-    background: rgb(70 70 72);
+    background: rgb(200 200 204);
 }
 
 .calc-btn-fn:active {
-    background: rgb(80 80 82);
+    background: rgb(188 188 192);
 }
 
 .calc-btn-op {
-    background: rgb(50 50 52);
+    background: rgb(228 228 231);
     color: rgb(25 118 210);
 }
 
 .calc-btn-op:hover {
-    background: rgb(70 70 72);
+    background: rgb(212 212 216);
 }
 
 .calc-btn-op:active {
-    background: rgb(80 80 82);
+    background: rgb(200 200 204);
 }
 
 .calc-btn-op-active {
@@ -118,14 +118,75 @@
 }
 
 .calc-btn-num {
+    background: rgb(244 244 245);
+    color: rgb(24 24 27);
+}
+
+.calc-btn-num:hover {
+    background: rgb(228 228 231);
+}
+
+.calc-btn-num:active {
+    background: rgb(212 212 216);
+}
+
+/* ── Dark mode ── */
+.dark .calc-screen {
+    background: rgb(24 24 27);
+    color: white;
+}
+
+.dark .calc-back-button {
+    color: white;
+}
+
+.dark .calc-back-button:hover {
+    background: rgb(255 255 255 / 0.1);
+}
+
+.dark .calc-back-button:active {
+    background: rgb(255 255 255 / 0.15);
+}
+
+.dark .calc-display {
+    color: white;
+}
+
+.dark .calc-btn-fn {
     background: rgb(50 50 52);
     color: white;
 }
 
-.calc-btn-num:hover {
+.dark .calc-btn-fn:hover {
     background: rgb(70 70 72);
 }
 
-.calc-btn-num:active {
+.dark .calc-btn-fn:active {
+    background: rgb(80 80 82);
+}
+
+.dark .calc-btn-op {
+    background: rgb(50 50 52);
+    color: rgb(25 118 210);
+}
+
+.dark .calc-btn-op:hover {
+    background: rgb(70 70 72);
+}
+
+.dark .calc-btn-op:active {
+    background: rgb(80 80 82);
+}
+
+.dark .calc-btn-num {
+    background: rgb(50 50 52);
+    color: white;
+}
+
+.dark .calc-btn-num:hover {
+    background: rgb(70 70 72);
+}
+
+.dark .calc-btn-num:active {
     background: rgb(80 80 82);
 }
