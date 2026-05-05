@@ -1,5 +1,15 @@
 ---@diagnostic disable: undefined-global
 
+local function nonEmpty(s)
+    return type(s) == 'string' and s ~= '' and s or nil
+end
+
+local function textValue(value)
+    if value == nil then return nil end
+    local text = tostring(value)
+    return text ~= '' and text or nil
+end
+
 local pendingCalls = {}
 local activeCalls  = {}
 
@@ -22,8 +32,20 @@ local function getPlayer(source)
     return exports['qb-core']:GetPlayer(source)
 end
 
+local function getCharInfo(player)
+    if not player or not player.PlayerData then return {} end
+    return player.PlayerData.charinfo or {}
+end
+
+local function getCharField(player, key)
+    return textValue(getCharInfo(player)[key])
+end
+
 local function getFullName(player)
-    return player.PlayerData.charinfo.firstname .. ' ' .. player.PlayerData.charinfo.lastname
+    local firstName = getCharField(player, 'firstname') or ''
+    local lastName = getCharField(player, 'lastname') or ''
+    local charName = (firstName .. ' ' .. lastName):match('^%s*(.-)%s*$')
+    return nonEmpty(charName) or textValue(player and player.PlayerData and player.PlayerData.name) or 'HELIX Player'
 end
 
 local function makeHandle(fullName)
@@ -53,24 +75,32 @@ end
 
 local function getCitizenIdFromPlayer(player)
     if not player or not player.PlayerData then return nil end
-    return player.PlayerData.citizenid
-        or (player.PlayerData.charinfo and player.PlayerData.charinfo.citizenid)
-        or (player.PlayerData.charinfo and player.PlayerData.charinfo.phone)
+    return textValue(player.PlayerData.citizenid)
+        or getCharField(player, 'citizenid')
+        or getCharField(player, 'phone')
 end
 
 local function getFirstName(player)
-    return player.PlayerData.charinfo.firstname or ''
+    return getCharField(player, 'firstname') or ''
 end
 
 local function getLastName(player)
-    return player.PlayerData.charinfo.lastname or ''
+    return getCharField(player, 'lastname') or ''
+end
+
+local function getPhoneNumber(player, fallback)
+    return getCharField(player, 'phone') or fallback
+end
+
+local function getAccountNumber(player)
+    return getCharField(player, 'account') or ''
 end
 
 local function syncPlayerAccount(player)
     local citizenid = getCitizenIdFromPlayer(player)
     if not citizenid then return nil end
 
-    local phone = player.PlayerData.charinfo.phone or citizenid
+    local phone = getPhoneNumber(player, citizenid)
     local firstName = getFirstName(player)
     local lastName = getLastName(player)
     local name = getFullName(player)
@@ -567,17 +597,18 @@ end)
 RegisterCallback('qb-phone:loadCoreData', function(source)
     local player = getPlayer(source)
     if not player then return nil end
-    local phone = player.PlayerData.charinfo.phone
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return nil end
+    local phone = getPhoneNumber(player, citizenid)
     local contactList = loadContacts(citizenid, phone)
-    local firstName = player.PlayerData.charinfo.firstname or ''
-    local lastName  = player.PlayerData.charinfo.lastname  or ''
     return {
         contacts      = JSON.stringify(contactList),
         conversations = JSON.stringify(loadConversations(citizenid, phone, contactList)),
         callHistory   = JSON.stringify(loadCallHistory(citizenid, phone)),
-        playerName    = (firstName .. ' ' .. lastName):match('^%s*(.-)%s*$'),
+        playerName    = getFullName(player),
+        phoneNumber   = tostring(phone),
+        citizenid     = tostring(citizenid),
+        accountNumber = tostring(getAccountNumber(player)),
     }
 end)
 
@@ -612,6 +643,23 @@ RegisterCallback('qb-phone:loadPhotos', function(source)
     if not citizenid then return nil end
     return {
         photos = JSON.stringify(loadPhotos(citizenid, phone)),
+    }
+end)
+
+RegisterCallback('qb-phone:loadProfile', function(source)
+    local player = getPlayer(source)
+    if not player then return nil end
+    local citizenid = syncPlayerAccount(player)
+    if not citizenid then return nil end
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT name, phone FROM phone_accounts WHERE citizenid = ? LIMIT 1', { citizenid }) or {}
+    local account = rows[1]
+    local name  = nonEmpty(account and (account.name  or account.Name))  or getFullName(player)
+    local phone = nonEmpty(account and (account.phone or account.Phone)) or getPhoneNumber(player, citizenid)
+    return {
+        name      = tostring(name),
+        phone     = tostring(phone),
+        citizenid = tostring(citizenid),
+        account   = tostring(getAccountNumber(player)),
     }
 end)
 

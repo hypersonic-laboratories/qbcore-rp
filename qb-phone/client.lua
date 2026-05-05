@@ -24,6 +24,41 @@ local offsets = {
 
 local function getCharacter() return GetPlayerPawn() end
 
+local function nonEmpty(value)
+    if value == nil then return nil end
+    local text = tostring(value)
+    return text ~= '' and text or nil
+end
+
+local function getLocalProfile()
+    local ok, data = pcall(function()
+        return exports['qb-core']:GetPlayerData()
+    end)
+    if not ok or type(data) ~= 'table' then return nil end
+
+    local charinfo = data.charinfo or {}
+    local firstName = nonEmpty(charinfo.firstname) or ''
+    local lastName = nonEmpty(charinfo.lastname) or ''
+    local name = nonEmpty((firstName .. ' ' .. lastName):match('^%s*(.-)%s*$')) or nonEmpty(data.name)
+
+    return {
+        name = name,
+        phone = nonEmpty(charinfo.phone),
+        citizenid = nonEmpty(data.citizenid) or nonEmpty(charinfo.citizenid),
+        account = nonEmpty(charinfo.account),
+    }
+end
+
+local function hasProfileData(profile)
+    return profile and (profile.name or profile.phone or profile.citizenid or profile.account)
+end
+
+local function sendProfile(profile)
+    if hasProfileData(profile) then
+        my_webui:SendEvent('profileLoaded', profile)
+    end
+end
+
 local function applyCameraTransform(mode)
     if not sceneCap or not sceneCap.Object then return end
     local cfg = offsets[mode]
@@ -125,12 +160,18 @@ local function openPhone()
     my_webui:BringToFront()
     my_webui:SetInputMode(1)
     my_webui:SendEvent('open')
+    sendProfile(getLocalProfile())
     TriggerCallback('qb-phone:loadCoreData', function(data)
         if not data then return end
         my_webui:SendEvent('contactsLoaded', data.contacts)
         my_webui:SendEvent('conversationsLoaded', data.conversations)
         my_webui:SendEvent('callHistoryLoaded', data.callHistory)
-        my_webui:SendEvent('profileLoaded', data.playerName)
+        sendProfile({
+            name = data.playerName,
+            phone = data.phoneNumber,
+            citizenid = data.citizenid,
+            account = data.accountNumber,
+        })
         TriggerServerEvent('qb-phone:server:loadCalendar')
     end)
 end
@@ -277,6 +318,43 @@ end)
 
 RegisterClientEvent('qb-phone:client:emailReceived', function(emailJson)
     my_webui:SendEvent('emailReceived', emailJson)
+end)
+
+my_webui:RegisterEventHandler('loadProfile', function(_, cb)
+    if type(_) == 'function' and cb == nil then cb = _ end
+
+    local responded = false
+    local fallback = getLocalProfile()
+    if hasProfileData(fallback) then
+        sendProfile(fallback)
+        if type(cb) == 'function' then
+            cb(fallback)
+            responded = true
+        end
+    end
+
+    TriggerCallback('qb-phone:loadProfile', function(data)
+        if not data then return end
+        local profile = {
+            name = data.name,
+            phone = data.phone,
+            citizenid = data.citizenid,
+            account = data.account,
+        }
+        sendProfile(profile)
+        if type(cb) == 'function' and not responded then cb(profile) end
+    end)
+end)
+
+my_webui:RegisterEventHandler('copyToClipboard', function(data)
+    local text = data
+    if type(data) == 'table' then
+        text = data.text or data.value or data.phone
+    end
+
+    text = nonEmpty(text)
+    if not text then return end
+    CopyToClipboard(text)
 end)
 
 my_webui:RegisterEventHandler('loadCalendar', function()

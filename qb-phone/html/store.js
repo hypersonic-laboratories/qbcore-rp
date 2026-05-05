@@ -4,6 +4,9 @@
     window.PhoneStore = {
         darkMode: ref(false),
         playerName: ref(""),
+        playerPhone: ref(""),
+        playerCitizenId: ref(""),
+        playerAccount: ref(""),
 
         CONTACTS: reactive([]),
         CONVERSATIONS: reactive([]),

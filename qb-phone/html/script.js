@@ -164,7 +164,13 @@ createApp({
                 return;
             }
             if (name === "profileLoaded") {
-                if (args[0]) window.PhoneStore.playerName.value = args[0];
+                const profile = args[0] && typeof args[0] === "object"
+                    ? args[0]
+                    : { name: args[0], phone: args[1], citizenid: args[2], account: args[3] };
+                window.PhoneStore.playerName.value = profile.name || "";
+                window.PhoneStore.playerPhone.value = profile.phone || "";
+                window.PhoneStore.playerCitizenId.value = profile.citizenid || profile.helixId || "";
+                window.PhoneStore.playerAccount.value = profile.account || profile.accountNumber || "";
                 return;
             }
             if (name === "contactsLoaded") {

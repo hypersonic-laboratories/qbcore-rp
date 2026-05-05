@@ -17,10 +17,12 @@ const SettingsApp = {
                     <div class="settings-profile-row">
                         <div class="settings-profile-avatar">{{ profileInitial }}</div>
                         <div class="settings-profile-copy">
-                            <div class="settings-profile-name">{{ profileName }}</div>
-                            <div class="settings-profile-sub">HELIX ID &amp; Account</div>
+                            <div class="settings-profile-name">{{ profileDisplayName }}</div>
+                            <div class="settings-profile-sub">{{ profilePhoneDisplay }}</div>
                         </div>
-                        <i data-lucide="chevron-right" class="settings-chevron"></i>
+                        <button type="button" class="settings-profile-copy-button" :disabled="!playerPhone" aria-label="Copy phone number" @click="copyPhoneNumber">
+                            <i data-lucide="copy" class="settings-profile-copy-icon"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -78,13 +80,6 @@ const SettingsApp = {
                                 <span class="settings-toggle-thumb"></span>
                             </button>
                         </div>
-                        <div class="settings-row settings-row-border">
-                            <div class="settings-row-icon-wrap" style="background: rgb(239 68 68)">
-                                <i data-lucide="shield" class="settings-row-icon-svg"></i>
-                            </div>
-                            <span class="settings-row-label">App Permissions</span>
-                            <i data-lucide="chevron-right" class="settings-chevron"></i>
-                        </div>
                     </div>
                 </div>
 
@@ -113,10 +108,38 @@ const SettingsApp = {
     emits: ["navigate"],
 
     setup(props, { emit }) {
-        const { ref, reactive, computed } = Vue;
+        const { ref, reactive, computed, onMounted } = Vue;
+        const store = window.PhoneStore;
 
-        const profileName = window.PhoneStore.playerName;
-        const profileInitial = computed(() => profileName.value ? profileName.value.charAt(0).toUpperCase() : "?");
+        const profileDisplayName = computed(() => store.playerName.value || "Loading profile");
+        const profileInitial = computed(() => store.playerName.value ? store.playerName.value.charAt(0).toUpperCase() : "H");
+        const playerPhone = computed(() => store.playerPhone.value || "");
+        const profilePhoneDisplay = computed(() => playerPhone.value || "Loading phone number");
+
+        function applyProfile(profile) {
+            if (!profile || typeof profile !== "object") return;
+            store.playerName.value = profile.name || profile.playerName || "";
+            store.playerPhone.value = profile.phone || profile.phoneNumber || "";
+            store.playerCitizenId.value = profile.citizenid || profile.helixId || "";
+            store.playerAccount.value = profile.account || profile.accountNumber || "";
+        }
+
+        function requestProfile() {
+            if (typeof hEvent !== "function") return;
+            hEvent("loadProfile", {}, applyProfile);
+        }
+
+        function copyPhoneNumber() {
+            if (!playerPhone.value || typeof hEvent !== "function") return;
+            hEvent("copyToClipboard", { text: playerPhone.value });
+        }
+
+        onMounted(() => {
+            requestProfile();
+            setTimeout(() => {
+                if (!store.playerName.value) requestProfile();
+            }, 750);
+        });
 
         const notifications = reactive([
             { key: "messages", label: "Messages", icon: "message-circle", color: "rgb(59 130 246)", on: true },
@@ -133,6 +156,6 @@ const SettingsApp = {
             emit("navigate", "home");
         }
 
-        return { profileName, profileInitial, notifications, darkMode, dnd, locationOn, onBack };
+        return { profileDisplayName, profilePhoneDisplay, playerPhone, profileInitial, notifications, darkMode, dnd, locationOn, copyPhoneNumber, onBack };
     },
 };
