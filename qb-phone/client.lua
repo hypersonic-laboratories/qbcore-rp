@@ -174,6 +174,8 @@ local function openPhone()
         })
         TriggerServerEvent('qb-phone:server:loadCalendar')
     end)
+
+    TriggerServerEvent('qb-phone:server:requestPhotos')
 end
 
 local function closePhone()
@@ -374,10 +376,11 @@ my_webui:RegisterEventHandler('deleteCalendarEvent', function(data)
 end)
 
 my_webui:RegisterEventHandler('loadPhotos', function()
-    TriggerCallback('qb-phone:loadPhotos', function(data)
-        if not data then return end
-        my_webui:SendEvent('photosLoaded', data.photos)
-    end)
+    TriggerServerEvent('qb-phone:server:requestPhotos')
+end)
+
+RegisterClientEvent('qb-phone:client:photosLoaded', function(photosJson)
+    my_webui:SendEvent('photosLoaded', photosJson or '[]')
 end)
 
 my_webui:RegisterEventHandler('deletePhoto', function(data)

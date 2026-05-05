@@ -324,6 +324,15 @@ local function loadPhotos(citizenid, phone)
     return result
 end
 
+local function buildPhotoPayloadForPlayer(player)
+    if not player then return '[]' end
+
+    local citizenid = getCitizenIdFromPlayer(player)
+    if not citizenid then return '[]' end
+    local phone = getPhoneNumber(player, citizenid)
+    return JSON.stringify(loadPhotos(citizenid, phone))
+end
+
 local function buildFeedForPhone(phone, viewerCitizenId)
     local reactionRows = exports['qb-core']:DatabaseAction('Select', 'SELECT tweet_id, citizenid, type FROM phone_tweet_reactions', {}) or {}
     local reactions = {}
@@ -638,12 +647,15 @@ end)
 RegisterCallback('qb-phone:loadPhotos', function(source)
     local player = getPlayer(source)
     if not player then return nil end
-    local phone = player.PlayerData.charinfo.phone
-    local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return nil end
     return {
-        photos = JSON.stringify(loadPhotos(citizenid, phone)),
+        photos = buildPhotoPayloadForPlayer(player),
     }
+end)
+
+RegisterServerEvent('qb-phone:server:requestPhotos', function(source)
+    local player = getPlayer(source)
+    if not player then return end
+    TriggerClientEvent(source, 'qb-phone:client:photosLoaded', buildPhotoPayloadForPlayer(player))
 end)
 
 RegisterCallback('qb-phone:loadProfile', function(source)
