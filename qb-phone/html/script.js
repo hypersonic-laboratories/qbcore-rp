@@ -39,6 +39,8 @@ createApp({
         const activeScreen = ref("home");
         const darkMode     = window.PhoneStore.darkMode;
         watch(darkMode, (enabled) => window.PhoneStore.saveDarkMode(enabled));
+        const wallpaperUrl = window.PhoneStore.wallpaperUrl;
+        watch(wallpaperUrl, (url) => window.PhoneStore.saveWallpaper(url));
 
         const incomingCall = ref(null);
         const outgoingCall = ref(null);
@@ -272,7 +274,7 @@ createApp({
 
         return {
             HOME_APPS, DOCK_APPS,
-            phoneVisible, locked, activeScreen, darkMode,
+            phoneVisible, locked, activeScreen, darkMode, wallpaperUrl,
             incomingCall, outgoingCall, activeCall, callDuration,
             formatCallDuration, acceptCall, hangup,
             navigateTo, onDial,

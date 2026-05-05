@@ -36,10 +36,12 @@
                         <div class="phone-camera-ring"></div>
 
                         <!-- Wallpaper (home only) -->
-                        <div v-if="!locked && activeScreen === 'home'" class="phone-wallpaper">
-                            <div class="wallpaper-glow wallpaper-glow-top"></div>
-                            <div class="wallpaper-glow wallpaper-glow-left"></div>
-                            <div class="wallpaper-glow wallpaper-glow-bottom"></div>
+                        <div v-if="!locked && activeScreen === 'home'" class="phone-wallpaper" :style="wallpaperUrl ? { backgroundImage: 'url(' + wallpaperUrl + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}">
+                            <template v-if="!wallpaperUrl">
+                                <div class="wallpaper-glow wallpaper-glow-top"></div>
+                                <div class="wallpaper-glow wallpaper-glow-left"></div>
+                                <div class="wallpaper-glow wallpaper-glow-bottom"></div>
+                            </template>
                         </div>
 
                         <!-- ── Lock Screen ── -->

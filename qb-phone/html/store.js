@@ -1,6 +1,7 @@
 (function () {
     const { reactive, ref } = Vue;
     const DARK_MODE_STORAGE_KEY = "helix-phone:dark-mode";
+    const WALLPAPER_STORAGE_KEY = "helix-phone:wallpaper";
 
     function loadStoredDarkMode() {
         try {
@@ -18,9 +19,29 @@
         }
     }
 
+    function loadStoredWallpaper() {
+        try {
+            return window.localStorage.getItem(WALLPAPER_STORAGE_KEY) || "";
+        } catch (_) {
+            return "";
+        }
+    }
+
+    function saveStoredWallpaper(url) {
+        try {
+            if (url) {
+                window.localStorage.setItem(WALLPAPER_STORAGE_KEY, url);
+            } else {
+                window.localStorage.removeItem(WALLPAPER_STORAGE_KEY);
+            }
+        } catch (_) {}
+    }
+
     window.PhoneStore = {
         darkMode: ref(loadStoredDarkMode()),
         saveDarkMode: saveStoredDarkMode,
+        wallpaperUrl: ref(loadStoredWallpaper()),
+        saveWallpaper: saveStoredWallpaper,
         playerName: ref(""),
         playerPhone: ref(""),
         playerCitizenId: ref(""),
