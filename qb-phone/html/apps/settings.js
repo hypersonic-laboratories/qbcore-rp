@@ -67,22 +67,6 @@ const SettingsApp = {
                     </div>
                 </div>
 
-                <!-- Privacy -->
-                <div class="settings-section">
-                    <div class="settings-section-label">Privacy</div>
-                    <div class="settings-group">
-                        <div class="settings-row">
-                            <div class="settings-row-icon-wrap" style="background: rgb(16 185 129)">
-                                <i data-lucide="map-pin" class="settings-row-icon-svg"></i>
-                            </div>
-                            <span class="settings-row-label">Location Services</span>
-                            <button type="button" :class="['settings-toggle', locationOn ? 'settings-toggle-on' : '']" @click="locationOn = !locationOn" aria-label="Toggle Location Services">
-                                <span class="settings-toggle-thumb"></span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- About -->
                 <div class="settings-section">
                     <div class="settings-section-label">About</div>
@@ -150,12 +134,11 @@ const SettingsApp = {
 
         const darkMode = window.PhoneStore.darkMode;
         const dnd = ref(false);
-        const locationOn = ref(true);
 
         function onBack() {
             emit("navigate", "home");
         }
 
-        return { profileDisplayName, profilePhoneDisplay, playerPhone, profileInitial, notifications, darkMode, dnd, locationOn, copyPhoneNumber, onBack };
+        return { profileDisplayName, profilePhoneDisplay, playerPhone, profileInitial, notifications, darkMode, dnd, copyPhoneNumber, onBack };
     },
 };

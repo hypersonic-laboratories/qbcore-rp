@@ -32,6 +32,7 @@ input {
     background: rgb(24 24 27);
     box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.35);
     padding: 10px;
+    overflow: visible;
 }
 
 .phone-screen {
@@ -95,27 +96,30 @@ input {
 
 .phone-side-button {
     position: absolute;
-    width: 4px;
+    width: 5px;
     border-radius: 9999px;
-    background: rgb(63 63 70);
+    background: linear-gradient(to right, rgb(24 24 27), rgb(63 63 70));
+    box-shadow: inset 1px 0 0 rgb(255 255 255 / 0.08);
 }
 
 .phone-side-button-right-top {
-    right: -3px;
+    right: -5px;
     top: 9rem;
     height: 4rem;
 }
 
 .phone-side-button-right-bottom {
-    right: -3px;
+    right: -5px;
     top: 14rem;
     height: 6rem;
 }
 
 .phone-side-button-left {
-    left: -3px;
+    left: -5px;
     top: 11rem;
     height: 5rem;
+    background: linear-gradient(to left, rgb(24 24 27), rgb(63 63 70));
+    box-shadow: inset -1px 0 0 rgb(255 255 255 / 0.08);
 }
 
 .lock-screen {

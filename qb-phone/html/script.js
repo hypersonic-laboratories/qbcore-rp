@@ -2,7 +2,6 @@ const { createApp } = Vue;
 
 const HOME_APPS = [
     { label: "Calendar",   bgClass: "app-icon-calendar",   iconClass: "app-icon-calendar-symbol",   icon: "calendar-days" },
-    { label: "Camera",     bgClass: "app-icon-camera",     iconClass: "app-icon-camera-symbol",     icon: "camera"        },
     // { label: "Maps",       bgClass: "app-icon-maps",       iconClass: "app-icon-maps-symbol",       icon: "map-pin"       },
     { label: "Settings",   bgClass: "app-icon-settings",   iconClass: "app-icon-settings-symbol",   icon: "settings"      },
     { label: "Clock",      bgClass: "app-icon-clock",      iconClass: "app-icon-clock-symbol",      icon: "clock-3"       },
@@ -14,7 +13,7 @@ const HOME_APPS = [
 const DOCK_APPS = [
     { label: "Phone",    bgClass: "dock-icon-phone",    iconClass: "dock-icon-phone-symbol",    icon: "phone"         },
     { label: "Messages", bgClass: "dock-icon-messages", iconClass: "dock-icon-messages-symbol", icon: "message-circle"},
-    { label: "Browser",  bgClass: "dock-icon-browser",  iconClass: "dock-icon-browser-symbol",  icon: "compass"       },
+    { label: "Camera",   bgClass: "dock-icon-camera",   iconClass: "dock-icon-camera-symbol",   icon: "camera"        },
     { label: "H",        bgClass: "app-icon-gene",      iconClass: "app-icon-gene-symbol",      icon: "dna"           },
 ];
 
@@ -33,12 +32,13 @@ createApp({
     },
 
     setup() {
-        const { ref } = Vue;
+        const { ref, watch } = Vue;
 
         const phoneVisible = ref(false);
         const locked       = ref(true);
         const activeScreen = ref("home");
         const darkMode     = window.PhoneStore.darkMode;
+        watch(darkMode, (enabled) => window.PhoneStore.saveDarkMode(enabled));
 
         const incomingCall = ref(null);
         const outgoingCall = ref(null);
