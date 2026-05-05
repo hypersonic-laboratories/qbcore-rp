@@ -411,6 +411,13 @@ local function handlePhotoUploaded(url)
     my_webui:SendEvent((url and url ~= '') and 'photoTaken' or 'photoFailed', url)
 end
 
+my_webui:RegisterEventHandler('gallerySavePhoto', function(data)
+    local url = type(data) == 'table' and (data.url or data.image) or data
+    if url and url ~= '' then
+        TriggerServerEvent('qb-phone:server:savePhoto', url)
+    end
+end)
+
 my_webui:RegisterEventHandler('photoUploaded', function(data)
     local url = data
     if type(data) == 'table' then

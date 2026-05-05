@@ -165,7 +165,13 @@ const PhotosApp = {
         function addFromUrl() {
             const url = urlDraft.value.trim();
             if (!url) return;
-            hEvent("photoUploaded", { url });
+            hEvent("gallerySavePhoto", { url });
+            PHOTOS.unshift({
+                id:       Date.now(),
+                url,
+                gradient: `url(${url}) center/cover no-repeat`,
+                takenAt:  "Just now",
+            });
             closeUrlInput();
         }
 

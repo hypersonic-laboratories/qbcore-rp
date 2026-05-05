@@ -32,16 +32,14 @@
             <div>
                 <!-- ══ Phone Shell ══ -->
                 <div class="phone-shell" v-show="phoneVisible">
-                    <div class="phone-screen" :class="{ dark: darkMode }">
+                    <div class="phone-screen" :class="{ dark: darkMode }" :style="wallpaperUrl && !locked && activeScreen === 'home' ? { background: 'url(' + wallpaperUrl + ') center/cover no-repeat' } : {}">
                         <div class="phone-camera-ring"></div>
 
-                        <!-- Wallpaper (home only) -->
-                        <div v-if="!locked && activeScreen === 'home'" class="phone-wallpaper" :style="wallpaperUrl ? { backgroundImage: 'url(' + wallpaperUrl + ')', backgroundSize: 'cover', backgroundPosition: 'center' } : {}">
-                            <template v-if="!wallpaperUrl">
-                                <div class="wallpaper-glow wallpaper-glow-top"></div>
-                                <div class="wallpaper-glow wallpaper-glow-left"></div>
-                                <div class="wallpaper-glow wallpaper-glow-bottom"></div>
-                            </template>
+                        <!-- Wallpaper glows (home only, no custom wallpaper) -->
+                        <div v-if="!locked && activeScreen === 'home' && !wallpaperUrl" class="phone-wallpaper">
+                            <div class="wallpaper-glow wallpaper-glow-top"></div>
+                            <div class="wallpaper-glow wallpaper-glow-left"></div>
+                            <div class="wallpaper-glow wallpaper-glow-bottom"></div>
                         </div>
 
                         <!-- ── Lock Screen ── -->
