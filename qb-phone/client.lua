@@ -91,13 +91,16 @@ local function buildCaptureAndUI(mode)
     sceneCap.Object:K2_AttachToComponent(mesh, HAND_SOCKET, 0, 0, 0, true)
     applyCameraTransform(mode)
 
+    local vp = UE.UWidgetLayoutLibrary.GetViewportSize(character)
+    local sx, sy = vp.X / 2560, vp.Y / 1440
+
     camRoot = Widget(NativeWidget.CanvasPanel)
     camRoot:AddToViewport()
     camFeed = Widget(NativeWidget.Image)
     camRoot:AddChild(camFeed)
     camFeed:SetCanvasLayout(
-        Vector2D(1920 - 400 - 50, 1080 - 225 - 50),
-        Vector2D(400, 225)
+        Vector2D(math.floor(1762 * sx), math.floor(706 * sy)),
+        Vector2D(math.floor(255 * sx), math.floor(288 * sy))
     )
     camFeed.innerWidget:SetBrushResourceObject(sceneCap.RenderTarget)
 end
