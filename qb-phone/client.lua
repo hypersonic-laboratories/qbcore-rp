@@ -504,3 +504,13 @@ Input.BindKey(Config.OpenKey, function()
     if HPlayer:GetInputMode() == 1 and not phoneOpen then return end
     if phoneOpen then closePhone() else openPhone() end
 end, 'Pressed')
+
+my_webui:RegisterEventHandler('rightMouseDown', function()
+    if not phoneOpen then return end
+    my_webui:SetInputMode(0)
+end)
+
+Input.BindKey('RightMouseButton', function()
+    if not phoneOpen then return end
+    my_webui:SetInputMode(1)
+end, 'Released')

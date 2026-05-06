@@ -291,6 +291,13 @@ createApp({
     },
 }).mount("#app");
 
+// ── Right-click look mode ─────────────────────────────────────────────────────
+
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+document.addEventListener('mousedown', (e) => {
+    if (e.button === 2) hEvent('rightMouseDown', {});
+});
+
 // ── Lucide icon refresh ───────────────────────────────────────────────────────
 
 (function () {
