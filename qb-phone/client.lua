@@ -132,16 +132,10 @@ local function setCameraMode(mode)
 
     if cameraMode == mode then return end
 
-    local ok
     if mode == 'front' then
-        ok = UE.UHRoleplaySystemGlobals.OpenPhoneFrontCamera(character)
+        UE.UHRoleplaySystemGlobals.OpenPhoneFrontCamera(character)
     elseif mode == 'back' then
-        ok = UE.UHRoleplaySystemGlobals.OpenPhoneBackCamera(character)
-    end
-
-    if not ok then
-        print('[PHONE] Failed to open ' .. mode .. ' camera')
-        return
+        UE.UHRoleplaySystemGlobals.OpenPhoneBackCamera(character)
     end
 
     cameraMode = mode
