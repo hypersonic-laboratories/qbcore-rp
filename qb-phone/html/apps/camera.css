@@ -27,16 +27,12 @@
 
 /* ── Top bar ── */
 .camera-top-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent);
+    background: rgb(10, 10, 12);
+    flex-shrink: 0;
 }
 
 .camera-top-btn {
@@ -82,26 +78,10 @@
     border: 0.5px solid rgba(255, 255, 255, 0.18);
 }
 
-.camera-facing-badge {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 11px;
-    font-family: "Tomorrow", sans-serif;
-    color: rgba(255, 255, 255, 0.6);
-    background: rgba(0, 0, 0, 0.35);
-    padding: 3px 10px;
-    border-radius: 20px;
-    letter-spacing: 0.04em;
-    pointer-events: none;
-}
 
 /* ── Bottom panel ── */
 .camera-bottom {
-    background: rgba(10, 10, 12, 0.88);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgb(10, 10, 12);
     padding: 14px 20px 20px;
     display: flex;
     flex-direction: column;
@@ -258,63 +238,3 @@
     height: 22px;
 }
 
-/* ── Filter pills ── */
-.camera-filter-row {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-.camera-filter-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-}
-
-.camera-filter-dot {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 2.5px solid transparent;
-    transition:
-        border-color 0.15s,
-        transform 0.15s;
-}
-
-.camera-filter-btn.active .camera-filter-dot {
-    border-color: #fff;
-    transform: scale(1.08);
-}
-
-.camera-filter-dot-natural {
-    background: linear-gradient(135deg, #c9b99a, #7a9e7e);
-}
-
-.camera-filter-dot-vivid {
-    background: linear-gradient(135deg, #f472b6, #38bdf8);
-}
-
-.camera-filter-dot-cinema {
-    background: linear-gradient(135deg, #c9a227, #1e4060);
-}
-
-.camera-filter-dot-film {
-    background: linear-gradient(135deg, #d4956a, #7c6248);
-}
-
-.camera-filter-label {
-    font-size: 10px;
-    font-family: "Tomorrow", sans-serif;
-    letter-spacing: 0.03em;
-    color: rgba(255, 255, 255, 0.4);
-    transition: color 0.15s;
-}
-
-.camera-filter-btn.active .camera-filter-label {
-    color: #fff;
-}

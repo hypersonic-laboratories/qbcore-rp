@@ -22,6 +22,8 @@ local offsets = {
     },
 }
 
+local zoomFov = { [0.6] = 90, [1] = 60, [2] = 30, [5] = 12 }
+
 local function getCharacter() return GetPlayerPawn() end
 
 local function nonEmpty(value)
@@ -91,6 +93,9 @@ local function buildCaptureAndUI(mode)
     sceneCap.Object:K2_AttachToComponent(mesh, HAND_SOCKET, 0, 0, 0, true)
     applyCameraTransform(mode)
 
+    local capComp = sceneCap.Object:GetComponentByClass(UE.USceneCaptureComponent2D.StaticClass())
+    if capComp then capComp.FOVAngle = 60 end
+
     local vp = UE.UWidgetLayoutLibrary.GetViewportSize(character)
     local sx, sy = vp.X / 2560, vp.Y / 1440
 
@@ -99,8 +104,8 @@ local function buildCaptureAndUI(mode)
     camFeed = Widget(NativeWidget.Image)
     camRoot:AddChild(camFeed)
     camFeed:SetCanvasLayout(
-        Vector2D(math.floor(1762 * sx), math.floor(706 * sy)),
-        Vector2D(math.floor(255 * sx), math.floor(288 * sy))
+        Vector2D(math.floor(1761 * sx), math.floor(739 * sy)),
+        Vector2D(math.floor(254 * sx), math.floor(402 * sy))
     )
     camFeed.innerWidget:SetBrushResourceObject(sceneCap.RenderTarget)
 end
@@ -394,16 +399,69 @@ my_webui:RegisterEventHandler('cameraFlipped', function(data)
     setCameraMode(facing == 'front' and 'front' or 'back')
 end)
 
+my_webui:RegisterEventHandler('cameraZoom', function(data)
+    if not sceneCap or not sceneCap.Object then return end
+    local fov = zoomFov[data and data.zoom] or 60
+    local capComp = sceneCap.Object:GetComponentByClass(UE.USceneCaptureComponent2D.StaticClass())
+    if capComp then capComp.FOVAngle = fov end
+end)
+
 my_webui:RegisterEventHandler('cameraClosed', function()
     if cameraMode then closeCamera() end
 end)
 
+local PHOTO_WEBHOOK = ''
+
 my_webui:RegisterEventHandler('takePhoto', function(_)
-    -- TODO: capture screenshot and upload
-    -- JS expects: hideForCapture → showAfterCapture + photoTaken(url) or photoFailed
+    if not sceneCap or not sceneCap.RenderTarget then
+        my_webui:SendEvent('showAfterCapture')
+        my_webui:SendEvent('photoFailed')
+        return
+    end
+
+    local character = getCharacter()
+    if not character then
+        my_webui:SendEvent('showAfterCapture')
+        my_webui:SendEvent('photoFailed')
+        return
+    end
+
+    my_webui:SendEvent('hideForCapture')
+
+    local saveDir = UE.UKismetSystemLibrary.GetProjectSavedDirectory() .. 'PhonePhotos/'
+    local fileName = 'photo_' .. tostring(os.time()) .. '.png'
+    UE.UKismetRenderingLibrary.ExportRenderTarget(character, sceneCap.RenderTarget, saveDir, fileName)
+
+    local filePath = (saveDir .. fileName):gsub('\\', '/')
+    local responsePath = filePath .. '.json'
+    os.execute('start "" /b curl -s -F "file=@' .. filePath .. '" "' .. PHOTO_WEBHOOK .. '" -o "' .. responsePath .. '"')
+
+    my_webui:SendEvent('showAfterCapture')
+
+    local attempts = 0
+    local function pollResponse()
+        attempts = attempts + 1
+        local f = io.open(responsePath, 'r')
+        if f then
+            local response = f:read('*all')
+            f:close()
+            os.remove(responsePath)
+            local ok, parsed = pcall(JSON.parse, response or '')
+            local url = ok and parsed and parsed.attachments and parsed.attachments[1] and parsed.attachments[1].url
+            if url and url ~= '' then
+                TriggerServerEvent('qb-phone:server:savePhoto', url)
+            end
+            my_webui:SendEvent(url and url ~= '' and 'photoTaken' or 'photoFailed', url)
+        elseif attempts < 20 then
+            Timer.SetTimeout(pollResponse, 500)
+        else
+            my_webui:SendEvent('photoFailed')
+        end
+    end
+    Timer.SetTimeout(pollResponse, 500)
 end)
 
-local function handlePhotoUploaded(url)
+function handlePhotoUploaded(url)
     if url and url ~= '' then
         TriggerServerEvent('qb-phone:server:savePhoto', url)
     end

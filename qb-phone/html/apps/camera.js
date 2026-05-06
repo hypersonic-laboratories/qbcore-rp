@@ -5,20 +5,6 @@ const CAMERA_ZOOM_LEVELS = [
     { label: "5×", value: 5 },
 ];
 
-const CAMERA_FILTERS = [
-    { id: "natural", label: "Natural", css: "none" },
-    { id: "vivid", label: "Vivid", css: "saturate(1.5) contrast(1.1)" },
-    {
-        id: "cinema",
-        label: "Cinema",
-        css: "sepia(0.3) contrast(1.15) brightness(0.92)",
-    },
-    {
-        id: "film",
-        label: "Film",
-        css: "sepia(0.45) saturate(0.85) brightness(1.06)",
-    },
-];
 
 const CameraApp = {
     template: `
@@ -38,11 +24,10 @@ const CameraApp = {
             </div>
 
             <!-- viewfinder -->
-            <div class="camera-viewfinder" :style="{ filter: activeFilterCss }">
+            <div class="camera-viewfinder">
                 <div class="camera-grid">
                     <div class="camera-grid-cell" v-for="n in 9" :key="n"></div>
                 </div>
-                <div class="camera-facing-badge">{{ isFront ? 'Front' : 'Rear' }}</div>
             </div>
 
             <!-- bottom panel -->
@@ -75,19 +60,6 @@ const CameraApp = {
                     </button>
                 </div>
 
-                <!-- filter pills -->
-                <div class="camera-filter-row">
-                    <button
-                        v-for="f in CAMERA_FILTERS"
-                        :key="f.id"
-                        type="button"
-                        :class="['camera-filter-btn', activeFilter === f.id ? 'active' : '']"
-                        @click="activeFilter = f.id"
-                    >
-                        <div :class="['camera-filter-dot', 'camera-filter-dot-' + f.id]"></div>
-                        <span class="camera-filter-label">{{ f.label }}</span>
-                    </button>
-                </div>
 
             </div>
         </div>
@@ -100,7 +72,6 @@ const CameraApp = {
         const { PHOTOS } = window.PhoneStore;
 
         const activeZoom = ref(1);
-        const activeFilter = ref("natural");
         const isFront = ref(false);
         const isFlashing = ref(false);
         const isCapturing = ref(false);
@@ -112,8 +83,6 @@ const CameraApp = {
             if (flashMode.value === "off") return "zap-off";
             return "zap";
         });
-
-        const activeFilterCss = computed(() => CAMERA_FILTERS.find((f) => f.id === activeFilter.value)?.css ?? "none");
 
         function cycleFlash() {
             const order = ["auto", "on", "off"];
@@ -134,6 +103,10 @@ const CameraApp = {
         // Notify Lua when the user flips between front/rear
         watch(isFront, (front) => {
             hEvent("cameraFlipped", { facing: front ? "front" : "rear" });
+        });
+
+        watch(activeZoom, (zoom) => {
+            hEvent("cameraZoom", { zoom });
         });
 
         function onMessage(e) {
@@ -163,16 +136,13 @@ const CameraApp = {
 
         return {
             CAMERA_ZOOM_LEVELS,
-            CAMERA_FILTERS,
             activeZoom,
-            activeFilter,
             isFront,
             isFlashing,
             isCapturing,
             flashMode,
             lastPhoto,
             flashIcon,
-            activeFilterCss,
             cycleFlash,
             takePhoto,
             emit,

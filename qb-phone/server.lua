@@ -1,5 +1,7 @@
 ---@diagnostic disable: undefined-global
 
+local PHOTO_WEBHOOK = '' -- Discord webhook URL, append ?wait=true
+
 local function nonEmpty(s)
     return type(s) == 'string' and s ~= '' and s or nil
 end
@@ -1046,6 +1048,30 @@ RegisterServerEvent('qb-phone:server:savePhoto', function(source, url)
     local citizenid = getCitizenIdFromPlayer(player)
     if not citizenid then return end
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_gallery (citizenid, image) VALUES (?, ?)', { citizenid, url })
+end)
+
+RegisterServerEvent('qb-phone:server:uploadPhoto', function(source, filePath)
+    if not filePath or filePath == '' or PHOTO_WEBHOOK == '' then
+        TriggerClientEvent(source, 'qb-phone:client:photoUploaded', nil)
+        return
+    end
+
+    -- TODO: replace with HELIX server HTTP call
+    -- local file = io.open(filePath, 'rb')
+    -- if not file then TriggerClientEvent(source, 'qb-phone:client:photoUploaded', nil); return end
+    -- local data = file:read('*all'); file:close()
+    -- local boundary = 'HELIXphoto' .. tostring(os.time())
+    -- local filename = filePath:match('[^\\/]+$') or 'photo.png'
+    -- local body = '--' .. boundary .. '\r\n'
+    --     .. 'Content-Disposition: form-data; name="file"; filename="' .. filename .. '"\r\n'
+    --     .. 'Content-Type: image/png\r\n\r\n'
+    --     .. data .. '\r\n--' .. boundary .. '--\r\n'
+    -- HTTP.Post(PHOTO_WEBHOOK, body, 'multipart/form-data; boundary=' .. boundary, function(status, responseBody)
+    --     local ok, parsed = pcall(JSON.parse, responseBody)
+    --     local url = ok and parsed and parsed.attachments and parsed.attachments[1] and parsed.attachments[1].url
+    --     TriggerClientEvent(source, 'qb-phone:client:photoUploaded', url)
+    -- end)
+    TriggerClientEvent(source, 'qb-phone:client:photoUploaded', nil)
 end)
 
 RegisterServerEvent('qb-phone:server:deletePhoto', function(source, photoId)
