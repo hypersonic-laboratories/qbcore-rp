@@ -275,6 +275,10 @@ createApp({
             }
         }
 
+        function closePhone() {
+            hEvent('close', {});
+        }
+
         return {
             HOME_APPS, DOCK_APPS,
             phoneVisible, locked, activeScreen, darkMode, wallpaperUrl, activeCaseColor,
@@ -282,7 +286,7 @@ createApp({
             formatCallDuration, acceptCall, hangup,
             navigateTo, onDial,
             getFormattedTime, getFormattedDate, getWeatherTemperature,
-            openApp,
+            openApp, closePhone,
         };
     },
 }).mount("#app");
