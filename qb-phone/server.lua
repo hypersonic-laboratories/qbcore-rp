@@ -287,9 +287,9 @@ local function loadCalendarEvents(citizenid, phone)
 
     local result = {}
     for _, row in ipairs(rows) do
-        local year  = tonumber(row.year  or row.Year)  or 0
-        local month = tonumber(row.month or row.Month) or 0
-        local day   = tonumber(row.day   or row.Day)   or 1
+        local year     = tonumber(row.year or row.Year) or 0
+        local month    = tonumber(row.month or row.Month) or 0
+        local day      = tonumber(row.day or row.Day) or 1
         local yearKey  = tostring(year)
         local monthKey = tostring(month)
         local dayKey   = tostring(day)
@@ -297,8 +297,8 @@ local function loadCalendarEvents(citizenid, phone)
         ensureTable(result[yearKey], monthKey)
         ensureTable(result[yearKey][monthKey], dayKey)
         table.insert(result[yearKey][monthKey][dayKey], {
-            id     = row.id     or row.Id,
-            title  = row.title  or row.Title  or '',
+            id     = row.id or row.Id,
+            title  = row.title or row.Title or '',
             time   = row.event_time or row.Event_time or row.EventTime or '',
             detail = row.detail or row.Detail or '',
         })
@@ -457,7 +457,9 @@ do
     local cols = exports['qb-core']:DatabaseAction('Select', 'PRAGMA table_info(phone_calendar_events)', {}) or {}
     local hasYear = false
     for _, col in ipairs(cols) do
-        if (col.name or '') == 'year' then hasYear = true; break end
+        if (col.name or '') == 'year' then
+            hasYear = true; break
+        end
     end
     if not hasYear then
         exports['qb-core']:DatabaseAction('Execute', 'ALTER TABLE phone_calendar_events ADD COLUMN year INTEGER DEFAULT 0', {})
@@ -484,9 +486,9 @@ RegisterServerEvent('qb-phone:server:dial', function(source, targetNumber)
         return
     end
 
-    local callerName   = getFullName(caller)
-    local callerNumber = caller.PlayerData.charinfo.phone
-    local targetName   = getFullName(target)
+    local callerName           = getFullName(caller)
+    local callerNumber         = caller.PlayerData.charinfo.phone
+    local targetName           = getFullName(target)
 
     pendingCalls[targetIntSrc] = {
         callerSrc    = source,
@@ -665,10 +667,10 @@ RegisterCallback('qb-phone:loadProfile', function(source)
     if not player then return nil end
     local citizenid = syncPlayerAccount(player)
     if not citizenid then return nil end
-    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT name, phone FROM phone_accounts WHERE citizenid = ? LIMIT 1', { citizenid }) or {}
+    local rows    = exports['qb-core']:DatabaseAction('Select', 'SELECT name, phone FROM phone_accounts WHERE citizenid = ? LIMIT 1', { citizenid }) or {}
     local account = rows[1]
-    local name  = nonEmpty(account and (account.name  or account.Name))  or getFullName(player)
-    local phone = nonEmpty(account and (account.phone or account.Phone)) or getPhoneNumber(player, citizenid)
+    local name    = nonEmpty(account and (account.name or account.Name)) or getFullName(player)
+    local phone   = nonEmpty(account and (account.phone or account.Phone)) or getPhoneNumber(player, citizenid)
     return {
         name      = tostring(name),
         phone     = tostring(phone),
@@ -796,7 +798,7 @@ RegisterServerEvent('qb-phone:server:createPost', function(source, content, imag
     local time      = os.date('%H:%M')
     local postId    = genId()
 
-    local post = {
+    local post      = {
         id           = postId,
         authorName   = authorName,
         authorNumber = authorNumber,
@@ -825,7 +827,7 @@ RegisterServerEvent('qb-phone:server:createPost', function(source, content, imag
         reposted = false,
         comments = {},
     }
-    TriggerClientEvent(-1, 'qb-phone:client:postReceived', JSON.stringify(payload))
+    BroadcastEvent('qb-phone:client:postReceived', JSON.stringify(payload))
 end)
 
 RegisterServerEvent('qb-phone:server:deletePost', function(source, postId)
@@ -843,7 +845,7 @@ RegisterServerEvent('qb-phone:server:deletePost', function(source, postId)
             exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_reactions WHERE tweet_id = ?', { tostring(postId) })
             exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_comments WHERE tweet_id = ?', { tostring(postId) })
             exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweets WHERE tweetId = ? AND citizenid = ?', { tostring(postId), citizenid })
-            TriggerClientEvent(-1, 'qb-phone:client:postDeleted', postId)
+            BroadcastEvent('qb-phone:client:postDeleted', postId)
             return
         end
     end
@@ -853,7 +855,7 @@ RegisterServerEvent('qb-phone:server:deletePost', function(source, postId)
         exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_reactions WHERE tweet_id = ?', { tostring(postId) })
         exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_comments WHERE tweet_id = ?', { tostring(postId) })
         exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweets WHERE tweetId = ?', { tostring(postId) })
-        TriggerClientEvent(-1, 'qb-phone:client:postDeleted', postId)
+        BroadcastEvent('qb-phone:client:postDeleted', postId)
     end
 end)
 
@@ -874,7 +876,7 @@ RegisterServerEvent('qb-phone:server:likePost', function(source, postId, liked)
         exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_tweet_reactions (tweet_id, citizenid, type) VALUES (?, ?, ?)', { tostring(postId), citizenid, 'like' })
     end
     local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT citizenid FROM phone_tweet_reactions WHERE tweet_id = ? AND type = ?', { tostring(postId), 'like' }) or {}
-    TriggerClientEvent(-1, 'qb-phone:client:postLikeUpdated', postId, #rows)
+    BroadcastEvent('qb-phone:client:postLikeUpdated', postId, #rows)
 end)
 
 RegisterServerEvent('qb-phone:server:repostPost', function(source, postId, reposted)
@@ -894,7 +896,7 @@ RegisterServerEvent('qb-phone:server:repostPost', function(source, postId, repos
         exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_tweet_reactions (tweet_id, citizenid, type) VALUES (?, ?, ?)', { tostring(postId), citizenid, 'repost' })
     end
     local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT citizenid FROM phone_tweet_reactions WHERE tweet_id = ? AND type = ?', { tostring(postId), 'repost' }) or {}
-    TriggerClientEvent(-1, 'qb-phone:client:postRepostUpdated', postId, #rows)
+    BroadcastEvent('qb-phone:client:postRepostUpdated', postId, #rows)
 end)
 
 RegisterServerEvent('qb-phone:server:followUser', function(source, handle, following, targetPhone)
@@ -968,7 +970,7 @@ RegisterServerEvent('qb-phone:server:addComment', function(source, postId, text)
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_tweet_comments (id, tweet_id, citizenid, firstName, lastName, handle, message) VALUES (?, ?, ?, ?, ?, ?, ?)', { tostring(comment.id), tostring(postId), authorCitizenId, firstName, lastName, handle, text })
 
     local payload = { id = comment.id, author = authorName, handle = handle, text = text, time = time }
-    TriggerClientEvent(-1, 'qb-phone:client:commentAdded', postId, JSON.stringify(payload))
+    BroadcastEvent('qb-phone:client:commentAdded', postId, JSON.stringify(payload))
 end)
 
 RegisterServerEvent('qb-phone:server:sendEmail', function(source, toNumber, subject, body)
