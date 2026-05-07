@@ -179,19 +179,22 @@ createApp({
                 return;
             }
             if (name === "contactsLoaded") {
-                const contacts = JSON.parse(args[0] || '[]');
+                const parsed = JSON.parse(args[0] || '[]');
+                const contacts = Array.isArray(parsed) ? parsed : [];
                 const { CONTACTS } = window.PhoneStore;
                 CONTACTS.splice(0, CONTACTS.length, ...contacts);
                 return;
             }
             if (name === "conversationsLoaded") {
-                const convs = JSON.parse(args[0] || '[]');
+                const parsed = JSON.parse(args[0] || '[]');
+                const convs = Array.isArray(parsed) ? parsed : [];
                 const { CONVERSATIONS } = window.PhoneStore;
                 CONVERSATIONS.splice(0, CONVERSATIONS.length, ...convs);
                 return;
             }
             if (name === "callHistoryLoaded") {
-                const history = JSON.parse(args[0] || '[]');
+                const parsed = JSON.parse(args[0] || '[]');
+                const history = Array.isArray(parsed) ? parsed : [];
                 const { CALL_HISTORY } = window.PhoneStore;
                 CALL_HISTORY.splice(0, CALL_HISTORY.length, ...history);
                 return;
@@ -203,7 +206,8 @@ createApp({
                 return;
             }
             if (name === "feedLoaded") {
-                const posts = JSON.parse(args[0] || '[]');
+                const parsed = JSON.parse(args[0] || '[]');
+                const posts = Array.isArray(parsed) ? parsed : [];
                 const { POSTS } = window.PhoneStore;
                 POSTS.splice(0, POSTS.length, ...posts);
                 return;
@@ -221,7 +225,8 @@ createApp({
                 return;
             }
             if (name === "photosLoaded") {
-                const photos = JSON.parse(args[0] || '[]');
+                const parsed = JSON.parse(args[0] || '[]');
+                const photos = Array.isArray(parsed) ? parsed : [];
                 const { PHOTOS } = window.PhoneStore;
                 PHOTOS.splice(0, PHOTOS.length, ...photos);
                 return;
