@@ -529,3 +529,92 @@ input {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* ── Call overlay ───────────────────────────────────────────── */
+
+.call-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3.5rem 2rem 3rem;
+    background: linear-gradient(to bottom, rgb(10 10 16 / 0.93), rgb(6 6 10 / 0.97));
+    backdrop-filter: blur(28px);
+    color: white;
+}
+
+.call-overlay-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+}
+
+.call-overlay-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgb(255 255 255 / 0.55);
+}
+
+.call-overlay-name {
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+.call-overlay-number {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: rgb(255 255 255 / 0.55);
+}
+
+.call-overlay-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3.5rem;
+}
+
+.call-action-btn {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 9999px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.call-action-btn:hover {
+    transform: scale(1.06);
+}
+
+.call-action-btn:active {
+    transform: scale(0.92);
+}
+
+.call-decline-btn {
+    background: rgb(239 68 68);
+    color: white;
+    box-shadow: 0 8px 20px rgb(239 68 68 / 0.35);
+}
+
+.call-accept-btn {
+    background: rgb(34 197 94);
+    color: white;
+    box-shadow: 0 8px 20px rgb(34 197 94 / 0.35);
+}
+
+.call-action-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+}
