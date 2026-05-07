@@ -30,12 +30,12 @@ const SettingsApp = {
                 <div class="settings-section">
                     <div class="settings-section-label">Notifications</div>
                     <div class="settings-group">
-                        <div v-for="(notif, i) in notifications" :key="notif.key" :class="['settings-row', i > 0 ? 'settings-row-border' : '']">
+                        <div v-for="(notif, i) in NOTIF_META" :key="notif.key" :class="['settings-row', i > 0 ? 'settings-row-border' : '']">
                             <div class="settings-row-icon-wrap" :style="{ background: notif.color }">
                                 <i :data-lucide="notif.icon" class="settings-row-icon-svg"></i>
                             </div>
                             <span class="settings-row-label">{{ notif.label }}</span>
-                            <button type="button" :class="['settings-toggle', notif.on ? 'settings-toggle-on' : '']" @click="notif.on = !notif.on" :aria-label="'Toggle ' + notif.label">
+                            <button type="button" :class="['settings-toggle', notifSettings[notif.key] ? 'settings-toggle-on' : '']" @click="toggleNotif(notif.key)" :aria-label="'Toggle ' + notif.label">
                                 <span class="settings-toggle-thumb"></span>
                             </button>
                         </div>
@@ -60,7 +60,7 @@ const SettingsApp = {
                                 <i data-lucide="bell-off" class="settings-row-icon-svg"></i>
                             </div>
                             <span class="settings-row-label">Do Not Disturb</span>
-                            <button type="button" :class="['settings-toggle', dnd ? 'settings-toggle-on' : '']" @click="dnd = !dnd" aria-label="Toggle Do Not Disturb">
+                            <button type="button" :class="['settings-toggle', dnd ? 'settings-toggle-on' : '']" @click="toggleDnd" aria-label="Toggle Do Not Disturb">
                                 <span class="settings-toggle-thumb"></span>
                             </button>
                         </div>
@@ -143,22 +143,36 @@ const SettingsApp = {
             }, 750);
         });
 
-        const notifications = reactive([
-            { key: "messages", label: "Messages", icon: "message-circle", color: "rgb(59 130 246)", on: true },
-            { key: "phone", label: "Phone", icon: "phone", color: "rgb(34 197 94)", on: true },
-            { key: "hmail", label: "Hmail", icon: "mail", color: "rgb(249 115 22)", on: true },
-            { key: "gene", label: "H (Gene)", icon: "dna", color: "rgb(168 85 247)", on: false },
-        ]);
+        const NOTIF_META = [
+            { key: "messages", label: "Messages", icon: "message-circle", color: "rgb(59 130 246)" },
+            { key: "phone",    label: "Phone",    icon: "phone",          color: "rgb(34 197 94)"  },
+            { key: "hmail",    label: "Hmail",    icon: "mail",           color: "rgb(249 115 22)" },
+            { key: "gene",     label: "H (Gene)", icon: "dna",            color: "rgb(168 85 247)" },
+        ];
+
+        const notifSettings = window.PhoneStore.notifSettings;
+        const dnd           = window.PhoneStore.dnd;
+
+        const { watch } = Vue;
+        watch(() => ({ ...notifSettings }), (val) => window.PhoneStore.saveNotifSettings(val), { deep: true });
+        watch(dnd, (val) => window.PhoneStore.saveDnd(val));
+
+        function toggleNotif(key) {
+            notifSettings[key] = !notifSettings[key];
+        }
+
+        function toggleDnd() {
+            dnd.value = !dnd.value;
+        }
 
         const darkMode    = window.PhoneStore.darkMode;
         const caseColorId = window.PhoneStore.caseColorId;
         const CASE_COLORS = window.CASE_COLORS;
-        const dnd = ref(false);
 
         function onBack() {
             emit("navigate", "home");
         }
 
-        return { profileDisplayName, profilePhoneDisplay, playerPhone, profileInitial, notifications, darkMode, dnd, caseColorId, CASE_COLORS, copyPhoneNumber, onBack };
+        return { profileDisplayName, profilePhoneDisplay, playerPhone, profileInitial, NOTIF_META, notifSettings, toggleNotif, darkMode, dnd, toggleDnd, caseColorId, CASE_COLORS, copyPhoneNumber, onBack };
     },
 };

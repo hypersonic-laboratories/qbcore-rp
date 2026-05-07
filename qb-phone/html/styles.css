@@ -33,6 +33,11 @@ input {
     box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.35);
     padding: 10px;
     overflow: visible;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.phone-shell.phone-peek {
+    transform: translateY(680px);
 }
 
 .phone-screen {
@@ -445,4 +450,82 @@ input {
 
 .bg-rose-500 {
     background: rgb(244 63 94);
+}
+
+/* ── In-screen SMS notification banner ───────────────────────── */
+
+.phone-notif {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    background: rgb(28 28 34 / 0.9);
+    backdrop-filter: blur(16px);
+    border-radius: 16px;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 0.3);
+    padding: 0.625rem 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    z-index: 50;
+    color: white;
+    pointer-events: none;
+    animation: phone-notif-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes phone-notif-in {
+    from {
+        transform: translateY(-110%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.phone-notif-icon {
+    width: 2rem;
+    height: 2rem;
+    background: rgb(147 197 253);
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.phone-notif-symbol {
+    width: 1rem;
+    height: 1rem;
+    color: rgb(30 64 175);
+}
+
+.phone-notif-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.phone-notif-app {
+    font-size: 0.625rem;
+    font-weight: 600;
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.1rem;
+}
+
+.phone-notif-sender {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 0.1rem;
+}
+
+.phone-notif-text {
+    font-size: 0.6875rem;
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

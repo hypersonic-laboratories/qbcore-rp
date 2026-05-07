@@ -31,9 +31,21 @@
         <div id="app">
             <div>
                 <!-- ══ Phone Shell ══ -->
-                <div class="phone-shell" v-show="phoneVisible" :style="{ background: activeCaseColor.main }">
+                <div class="phone-shell" v-show="phoneVisible || notification" :class="{ 'phone-peek': !phoneVisible && notification }" :style="{ background: activeCaseColor.main }">
                     <div class="phone-screen" :class="{ dark: darkMode }" :style="wallpaperUrl && !locked && activeScreen === 'home' ? { background: 'url(' + wallpaperUrl + ') center/cover no-repeat' } : {}">
                         <div class="phone-camera-ring"></div>
+
+                        <!-- ── Notification banner ── -->
+                        <div v-if="notification" class="phone-notif">
+                            <div class="phone-notif-icon" :style="{ background: notification.iconBg }">
+                                <i :data-lucide="notification.icon" class="phone-notif-symbol" :style="{ color: notification.iconColor }"></i>
+                            </div>
+                            <div class="phone-notif-body">
+                                <div class="phone-notif-app">{{ notification.appLabel }}</div>
+                                <div class="phone-notif-sender">{{ notification.title }}</div>
+                                <div class="phone-notif-text">{{ notification.body }}</div>
+                            </div>
+                        </div>
 
                         <!-- Wallpaper glows (home only, no custom wallpaper) -->
                         <div v-if="!locked && activeScreen === 'home' && !wallpaperUrl" class="phone-wallpaper">
@@ -140,7 +152,6 @@
                                 </button>
                             </div>
                         </div>
-
                     </div>
                     <div class="phone-side-button phone-side-button-right-top" :style="{ background: 'linear-gradient(to right, ' + activeCaseColor.main + ', ' + activeCaseColor.light + ')' }"></div>
                     <div class="phone-side-button phone-side-button-right-bottom" :style="{ background: 'linear-gradient(to right, ' + activeCaseColor.main + ', ' + activeCaseColor.light + ')' }"></div>
