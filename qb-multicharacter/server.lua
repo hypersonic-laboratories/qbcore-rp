@@ -76,6 +76,7 @@ RegisterServerEvent('qb-multicharacter:server:loadUserData', function(source, cD
     if exports['qb-core']:Login(source, cData.citizenid) then
         local PlayerState = source:GetLyraPlayerState()
         local netId = PlayerState:GetPlayerId()
+        local CheckUserInterval
         CheckUserInterval = Timer.SetInterval(function()
             if hasDonePreloading[netId] then
                 print('[qb-core] ' .. PlayerState:GetPlayerName() .. ' (Citizen ID: ' .. cData.citizenid .. ') has successfully loaded!')
@@ -118,6 +119,7 @@ RegisterServerEvent('qb-multicharacter:server:createCharacter', function(source,
     if exports['qb-core']:Login(source, false, newData) then
         local PlayerState = source:GetLyraPlayerState()
         local netId = PlayerState:GetPlayerId()
+        local CheckInterval
         CheckInterval = Timer.SetInterval(function()
             if hasDonePreloading[netId] then
                 local Apartments = exports['qb-apartments']:Apartments()
