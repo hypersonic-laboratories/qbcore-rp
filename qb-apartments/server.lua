@@ -1,5 +1,6 @@
 local Lang = require('locales/en')
 local ApartmentObjects = {}
+local pendingApartmentCreation = {}
 
 -- Functions
 
@@ -189,6 +190,9 @@ end
 RegisterServerEvent('qb-apartments:server:CreateApartment', function(source, aptName)
 	local Player = exports['qb-core']:GetPlayer(source)
 	if not Player then return end
+	if pendingApartmentCreation[source] then return end
+	pendingApartmentCreation[source] = true
+
 	local apartmentId = exports['qb-core']:CreateApartmentId()
 	local label = Apartments.Locations[aptName].label
 	exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO apartments (name, type, label, citizenid) VALUES (?, ?, ?, ?)', {
@@ -197,6 +201,7 @@ RegisterServerEvent('qb-apartments:server:CreateApartment', function(source, apt
 		label,
 		Player.PlayerData.citizenid,
 	})
+	pendingApartmentCreation[source] = nil
 	TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.receive_apart') .. ' (' .. label .. ')')
 	EnterApartment(source, apartmentId, aptName)
 end)
