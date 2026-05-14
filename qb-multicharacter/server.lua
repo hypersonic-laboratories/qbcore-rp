@@ -69,6 +69,7 @@ RegisterServerEvent('qb-multicharacter:server:disconnect', function(source)
 end)
 
 RegisterServerEvent('qb-multicharacter:server:loadUserData', function(source, cData) -- TO DO ADD APARTMENTS SUPPORT
+    if exports['qb-core']:GetPlayer(source) then return end
     if exports['qb-core']:Login(source, cData.citizenid) then
         local PlayerState = source:GetLyraPlayerState()
         print('[qb-core] ' .. PlayerState:GetPlayerName() .. ' (Citizen ID: ' .. cData.citizenid .. ') has successfully loaded!')

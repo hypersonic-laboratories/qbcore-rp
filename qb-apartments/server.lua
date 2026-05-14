@@ -1,6 +1,5 @@
 local Lang = require('locales/en')
 local ApartmentObjects = {}
-local pendingApartmentCreation = {}
 
 -- Functions
 
@@ -190,8 +189,9 @@ end
 RegisterServerEvent('qb-apartments:server:CreateApartment', function(source, aptName)
 	local Player = exports['qb-core']:GetPlayer(source)
 	if not Player then return end
-	if pendingApartmentCreation[source] then return end
-	pendingApartmentCreation[source] = true
+
+	local existing = exports['qb-core']:DatabaseAction('Select', 'SELECT name FROM apartments WHERE citizenid = ? LIMIT 1', { Player.PlayerData.citizenid })
+	if existing and existing[1] then return end
 
 	local apartmentId = exports['qb-core']:CreateApartmentId()
 	local label = Apartments.Locations[aptName].label
@@ -201,7 +201,6 @@ RegisterServerEvent('qb-apartments:server:CreateApartment', function(source, apt
 		label,
 		Player.PlayerData.citizenid,
 	})
-	pendingApartmentCreation[source] = nil
 	TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.receive_apart') .. ' (' .. label .. ')')
 	EnterApartment(source, apartmentId, aptName)
 end)
