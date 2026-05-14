@@ -34,6 +34,9 @@ RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     isLoggedIn = true
     disableDefaultHUD()
     player_data = exports['qb-core']:GetPlayerData()
+    if my_webui and player_data.money then
+        my_webui:SendEvent('ShowCashAmount', round(player_data.money['cash'] or 0))
+    end
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
@@ -44,6 +47,17 @@ end)
 
 RegisterClientEvent('QBCore:Player:SetPlayerData', function(val)
     player_data = val
+end)
+
+RegisterClientEvent('QBCore:Player:OnFieldUpdate', function(key, val)
+    if key == 'money' then
+        player_data.money = val
+        if my_webui then
+            my_webui:SendEvent('ShowCashAmount', round(val.cash or 0))
+        end
+    elseif key == 'metadata' then
+        player_data.metadata = val
+    end
 end)
 
 RegisterClientEvent('qb-hud:client:onRadio', function(bool)
@@ -73,15 +87,6 @@ RegisterClientEvent('qb-hud:client:OnMoneyChange', function(type, amount, isMinu
         isMinus = isMinus,
         type = type
     })
-end)
-
-RegisterClientEvent('qb-hud:client:ShowAccounts', function(type, amount)
-    if not my_webui then return end
-    if type == 'cash' then
-        my_webui:SendEvent('ShowCashAmount', round(amount))
-    else
-        my_webui:SendEvent('ShowBankAmount', round(amount))
-    end
 end)
 
 RegisterClientEvent('qb-hud:client:UpdateNeeds', function(newHunger, newThirst)

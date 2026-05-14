@@ -122,15 +122,10 @@ const bankingApp = Vue.createApp({
                 },
                 (response) => {
                     if (response.success) {
-                        const account = this.accounts.find((acc) => acc.name === this.selectedMoneyAccount.name);
-                        if (account) {
-                            account.balance -= this.selectedMoneyAmount;
-                            this.playerCash += this.selectedMoneyAmount;
-                            this.addStatement(this.accountNumber, this.selectedMoneyAccount.name, this.moneyReason, this.selectedMoneyAmount, "withdraw");
-                            this.selectedMoneyAmount = 0;
-                            this.moneyReason = "";
-                            this.selectedMoneyAccount = null;
-                        }
+                        this.addStatement(this.accountNumber, this.selectedMoneyAccount.name, this.moneyReason, this.selectedMoneyAmount, "withdraw");
+                        this.selectedMoneyAmount = 0;
+                        this.moneyReason = "";
+                        this.selectedMoneyAccount = null;
                         this.addNotification(response.message, "success");
                     } else {
                         this.addNotification(response.message, "error");
@@ -151,15 +146,10 @@ const bankingApp = Vue.createApp({
                 },
                 (response) => {
                     if (response.success) {
-                        const account = this.accounts.find((acc) => acc.name === this.selectedMoneyAccount.name);
-                        if (account) {
-                            account.balance += this.selectedMoneyAmount;
-                            this.playerCash -= this.selectedMoneyAmount;
-                            this.addStatement(this.accountNumber, this.selectedMoneyAccount.name, this.moneyReason, this.selectedMoneyAmount, "deposit");
-                            this.selectedMoneyAmount = 0;
-                            this.moneyReason = "";
-                            this.selectedMoneyAccount = null;
-                        }
+                        this.addStatement(this.accountNumber, this.selectedMoneyAccount.name, this.moneyReason, this.selectedMoneyAmount, "deposit");
+                        this.selectedMoneyAmount = 0;
+                        this.moneyReason = "";
+                        this.selectedMoneyAccount = null;
                         this.addNotification(response.message, "success");
                     } else {
                         this.addNotification(response.message, "error");
@@ -474,6 +464,11 @@ const bankingApp = Vue.createApp({
             } else if (action === "openATM") {
                 this.tempBankData = event.data.args[0];
                 this.showPinPrompt = true;
+            } else if (action === "updatePlayerMoney") {
+                const { cash, bank } = event.data.args[0];
+                this.playerCash = cash;
+                const checking = this.accounts.find((acc) => acc.name === "checking");
+                if (checking) checking.balance = bank;
             }
         },
     },

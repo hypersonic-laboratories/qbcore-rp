@@ -352,7 +352,6 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
     if not Offline then
         QBCore.Players[PlayerData.source] = player
         QBCore.Player.Save(PlayerData.source)
-        exports['qb-multicharacter']:SetPlayerLoaded(player)
         player:UpdateClient()
     end
 

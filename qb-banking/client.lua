@@ -1,5 +1,14 @@
 local my_webui = WebUI('qb-banking', 'qb-banking/html/index.html')
 
+RegisterClientEvent('QBCore:Player:OnFieldUpdate', function(key, val)
+    if key == 'money' and my_webui then
+        my_webui:SendEvent('updatePlayerMoney', {
+            cash = val.cash or 0,
+            bank = val.bank or 0
+        })
+    end
+end)
+
 -- Functions
 
 my_webui:RegisterEventHandler('closeApp', function()

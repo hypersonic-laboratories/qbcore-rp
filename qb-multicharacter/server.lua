@@ -1,5 +1,5 @@
 local Lang = require('locales/en')
-local hasDonePreloading = {}
+local pendingCharCreation = {}
 local dir = debug.getinfo(1, 'S').source .. '/../' -- append trailing slash, exit file dir
 local Countries = {}
 
@@ -60,12 +60,8 @@ end
 
 -- Events
 
-exports('qb-multicharacter', 'SetPlayerLoaded', function(Player)
-    hasDonePreloading[Player.PlayerData.netId] = true
-end)
-
 RegisterServerEvent('QBCore:Server:OnPlayerUnload', function(source)
-    hasDonePreloading[source] = false
+    pendingCharCreation[source] = nil
 end)
 
 RegisterServerEvent('qb-multicharacter:server:disconnect', function(source)
@@ -75,72 +71,58 @@ end)
 RegisterServerEvent('qb-multicharacter:server:loadUserData', function(source, cData) -- TO DO ADD APARTMENTS SUPPORT
     if exports['qb-core']:Login(source, cData.citizenid) then
         local PlayerState = source:GetLyraPlayerState()
-        local netId = PlayerState:GetPlayerId()
-        local CheckUserInterval
-        CheckUserInterval = Timer.SetInterval(function()
-            if hasDonePreloading[netId] then
-                print('[qb-core] ' .. PlayerState:GetPlayerName() .. ' (Citizen ID: ' .. cData.citizenid .. ') has successfully loaded!')
-                TriggerClientEvent(source, 'qb-multicharacter:client:closeNUI')
-                --QBCore.Commands.Refresh(source)
-                --loadHouseData(source)
-                if Config.SkipSelection then
-                    local result = GetOwnedApartment(cData.citizenid)
-                    if result then
-                        local Player = exports['qb-core']:GetPlayer(source)
-                        local insideMeta = Player.PlayerData.metadata['inside']
-                        if insideMeta.house then
-                            TriggerClientEvent(source, 'qb-houses:client:LastLocationHouse', insideMeta.house)
-                        elseif insideMeta.apartment.apartmentType and insideMeta.apartment.apartmentId then
-                            TriggerClientEvent(source, 'qb-apartments:client:LastLocationHouse', insideMeta.apartment.apartmentType, insideMeta.apartment.apartmentId)
-                        end
-                    else
-                        local coords = JSON.parse(cData.position)
-                        local pawn = GetPlayerPawn(source)
-                        if pawn then SetEntityCoords(pawn, Vector(coords.x, coords.y, coords.z)) end
-                    end
-                else
-                    local Apartments = exports['qb-apartments']:Apartments()
-                    if Apartments.Starting then
-                        TriggerClientEvent(source, 'qb-apartments:client:setupSpawnUI', cData)
-                    else
-                        TriggerClientEvent(source, 'qb-spawn:client:openUI', true, cData, false, nil)
-                    end
+        print('[qb-core] ' .. PlayerState:GetPlayerName() .. ' (Citizen ID: ' .. cData.citizenid .. ') has successfully loaded!')
+        TriggerClientEvent(source, 'qb-multicharacter:client:closeNUI')
+        --QBCore.Commands.Refresh(source)
+        --loadHouseData(source)
+        if Config.SkipSelection then
+            local result = GetOwnedApartment(cData.citizenid)
+            if result then
+                local Player = exports['qb-core']:GetPlayer(source)
+                local insideMeta = Player.PlayerData.metadata['inside']
+                if insideMeta.house then
+                    TriggerClientEvent(source, 'qb-houses:client:LastLocationHouse', insideMeta.house)
+                elseif insideMeta.apartment.apartmentType and insideMeta.apartment.apartmentId then
+                    TriggerClientEvent(source, 'qb-apartments:client:LastLocationHouse', insideMeta.apartment.apartmentType, insideMeta.apartment.apartmentId)
                 end
-                Timer.ClearInterval(CheckUserInterval)
+            else
+                local coords = JSON.parse(cData.position)
+                local pawn = GetPlayerPawn(source)
+                if pawn then SetEntityCoords(pawn, Vector(coords.x, coords.y, coords.z)) end
             end
-        end, 10)
+        else
+            local Apartments = exports['qb-apartments']:Apartments()
+            if Apartments.Starting then
+                TriggerClientEvent(source, 'qb-apartments:client:setupSpawnUI', cData)
+            else
+                TriggerClientEvent(source, 'qb-spawn:client:openUI', true, cData, false, nil)
+            end
+        end
     end
 end)
 
 RegisterServerEvent('qb-multicharacter:server:createCharacter', function(source, data)
+    if exports['qb-core']:GetPlayer(source) then return end
+    if pendingCharCreation[source] then return end
+    pendingCharCreation[source] = true
+
     local newData = {}
     newData.cid = data.cid
     newData.charinfo = data
     if exports['qb-core']:Login(source, false, newData) then
         local PlayerState = source:GetLyraPlayerState()
-        local netId = PlayerState:GetPlayerId()
-        local CheckInterval
-        CheckInterval = Timer.SetInterval(function()
-            if hasDonePreloading[netId] then
-                local Apartments = exports['qb-apartments']:Apartments()
-                if Apartments.Starting then
-                    print('^2[qb-core]^7 ' .. PlayerState:GetPlayerName() .. ' has successfully loaded!')
-                    --QBCore.Commands.Refresh(source)
-                    --loadHouseData(source)
-                    TriggerClientEvent(source, 'qb-multicharacter:client:closeNUI')
-                    TriggerClientEvent(source, 'qb-apartments:client:setupSpawnUI', newData)
-                    GiveStarterItems(source)
-                    Timer.ClearInterval(CheckInterval)
-                else
-                    print('^2[qb-core]^7 ' .. PlayerState:GetPlayerName() .. ' has successfully loaded!')
-                    --QBCore.Commands.Refresh(source)
-                    --loadHouseData(source)
-                    TriggerClientEvent(source, 'qb-multicharacter:client:closeNUIdefault')
-                    GiveStarterItems(source)
-                    Timer.ClearInterval(CheckInterval)
-                end
-            end
-        end, 10)
+        pendingCharCreation[source] = nil
+        print('^2[qb-core]^7 ' .. PlayerState:GetPlayerName() .. ' has successfully loaded!')
+        local Apartments = exports['qb-apartments']:Apartments()
+        if Apartments.Starting then
+            TriggerClientEvent(source, 'qb-multicharacter:client:closeNUI')
+            TriggerClientEvent(source, 'qb-apartments:client:setupSpawnUI', newData)
+        else
+            TriggerClientEvent(source, 'qb-multicharacter:client:closeNUIdefault')
+        end
+        GiveStarterItems(source)
+    else
+        pendingCharCreation[source] = nil
     end
 end)
 
@@ -170,7 +152,7 @@ RegisterCallback('GetNumberOfCharacters', function(source)
         numOfChars = Config.DefaultNumberOfCharacters
     end
 
-    return {charCount = numOfChars}
+    return { charCount = numOfChars }
 end)
 
 RegisterCallback('setupCharacters', function(source)
