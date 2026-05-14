@@ -108,7 +108,7 @@ RegisterCommand('givemoney', Lang:t('command.givemoney.help'), function(source, 
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_online'), 'error')
         return
     end
-    Player.Functions.AddMoney(tostring(args[2]), tonumber(args[3]), 'Admin give money')
+    Player:AddMoney(tostring(args[2]), tonumber(args[3]), 'Admin give money')
 end, true)
 
 RegisterCommand('setmoney', Lang:t('command.setmoney.help'), function(source, args)
@@ -117,7 +117,7 @@ RegisterCommand('setmoney', Lang:t('command.setmoney.help'), function(source, ar
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_online'), 'error')
         return
     end
-    Player.Functions.SetMoney(tostring(args[2]), tonumber(args[3]))
+    Player:SetMoney(tostring(args[2]), tonumber(args[3]))
 end, true)
 
 -- Job
@@ -139,7 +139,7 @@ RegisterCommand('setjob', Lang:t('command.setjob.help'), function(source, args)
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_online'), 'error')
         return
     end
-    Player.Functions.SetJob(tostring(args[2]), tonumber(args[3]))
+    Player:SetJob(tostring(args[2]), tonumber(args[3]))
 end, true)
 
 -- Gang
@@ -163,5 +163,5 @@ RegisterCommand('setgang', Lang:t('command.setgang.help'), function(source, args
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_online'), 'error')
         return
     end
-    Player.Functions.SetGang(tostring(args[2]), tonumber(args[3]))
+    Player:SetGang(tostring(args[2]), tonumber(args[3]))
 end, true)

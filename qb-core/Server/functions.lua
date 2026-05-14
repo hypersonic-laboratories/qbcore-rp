@@ -58,7 +58,8 @@ end
 
 function QBCore.Functions.GetPlayerByPhone(number)
 	for _, player in pairs(QBCore.Players) do
-		if player.PlayerData.charinfo.phone == number then
+		local charinfo = player.PlayerData.charinfo
+		if charinfo.phone == number then
 			return player
 		end
 	end
@@ -67,7 +68,8 @@ end
 
 function QBCore.Functions.GetPlayerByAccount(account)
 	for _, player in pairs(QBCore.Players) do
-		if player.PlayerData.charinfo.account == account then
+		local charinfo = player.PlayerData.charinfo
+		if charinfo.account == account then
 			return player
 		end
 	end
@@ -100,7 +102,8 @@ function QBCore.Functions.GetPlayersOnDuty(job)
 	local players = {}
 	local count = 0
 	for src, Player in pairs(QBCore.Players) do
-		if Player.PlayerData.job.name == job and Player.PlayerData.job.onduty then
+		local jobData = Player.PlayerData.job
+		if jobData.name == job and jobData.onduty then
 			players[#players + 1] = src
 			count = count + 1
 		end
@@ -111,7 +114,8 @@ end
 function QBCore.Functions.GetDutyCount(job)
 	local count = 0
 	for _, Player in pairs(QBCore.Players) do
-		if Player.PlayerData.job.name == job and Player.PlayerData.job.onduty then
+		local jobData = Player.PlayerData.job
+		if jobData.name == job and jobData.onduty then
 			count = count + 1
 		end
 	end
@@ -126,12 +130,12 @@ function QBCore.Functions.CanUseItem(item)
 	return QBCore.UsableItems[item]
 end
 
-function QBCore.Functions.Debug(tbl)
+function QBCore.Functions.DebugServer(tbl)
 	if HPlayer then return end
 	HELIXTable.Dump(tbl)
 end
 
-function QBCore.Functions.Notify(source, message, type, length, icon)
+function QBCore.Functions.NotifyPlayer(source, message, type, length, icon)
 	if HPlayer then return end
 	TriggerClientEvent(source, 'QBCore:Notify', message, type, length, icon)
 end
@@ -240,13 +244,13 @@ function QBCore.Functions.AddJobs(jobs)
 		if type(key) ~= 'string' then
 			message = 'invalid_job_name'
 			shouldContinue = false
-			errorItem = jobs[key]
+			errorItem = value
 			break
 		end
 		if QBCore.Shared.Jobs[key] then
 			message = 'job_exists'
 			shouldContinue = false
-			errorItem = jobs[key]
+			errorItem = value
 			break
 		end
 		QBCore.Shared.Jobs[key] = value
@@ -319,13 +323,13 @@ function QBCore.Functions.AddItems(items)
 		if type(key) ~= 'string' then
 			message = 'invalid_item_name'
 			shouldContinue = false
-			errorItem = items[key]
+			errorItem = value
 			break
 		end
 		if QBCore.Shared.Items[key] then
 			message = 'item_exists'
 			shouldContinue = false
-			errorItem = items[key]
+			errorItem = value
 			break
 		end
 		QBCore.Shared.Items[key] = value
@@ -372,13 +376,13 @@ function QBCore.Functions.AddGangs(gangs)
 		if type(key) ~= 'string' then
 			message = 'invalid_gang_name'
 			shouldContinue = false
-			errorItem = gangs[key]
+			errorItem = value
 			break
 		end
 		if QBCore.Shared.Gangs[key] then
 			message = 'gang_exists'
 			shouldContinue = false
-			errorItem = gangs[key]
+			errorItem = value
 			break
 		end
 		QBCore.Shared.Gangs[key] = value
@@ -434,12 +438,12 @@ function QBCore.Functions.AddPlayerMethod(ids, methodName, handler)
 	if idType == 'number' then
 		if ids == -1 then
 			for _, v in pairs(QBCore.Players) do
-				v.Functions.AddMethod(methodName, handler)
+				v:AddMethod(methodName, handler)
 			end
 		else
 			local p = QBCore.Players[ids]
 			if not p then return end
-			p.Functions.AddMethod(methodName, handler)
+			p:AddMethod(methodName, handler)
 		end
 	elseif idType == 'table' and table.type(ids) == 'array' then
 		for i = 1, #ids do
@@ -453,12 +457,12 @@ function QBCore.Functions.AddPlayerField(ids, fieldName, data)
 	if idType == 'number' then
 		if ids == -1 then
 			for _, v in pairs(QBCore.Players) do
-				v.Functions.AddField(fieldName, data)
+				v:AddField(fieldName, data)
 			end
 		else
 			local p = QBCore.Players[ids]
 			if not p then return end
-			p.Functions.AddField(fieldName, data)
+			p:AddField(fieldName, data)
 		end
 	elseif idType == 'table' and table.type(ids) == 'array' then
 		for i = 1, #ids do

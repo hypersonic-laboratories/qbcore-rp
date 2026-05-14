@@ -215,8 +215,8 @@ RegisterCallback('withdraw', function(source, data)
     if accountName == 'checking' then
         local accountBalance = Player.PlayerData.money.bank
         if accountBalance < withdrawAmount then return { success = false, message = Lang:t('error.money') } end
-        exports['qb-core']:Player(source, 'RemoveMoney', 'bank', withdrawAmount, 'bank withdrawal')
-        exports['qb-core']:Player(source, 'AddMoney', 'cash', withdrawAmount, 'bank withdrawal')
+        Player.RemoveMoney('bank', withdrawAmount, 'bank withdrawal')
+        Player.AddMoney('cash', withdrawAmount, 'bank withdrawal')
         if not CreateBankStatement(source, 'checking', withdrawAmount, reason, 'withdraw', 'player') then return { success = false, message = Lang:t('error.error') } end
         return { success = true, message = Lang:t('success.withdraw') }
     end
@@ -228,7 +228,7 @@ RegisterCallback('withdraw', function(source, data)
         local accountBalance = GetAccountBalance(accountName)
         if accountBalance < withdrawAmount then return { success = false, message = Lang:t('error.money') } end
         if not RemoveMoney(accountName, withdrawAmount) then return { success = false, message = Lang:t('error.error') } end
-        exports['qb-core']:Player(source, 'AddMoney', 'cash', withdrawAmount, 'bank account: ' .. accountName .. ' withdrawal')
+        Player.AddMoney('cash', withdrawAmount, 'bank account: ' .. accountName .. ' withdrawal')
         if not CreateBankStatement(source, accountName, withdrawAmount, reason, 'withdraw', Accounts[accountName].account_type) then return { success = false, message = Lang:t('error.error') } end
         return { success = true, message = Lang:t('success.withdraw') }
     end
@@ -243,8 +243,8 @@ RegisterCallback('deposit', function(source, data)
     if accountName == 'checking' then
         local accountBalance = Player.PlayerData.money.cash
         if accountBalance < depositAmount then return { success = false, message = Lang:t('error.money') } end
-        exports['qb-core']:Player(source, 'RemoveMoney', 'cash', depositAmount, 'bank deposit')
-        exports['qb-core']:Player(source, 'AddMoney', 'bank', depositAmount, 'bank deposit')
+        Player.RemoveMoney('cash', depositAmount, 'bank deposit')
+        Player.AddMoney('bank', depositAmount, 'bank deposit')
         if not CreateBankStatement(source, 'checking', depositAmount, reason, 'deposit', 'player') then return { success = false, message = Lang:t('error.error') } end
         return { success = true, message = Lang:t('success.deposit') }
     end
@@ -254,7 +254,7 @@ RegisterCallback('deposit', function(source, data)
         if Accounts[accountName].account_type == 'job' and job.name ~= accountName and not job.isboss then return { success = false, message = Lang:t('error.access') } end
         if Accounts[accountName].account_type == 'gang' and gang.name ~= accountName and not gang.isboss then return { success = false, message = Lang:t('error.access') } end
         if Player.PlayerData.money.cash < depositAmount then return { success = false, message = Lang:t('error.money') } end
-        exports['qb-core']:Player(source, 'RemoveMoney', 'cash', depositAmount, 'bank account: ' .. accountName .. ' deposit')
+        Player.RemoveMoney('cash', depositAmount, 'bank account: ' .. accountName .. ' deposit')
         if not AddMoney(accountName, depositAmount) then return { success = false, message = Lang:t('error.error') } end
         return { success = true, message = Lang:t('success.deposit') }
     end
@@ -271,9 +271,9 @@ RegisterCallback('internalTransfer', function(source, data)
     local reason = (data.reason ~= '' and data.reason) or 'Internal transfer'
     if fromAccountName == 'checking' then
         if Player.PlayerData.money.bank < transferAmount then return { success = false, message = Lang:t('error.money') } end
-        exports['qb-core']:Player(source, 'RemoveMoney', 'bank', transferAmount, reason)
+        Player.RemoveMoney('bank', transferAmount, reason)
         if toAccountName == 'checking' then
-            exports['qb-core']:Player(source, 'AddMoney', 'bank', transferAmount, reason)
+            Player.AddMoney('bank', transferAmount, reason)
         else
             if not AddMoney(toAccountName, transferAmount) then return { success = false, message = Lang:t('error.error') } end
         end
@@ -285,7 +285,7 @@ RegisterCallback('internalTransfer', function(source, data)
         local fromAccountBalance = GetAccountBalance(fromAccountName)
         if fromAccountBalance < transferAmount then return { success = false, message = Lang:t('error.money') } end
         if not RemoveMoney(fromAccountName, transferAmount) then return { success = false, message = Lang:t('error.error') } end
-        exports['qb-core']:Player(source, 'AddMoney', 'bank', transferAmount, reason)
+        Player.AddMoney('bank', transferAmount, reason)
         if not CreateBankStatement(source, 'checking', transferAmount, reason, 'deposit', 'player') then return { success = false, message = Lang:t('error.error') } end
         return { success = true, message = Lang:t('success.transfer') }
     else
@@ -312,8 +312,8 @@ RegisterCallback('externalTransfer', function(source, data)
     local reason = (data.reason ~= '' and data.reason) or 'External transfer'
     if fromAccountName == 'checking' then
         if Player.PlayerData.money.bank < transferAmount then return { success = false, message = Lang:t('error.money') } end
-        exports['qb-core']:Player(source, 'RemoveMoney', 'bank', transferAmount, reason)
-        exports['qb-core']:Player(toPlayer.PlayerData.source, 'AddMoney', 'bank', transferAmount, reason)
+        Player.RemoveMoney('bank', transferAmount, reason)
+        toPlayer.AddMoney('bank', transferAmount, reason)
         if not CreateBankStatement(source, 'checking', transferAmount, reason, 'withdraw', 'player') then return { success = false, message = Lang:t('error.error') } end
         if not CreateBankStatement(toPlayer.PlayerData.source, 'checking', transferAmount, reason, 'deposit', 'player') then return { success = false, message = Lang:t('error.error') } end
         return { success = true, message = Lang:t('success.transfer') }
@@ -323,7 +323,7 @@ RegisterCallback('externalTransfer', function(source, data)
         local fromAccountBalance = GetAccountBalance(fromAccountName)
         if fromAccountBalance < transferAmount then return { success = false, message = Lang:t('error.money') } end
         if not RemoveMoney(fromAccountName, transferAmount) then return { success = false, message = Lang:t('error.error') } end
-        exports['qb-core']:Player(toPlayer.PlayerData.source, 'AddMoney', 'bank', transferAmount, reason)
+        toPlayer.AddMoney('bank', transferAmount, reason)
         if not CreateBankStatement(toPlayer.PlayerData.source, 'checking', transferAmount, reason, 'deposit', 'player') then return { success = false, message = Lang:t('error.error') } end
         return { success = true, message = Lang:t('success.transfer') }
     end
@@ -354,7 +354,7 @@ RegisterCallback('openAccount', function(source, data)
     local initialAmount = tonumber(data.amount)
     if GetNumberOfAccounts(citizenid) >= Config.maxAccounts then return { success = false, message = Lang:t('error.accounts') } end
     if Player.PlayerData.money.bank < initialAmount then return { success = false, message = Lang:t('error.money') } end
-    exports['qb-core']:Player(source, 'RemoveMoney', 'bank', initialAmount, 'Opened account ' .. accountName)
+    Player.RemoveMoney('bank', initialAmount, 'Opened account ' .. accountName)
     if not CreatePlayerAccount(source, accountName, initialAmount, JSON.stringify({})) then return { success = false, message = Lang:t('error.error') } end
     if not CreateBankStatement(source, accountName, initialAmount, 'Initial deposit', 'deposit', 'shared') then return { success = false, message = Lang:t('error.error') } end
     if not CreateBankStatement(source, 'checking', initialAmount, 'Initial deposit for ' .. accountName, 'withdraw', 'player') then return { success = false, message = Lang:t('error.error') } end

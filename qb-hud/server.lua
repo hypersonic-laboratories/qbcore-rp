@@ -36,7 +36,7 @@ RegisterServerEvent('qb-hud:server:GainStress', function(source, amount)
     if newStress > 100 then
         newStress = 100
     end
-    exports['qb-core']:Player(source, 'SetMetaData', 'stress', newStress)
+    Player.SetMetaData('stress', newStress)
 end)
 
 RegisterServerEvent('qb-hud:server:RelieveStress', function(source, amount)
@@ -56,5 +56,5 @@ RegisterServerEvent('qb-hud:server:RelieveStress', function(source, amount)
     if newStress > 100 then
         newStress = 100
     end
-    exports['qb-core']:Player(source, 'SetMetaData', 'stress', newStress)
+    Player.SetMetaData('stress', newStress)
 end)

@@ -14,7 +14,7 @@ local function AddPlayerToApartment(source, apartmentId)
 		insideMeta.apartment.apartmentType = ApartmentObjects[apartmentId].label
 		insideMeta.apartment.apartmentId = apartmentId
 		insideMeta.house = nil
-		exports['qb-core']:Player(source, 'SetMetaData', 'inside', insideMeta)
+		Player.SetMetaData('inside', insideMeta)
 
 		local enteringPlayerId = GetPlayerId(source)
 		TriggerClientEvent(source, 'qb-apartments:client:HideAllPlayers')
@@ -66,7 +66,7 @@ local function RemovePlayerFromApartment(Player, apartmentId)
 		insideMeta.apartment.apartmentType = nil
 		insideMeta.apartment.apartmentId = nil
 		insideMeta.house = nil
-		exports['qb-core']:Player(source, 'SetMetaData', 'inside', insideMeta)
+		Player.SetMetaData('inside', insideMeta)
 
 		local inst = ApartmentObjects[apartmentId]
 		local insideSources = {}

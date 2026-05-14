@@ -9,7 +9,7 @@ end
 
 -- Functions
 
-function QBCore.Functions.Debug(tbl)
+function QBCore.Functions.DebugClient(tbl)
     if not HPlayer then return end
     HELIXTable.Dump(tbl)
 end

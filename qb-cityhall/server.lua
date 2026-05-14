@@ -29,7 +29,7 @@ RegisterServerEvent('qb-cityhall:server:ApplyJob', function(source, job)
     if GetDistanceBetweenCoords(pedCoords, coords) > 1500 then return end
 
     local JobInfo = sharedJobs[job]
-    exports['qb-core']:Player(source, 'SetJob', job, getHighestRank(job))
+    Player.SetJob(job, getHighestRank(job))
     TriggerClientEvent(source, 'QBCore:Notify', Lang:t('info.new_job', { job = JobInfo.label }))
 end)
 
@@ -43,7 +43,7 @@ RegisterServerEvent('qb-cityhall:server:requestId', function(source, item)
     if GetDistanceBetweenCoords(pedCoords, coords) > 1500 then return end
 
     local itemInfo = Config.Cityhalls[1].licenses[item]
-    if not exports['qb-core']:Player(source, 'RemoveMoney', itemInfo.cost) then
+    if not Player.RemoveMoney('cash', itemInfo.cost) then
         return TriggerClientEvent(source, 'QBCore:Notify', ('You don\'t have enough money on you, you need %s cash'):format(itemInfo.cost), 'error')
     end
 

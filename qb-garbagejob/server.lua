@@ -85,7 +85,7 @@ local function CompleteJob(source, returnedTruck)
     end
 
     TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.reward', { amount = route.pay }), 'success')
-    exports['qb-core']:Player(source, 'AddMoney', 'bank', route.pay, 'qb-garbagejob:completedJob')
+    Player.AddMoney('bank', route.pay, 'qb-garbagejob:completedJob')
 
     if route.vehicle and route.vehicle:IsValid() then
         TriggerClientEvent(source, 'qb-garbagejob:client:removeTargets', route.vehicle)

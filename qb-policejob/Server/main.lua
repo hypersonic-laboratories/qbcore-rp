@@ -311,7 +311,7 @@ RegisterServerEvent('qb-policejob:server:toggleTracker', function(source, args)
     if distance > 500 then return end
 
     local NewTrackerState = not TargetPlayer.PlayerData.metadata.tracker
-    exports['qb-core']:Player(TargetPlayer.PlayerData.source, 'SetMetaData', 'tracker', NewTrackerState)
+    TargetPlayer.SetMetaData('tracker', NewTrackerState)
     
     local FirstName = TargetPlayer.PlayerData.charinfo.firstname
     local LastName = TargetPlayer.PlayerData.charinfo.lastname

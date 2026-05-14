@@ -110,13 +110,13 @@ end
 -- Spawns a vehicle at the relevant garage, if a spot is free
 RegisterServerEvent('qb-garages:server:SpawnVehicle', function(source, plate, index, vehicleName, fuel)
     if OutsideVehicles[plate] and OutsideVehicles[plate].entity:IsValid() then
-        exports['qb-core']:Notify(source, Lang:t('error.not_depot'), 'error', 5000)
+        exports['qb-core']:NotifyPlayer(source, Lang:t('error.not_depot'), 'error', 5000)
         return false
     end
 
     local SpawnPoint = GetSpawnPoint(index)
     if not SpawnPoint then
-        exports['qb-core']:Notify(source, Lang:t('error.no_spawn'), 'error')
+        exports['qb-core']:NotifyPlayer(source, Lang:t('error.no_spawn'), 'error')
         return false
     end
 
@@ -250,7 +250,7 @@ RegisterServerEvent('qb-garages:server:PayDepotPrice', function(source, data)
             return
         end
 
-        local success = exports['qb-core']:Player(source, 'RemoveMoney', moneyType, depotPrice, 'paid-depot')
+        local success = Player.RemoveMoney(moneyType, depotPrice, 'paid-depot')
         if not success then return end
         TriggerLocalServerEvent('qb-garages:server:SpawnVehicle', source, data.plate, data.index, data.vehicle, data.stats.fuel)
     end

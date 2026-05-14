@@ -226,7 +226,7 @@ RegisterServerEvent('qb-taxijob:server:dropoffNPC', function(source, benchIndex,
 
         local Player = exports['qb-core']:GetPlayer(source)
         if Player and payout > 0 then
-            exports['qb-core']:Player(source, 'AddMoney', 'bank', payout, 'taxi-job')
+            Player.AddMoney('bank', payout, 'taxi-job')
         end
 
         activeJobs[playerId] = nil

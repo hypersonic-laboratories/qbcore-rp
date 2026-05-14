@@ -63,7 +63,7 @@ local function deliveryPay(source, shop)
 	if distance > 10 then
 		return
 	end
-	Player.Functions.AddMoney('bank', Config.DeliveryPrice, 'qb-shops:deliveryPay')
+	Player.AddMoney('bank', Config.DeliveryPrice, 'qb-shops:deliveryPay')
 	if math.random(100) <= 10 then
 		AddItem(source, Config.RewardItem, 1, false, false, 'qb-shops:deliveryPay')
 	end

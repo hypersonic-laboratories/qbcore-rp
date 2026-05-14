@@ -144,18 +144,35 @@ Timer.SetTimeout(function()
         )
     end
 
-    for i = 1, #Config.atmModels do
-        local atmModel = Config.atmModels[i]
-        exports['qb-target']:AddTargetModel(atmModel, {
-            options = {
+    for i = 1, #Config.atm_locations do
+        exports['qb-target']:AddMeshTarget(
+            'atm_' .. i,
+            Config.atm_locations[i].coords,
+            Rotator(0, Config.atm_locations[i].heading, 0),
+            '/QBCoreAssets/Meshes/SM_ATM.SM_ATM', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+            {
                 {
                     icon = 'university',
                     label = 'Open ATM',
-                    --item = 'bank_card',
-                    event = 'qb-banking:client:openATM',
+                    -- event = 'qb-banking:client:openATM',
+                    event = 'qb-banking:client:openBank',
                 }
-            },
-            distance = 1000
-        })
+            }
+        )
     end
+
+    -- for i = 1, #Config.atmModels do
+    --     local atmModel = Config.atmModels[i]
+    --     exports['qb-target']:AddTargetModel(atmModel, {
+    --         options = {
+    --             {
+    --                 icon = 'university',
+    --                 label = 'Open ATM',
+    --                 --item = 'bank_card',
+    --                 event = 'qb-banking:client:openATM',
+    --             }
+    --         },
+    --         distance = 1000
+    --     })
+    -- end
 end, 2000)

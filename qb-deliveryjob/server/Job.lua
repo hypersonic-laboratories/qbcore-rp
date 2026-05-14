@@ -113,10 +113,12 @@ function Job:Payout()
         amount = math.floor(amount * 0.3)
     end
 
-    local Success = exports['qb-core']:Player(self.Courier, 'AddMoney', 'bank', amount, 'delivery-job-payout')
+    local Player = exports['qb-core']:GetPlayer(self.Courier)
+    if not Player then return end
+    local Success = Player.AddMoney('bank', amount, 'delivery-job-payout')
     if not Success then return end
 
-    exports['qb-core']:Notify(self.Courier, completedRoute and Lang:t('success.paid', {Amount = amount}) or Lang:t('success.incomplete_paid', {Amount = amount}), 'success')
+    exports['qb-core']:NotifyPlayer(self.Courier, completedRoute and Lang:t('success.paid', {Amount = amount}) or Lang:t('success.incomplete_paid', {Amount = amount}), 'success')
 
     return true
 end

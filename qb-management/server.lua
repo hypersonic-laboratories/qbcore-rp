@@ -69,9 +69,9 @@ RegisterServerEvent('qb-management:server:GradeUpdateGang', function(source, dat
     end
 
     if Member then
-        if exports['qb-core']:Player(Member, 'SetGang', Player.PlayerData.gang.name, data.grade) then
+        if Member.SetGang(Player.PlayerData.gang.name, data.grade) then
             TriggerClientEvent(source, 'QBCore:Notify', 'Sucessfully promoted!', 'success')
-            exports['qb-core']:Player(Member, 'Save')
+            Member.Save()
             if Member.PlayerData.source then
                 TriggerClientEvent(Member.PlayerData.source, 'QBCore:Notify', 'You have been promoted to ' .. data.gradename .. '.', 'success')
             end
@@ -100,8 +100,8 @@ RegisterServerEvent('qb-management:server:FireMember', function(source, target)
             TriggerClientEvent(source, 'QBCore:Notify', 'You cannot fire this citizen!', 'error')
             return
         end
-        if exports['qb-core']:Player(Member, 'SetGang', 'none', '0') then
-            exports['qb-core']:Player(Member, 'Save')
+        if Member.SetGang('none', '0') then
+            Member.Save()
             TriggerClientEvent(source, 'QBCore:Notify', 'Gang member fired!', 'success')
 
             if Member.PlayerData.source then
@@ -125,7 +125,7 @@ RegisterServerEvent('qb-management:server:HireMember', function(source, recruit)
         return
     end
 
-    if Target and exports['qb-core']:Player(Target, 'SetGang', Player.PlayerData.gang.name, 0) then
+    if Target and Target.SetGang(Player.PlayerData.gang.name, 0) then
         TriggerClientEvent(source, 'QBCore:Notify', 'You recruited ' .. (Target.PlayerData.charinfo.firstname .. ' ' .. Target.PlayerData.charinfo.lastname) .. ' come ' .. Player.PlayerData.gang.label .. '', 'success')
         TriggerClientEvent(Target.PlayerData.source, 'QBCore:Notify', 'You were recruited into ' .. Player.PlayerData.gang.label .. '', 'success')
     end
@@ -151,9 +151,9 @@ RegisterServerEvent('qb-management:server:GradeUpdate', function(source, data)
     end
 
     if Employee then
-        if exports['qb-core']:Player(Employee, 'SetJob', Player.PlayerData.job.name, data.grade) then
+        if Employee.SetJob(Player.PlayerData.job.name, data.grade) then
             TriggerClientEvent(source, 'QBCore:Notify', 'Sucessfully promoted!', 'success')
-            exports['qb-core']:Player(Employee, 'Save')
+            Employee.Save()
             if Employee.PlayerData.source then
                 TriggerClientEvent(Employee.PlayerData.source, 'QBCore:Notify', 'You have been promoted to ' .. data.gradename .. '.', 'success')
             end
@@ -181,8 +181,8 @@ RegisterServerEvent('qb-management:server:FireEmployee', function(source, target
             TriggerClientEvent(source, 'QBCore:Notify', 'You cannot fire this citizen!', 'error')
             return
         end
-        if exports['qb-core']:Player(Employee, 'SetJob', 'unemployed', '0') then
-            exports['qb-core']:Player(Employee, 'Save')
+        if Employee.SetJob('unemployed', '0') then
+            Employee.Save()
             TriggerClientEvent(source, 'QBCore:Notify', 'Employee fired!', 'success')
 
             if Employee.PlayerData.source then
@@ -206,7 +206,7 @@ RegisterServerEvent('qb-management:server:HireEmployee', function(source, recrui
     --     return
     -- end
 
-    if Target and exports['qb-core']:Player(Target.PlayerData.source, 'SetJob', Player.PlayerData.job.name, 0) then
+    if Target and Target.SetJob(Player.PlayerData.job.name, 0) then
         TriggerClientEvent(source, 'QBCore:Notify', 'You hired ' .. (Target.PlayerData.charinfo.firstname .. ' ' .. Target.PlayerData.charinfo.lastname) .. ' come ' .. Player.PlayerData.job.label .. '', 'success')
         TriggerClientEvent(Target.PlayerData.source, 'QBCore:Notify', 'You were hired as ' .. Player.PlayerData.job.label .. '', 'success')
     end

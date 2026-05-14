@@ -177,7 +177,7 @@ function ClearInventory(source, filterItems)
         end
     end
 
-    exports['qb-core']:Player('SetPlayerData', 'items', savedItemData)
+    Player.SetPlayerData('items', savedItemData)
 
     if not Player.Offline then
         local logMessage = string.format('**%s (citizenid: %s | id: %s)** inventory cleared', source:GetAccountName(), Player.PlayerData.citizenid, source)
@@ -190,7 +190,7 @@ exports('qb-inventory', 'ClearInventory', ClearInventory)
 function SetInventory(source, items)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
-    exports['qb-core']:Player('SetPlayerData', 'items', items)
+    Player.SetPlayerData('items', items)
     if not Player.Offline then
         local logMessage = string.format('**%s (citizenid: %s | id: %s)** items set: %s', source:GetAccountName(), Player.PlayerData.citizenid, source, json.encode(items))
         --Events.Call('qb-log:server:CreateLog', 'playerinventory', 'SetInventory', 'blue', logMessage)
@@ -207,7 +207,7 @@ function SetItemData(source, itemName, key, val)
     if not item then return false end
     item[key] = val
     Player.PlayerData.items[item.slot] = item
-    exports['qb-core']:Player('SetPlayerData', 'items', Player.PlayerData.items)
+    Player.SetPlayerData('items', Player.PlayerData.items)
     return true
 end
 
@@ -481,7 +481,7 @@ function AddItem(identifier, item, amount, slot, info, reason)
         end
     end
 
-    if player then exports['qb-core']:Player(identifier, 'SetPlayerData', 'items', inventory) end
+    if player then player.SetPlayerData('items', inventory) end
     -- local invName = player and identifier:GetName() .. ' (' .. identifier:GetID() .. ')' or identifier
     -- local addReason = reason or 'No reason specified'
     -- local resourceName = 'qb-inventory'
@@ -546,7 +546,7 @@ function RemoveItem(identifier, item, amount, slot, reason)
         inventory[slot] = nil
     end
 
-    if player then exports['qb-core']:Player(identifier, 'SetPlayerData', 'items', inventory) end
+    if player then player.SetPlayerData('items', inventory) end
     -- local invName = player and identifier:GetName() .. ' (' .. identifier:GetID() .. ')' or identifier
     -- local removeReason = reason or 'No reason specified'
     -- local resourceName = 'qb-inventory'

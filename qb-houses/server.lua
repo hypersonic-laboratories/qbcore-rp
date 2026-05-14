@@ -80,7 +80,7 @@ local function AddPlayerToProperty(source, propertyKey)
     insideMeta.property = propertyKey
     insideMeta.apartment = nil
     insideMeta.house = nil
-    exports['qb-core']:Player(source, 'SetMetaData', 'inside', insideMeta)
+    Player.SetMetaData('inside', insideMeta)
     local enteringPlayerId = GetPlayerId(source)
     TriggerClientEvent(source, 'qb-houses:client:HideAllPlayers')
     local enteringTalker = source:GetVoiceTalker()
@@ -130,7 +130,7 @@ local function RemovePlayerFromProperty(Player, propertyKey)
     insideMeta.property = nil
     insideMeta.apartment = nil
     insideMeta.house = nil
-    exports['qb-core']:Player(source, 'SetMetaData', 'inside', insideMeta)
+    Player.SetMetaData('inside', insideMeta)
     local leavingTalker = source:GetVoiceTalker()
     for _, otherCtrl in pairs(GetAllPlayers()) do
         if otherCtrl ~= source then
@@ -557,7 +557,7 @@ RegisterServerEvent('qb-houses:server:PurchaseProperty', function(source, data)
     end
     local propertyKey = exports['qb-core']:CreateApartmentId()
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO properties (property_key, entrance_id, owner_citizenid, owned, interior_type, interior_ref) VALUES (?, ?, ?, ?, ?, ?)', { propertyKey, entranceId, cid, 1, 'instanced', entrance.interiorRef })
-    exports['qb-core']:Player(source, 'RemoveMoney', 'cash', price)
+    Player.RemoveMoney('cash', price)
     exports['qb-inventory']:CreateStash(propertyKey .. '_furniture', {
         maxweight = 50000000000,
         slots = 500,

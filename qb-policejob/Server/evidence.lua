@@ -99,10 +99,10 @@ RegisterCallback('GetPlayerStatus', function(source)
 
     local PlayerCoords = GetEntityCoords(PlayerPawn)
     local ClosestPawn = GetClosestPawn(PlayerCoords, 500)
-    if not ClosestPawn or not ClosestPawn:IsPlayerControlled() then exports['qb-core']:Notify(source, 'You\'re not close enough to check status', 'error') return end
+    if not ClosestPawn or not ClosestPawn:IsPlayerControlled() then exports['qb-core']:NotifyPlayer(source, 'You\'re not close enough to check status', 'error') return end
 
     local ClosestPlayerStatus = PlayerStatus[ClosestPawn:GetController()]
-    if not ClosestPlayerStatus then exports['qb-core']:Notify(source, 'Player status is normal') return end
+    if not ClosestPlayerStatus then exports['qb-core']:NotifyPlayer(source, 'Player status is normal') return end
 
     local FormattedStatuses = {}
     for k, v in pairs(ClosestPlayerStatus) do
@@ -110,7 +110,7 @@ RegisterCallback('GetPlayerStatus', function(source)
     end
 
     if #FormattedStatuses <= 0 then
-        exports['qb-core']:Notify(source, 'Player status is normal')
+        exports['qb-core']:NotifyPlayer(source, 'Player status is normal')
         return
     end
 
