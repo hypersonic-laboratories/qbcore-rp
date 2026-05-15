@@ -294,9 +294,7 @@ RegisterCallback('server.attemptPurchase', function(source, data)
     local amount = data.amount
     local shop = string.gsub(data.shop, 'shop%-', '')
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then
-        return false
-    end
+    if not Player then return false end
 
     local shopInfo = RegisteredShops[shop]
     if not shopInfo then return false end
@@ -308,7 +306,7 @@ RegisterCallback('server.attemptPurchase', function(source, data)
         if GetDistanceBetweenCoords(playerCoords, shopCoords) > 650 then return false end
     end
 
-    if shopInfo.items[itemInfo.slot].name ~= itemInfo.name then return false end -- check item name in slot passed
+    if shopInfo.items[itemInfo.slot].name ~= itemInfo.name then return false end
 
     if amount > shopInfo.items[itemInfo.slot].amount then return false end
 

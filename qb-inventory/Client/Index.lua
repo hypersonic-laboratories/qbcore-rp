@@ -21,6 +21,14 @@ RegisterClientEvent('QBCore:Player:SetPlayerData', function(val)
 	player_data = val
 end)
 
+RegisterClientEvent('QBCore:Player:OnFieldUpdate', function(key, value)
+	if key ~= 'items' then return end
+	player_data.items = value
+	if inv_open and my_webui then
+		my_webui:SendEvent('updateInventory', { inventory = value })
+	end
+end)
+
 -- Functions
 
 local function FormatWeaponAttachments(itemdata)

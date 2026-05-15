@@ -519,38 +519,7 @@ const InventoryContainer = Vue.createApp({
                 }, (canPurchase) => {
                     if (canPurchase) {
                         const sourceInventory = this.getInventoryByType("other");
-                        const targetInventory = this.getInventoryByType("player");
                         const amountToTransfer = transferAmount !== null ? transferAmount : sourceItem.amount;
-                        if (sourceItem.amount < amountToTransfer) {
-                            this.inventoryError(sourceSlot);
-                            return;
-                        }
-                        let targetItem = targetInventory[targetSlot];
-                        if (!targetItem) {
-                            targetInventory[targetSlot] = {
-                                ...sourceItem,
-                                amount: amountToTransfer,
-                            };
-                        } else if (!targetItem || targetItem.name !== sourceItem.name) {
-                            let foundSlot = Object.keys(targetInventory).find((slot) => targetInventory[slot] && targetInventory[slot].name === sourceItem.name);
-                            if (foundSlot) {
-                                targetInventory[foundSlot].amount += amountToTransfer;
-                            } else {
-                                const targetInventoryKeys = Object.keys(targetInventory);
-                                if (targetInventoryKeys.length < this.totalSlots) {
-                                    let freeSlot = Array.from({ length: this.totalSlots }, (_, i) => i + 1).find((i) => !(i in targetInventory));
-                                    targetInventory[freeSlot] = {
-                                        ...sourceItem,
-                                        amount: amountToTransfer,
-                                    };
-                                } else {
-                                    this.inventoryError(sourceSlot);
-                                    return;
-                                }
-                            }
-                        } else {
-                            targetItem.amount += amountToTransfer;
-                        }
                         sourceItem.amount -= amountToTransfer;
                         if (sourceItem.amount <= 0) {
                             delete sourceInventory[sourceSlot];
