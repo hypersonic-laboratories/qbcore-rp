@@ -84,7 +84,7 @@ local function buildCaptureAndUI(mode)
 
     sceneCap = SceneCapture(
         Vector(0, 0, 0), Rotator(0, 0, 0),
-        1280, 720,
+        720, 1280,
         SceneCaptureSource.FinalColorLDR,
         false
     )
@@ -410,7 +410,7 @@ my_webui:RegisterEventHandler('cameraClosed', function()
     if cameraMode then closeCamera() end
 end)
 
-local PHOTO_WEBHOOK = ''
+local FIVEMANAGE_IMAGE_KEY = 'Py4jfdWgiRLzTTboAofHBC2aoiCSfrar'
 
 my_webui:RegisterEventHandler('takePhoto', function(_)
     if not sceneCap or not sceneCap.RenderTarget then
@@ -434,7 +434,7 @@ my_webui:RegisterEventHandler('takePhoto', function(_)
 
     local filePath = (saveDir .. fileName):gsub('\\', '/')
     local responsePath = filePath .. '.json'
-    os.execute('start "" /b curl -s -F "file=@' .. filePath .. '" "' .. PHOTO_WEBHOOK .. '" -o "' .. responsePath .. '"')
+    os.execute('start "" /b curl -s -X POST -F "file=@' .. filePath .. '" -H "Authorization: ' .. FIVEMANAGE_IMAGE_KEY .. '" "https://api.fivemanage.com/api/v3/file" -o "' .. responsePath .. '"')
 
     my_webui:SendEvent('showAfterCapture')
 
@@ -447,7 +447,7 @@ my_webui:RegisterEventHandler('takePhoto', function(_)
             f:close()
             os.remove(responsePath)
             local ok, parsed = pcall(JSON.parse, response or '')
-            local url = ok and parsed and parsed.attachments and parsed.attachments[1] and parsed.attachments[1].url
+            local url = ok and parsed and parsed.data and parsed.data.url
             if url and url ~= '' then
                 TriggerServerEvent('qb-phone:server:savePhoto', url)
             end

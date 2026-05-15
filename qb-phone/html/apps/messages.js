@@ -126,18 +126,77 @@ const MessagesApp = {
                 <div class="messages-thread-body">
                     <div v-for="msg in currentConversation.messages" :key="msg.id" :class="['message-bubble-row', msg.sender === 'me' ? 'message-bubble-row-me' : '']">
                         <div :class="['message-bubble', msg.sender === 'me' ? 'message-bubble-me' : 'message-bubble-them']">
-                            <div>{{ msg.text }}</div>
+                            <img v-if="isImageUrl(msg.text)" :src="msg.text" class="message-bubble-image" @click="viewingImage = msg.text" @error="e => e.target.style.display='none'" />
+                            <audio v-else-if="isAudioUrl(msg.text)" :src="msg.text" class="message-bubble-audio" controls preload="none"></audio>
+                            <div v-else>{{ msg.text }}</div>
                             <div class="message-bubble-time">{{ msg.time }}</div>
                         </div>
                     </div>
                 </div>
+                <!-- GIF picker -->
+                <div v-if="showGifPicker" class="emoji-picker gif-picker">
+                    <div class="gif-picker-search-wrap">
+                        <i data-lucide="search" class="gif-picker-search-icon"></i>
+                        <input v-model="gifQuery" placeholder="Search GIFs…" class="gif-picker-search-input" />
+                    </div>
+                    <div v-if="gifLoading" class="gallery-picker-empty">Loading…</div>
+                    <div v-else-if="gifResults.length" class="gif-picker-grid">
+                        <button v-for="gif in gifResults" :key="gif.id" type="button" class="gif-picker-tile" @click="insertGif(gif)">
+                            <img :src="gif.images.fixed_width_small.url" class="gif-picker-img" />
+                        </button>
+                    </div>
+                    <div v-else class="gallery-picker-empty">No GIFs found.</div>
+                </div>
+                <div v-if="showGifPicker" class="emoji-picker-backdrop" @click="showGifPicker = false"></div>
+
+                <!-- Gallery picker -->
+                <div v-if="showGalleryPicker" class="emoji-picker gallery-picker">
+                    <div v-if="PHOTOS.length" class="gallery-picker-grid">
+                        <button v-for="photo in PHOTOS" :key="photo.id" type="button"
+                            class="gallery-picker-tile" :style="{ background: photo.gradient }"
+                            @click="insertPhoto(photo)">
+                        </button>
+                    </div>
+                    <div v-else class="gallery-picker-empty">No photos yet. Use the camera app to add some.</div>
+                </div>
+                <div v-if="showGalleryPicker" class="emoji-picker-backdrop" @click="showGalleryPicker = false"></div>
+
+                <!-- Emoji picker -->
+                <div v-if="showEmojiPicker" class="emoji-picker">
+                    <div class="emoji-picker-tabs">
+                        <button v-for="cat in emojiCategories" :key="cat.name"
+                            :class="['emoji-tab', activeEmojiTab === cat.name ? 'emoji-tab-active' : '']"
+                            @click="activeEmojiTab = cat.name">{{ cat.icon }}</button>
+                    </div>
+                    <div class="emoji-picker-grid">
+                        <button v-for="em in activeEmojiList" :key="em" class="emoji-btn" @click="insertEmoji(em)">{{ em }}</button>
+                    </div>
+                </div>
+                <div v-if="showEmojiPicker" class="emoji-picker-backdrop" @click="showEmojiPicker = false"></div>
+
                 <div class="messages-composer">
-                    <input v-model="messageDraft" placeholder="Message" class="messages-composer-input" @keyup.enter="sendMessage" />
+                    <div class="messages-composer-pill">
+                        <input v-model="messageDraft" placeholder="Message" class="messages-composer-input" @keyup.enter="sendMessage" />
+                        <button type="button" :class="['messages-composer-icon-btn', showEmojiPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="Emoji" @click.stop="showEmojiPicker = !showEmojiPicker">
+                            <i data-lucide="smile" style="width:1.25rem;height:1.25rem"></i>
+                        </button>
+                        <button type="button" :class="['messages-composer-icon-btn messages-composer-gif-btn', showGifPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="GIF" @click.stop="toggleGifPicker">
+                            <span class="messages-composer-gif-label">GIF</span>
+                        </button>
+                        <button type="button" :class="['messages-composer-icon-btn', showGalleryPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="Gallery" @click.stop="showGalleryPicker = !showGalleryPicker">
+                            <i data-lucide="image" style="width:1.25rem;height:1.25rem"></i>
+                        </button>
+                    </div>
                     <button type="button" class="messages-send-button" aria-label="Send message" @click="sendMessage">
                         <i data-lucide="send-horizontal" class="messages-send-icon"></i>
                     </button>
                 </div>
             </div>
+        </div>
+
+        <!-- Image lightbox -->
+        <div v-if="viewingImage" class="image-lightbox" @click="viewingImage = null">
+            <img :src="viewingImage" class="image-lightbox-img" @click.stop />
         </div>
     `,
 
@@ -145,12 +204,133 @@ const MessagesApp = {
 
     setup(props, { emit }) {
         const { ref, computed } = Vue;
-        const { CONVERSATIONS, CONTACTS, currentConversationId } = window.PhoneStore;
+        const { CONVERSATIONS, CONTACTS, PHOTOS, currentConversationId } = window.PhoneStore;
 
         const messageSearch = ref("");
         const messageDraft = ref("");
         const composingNew = ref(false);
         const newQuery = ref("");
+        const viewingImage = ref(null);
+        const showEmojiPicker = ref(false);
+        const showGalleryPicker = ref(false);
+        const isRecording = ref(false);
+        const isUploadingAudio = ref(false);
+        const audioError = ref('');
+        const recordingSeconds = ref(0);
+        const recordingDisplay = Vue.computed(() => {
+            const s = recordingSeconds.value;
+            return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+        });
+        let _mediaRecorder = null;
+        let _audioChunks = [];
+        let _recordingTimer = null;
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                _audioChunks = [];
+                _mediaRecorder = new MediaRecorder(stream);
+                _mediaRecorder.ondataavailable = e => { if (e.data.size > 0) _audioChunks.push(e.data); };
+                _mediaRecorder.start();
+                isRecording.value = true;
+                recordingSeconds.value = 0;
+                _recordingTimer = setInterval(() => recordingSeconds.value++, 1000);
+            } catch (err) {
+                isRecording.value = false;
+                const name = err?.name ?? String(err);
+                if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+                    audioError.value = 'Microphone access denied.';
+                } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+                    audioError.value = 'No microphone found.';
+                } else if (!navigator.mediaDevices) {
+                    audioError.value = 'Microphone not supported in this context.';
+                } else {
+                    audioError.value = 'Could not start recording (' + name + ').';
+                }
+                setTimeout(() => { audioError.value = ''; }, 4000);
+            }
+        }
+
+        async function stopRecording() {
+            if (!_mediaRecorder) return;
+            clearInterval(_recordingTimer);
+            _recordingTimer = null;
+            isRecording.value = false;
+
+            const blob = await new Promise(resolve => {
+                _mediaRecorder.onstop = () => resolve(new Blob(_audioChunks, { type: 'audio/webm' }));
+                _mediaRecorder.stop();
+                _mediaRecorder.stream.getTracks().forEach(t => t.stop());
+            });
+            _mediaRecorder = null;
+            _audioChunks = [];
+
+            isUploadingAudio.value = true;
+            try {
+                const fd = new FormData();
+                fd.append('file', blob, 'voice_message.webm');
+                const res = await fetch('https://api.fivemanage.com/api/v3/file', {
+                    method: 'POST',
+                    headers: { Authorization: 'zvYWd23h2vlgppAbwFalDYJPhM0bCoRk' },
+                    body: fd,
+                });
+                const json = await res.json();
+                const url = json?.data?.url;
+                if (url) { messageDraft.value = url; sendMessage(); }
+            } catch { } finally {
+                isUploadingAudio.value = false;
+            }
+        }
+
+        function isAudioUrl(text) {
+            if (!text) return false;
+            try {
+                const url = new URL(text);
+                return /\.(mp3|ogg|wav|webm|m4a|aac)(\?.*)?$/i.test(url.pathname);
+            } catch { return false; }
+        }
+        const showGifPicker = ref(false);
+        const gifQuery = ref("");
+        const gifResults = ref([]);
+        const gifLoading = ref(false);
+        let gifDebounce = null;
+        const GIPHY_KEY = "5CPPKIuHNPKyo2ZhPzILZvnASPTyHSFA";
+
+        Vue.watch(gifQuery, (q) => {
+            clearTimeout(gifDebounce);
+            gifDebounce = setTimeout(() => fetchGifs(q.trim()), 400);
+        });
+
+        async function fetchGifs(q) {
+            gifLoading.value = true;
+            const endpoint = q
+                ? `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(q)}&limit=12&rating=pg13`
+                : `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=12&rating=pg13`;
+            try {
+                const res = await fetch(endpoint);
+                const json = await res.json();
+                gifResults.value = json.data ?? [];
+            } catch {
+                gifResults.value = [];
+            } finally {
+                gifLoading.value = false;
+            }
+        }
+
+        function toggleGifPicker() {
+            showGifPicker.value = !showGifPicker.value;
+            if (showGifPicker.value && gifResults.value.length === 0) fetchGifs("");
+        }
+
+        function insertGif(gif) {
+            const url = gif.images.original.url;
+            messageDraft.value = url;
+            showGifPicker.value = false;
+            sendMessage();
+        }
+        const emojiCategories = window.EMOJI_CATEGORIES;
+        const activeEmojiTab = ref(emojiCategories[0].name);
+        const activeEmojiList = Vue.computed(() => emojiCategories.find(c => c.name === activeEmojiTab.value)?.emojis ?? []);
 
         const contactSuggestions = computed(() => {
             const q = newQuery.value.trim().toLowerCase();
@@ -166,9 +346,22 @@ const MessagesApp = {
 
         const currentConversation = computed(() => CONVERSATIONS.find((c) => c.id === currentConversationId.value) || null);
 
+        function isImageUrl(text) {
+            if (!text) return false;
+            try {
+                const url = new URL(text);
+                return /\.(jpe?g|png|gif|webp|bmp|svg)(\?.*)?$/i.test(url.pathname);
+            } catch {
+                return false;
+            }
+        }
+
         function getConversationPreview(c) {
             const last = c.messages[c.messages.length - 1];
-            return last ? last.text : "No messages yet";
+            if (!last) return "No messages yet";
+            if (isImageUrl(last.text)) return "[Image]";
+            if (isAudioUrl(last.text)) return "[Voice message]";
+            return last.text;
         }
 
         function getConversationTime(c) {
@@ -214,6 +407,16 @@ const MessagesApp = {
             messageDraft.value = "";
         }
 
+        function insertEmoji(em) {
+            messageDraft.value += em;
+        }
+
+        function insertPhoto(photo) {
+            messageDraft.value = photo.url;
+            showGalleryPicker.value = false;
+            sendMessage();
+        }
+
         function sendMessage() {
             const text = messageDraft.value.trim();
             if (!text || currentConversationId.value === null) return;
@@ -222,6 +425,9 @@ const MessagesApp = {
             conv.messages.push({ id: Date.now(), sender: "me", text, time: "Now" });
             hEvent("sendMessage", { number: conv.number, text });
             messageDraft.value = "";
+            showEmojiPicker.value = false;
+            showGalleryPicker.value = false;
+            showGifPicker.value = false;
         }
 
         function onBack() {
@@ -242,6 +448,29 @@ const MessagesApp = {
             contactSuggestions,
             filteredConversations,
             currentConversation,
+            viewingImage,
+            PHOTOS,
+            showEmojiPicker,
+            showGalleryPicker,
+            isRecording,
+            isUploadingAudio,
+            audioError,
+            recordingDisplay,
+            startRecording,
+            stopRecording,
+            isAudioUrl,
+            showGifPicker,
+            gifQuery,
+            gifResults,
+            gifLoading,
+            toggleGifPicker,
+            insertGif,
+            insertPhoto,
+            emojiCategories,
+            activeEmojiTab,
+            activeEmojiList,
+            insertEmoji,
+            isImageUrl,
             getConversationPreview,
             getConversationTime,
             openConversation,

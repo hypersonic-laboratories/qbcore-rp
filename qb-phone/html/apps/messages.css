@@ -81,12 +81,16 @@
     transform: translateY(-50%);
 }
 
-.messages-search-input,
-.messages-composer-input {
+.messages-search-input {
     width: 100%;
     border: 1px solid rgb(228 228 231);
     border-radius: 9999px;
     background: rgb(244 244 245);
+    color: rgb(24 24 27);
+    outline: none;
+}
+
+.messages-composer-input {
     color: rgb(24 24 27);
     outline: none;
 }
@@ -305,24 +309,324 @@
     margin-top: 0.35rem;
 }
 
+.messages-audio-error {
+    background: rgb(254 226 226);
+    color: rgb(185 28 28);
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 0.35rem 1rem;
+    border-top: 1px solid rgb(252 165 165);
+}
+
+.message-bubble-audio {
+    display: block;
+    width: 100%;
+    min-width: 180px;
+    height: 36px;
+    border-radius: 0.5rem;
+}
+
+.messages-mic-button {
+    background: rgb(99 102 241);
+}
+
+.messages-mic-stop {
+    background: rgb(239 68 68);
+}
+
+.messages-send-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.messages-recording-indicator {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+}
+
+.messages-recording-dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 9999px;
+    background: rgb(239 68 68);
+    animation: pulse-dot 1s ease-in-out infinite;
+    flex: 0 0 auto;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.messages-recording-time {
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    color: rgb(239 68 68);
+    font-weight: 500;
+}
+
+.message-bubble-image {
+    display: block;
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 0.75rem;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.image-lightbox {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    cursor: pointer;
+}
+
+.image-lightbox-img {
+    max-width: 90%;
+    max-height: 80%;
+    border-radius: 0.75rem;
+    object-fit: contain;
+    cursor: default;
+}
+
 .messages-composer {
     border-top: 1px solid rgb(228 228 231);
     background: rgb(255 255 255 / 0.96);
-    padding: 0.75rem 1rem 1rem;
+    padding: 0.6rem 0.75rem 0.8rem;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
+}
+
+
+.messages-composer-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: rgb(244 244 245);
+    border-radius: 9999px;
+    border: 1px solid rgb(228 228 231);
+    padding: 0 0.25rem 0 0.25rem;
+    gap: 0;
+    min-width: 0;
 }
 
 .messages-composer-input {
-    padding: 0.85rem 1rem;
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    padding: 0.6rem 0.5rem;
     font-size: 0.875rem;
+    outline: none;
+}
+
+.messages-composer-icon-btn {
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    background: transparent;
+    color: rgb(113 113 122);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 9999px;
+    flex: 0 0 auto;
+}
+
+.messages-composer-icon-btn:hover {
+    background: rgb(228 228 231);
+}
+
+.messages-composer-icon-btn-active {
+    color: rgb(99 102 241);
+    background: rgb(238 238 255);
+}
+
+.emoji-picker-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 49;
+}
+
+.emoji-picker {
+    position: absolute;
+    bottom: 3.5rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    background: rgb(255 255 255);
+    border: 1px solid rgb(228 228 231);
+    border-radius: 1rem;
+    box-shadow: 0 -4px 24px rgb(0 0 0 / 0.1);
+    z-index: 50;
+    overflow: hidden;
+}
+
+.emoji-picker-tabs {
+    display: flex;
+    border-bottom: 1px solid rgb(228 228 231);
+    padding: 0.25rem 0.25rem 0;
+    gap: 0.1rem;
+}
+
+.emoji-tab {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    font-size: 1.1rem;
+    padding: 0.35rem 0;
+    border-radius: 0.5rem 0.5rem 0 0;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.1s;
+}
+
+.emoji-tab:hover {
+    opacity: 0.8;
+}
+
+.emoji-tab-active {
+    opacity: 1;
+    background: rgb(238 238 255);
+}
+
+.emoji-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0;
+    padding: 0.4rem;
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+.emoji-btn {
+    border: 0;
+    background: transparent;
+    font-size: 1.35rem;
+    padding: 0.3rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    line-height: 1;
+    text-align: center;
+}
+
+.emoji-btn:hover {
+    background: rgb(238 238 255);
+}
+
+.gif-picker-search-wrap {
+    position: relative;
+    padding: 0.5rem;
+    border-bottom: 1px solid rgb(228 228 231);
+}
+
+.gif-picker-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.9rem;
+    height: 0.9rem;
+    color: rgb(113 113 122);
+    pointer-events: none;
+}
+
+.gif-picker-search-input {
+    width: 100%;
+    border: 1px solid rgb(228 228 231);
+    border-radius: 9999px;
     background: rgb(244 244 245);
+    padding: 0.4rem 0.75rem 0.4rem 2rem;
+    font-size: 0.8rem;
+    outline: none;
+    box-sizing: border-box;
+    color: rgb(24 24 27);
+}
+
+.gif-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.25rem;
+    padding: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.gif-picker-tile {
+    border: 0;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    background: rgb(228 228 231);
+}
+
+.gif-picker-tile:hover {
+    opacity: 0.85;
+}
+
+.gif-picker-img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.25rem;
+    padding: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.gallery-picker-tile {
+    aspect-ratio: 1;
+    border: 0;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    background-size: cover;
+    background-position: center;
+}
+
+.gallery-picker-tile:hover {
+    opacity: 0.85;
+}
+
+.gallery-picker-empty {
+    padding: 1.25rem 1rem;
+    font-size: 0.8rem;
+    color: rgb(113 113 122);
+    text-align: center;
+}
+
+.messages-composer-gif-btn {
+    width: auto;
+    padding: 0 0.4rem;
+}
+
+.messages-composer-gif-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgb(99 102 241);
 }
 
 .messages-send-button {
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 2.25rem;
+    height: 2.25rem;
     border: 0;
     border-radius: 9999px;
     background: rgb(59 130 246);
@@ -332,6 +636,11 @@
     justify-content: center;
     cursor: pointer;
     flex: 0 0 auto;
+}
+
+.messages-send-icon {
+    width: 1rem;
+    height: 1rem;
 }
 
 /* â”€â”€ Dark mode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -385,6 +694,63 @@
 .dark .messages-composer {
     background: rgb(18 18 22 / 0.97);
     border-top-color: rgb(55 55 63);
+}
+
+.dark .messages-composer-pill {
+    background: rgb(39 39 45);
+    border-color: rgb(55 55 63);
+}
+
+.dark .messages-composer-input {
+    color: rgb(244 244 245);
+}
+
+.dark .messages-composer-icon-btn {
+    color: rgb(161 161 170);
+}
+
+.dark .messages-composer-icon-btn:hover {
+    background: rgb(55 55 63);
+}
+
+.dark .messages-composer-gif-label {
+    color: rgb(129 140 248);
+}
+
+.dark .gif-picker-search-wrap {
+    border-bottom-color: rgb(55 55 63);
+}
+
+.dark .gif-picker-search-input {
+    background: rgb(39 39 45);
+    border-color: rgb(55 55 63);
+    color: rgb(244 244 245);
+}
+
+.dark .gif-picker-tile {
+    background: rgb(39 39 45);
+}
+
+.dark .emoji-picker {
+    background: rgb(28 28 34);
+    border-color: rgb(55 55 63);
+}
+
+.dark .emoji-picker-tabs {
+    border-bottom-color: rgb(55 55 63);
+}
+
+.dark .emoji-tab-active {
+    background: rgb(39 39 55);
+}
+
+.dark .emoji-btn:hover {
+    background: rgb(39 39 55);
+}
+
+.dark .messages-composer-icon-btn-active {
+    background: rgb(39 39 55);
+    color: rgb(129 140 248);
 }
 
 .dark .message-bubble-them {

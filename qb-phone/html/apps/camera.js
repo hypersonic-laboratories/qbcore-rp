@@ -46,10 +46,10 @@ const CameraApp = {
 
                 <!-- gallery | shutter | flip -->
                 <div class="camera-controls-row">
-                    <div class="camera-gallery-thumb" aria-label="Gallery">
+                    <button type="button" class="camera-gallery-thumb" aria-label="Gallery" @click="emit('navigate', 'photos')">
                         <i v-if="!lastPhoto" data-lucide="image" class="camera-gallery-icon"></i>
                         <div v-else class="camera-gallery-captured" :style="{ background: lastPhoto }"></div>
-                    </div>
+                    </button>
 
                     <button type="button" :class="['camera-shutter', isCapturing ? 'camera-shutter--busy' : '']" :disabled="isCapturing" aria-label="Take photo" @click="takePhoto">
                         <div class="camera-shutter-inner"></div>

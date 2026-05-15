@@ -1,7 +1,5 @@
 ---@diagnostic disable: undefined-global
 
-local PHOTO_WEBHOOK = '' -- Discord webhook URL, append ?wait=true
-
 local function nonEmpty(s)
     return type(s) == 'string' and s ~= '' and s or nil
 end
