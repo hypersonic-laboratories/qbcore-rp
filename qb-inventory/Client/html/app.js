@@ -216,7 +216,7 @@ const InventoryContainer = Vue.createApp({
             }
         },
         handleMouseDown(event, slot, inventory) {
-            if (event.button === 1) return; // skip middle mouse
+            if (event.button === 1) return;
             event.preventDefault();
             const itemInSlot = this.getItemInSlot(slot, inventory);
             if (event.button === 0) {

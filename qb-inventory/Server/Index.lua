@@ -289,7 +289,15 @@ RegisterCallback('server.createDrop', function(source, item)
     end
 end)
 
+local recentPurchases = {}
+
 RegisterCallback('server.attemptPurchase', function(source, data)
+    local dedupKey = tostring(source) .. '_' .. tostring(data.item and data.item.slot) .. '_' .. tostring(data.shop)
+    local now = os.time()
+    if recentPurchases[dedupKey] and (now - recentPurchases[dedupKey]) < 2 then
+        return false
+    end
+    recentPurchases[dedupKey] = now
     local itemInfo = data.item
     local amount = data.amount
     local shop = string.gsub(data.shop, 'shop%-', '')
