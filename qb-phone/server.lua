@@ -782,6 +782,8 @@ RegisterServerEvent('qb-phone:server:deleteContact', function(source, number)
     end
 end)
 
+local _recentPostCreates = {}
+
 RegisterServerEvent('qb-phone:server:createPost', function(source, content, image)
     local player = getPlayer(source)
     if not player then return end
@@ -790,6 +792,10 @@ RegisterServerEvent('qb-phone:server:createPost', function(source, content, imag
     local authorNumber    = player.PlayerData.charinfo.phone
     local authorCitizenId = getCitizenIdFromPlayer(player)
     if not authorCitizenId then return end
+    local dedupeKey = authorCitizenId .. '|' .. (content or '') .. '|' .. (image or '')
+    local now = os.time()
+    if _recentPostCreates[dedupeKey] and now - _recentPostCreates[dedupeKey] < 5 then return end
+    _recentPostCreates[dedupeKey] = now
     local firstName = getFirstName(player)
     local lastName  = getLastName(player)
     local handle    = makeHandle(authorName)
@@ -1041,12 +1047,18 @@ RegisterServerEvent('qb-phone:server:deleteCalendarEvent', function(source, even
     sendCalendarEvents(player, citizenid, phone)
 end)
 
+local _recentPhotoSaves = {}
+
 RegisterServerEvent('qb-phone:server:savePhoto', function(source, url)
     if not url or url == '' then return end
     local player = getPlayer(source)
     if not player then return end
     local citizenid = getCitizenIdFromPlayer(player)
     if not citizenid then return end
+    local dedupeKey = citizenid .. '|' .. url
+    local now = os.time()
+    if _recentPhotoSaves[dedupeKey] and now - _recentPhotoSaves[dedupeKey] < 5 then return end
+    _recentPhotoSaves[dedupeKey] = now
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_gallery (citizenid, image) VALUES (?, ?)', { citizenid, url })
 end)
 

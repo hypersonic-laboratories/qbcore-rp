@@ -165,6 +165,7 @@ const PhotosApp = {
         function addFromUrl() {
             const url = urlDraft.value.trim();
             if (!url) return;
+            closeUrlInput();
             hEvent("gallerySavePhoto", { url });
             PHOTOS.unshift({
                 id:       Date.now(),
@@ -172,7 +173,6 @@ const PhotosApp = {
                 gradient: `url(${url}) center/cover no-repeat`,
                 takenAt:  "Just now",
             });
-            closeUrlInput();
         }
 
         function shareToContact(contact) {

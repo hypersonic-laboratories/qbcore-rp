@@ -291,8 +291,10 @@ const GeneApp = {
 
         function createPost() {
             if (!newPostContent.value.trim()) return;
-            hEvent("createPost", { content: newPostContent.value.trim(), image: newPostImageUrl.value.trim() });
+            const content = newPostContent.value.trim();
+            const image = newPostImageUrl.value.trim();
             cancelCompose();
+            hEvent("createPost", { content, image });
         }
 
         function toggleLike(id) {
