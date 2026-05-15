@@ -1,6 +1,4 @@
 QBCore.Functions = {}
-QBCore.Player_Buckets = {}
-QBCore.Entity_Buckets = {}
 QBCore.UsableItems = {}
 
 function QBCore.Functions.GetIdentifier(source)
@@ -54,6 +52,10 @@ end
 
 function QBCore.Functions.GetPlayerByLicense(license)
 	return QBCore.Player.GetPlayerByLicense(license)
+end
+
+function QBCore.Functions.GetOfflinePlayerByLicense(license)
+	return QBCore.Player.GetOfflinePlayerByLicense(license)
 end
 
 function QBCore.Functions.GetPlayerByPhone(number)
@@ -130,14 +132,9 @@ function QBCore.Functions.CanUseItem(item)
 	return QBCore.UsableItems[item]
 end
 
-function QBCore.Functions.DebugServer(tbl)
+function QBCore.Functions.Debug(tbl)
 	if HPlayer then return end
 	HELIXTable.Dump(tbl)
-end
-
-function QBCore.Functions.NotifyPlayer(source, message, type, length, icon)
-	if HPlayer then return end
-	TriggerClientEvent(source, 'QBCore:Notify', message, type, length, icon)
 end
 
 function QBCore.Functions.CreateCitizenId()
@@ -421,18 +418,6 @@ function QBCore.Functions.UpdateGang(gangName, gang)
 	return true, 'success'
 end
 
-function QBCore.Functions.SetPlayerBucket(source, bucket)
-	if source and bucket then
-		local plicense = QBCore.Functions.GetIdentifier(source)
-		source:SetValue('instance', bucket, true)
-		source:SetDimension(bucket)
-		QBCore.Player_Buckets[plicense] = { id = source, bucket = bucket }
-		return true
-	else
-		return false
-	end
-end
-
 function QBCore.Functions.AddPlayerMethod(ids, methodName, handler)
 	local idType = type(ids)
 	if idType == 'number' then
@@ -445,7 +430,7 @@ function QBCore.Functions.AddPlayerMethod(ids, methodName, handler)
 			if not p then return end
 			p:AddMethod(methodName, handler)
 		end
-	elseif idType == 'table' and table.type(ids) == 'array' then
+	elseif idType == 'table' then
 		for i = 1, #ids do
 			QBCore.Functions.AddPlayerMethod(ids[i], methodName, handler)
 		end
@@ -464,7 +449,7 @@ function QBCore.Functions.AddPlayerField(ids, fieldName, data)
 			if not p then return end
 			p:AddField(fieldName, data)
 		end
-	elseif idType == 'table' and table.type(ids) == 'array' then
+	elseif idType == 'table' then
 		for i = 1, #ids do
 			QBCore.Functions.AddPlayerField(ids[i], fieldName, data)
 		end

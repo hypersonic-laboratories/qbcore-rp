@@ -7,9 +7,61 @@ function QBCore.Functions.GetPlayerData()
     return QBCore.PlayerData
 end
 
+function QBCore.Functions.GetCitizenId()
+    return QBCore.PlayerData.citizenid
+end
+
+function QBCore.Functions.GetJob()
+    return QBCore.PlayerData.job
+end
+
+function QBCore.Functions.GetGang()
+    return QBCore.PlayerData.gang
+end
+
+function QBCore.Functions.IsOnDuty()
+    return QBCore.PlayerData.job and QBCore.PlayerData.job.onduty or false
+end
+
+function QBCore.Functions.IsBoss()
+    return QBCore.PlayerData.job and QBCore.PlayerData.job.isboss or false
+end
+
+function QBCore.Functions.IsGangBoss()
+    return QBCore.PlayerData.gang and QBCore.PlayerData.gang.isboss or false
+end
+
+function QBCore.Functions.IsDead()
+    return QBCore.PlayerData.metadata and QBCore.PlayerData.metadata['isdead'] or false
+end
+
+function QBCore.Functions.IsHandcuffed()
+    return QBCore.PlayerData.metadata and QBCore.PlayerData.metadata['ishandcuffed'] or false
+end
+
+function QBCore.Functions.IsInJail()
+    return QBCore.PlayerData.metadata and QBCore.PlayerData.metadata['injail'] or false
+end
+
+function QBCore.Functions.HasLicence(licence)
+    local licences = QBCore.PlayerData.metadata and QBCore.PlayerData.metadata.licences
+    if not licences then return false end
+    return licences[licence] or false
+end
+
+function QBCore.Functions.GetCharInfo(key)
+    if not QBCore.PlayerData.charinfo then return nil end
+    return QBCore.PlayerData.charinfo[key]
+end
+
+function QBCore.Functions.CanAfford(moneytype, amount)
+    if not QBCore.PlayerData.money then return false end
+    return (QBCore.PlayerData.money[moneytype] or 0) >= amount
+end
+
 -- Functions
 
-function QBCore.Functions.DebugClient(tbl)
+function QBCore.Functions.Debug(tbl)
     if not HPlayer then return end
     HELIXTable.Dump(tbl)
 end

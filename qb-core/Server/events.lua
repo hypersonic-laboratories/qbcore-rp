@@ -9,7 +9,6 @@ RegisterServerEvent('QBCore:UpdatePlayer', function(source)
     if newThirst <= 0 then newThirst = 0 end
     Player:SetMetaData('thirst', newThirst)
     Player:SetMetaData('hunger', newHunger)
-    TriggerClientEvent(source, 'qb-hud:client:UpdateNeeds', newHunger, newThirst)
     Player:Save()
 end)
 
@@ -23,6 +22,4 @@ RegisterServerEvent('QBCore:ToggleDuty', function(source)
         Player:SetJobDuty(true)
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('info.on_duty'))
     end
-    TriggerLocalServerEvent('QBCore:Server:SetDuty', source, Player.PlayerData.job.onduty)
-    TriggerClientEvent(source, 'QBCore:Client:SetDuty', Player.PlayerData.job.onduty)
 end)

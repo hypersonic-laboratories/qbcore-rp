@@ -3,7 +3,7 @@ local Vehicles = exports['qb-core']:GetShared('Vehicles')
 local FingerprintSessions = {}
 local States = {
     Escorted = {}, -- <target_ped: AHCharacter, escorting_source: AHPlayerController>
-    Cuffed = {} -- <target_citizenid: string, cuffing_source: AHPlayerController> ID used for persistence
+    Cuffed = {}    -- <target_citizenid: string, cuffing_source: AHPlayerController> ID used for persistence
 }
 
 -- Functions
@@ -312,7 +312,7 @@ RegisterServerEvent('qb-policejob:server:toggleTracker', function(source, args)
 
     local NewTrackerState = not TargetPlayer.PlayerData.metadata.tracker
     TargetPlayer.SetMetaData('tracker', NewTrackerState)
-    
+
     local FirstName = TargetPlayer.PlayerData.charinfo.firstname
     local LastName = TargetPlayer.PlayerData.charinfo.lastname
     local NameData = { firstname = FirstName, lastname = LastName }
@@ -370,7 +370,7 @@ Events.SubscribeRemote('qb-policejob:server:panicButton', function(source)
             Events.CallRemote('qb-policejob:client:policeAlert', v.PlayerData.source, ped_coords, text)
         end
     end
-end)
+end)]]
 
 -- Items
 
@@ -398,13 +398,14 @@ local function handcuff(source)
     end, 5000)
 end
 
-QBCore.Functions.CreateUseableItem('handcuffs', function(source)
+exports['qb-core']:CreateUseableItem('handcuffs', { event = 'qb-policejob:server:useHandcuffs' })
+
+RegisterServerEvent('qb-policejob:server:useHandcuffs', function(source)
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' and not Player.PlayerData.job.onduty then
-        Events.CallRemote('QBCore:Notify', source, Lang:t('error.on_duty_police_only'), 'error')
+    if Player.PlayerData.job.type ~= 'leo' or not Player.PlayerData.job.onduty then
+        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.on_duty_police_only'), 'error')
         return
     end
     handcuff(source)
 end)
- ]]

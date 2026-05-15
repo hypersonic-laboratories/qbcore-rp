@@ -440,13 +440,15 @@ end)
 
 -- Items
 
--- QBCore.Functions.CreateUseableItem('bank_card', function(source, item)
---     local Player = exports['qb-core']:GetPlayer(source)
---     if not Player then return end
---     if Player.Functions.GetItemByName(item.name) then
---         TriggerClientEvent('qb-banking:client:useCard', source)
---     end
--- end)
+exports['qb-core']:CreateUseableItem('bank_card', { event = 'qb-banking:server:useCard' })
+
+RegisterServerEvent('qb-banking:server:useCard', function(source)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player then return end
+    if Player.HasItem('bank_card') then
+        TriggerClientEvent('qb-banking:client:useCard', source)
+    end
+end)
 
 -- Threads
 

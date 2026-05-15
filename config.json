@@ -27,6 +27,7 @@
     "qb-admin",
     "qb-fishing",
     "qb-mining",
-    "qb-phone"
+    "qb-phone",
+    "qb-consumables"
   ]
 }

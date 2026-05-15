@@ -1,10 +1,27 @@
-QBCore.Players = {}
-QBCore.Player  = {}
+--[[
+    Getting a player:
+
+        local Player = exports['qb-core']:GetPlayer(source)          -- online, by server id
+        local Player = exports['qb-core']:GetPlayerByCitizenId(cid)  -- online, by citizenid
+        local Player = exports['qb-core']:GetOfflinePlayerByCitizenId(cid) -- offline, DB lookup
+
+    Calling functions:
+
+        Player.AddMoney('cash', 500, 'reason')
+        Player.RemoveMoney('bank', 200, 'reason')
+        Player.SetJob('police', 2)
+        Player.SetMetaData('hunger', 100)
+        Player.Save()
+]]
+
+QBCore.Players            = {}
+QBCore.Player             = {}
+QBCore.PlayersByCitizenId = {}
 
 -- ─────────────────────────── Player class ───────────────────────────────────
 
-local Player   = {}
-Player.__index = Player
+local Player              = {}
+Player.__index            = Player
 
 function Player.new(PlayerData, Offline)
     local instance      = setmetatable({}, Player)
@@ -70,11 +87,6 @@ end
 
 -- ─────────────────────────── instance methods ───────────────────────────────
 
-function Player:GetPlayerData()
-    return self.PlayerData
-end
-
--- Full sync on first load; targeted field update on subsequent mutations.
 function Player:UpdateClient(key, value)
     if self.Offline then return end
     if key ~= nil then
@@ -82,6 +94,11 @@ function Player:UpdateClient(key, value)
     else
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Player:SetPlayerData', self.PlayerData)
     end
+end
+
+function Player:UpdateClientSub(key, subKey, value)
+    if self.Offline then return end
+    TriggerClientEvent(self.PlayerData.source, 'QBCore:Player:OnSubFieldUpdate', key, subKey, value)
 end
 
 function Player:SetJob(job, grade)
@@ -104,7 +121,6 @@ function Player:SetJob(job, grade)
         self.PlayerData.job.isboss        = gradeInfo.isboss or false
     end
     if not self.Offline then
-        self:UpdateClient('job', self.PlayerData.job)
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnJobUpdate', self.PlayerData.job)
     end
     return true
@@ -127,25 +143,56 @@ function Player:SetGang(gang, grade)
         self.PlayerData.gang.isboss       = gradeInfo.isboss or false
     end
     if not self.Offline then
-        self:UpdateClient('gang', self.PlayerData.gang)
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnGangUpdate', self.PlayerData.gang)
     end
     return true
+end
+
+function Player:GetGang()
+    return self.PlayerData.gang
+end
+
+function Player:IsGangBoss()
+    return self.PlayerData.gang.isboss
 end
 
 function Player:Notify(text, notifType, length, icon)
     TriggerClientEvent(self.PlayerData.source, 'QBCore:Notify', text, notifType, length, icon)
 end
 
+function Player:GetSource()
+    return self.PlayerData.source
+end
+
+function Player:GetCitizenId()
+    return self.PlayerData.citizenid
+end
+
+function Player:GetName()
+    local charinfo = self.PlayerData.charinfo
+    return charinfo.firstname .. ' ' .. charinfo.lastname
+end
+
 function Player:HasItem(items, amount)
-    return QBCore.Functions.HasItem(self.PlayerData.source, items, amount)
+    return exports['qb-inventory']:HasItem(self.PlayerData.source, items, amount)
+end
+
+function Player:GetJob()
+    return self.PlayerData.job
+end
+
+function Player:IsOnDuty()
+    return self.PlayerData.job.onduty
+end
+
+function Player:IsBoss()
+    return self.PlayerData.job.isboss
 end
 
 function Player:SetJobDuty(onDuty)
     self.PlayerData.job.onduty = not not onDuty
     if not self.Offline then
-        self:UpdateClient('job', self.PlayerData.job)
-        TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnJobUpdate', self.PlayerData.job)
+        self:UpdateClientSub('job', 'onduty', self.PlayerData.job.onduty)
     end
 end
 
@@ -157,11 +204,11 @@ end
 
 function Player:SetMetaData(meta, val)
     if not meta or type(meta) ~= 'string' then return end
-    if meta == 'hunger' or meta == 'thirst' then
-        val = val > 100 and 100 or val
+    if meta == 'hunger' or meta == 'thirst' or meta == 'stress' or meta == 'armor' then
+        val = math.min(100, math.max(0, val))
     end
     self.PlayerData.metadata[meta] = val
-    self:UpdateClient('metadata', self.PlayerData.metadata)
+    self:UpdateClientSub('metadata', meta, val)
 end
 
 function Player:GetMetaData(meta)
@@ -169,12 +216,48 @@ function Player:GetMetaData(meta)
     return self.PlayerData.metadata[meta]
 end
 
-function Player:AddJobReputation(amount)
-    if not amount then return end
-    amount = tonumber(amount)
-    local jobName = self.PlayerData.job.name
-    self.PlayerData.metadata.jobrep[jobName] = self.PlayerData.metadata.jobrep[jobName] + amount
-    self:UpdateClient('metadata', self.PlayerData.metadata)
+function Player:IsDead()
+    return self.PlayerData.metadata.isdead
+end
+
+function Player:IsHandcuffed()
+    return self.PlayerData.metadata.ishandcuffed
+end
+
+function Player:IsInJail()
+    return self.PlayerData.metadata.injail > 0
+end
+
+function Player:HasLicence(licence)
+    if not licence or type(licence) ~= 'string' then return false end
+    return self.PlayerData.metadata.licences[licence] == true
+end
+
+function Player:SetLicence(licence, val)
+    if not licence or type(licence) ~= 'string' then return end
+    self.PlayerData.metadata.licences[licence] = not not val
+    self:UpdateClientSub('metadata', 'licences', self.PlayerData.metadata.licences)
+end
+
+function Player:AddRep(rep, amount)
+    if not rep or not amount then return end
+    local addAmount                      = tonumber(amount)
+    local currentRep                     = self.PlayerData.metadata['rep'][rep] or 0
+    self.PlayerData.metadata['rep'][rep] = currentRep + addAmount
+    self:UpdateClientSub('metadata', 'rep', self.PlayerData.metadata.rep)
+end
+
+function Player:RemoveRep(rep, amount)
+    if not rep or not amount then return end
+    local removeAmount                   = tonumber(amount)
+    local currentRep                     = self.PlayerData.metadata['rep'][rep] or 0
+    self.PlayerData.metadata['rep'][rep] = math.max(0, currentRep - removeAmount)
+    self:UpdateClientSub('metadata', 'rep', self.PlayerData.metadata.rep)
+end
+
+function Player:GetRep(rep)
+    if not rep then return end
+    return self.PlayerData.metadata['rep'][rep] or 0
 end
 
 function Player:AddMoney(moneytype, amount, reason)
@@ -185,7 +268,7 @@ function Player:AddMoney(moneytype, amount, reason)
     if not self.PlayerData.money[moneytype] then return false end
     self.PlayerData.money[moneytype] = self.PlayerData.money[moneytype] + amount
     if not self.Offline then
-        self:UpdateClient('money', self.PlayerData.money)
+        self:UpdateClientSub('money', moneytype, self.PlayerData.money[moneytype])
         TriggerClientEvent(self.PlayerData.source, 'qb-hud:client:OnMoneyChange', moneytype, amount, false)
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnMoneyChange', moneytype, amount, 'add', reason)
     end
@@ -205,7 +288,7 @@ function Player:RemoveMoney(moneytype, amount, reason)
     end
     self.PlayerData.money[moneytype] = self.PlayerData.money[moneytype] - amount
     if not self.Offline then
-        self:UpdateClient('money', self.PlayerData.money)
+        self:UpdateClientSub('money', moneytype, self.PlayerData.money[moneytype])
         TriggerClientEvent(self.PlayerData.source, 'qb-hud:client:OnMoneyChange', moneytype, amount, true)
         if moneytype == 'bank' then
             TriggerClientEvent(self.PlayerData.source, 'qb-phone:client:RemoveBankMoney', amount)
@@ -224,7 +307,7 @@ function Player:SetMoney(moneytype, amount, reason)
     local difference = amount - self.PlayerData.money[moneytype]
     self.PlayerData.money[moneytype] = amount
     if not self.Offline then
-        self:UpdateClient('money', self.PlayerData.money)
+        self:UpdateClientSub('money', moneytype, amount)
         TriggerClientEvent(self.PlayerData.source, 'qb-hud:client:OnMoneyChange', moneytype, math.abs(difference), difference < 0)
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnMoneyChange', moneytype, amount, 'set', reason)
     end
@@ -237,9 +320,29 @@ function Player:GetMoney(moneytype)
     return self.PlayerData.money[moneytype]
 end
 
+function Player:CanAfford(moneytype, amount)
+    if not moneytype or not amount then return false end
+    moneytype     = moneytype:lower()
+    amount        = tonumber(amount)
+    local balance = self.PlayerData.money[moneytype]
+    if not balance then return false end
+    return balance >= amount
+end
+
+function Player:GetCharInfo(key)
+    if not key or type(key) ~= 'string' then return end
+    return self.PlayerData.charinfo[key]
+end
+
+function Player:SetCharInfo(key, val)
+    if not key or type(key) ~= 'string' then return end
+    self.PlayerData.charinfo[key] = val
+    self:UpdateClientSub('charinfo', key, val)
+end
+
 function Player:SetCreditCard(cardNumber)
     self.PlayerData.charinfo.card = cardNumber
-    self:UpdateClient('charinfo', self.PlayerData.charinfo)
+    self:UpdateClientSub('charinfo', 'card', cardNumber)
 end
 
 function Player:GetCardSlot(cardNumber, cardType)
@@ -310,7 +413,7 @@ function QBCore.Player.GetOfflinePlayer(citizenid)
     if not citizenid then return nil end
     local result = Database.Select('SELECT * FROM players WHERE citizenid = ? LIMIT 1', { citizenid })
     if not result or #result == 0 then return nil end
-    local PlayerData = result[1].Columns:ToTable()
+    local PlayerData    = result[1].Columns:ToTable()
     PlayerData.money    = JSON.parse(PlayerData.money)
     PlayerData.job      = JSON.parse(PlayerData.job)
     PlayerData.gang     = JSON.parse(PlayerData.gang)
@@ -328,8 +431,23 @@ function QBCore.Player.GetPlayerByLicense(license)
     return nil
 end
 
+function QBCore.Player.GetOfflinePlayerByLicense(license)
+    if not license then return nil end
+    local result = Database.Select('SELECT * FROM players WHERE license = ? LIMIT 1', { license })
+    if not result or #result == 0 then return nil end
+    local PlayerData    = result[1].Columns:ToTable()
+    PlayerData.money    = JSON.parse(PlayerData.money)
+    PlayerData.job      = JSON.parse(PlayerData.job)
+    PlayerData.gang     = JSON.parse(PlayerData.gang)
+    PlayerData.position = JSON.parse(PlayerData.position)
+    PlayerData.metadata = JSON.parse(PlayerData.metadata)
+    PlayerData.charinfo = JSON.parse(PlayerData.charinfo)
+    PlayerData.items    = formatItems(JSON.parse(PlayerData.inventory))
+    return QBCore.Player.CheckPlayerData(nil, PlayerData)
+end
+
 function QBCore.Player.CheckPlayerData(source, PlayerData)
-    PlayerData = PlayerData or {}
+    PlayerData    = PlayerData or {}
     local Offline = not source
     if source then
         PlayerData.source  = source
@@ -338,7 +456,52 @@ function QBCore.Player.CheckPlayerData(source, PlayerData)
         PlayerData.license = PlayerState:GetHelixUserId()
         PlayerData.name    = PlayerState:GetPlayerName()
     end
+
+    local validatedJob = false
+    if PlayerData.job and PlayerData.job.name ~= nil and PlayerData.job.grade and PlayerData.job.grade.level ~= nil then
+        local jobInfo = QBCore.Shared.Jobs[PlayerData.job.name]
+        if jobInfo then
+            local jobGradeInfo = jobInfo.grades[tostring(PlayerData.job.grade.level)]
+            if jobGradeInfo then
+                PlayerData.job.label         = jobInfo.label
+                PlayerData.job.grade.name    = jobGradeInfo.name
+                PlayerData.job.grade.payment = jobGradeInfo.payment
+                PlayerData.job.grade.isboss  = jobGradeInfo.isboss or false
+                PlayerData.job.isboss        = jobGradeInfo.isboss or false
+                validatedJob                 = true
+            end
+        end
+    end
+
+    if not validatedJob then PlayerData.job = nil end
+
+    local validatedGang = false
+    if PlayerData.gang and PlayerData.gang.name ~= nil and PlayerData.gang.grade and PlayerData.gang.grade.level ~= nil then
+        local gangInfo = QBCore.Shared.Gangs[PlayerData.gang.name]
+        if gangInfo then
+            local gangGradeInfo = gangInfo.grades[tostring(PlayerData.gang.grade.level)]
+            if gangGradeInfo then
+                PlayerData.gang.label         = gangInfo.label
+                PlayerData.gang.grade.name    = gangGradeInfo.name
+                PlayerData.gang.grade.payment = gangGradeInfo.payment
+                PlayerData.gang.grade.isboss  = gangGradeInfo.isboss or false
+                PlayerData.gang.isboss        = gangGradeInfo.isboss or false
+                validatedGang                 = true
+            end
+        end
+    end
+
+    if not validatedGang then PlayerData.gang = nil end
+
     applyDefaults(PlayerData, QBCore.Config.Player.PlayerDefaults)
+
+    if PlayerData.job and QBCore.Shared.ForceJobDefaultDutyAtLogin then
+        local jobInfo = QBCore.Shared.Jobs[PlayerData.job.name]
+        if jobInfo then
+            PlayerData.job.onduty = jobInfo.defaultDuty
+        end
+    end
+
     return QBCore.Player.CreatePlayer(PlayerData, Offline)
 end
 
@@ -350,7 +513,8 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
     end
 
     if not Offline then
-        QBCore.Players[PlayerData.source] = player
+        QBCore.Players[PlayerData.source]               = player
+        QBCore.PlayersByCitizenId[PlayerData.citizenid] = player
         QBCore.Player.Save(PlayerData.source)
         player:UpdateClient()
     end
@@ -364,21 +528,11 @@ function QBCore.Player.Logout(source)
     player:Save()
     TriggerClientEvent(source, 'QBCore:Client:OnPlayerUnload')
     TriggerLocalServerEvent('QBCore:Server:OnPlayerUnload', source)
-    QBCore.Player_Buckets[player.PlayerData.license] = nil
+    QBCore.PlayersByCitizenId[player.PlayerData.citizenid] = nil
     QBCore.Players[source] = nil
 end
 
-function QBCore.Player.Save(source)
-    local pcoords    = QBCore.Config.DefaultSpawn
-    local ped        = GetPlayerPawn(source)
-    pcoords          = ped and GetEntityCoords(ped) or (PositionCache[source] or pcoords)
-
-    local PlayerData = QBCore.Players[source].PlayerData
-    if not PlayerData then
-        print('ERROR QBCORE.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
-        return
-    end
-
+local function writePlayerToDatabase(PlayerData, position)
     local ItemsJson = {}
     if PlayerData.items and next(PlayerData.items) then
         for slot, item in pairs(PlayerData.items) do
@@ -415,12 +569,35 @@ function QBCore.Player.Save(source)
         JSON.stringify(PlayerData.charinfo),
         JSON.stringify(PlayerData.job),
         JSON.stringify(PlayerData.gang),
-        JSON.stringify({ x = pcoords.X, y = pcoords.Y, z = pcoords.Z }),
+        JSON.stringify(position),
         JSON.stringify(PlayerData.metadata),
         JSON.stringify(ItemsJson),
     })
+end
 
+function QBCore.Player.Save(source)
+    local PlayerData = QBCore.Players[source].PlayerData
+    if not PlayerData then
+        print('ERROR QBCORE.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
+        return
+    end
+
+    local pcoords = QBCore.Config.DefaultSpawn
+    local ped     = GetPlayerPawn(source)
+    pcoords       = ped and GetEntityCoords(ped) or (PositionCache[source] or pcoords)
+
+    writePlayerToDatabase(PlayerData, { x = pcoords.X, y = pcoords.Y, z = pcoords.Z })
     print(('[QBCORE] Saved player data for %s (Citizen ID: %s)'):format(PlayerData.name, PlayerData.citizenid))
+end
+
+function QBCore.Player.SaveOffline(PlayerData)
+    if not PlayerData then
+        print('ERROR QBCORE.PLAYER.SAVEOFFLINE - PLAYERDATA IS EMPTY!')
+        return
+    end
+
+    writePlayerToDatabase(PlayerData, PlayerData.position)
+    print(('[QBCORE] Saved offline player data for %s (Citizen ID: %s)'):format(PlayerData.name, PlayerData.citizenid))
 end
 
 local playertables = {

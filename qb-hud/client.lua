@@ -45,18 +45,13 @@ RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
     player_data = {}
 end)
 
-RegisterClientEvent('QBCore:Player:SetPlayerData', function(val)
-    player_data = val
+RegisterClientEvent('QBCore:Player:OnFieldUpdate', function(key, val)
+    player_data[key] = val
 end)
 
-RegisterClientEvent('QBCore:Player:OnFieldUpdate', function(key, val)
-    if key == 'money' then
-        player_data.money = val
-        if my_webui then
-            my_webui:SendEvent('ShowCashAmount', round(val.cash or 0))
-        end
-    elseif key == 'metadata' then
-        player_data.metadata = val
+RegisterClientEvent('QBCore:Player:OnSubFieldUpdate', function(key, subKey, val)
+    if player_data[key] then
+        player_data[key][subKey] = val
     end
 end)
 
@@ -87,11 +82,6 @@ RegisterClientEvent('qb-hud:client:OnMoneyChange', function(type, amount, isMinu
         isMinus = isMinus,
         type = type
     })
-end)
-
-RegisterClientEvent('qb-hud:client:UpdateNeeds', function(newHunger, newThirst)
-    hunger = newHunger
-    thirst = newThirst
 end)
 
 -- Game Events

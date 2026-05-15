@@ -4,6 +4,24 @@ RegisterClientEvent('QBCore:Player:SetPlayerData', function(val)
     QBCore.PlayerData = val
 end)
 
+RegisterClientEvent('QBCore:Player:OnFieldUpdate', function(key, value)
+    QBCore.PlayerData[key] = value
+end)
+
+RegisterClientEvent('QBCore:Player:OnSubFieldUpdate', function(key, subKey, value)
+    if QBCore.PlayerData[key] then
+        QBCore.PlayerData[key][subKey] = value
+    end
+end)
+
+RegisterClientEvent('QBCore:Client:OnJobUpdate', function(job)
+    QBCore.PlayerData.job = job
+end)
+
+RegisterClientEvent('QBCore:Client:OnGangUpdate', function(gang)
+    QBCore.PlayerData.gang = gang
+end)
+
 RegisterClientEvent('QBCore:Player:UpdatePlayerData', function()
     TriggerServerEvent('QBCore:UpdatePlayer')
 end)

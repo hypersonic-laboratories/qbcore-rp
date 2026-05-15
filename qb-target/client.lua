@@ -85,10 +85,6 @@ RegisterClientEvent('QBCore:Client:OnGangUpdate', function(GangInfo)
     player_data.gang = GangInfo
 end)
 
-RegisterClientEvent('QBCore:Player:SetPlayerData', function(val)
-    player_data = val
-end)
-
 function onShutdown()
     if my_webui then
         my_webui:Destroy()

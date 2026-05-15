@@ -259,19 +259,15 @@ end
 
 exports('qb-inventory', 'GetUsableItem', GetUsableItem)
 
-function UseItem(itemName, ...)
-    local itemData = GetUsableItem(itemName)
-    local callback = type(itemData) == 'table' and (rawget(itemData, '__cfx_functionReference') and itemData or itemData.cb or itemData.callback) or type(itemData) == 'function' and itemData
-    if not callback then return end
-    callback(...)
+function UseItem(itemName, source, itemData)
+    local item = GetUsableItem(itemName)
+    if not item or not item.event then return end
+    TriggerLocalServerEvent(item.event, source, itemData)
 end
 
 exports('qb-inventory', 'UseItem', UseItem)
 
 function CloseInventory(source, identifier)
-    local player_ped = GetPlayerPawn(source)
-    --player_ped:SetInputEnabled(true)
-    --source:SetValue('inv_busy', false, true)
     if identifier and Inventories[identifier] then
         Inventories[identifier].isOpen = false
     end
