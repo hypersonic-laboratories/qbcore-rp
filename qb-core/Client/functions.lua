@@ -1,5 +1,5 @@
 QBCore.Functions = {}
-local my_webui = WebUI('qb-core', 'qb-core/Client/html/index.html', 0)
+local my_webui = WebUI('qb-core', 'qb-core/html/index.html', 0)
 
 -- Getter Functions
 
