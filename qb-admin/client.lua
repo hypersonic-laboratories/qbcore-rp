@@ -203,7 +203,9 @@ RegisterClientEvent('qb-admin:client:reportsClearedResolved', function(payload)
     my_webui:SendEvent('qb-admin:reportsClearedResolved', payload)
 end)
 
-RegisterClientEvent('qb-admin:client:dashboardAnnounce', function() end)
+RegisterClientEvent('qb-admin:client:dashboardAnnounce', function(message)
+    -- TO DO: Display dashboard announcements to players/admins.
+end)
 
 RegisterClientEvent('qb-admin:client:openClothing', function()
     TriggerLocalClientEvent('qb-clothing:client:openMenu')
@@ -233,7 +235,7 @@ end)
 local overheadNamesActive = false
 RegisterClientEvent('qb-admin:client:toggleOverheadNames', function()
     overheadNamesActive = not overheadNamesActive
-    TriggerLocalClientEvent('qb-admin:client:overheadNamesChanged', overheadNamesActive)
+    -- TO DO: Implement overhead names functionality
 end)
 
 local spectateTargetId = nil
@@ -243,6 +245,7 @@ RegisterClientEvent('qb-admin:client:spectatePlayer', function(targetPlayerId)
         return
     end
     spectateTargetId = targetPlayerId
+    -- TO DO: Attach camera/view to the target player while spectating is active.
 end)
 
 -- Commands
