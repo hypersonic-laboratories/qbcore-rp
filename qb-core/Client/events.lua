@@ -7,7 +7,7 @@ RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     QBCore.IsLoggedIn = true
 end)
 
-RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
+RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
     QBCore.IsLoggedIn = false
     QBCore.PlayerData = {}
 end)

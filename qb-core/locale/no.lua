@@ -1,22 +1,22 @@
 local Translations = {
     error = {
-        not_online = 'Spiller ikke online',
-        wrong_format = 'Ugyldig format',
-        missing_args = 'Ikke alle argumenter er lagt inn (x, y, z)',
-        missing_args2 = 'Alle argumenter må fylles ut!',
-        no_access = 'Du mangler tilgang til denne kommandoen',
-        company_too_poor = 'Arbeidsgiveren din er blakk',
-        item_not_exist = 'Gjenstand finnes ikke',
-        too_heavy = 'Lommene er fulle',
-        location_not_exist = 'Plassering finnes ikke',
-        duplicate_license = 'Duplikat Rockstar-lisens funnet',
-        no_valid_license  = 'Ingen gyldig Rockstar-lisens funnet',
-        not_whitelisted = 'Du har ikke tilgang til serveren',
-        server_already_open = 'Serveren er allerede åpen',
+        not_online            = 'Spiller ikke online',
+        wrong_format          = 'Ugyldig format',
+        missing_args          = 'Ikke alle argumenter er lagt inn (x, y, z)',
+        missing_args2         = 'Alle argumenter må fylles ut!',
+        no_access             = 'Du mangler tilgang til denne kommandoen',
+        company_too_poor      = 'Arbeidsgiveren din er blakk',
+        item_not_exist        = 'Gjenstand finnes ikke',
+        too_heavy             = 'Lommene er fulle',
+        location_not_exist    = 'Plassering finnes ikke',
+        duplicate_license     = 'Duplikat Rockstar-lisens funnet',
+        no_valid_license      = 'Ingen gyldig Rockstar-lisens funnet',
+        not_whitelisted       = 'Du har ikke tilgang til serveren',
+        server_already_open   = 'Serveren er allerede åpen',
         server_already_closed = 'Serveren er allerede stengt',
-        no_permission = 'Du har ikke tillatelser til dette..',
-        no_waypoint = 'Ingen markør satt.',
-        tp_error = 'Feil under teleportering.',
+        no_permission         = 'Du har ikke tillatelser til dette..',
+        no_waypoint           = 'Ingen markør satt.',
+        tp_error              = 'Feil under teleportering.',
     },
     success = {
         server_opened = 'Serveren er åpnet',
@@ -39,9 +39,9 @@ local Translations = {
         tp = {
             help = 'TP til spiller eller koordinater (kun admin)',
             params = {
-                x = { name = 'id/x', help = 'ID for spiller eller X-posisjon'},
-                y = { name = 'y', help = 'Y posisjon'},
-                z = { name = 'z', help = 'Z posisjon'},
+                x = { name = 'id/x', help = 'ID for spiller eller X-posisjon' },
+                y = { name = 'y', help = 'Y posisjon' },
+                z = { name = 'z', help = 'Z posisjon' },
             },
         },
         tpm = { help = 'TP Til Markør (kun admin)' },
@@ -50,7 +50,7 @@ local Translations = {
             help = 'Gi spillertilganger (Kun gud)',
             params = {
                 id = { name = 'id', help = 'ID på spiller' },
-                permission = { name = 'permission', help = 'Tilgangsnivå '},
+                permission = { name = 'permission', help = 'Tilgangsnivå ' },
             },
         },
         removepermission = {
@@ -119,7 +119,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'no' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

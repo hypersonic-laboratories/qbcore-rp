@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = 'ผู้เล่นไม่ออนไลน์',
-        wrong_format = 'รูปแบบไม่ถูกต้อง',
-        missing_args = 'ตัวแปรที่ต้องการไม่ถูกกำหนด (x, y, z)',
-        missing_args2 = 'ต้องกำหนดตัวแปรทุกตัวให้ครบ!',
-        no_access = 'ไม่สามารถเข้าถึงคำสั่งนี้ได้',
-        company_too_poor = 'บริษัทของคุณกำลังจะล้มละลาย',
-        item_not_exist = 'ไม่มีไอเทมนี้',
-        too_heavy = 'กระเป๋าเต็มแล้ว',
-        location_not_exist = 'ไม่มีตำแหน่งนี้',
-        duplicate_license = 'พบใบอนุญาต Rockstar ซ้ำ',
-        no_valid_license  = 'ไม่พบใบอนุญาต Rockstar ที่ถูกต้อง',
-        not_whitelisted = 'คุณไม่ได้รับอนุญาตให้เข้าใช้เซิร์ฟเวอร์นี้',
-        server_already_open = 'เซิร์ฟเวอร์ถูกเปิดแล้ว',
-        server_already_closed = 'เซิร์ฟเวอร์ถูกปิดแล้ว',
-        no_permission = 'คุณไม่ได้รับสิทธิ์ในการใช้คำสั่งนี้..',
-        no_waypoint = 'ไม่มีจุดเส้นทางที่ตั้ง',
-        tp_error = 'ข้อผิดพลาดขณะวาร์ป',
-        connecting_database_error = 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์ (SQL server เปิดอยู่ไหม?)',
+        not_online                  = 'ผู้เล่นไม่ออนไลน์',
+        wrong_format                = 'รูปแบบไม่ถูกต้อง',
+        missing_args                = 'ตัวแปรที่ต้องการไม่ถูกกำหนด (x, y, z)',
+        missing_args2               = 'ต้องกำหนดตัวแปรทุกตัวให้ครบ!',
+        no_access                   = 'ไม่สามารถเข้าถึงคำสั่งนี้ได้',
+        company_too_poor            = 'บริษัทของคุณกำลังจะล้มละลาย',
+        item_not_exist              = 'ไม่มีไอเทมนี้',
+        too_heavy                   = 'กระเป๋าเต็มแล้ว',
+        location_not_exist          = 'ไม่มีตำแหน่งนี้',
+        duplicate_license           = 'พบใบอนุญาต Rockstar ซ้ำ',
+        no_valid_license            = 'ไม่พบใบอนุญาต Rockstar ที่ถูกต้อง',
+        not_whitelisted             = 'คุณไม่ได้รับอนุญาตให้เข้าใช้เซิร์ฟเวอร์นี้',
+        server_already_open         = 'เซิร์ฟเวอร์ถูกเปิดแล้ว',
+        server_already_closed       = 'เซิร์ฟเวอร์ถูกปิดแล้ว',
+        no_permission               = 'คุณไม่ได้รับสิทธิ์ในการใช้คำสั่งนี้..',
+        no_waypoint                 = 'ไม่มีจุดเส้นทางที่ตั้ง',
+        tp_error                    = 'ข้อผิดพลาดขณะวาร์ป',
+        connecting_database_error   = 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์ (SQL server เปิดอยู่ไหม?)',
         connecting_database_timeout = 'เชื่อมต่อกับฐานข้อมูลเกิด timeout (SQL server เปิดอยู่ไหม?'
     },
     success = {
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'เคลือนย้ายไปยัง ผู้เล่น หรือ ตำแหน่งพิกัด (สำหรับ Admin)',
             params = {
-                x = { name = 'id/x', help = 'ไอดีของผู้เล่น หรือ พิกัด x'},
-                y = { name = 'y', help = 'พิกัด y'},
-                z = { name = 'z', help = 'พิกัด z'},
+                x = { name = 'id/x', help = 'ไอดีของผู้เล่น หรือ พิกัด x' },
+                y = { name = 'y', help = 'พิกัด y' },
+                z = { name = 'z', help = 'พิกัด z' },
             },
         },
         tpm = { help = 'เคลือนย้ายไปบังจุดมาร์ค (สำหรับ Admin)' },
@@ -119,9 +119,9 @@ local Translations = {
         },
     }
 }
-    
+
 if GetConvar('qb_locale', 'en') == 'th' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

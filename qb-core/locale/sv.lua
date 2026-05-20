@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = 'Spelaren är inte online',
-        wrong_format = 'Felaktigt format',
-        missing_args = 'Alla argument har inte angetts (x, y, z)',
-        missing_args2 = 'Alla argument måste fyllas i!',
-        no_access = 'Du har inte tillgång till detta kommando',
-        company_too_poor = 'Din arbetsgivare är pank',
-        item_not_exist = 'Objektet finns inte',
-        too_heavy = 'Ditt inventory är fullt!',
-        location_not_exist = 'Platsen finns inte',
-        duplicate_license = 'Duplicerad Rockstar Licens Funnet',
-        no_valid_license  = 'Ingen Giltig Rockstar Licens Hittades',
-        not_whitelisted = 'Du är inte whitelistad på servern',
-        server_already_open = 'Servern är redan öppen',
-        server_already_closed = 'Servern är redan stängd',
-        no_permission = 'Du har inte behörigheter för detta..',
-        no_waypoint = 'Ingen waypoint satt.',
-        tp_error = 'Fel vid teleportering.',
-        connecting_database_error = 'Ett databasfel inträffade under anslutningen till servern.(Är SQL-servern på?)',
+        not_online                  = 'Spelaren är inte online',
+        wrong_format                = 'Felaktigt format',
+        missing_args                = 'Alla argument har inte angetts (x, y, z)',
+        missing_args2               = 'Alla argument måste fyllas i!',
+        no_access                   = 'Du har inte tillgång till detta kommando',
+        company_too_poor            = 'Din arbetsgivare är pank',
+        item_not_exist              = 'Objektet finns inte',
+        too_heavy                   = 'Ditt inventory är fullt!',
+        location_not_exist          = 'Platsen finns inte',
+        duplicate_license           = 'Duplicerad Rockstar Licens Funnet',
+        no_valid_license            = 'Ingen Giltig Rockstar Licens Hittades',
+        not_whitelisted             = 'Du är inte whitelistad på servern',
+        server_already_open         = 'Servern är redan öppen',
+        server_already_closed       = 'Servern är redan stängd',
+        no_permission               = 'Du har inte behörigheter för detta..',
+        no_waypoint                 = 'Ingen waypoint satt.',
+        tp_error                    = 'Fel vid teleportering.',
+        connecting_database_error   = 'Ett databasfel inträffade under anslutningen till servern.(Är SQL-servern på?)',
         connecting_database_timeout = 'Anslutning till databasen timed out.(Är SQL-servern på?)',
     },
     success = {
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'TP till spelare eller koords (Admin Only)',
             params = {
-                x = { name = 'id/x', help = 'ID för spelare eller X-position'},
-                y = { name = 'y', help = 'Y position'},
-                z = { name = 'z', help = 'Z position'},
+                x = { name = 'id/x', help = 'ID för spelare eller X-position' },
+                y = { name = 'y', help = 'Y position' },
+                z = { name = 'z', help = 'Z position' },
             },
         },
         tpm = { help = 'TP till markör (Admin Only)' },
@@ -121,7 +121,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'sv' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

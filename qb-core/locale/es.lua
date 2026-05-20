@@ -1,22 +1,22 @@
 local Translations = {
     error = {
-        not_online = 'El jugador no está conectado',
-        wrong_format = 'Formato incorrecto',
-        missing_args = 'No se han ingresado todos los argumentos (x, y, z)',
-        missing_args2 = '¡Debes ingresar todos los argumentos!',
-        no_access = 'No tienes acceso a este comando',
-        company_too_poor = 'Tu empleador está en bancarrota',
-        item_not_exist = 'El objeto no existe',
-        too_heavy = 'No hay espacio en tu inventario',
-        location_not_exist = 'La ubicación no existe',
-        duplicate_license = 'Licencia de Rockstar duplicada',
-        no_valid_license  = 'No tienes una licencia de Rockstar válida',
-        not_whitelisted = 'No tienes acceso a este servidor',
-        server_already_open = 'El servidor ya está abierto',
-        server_already_closed = 'El servidor ya está cerrado',
-        no_permission = 'No tienes permisos para esto..',
-        no_waypoint = 'No hay waypoint establecido.',
-        tp_error = 'Error mientras se teletransporta.',
+        not_online                  = 'El jugador no está conectado',
+        wrong_format                = 'Formato incorrecto',
+        missing_args                = 'No se han ingresado todos los argumentos (x, y, z)',
+        missing_args2               = '¡Debes ingresar todos los argumentos!',
+        no_access                   = 'No tienes acceso a este comando',
+        company_too_poor            = 'Tu empleador está en bancarrota',
+        item_not_exist              = 'El objeto no existe',
+        too_heavy                   = 'No hay espacio en tu inventario',
+        location_not_exist          = 'La ubicación no existe',
+        duplicate_license           = 'Licencia de Rockstar duplicada',
+        no_valid_license            = 'No tienes una licencia de Rockstar válida',
+        not_whitelisted             = 'No tienes acceso a este servidor',
+        server_already_open         = 'El servidor ya está abierto',
+        server_already_closed       = 'El servidor ya está cerrado',
+        no_permission               = 'No tienes permisos para esto..',
+        no_waypoint                 = 'No hay waypoint establecido.',
+        tp_error                    = 'Error mientras se teletransporta.',
         connecting_database_error   = '[QBCORE] - Un error en la base de datos sucedió mientras te conectabas al servidor (¿Está la SQL del servidor encendida?)',
         connecting_database_timeout = '[QBCORE] - La conexión con la base de datos falló (¿Está la SQL del servidor encendida?)',
     },
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'TP al jugador o a las coordenadas (sólo para admin)',
             params = {
-                x = { name = 'id/x', help = 'ID de jugador o posición X'},
-                y = { name = 'y', help = 'Y posición'},
-                z = { name = 'z', help = 'Z posición'},
+                x = { name = 'id/x', help = 'ID de jugador o posición X' },
+                y = { name = 'y', help = 'Y posición' },
+                z = { name = 'z', help = 'Z posición' },
             },
         },
         tpm = { help = 'TP al marcador (sólo para admin)' },
@@ -124,7 +124,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'es' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

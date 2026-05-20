@@ -1,16 +1,16 @@
 local Translations = {
     error = {
-        not_online = 'Hráč není online',
-        wrong_format = 'Nesprávný formát',
-        missing_args = 'Né všechny argumenty byly vyplněny (x, y, z)',
-        missing_args2 = 'Všechny argumenty musí být vyplněný!',
-        no_access = 'Nemáte přístup k tomuto příkazu',
-        company_too_poor = 'Váš zaměstnavatel nemá dostatek peněz, aby vás vyplatil',
-        item_not_exist = 'Předmět neexistuje',
-        too_heavy = 'Inventář je plný',
+        not_online        = 'Hráč není online',
+        wrong_format      = 'Nesprávný formát',
+        missing_args      = 'Né všechny argumenty byly vyplněny (x, y, z)',
+        missing_args2     = 'Všechny argumenty musí být vyplněný!',
+        no_access         = 'Nemáte přístup k tomuto příkazu',
+        company_too_poor  = 'Váš zaměstnavatel nemá dostatek peněz, aby vás vyplatil',
+        item_not_exist    = 'Předmět neexistuje',
+        too_heavy         = 'Inventář je plný',
         duplicate_license = 'Stejná Rockstar licence je již na serveru',
         no_valid_license  = 'Nebyla nalezena žádná platná Rockstar licence',
-        not_whitelisted = 'Nejste na whitelistu'
+        not_whitelisted   = 'Nejste na whitelistu'
     },
     success = {
         server_opened = 'Server byl otevřen',
@@ -31,9 +31,9 @@ local Translations = {
         tp = {
             help = 'Teleport k hráči nebo na souřadnice (Pouze Admin)',
             params = {
-                x = { name = 'id/x', help = 'ID hráče nebo X pozice'},
-                y = { name = 'y', help = 'Y pozice'},
-                z = { name = 'z', help = 'Z pozice'},
+                x = { name = 'id/x', help = 'ID hráče nebo X pozice' },
+                y = { name = 'y', help = 'Y pozice' },
+                z = { name = 'z', help = 'Z pozice' },
             },
         },
         tpm = { help = 'TP Na Marker (pouze Admin)' },
@@ -111,7 +111,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'cs' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

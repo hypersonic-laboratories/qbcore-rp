@@ -2,6 +2,10 @@
 Locale = {}
 Locale.__index = Locale
 
+-- Exported tables only keep callable methods across package boundaries when the
+-- table itself has a metatable.
+setmetatable(Locale, {})
+
 local function translateKey(phrase, subs)
     if type(phrase) ~= 'string' then
         error('TypeError: translateKey function expects arg #1 to be a string')
@@ -33,7 +37,7 @@ end
 function Locale.new(_, opts)
     local self = setmetatable({}, Locale)
 
-    self.fallback = opts.fallbackLang and Locale:new({
+    self.fallback = opts.fallbackLang and Locale.new({
         warnOnMissing = false,
         phrases = opts.fallbackLang.phrases,
     }) or false

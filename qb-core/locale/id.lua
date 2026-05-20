@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = 'Pemain tidak online',
-        wrong_format = 'Format Salah',
-        missing_args = 'Semua argumen belum dimasukkan (x, y, z)',
-        missing_args2 = 'Semua argumen harus diisi!',
-        no_access = 'Kamu tidak memiliki akses ke perintah ini',
-        company_too_poor = 'Perusahaan kamu tidak mampu membayar kamu',
-        item_not_exist = 'Barang tidak tersedia',
-        too_heavy = 'Inventory terlalu penuh',
-        location_not_exist = 'Lokasi tidak tersedia',
-        duplicate_license = 'Ditemukan Lisensi Rockstar Duplikat',
-        no_valid_license  = 'Tidak Ditemukan Lisensi Rockstar yang Valid',
-        not_whitelisted = 'Kamu tidak masuk daftar putih untuk server ini',
-        server_already_open = 'Server sudah terbuka',
-        server_already_closed = 'Server sudah ditutup',
-        no_permission = 'Kamu tidak memiliki izin untuk ini..',
-        no_waypoint = 'Tidak ada Titik Arah yang Ditetapkan.',
-        tp_error = 'Kesalahan saat teleportasi.',
-        connecting_database_error = 'Terjadi kesalahan database saat menghubungkan ke server. (Apakah server SQL aktif?)',
+        not_online                  = 'Pemain tidak online',
+        wrong_format                = 'Format Salah',
+        missing_args                = 'Semua argumen belum dimasukkan (x, y, z)',
+        missing_args2               = 'Semua argumen harus diisi!',
+        no_access                   = 'Kamu tidak memiliki akses ke perintah ini',
+        company_too_poor            = 'Perusahaan kamu tidak mampu membayar kamu',
+        item_not_exist              = 'Barang tidak tersedia',
+        too_heavy                   = 'Inventory terlalu penuh',
+        location_not_exist          = 'Lokasi tidak tersedia',
+        duplicate_license           = 'Ditemukan Lisensi Rockstar Duplikat',
+        no_valid_license            = 'Tidak Ditemukan Lisensi Rockstar yang Valid',
+        not_whitelisted             = 'Kamu tidak masuk daftar putih untuk server ini',
+        server_already_open         = 'Server sudah terbuka',
+        server_already_closed       = 'Server sudah ditutup',
+        no_permission               = 'Kamu tidak memiliki izin untuk ini..',
+        no_waypoint                 = 'Tidak ada Titik Arah yang Ditetapkan.',
+        tp_error                    = 'Kesalahan saat teleportasi.',
+        connecting_database_error   = 'Terjadi kesalahan database saat menghubungkan ke server. (Apakah server SQL aktif?)',
         connecting_database_timeout = 'Waktu koneksi ke database habis. (Apakah server SQL aktif?)',
     },
     success = {
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'TP Ke Pemain atau Koord (Khusus Admin)',
             params = {
-                x = { name = 'id/x', help = 'ID pemain atau posisi X'},
-                y = { name = 'y', help = 'posisi Y'},
-                z = { name = 'z', help = 'posisi Z'},
+                x = { name = 'id/x', help = 'ID pemain atau posisi X' },
+                y = { name = 'y', help = 'posisi Y' },
+                z = { name = 'z', help = 'posisi Z' },
             },
         },
         tpm = { help = 'TP Ke Penanda (Khusus Admin)' },
@@ -121,7 +121,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'id' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

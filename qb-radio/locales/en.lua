@@ -12,7 +12,7 @@ local Translations = {
     ['increase_radio_volume'] = 'The radio is already set to the lowest volume',
 }
 
-Lang = Lang or Locale:new({
+Lang = Lang or Locale.new({
     phrases = Translations,
     warnOnMissing = true
 })

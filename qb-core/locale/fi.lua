@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = 'Pelaaja ei ole paikalla',
-        wrong_format = 'Väärä formaatti',
-        missing_args = 'Kaikkia argumentteja ei ole syötetty (x, y, z)',
-        missing_args2 = 'Kaikki argumentit on täytettävä!',
-        no_access = 'Ei pääsyä tähän komentoon',
-        company_too_poor = 'Työnantajasi on köyhä',
-        item_not_exist = 'Kohdetta ei ole olemassa',
-        too_heavy = 'Taskusi ovat täynnä',
-        location_not_exist = 'Sijaintia ei ole olemassa',
-        duplicate_license = 'Rockstar-lisenssin kaksoiskappale löydetty',
-        no_valid_license  = 'Voimassa olevaa Rockstar-lisenssiä ei löytynyt',
-        not_whitelisted = 'Sinua ei ole lisätty tämän palvelimen allowlistille',
-        server_already_open = 'Serveri on jo auki',
-        server_already_closed = 'Serveri on jo suljettu',
-        no_permission = 'Sinulla ei ole oikeuksia tämmöseen..',
-        no_waypoint = 'Et ole asettanut waypointtia.',
-        tp_error = 'Virhe teleportatessa.',
-        connecting_database_error = 'Tietokantavirhe muodostettaessa yhteyttä palvelimeen. (Onko SQL-palvelin päällä?)',
+        not_online                  = 'Pelaaja ei ole paikalla',
+        wrong_format                = 'Väärä formaatti',
+        missing_args                = 'Kaikkia argumentteja ei ole syötetty (x, y, z)',
+        missing_args2               = 'Kaikki argumentit on täytettävä!',
+        no_access                   = 'Ei pääsyä tähän komentoon',
+        company_too_poor            = 'Työnantajasi on köyhä',
+        item_not_exist              = 'Kohdetta ei ole olemassa',
+        too_heavy                   = 'Taskusi ovat täynnä',
+        location_not_exist          = 'Sijaintia ei ole olemassa',
+        duplicate_license           = 'Rockstar-lisenssin kaksoiskappale löydetty',
+        no_valid_license            = 'Voimassa olevaa Rockstar-lisenssiä ei löytynyt',
+        not_whitelisted             = 'Sinua ei ole lisätty tämän palvelimen allowlistille',
+        server_already_open         = 'Serveri on jo auki',
+        server_already_closed       = 'Serveri on jo suljettu',
+        no_permission               = 'Sinulla ei ole oikeuksia tämmöseen..',
+        no_waypoint                 = 'Et ole asettanut waypointtia.',
+        tp_error                    = 'Virhe teleportatessa.',
+        connecting_database_error   = 'Tietokantavirhe muodostettaessa yhteyttä palvelimeen. (Onko SQL-palvelin päällä?)',
         connecting_database_timeout = 'Yhteys tietokantaan aikakatkaistiin. (Onko SQL-palvelin päällä?)',
     },
     success = {
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'TP pelaajalle tai koordinaateille (Vain Admineille)',
             params = {
-                x = { name = 'id/x', help = 'Pelaajan ID tai X-paikka'},
-                y = { name = 'y', help = 'Y position'},
-                z = { name = 'z', help = 'Z position'},
+                x = { name = 'id/x', help = 'Pelaajan ID tai X-paikka' },
+                y = { name = 'y', help = 'Y position' },
+                z = { name = 'z', help = 'Z position' },
             },
         },
         tpm = { help = 'TP Markerille (Vain Admineille)' },
@@ -120,7 +120,7 @@ local Translations = {
     },
 }
 
-Lang = Lang or Locale:new({
+Lang = Lang or Locale.new({
     phrases = Translations,
     warnOnMissing = true
 })

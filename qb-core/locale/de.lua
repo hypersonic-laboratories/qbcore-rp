@@ -1,22 +1,22 @@
 local Translations = {
     error = {
-        not_online = 'Der Spieler ist nicht online',
-        wrong_format = 'Falsches Format',
-        missing_args = 'Nicht alle Argumente wurden ausgefüllt (x, y, z)',
-        missing_args2 = 'Alle Argumente müssen ausgefüllt sein!',
-        no_access = 'Kein Zugriff auf diesen Befehl',
-        company_too_poor = 'Dein Arbeitgeber hat kein Geld mehr',
-        item_not_exist = 'Das Item existiert nicht',
-        too_heavy = 'Inventar zu voll',
-        location_not_exist = 'Der Ort existiert nicht',
-        duplicate_license = 'Doppelte Rockstar-Lizenz gefunden',
-        no_valid_license  = 'Keine verifizierte Rockstar-Lizenz gefunden',
-        not_whitelisted = 'Du bist nicht gewhitelisted',
-        server_already_open = 'Der Server ist schon geöffnet',
+        not_online            = 'Der Spieler ist nicht online',
+        wrong_format          = 'Falsches Format',
+        missing_args          = 'Nicht alle Argumente wurden ausgefüllt (x, y, z)',
+        missing_args2         = 'Alle Argumente müssen ausgefüllt sein!',
+        no_access             = 'Kein Zugriff auf diesen Befehl',
+        company_too_poor      = 'Dein Arbeitgeber hat kein Geld mehr',
+        item_not_exist        = 'Das Item existiert nicht',
+        too_heavy             = 'Inventar zu voll',
+        location_not_exist    = 'Der Ort existiert nicht',
+        duplicate_license     = 'Doppelte Rockstar-Lizenz gefunden',
+        no_valid_license      = 'Keine verifizierte Rockstar-Lizenz gefunden',
+        not_whitelisted       = 'Du bist nicht gewhitelisted',
+        server_already_open   = 'Der Server ist schon geöffnet',
         server_already_closed = 'Der Server ist schon geschlossen',
-        no_permission = 'Du hast keine Rechte dafür..',
-        no_waypoint = 'Kein Wegpunkt gesetzt.',
-        tp_error = 'Error beim teleportieren.',
+        no_permission         = 'Du hast keine Rechte dafür..',
+        no_waypoint           = 'Kein Wegpunkt gesetzt.',
+        tp_error              = 'Error beim teleportieren.',
     },
     success = {
         server_opened = 'Der Server wurde geöffnet',
@@ -39,9 +39,9 @@ local Translations = {
         tp = {
             help = 'TP zu Spieler oder Coords (Nur Admins)',
             params = {
-                x = { name = 'id/x', help = 'ID vom Spieler oder X position'},
-                y = { name = 'y', help = 'Y position'},
-                z = { name = 'z', help = 'Z position'},
+                x = { name = 'id/x', help = 'ID vom Spieler oder X position' },
+                y = { name = 'y', help = 'Y position' },
+                z = { name = 'z', help = 'Z position' },
             },
         },
         tpm = { help = 'TP zum Marker (Nur Admins)' },
@@ -122,7 +122,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'de' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

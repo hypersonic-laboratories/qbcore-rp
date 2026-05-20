@@ -15,11 +15,7 @@ end)
 
 Timer.SetTimeout(function()
     for shop, shopData in pairs(Config.Locations) do
-        exports['qb-target']:AddSphereZone(shop, {
-            X = shopData.coords.X,
-            Y = shopData.coords.Y,
-            Z = shopData.coords.Z
-        }, 100.0, {
+        exports['qb-target']:AddSphereZone(shop, shopData.coords, 100.0, {
             debug = true,
             distance = 500
         }, {

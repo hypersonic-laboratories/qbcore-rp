@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = 'Người chơi không trực tuyến',
-        wrong_format = 'Định dạng không chính xác',
-        missing_args = 'Chưa nhập đủ các số (x, y, z)',
-        missing_args2 = 'Tất cả các đối số phải được điền vào!',
-        no_access = 'không có quyền sử dụng lệnh này',
-        company_too_poor = 'Công ty của bạn đã phá sản',
-        item_not_exist = 'Vật phẩm không tồn tại',
-        too_heavy = 'kho đồ đã đầy',
-        location_not_exist = 'Vị trí không tồn tại',
-        duplicate_license = 'Đã tìm thấy giấy phép Rockstar trùng lặp',
-        no_valid_license  = 'Không tìm thấy giấy phép Rockstar hợp lệ',
-        not_whitelisted = 'Bạn không nằm trong danh sách cho phép của máy chủ này',
-        server_already_open = 'Máy chủ đã mở cửa',
-        server_already_closed = 'Máy chủ đã đóng cửa',
-        no_permission = 'Bạn không có quyền để làm việc này',
-        no_waypoint = 'Không có Waypoint nào được đặt.',
-        tp_error = 'Lỗi trong lúc dịch chuyển.',
-        connecting_database_error = 'Đã xảy ra lỗi trong lúc kết nối đến máy chủ CSDL. (Máy chủ SQL đã mở?)',
+        not_online                  = 'Người chơi không trực tuyến',
+        wrong_format                = 'Định dạng không chính xác',
+        missing_args                = 'Chưa nhập đủ các số (x, y, z)',
+        missing_args2               = 'Tất cả các đối số phải được điền vào!',
+        no_access                   = 'không có quyền sử dụng lệnh này',
+        company_too_poor            = 'Công ty của bạn đã phá sản',
+        item_not_exist              = 'Vật phẩm không tồn tại',
+        too_heavy                   = 'kho đồ đã đầy',
+        location_not_exist          = 'Vị trí không tồn tại',
+        duplicate_license           = 'Đã tìm thấy giấy phép Rockstar trùng lặp',
+        no_valid_license            = 'Không tìm thấy giấy phép Rockstar hợp lệ',
+        not_whitelisted             = 'Bạn không nằm trong danh sách cho phép của máy chủ này',
+        server_already_open         = 'Máy chủ đã mở cửa',
+        server_already_closed       = 'Máy chủ đã đóng cửa',
+        no_permission               = 'Bạn không có quyền để làm việc này',
+        no_waypoint                 = 'Không có Waypoint nào được đặt.',
+        tp_error                    = 'Lỗi trong lúc dịch chuyển.',
+        connecting_database_error   = 'Đã xảy ra lỗi trong lúc kết nối đến máy chủ CSDL. (Máy chủ SQL đã mở?)',
         connecting_database_timeout = 'Đã hết thời gian kết nối tới CSDL. (Máy chủ SQL đã mở?)',
     },
     success = {
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'Dịch chuyển đến Người chơi hoặc Tọa độ (Admin)',
             params = {
-                x = { name = 'id/x', help = 'ID người chơi hoặc Tọa độ X'},
-                y = { name = 'y', help = 'Tọa độ Y'},
-                z = { name = 'z', help = 'Tọa độ Z'},
+                x = { name = 'id/x', help = 'ID người chơi hoặc Tọa độ X' },
+                y = { name = 'y', help = 'Tọa độ Y' },
+                z = { name = 'z', help = 'Tọa độ Z' },
             },
         },
         tpm = { help = 'Dịch chuyển đến điểm Đánh dấu (Admin)' },
@@ -121,7 +121,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'vn' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

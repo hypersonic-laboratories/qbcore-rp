@@ -1,22 +1,22 @@
 local Translations = {
     error = {
-        not_online = 'ekki á netinu',
-        wrong_format = 'rangt snið',
-        missing_args = 'Ekki er búið að færa inn öll rök (x, y, z)',
-        missing_args2 = 'Öll rök verður að fylla út!',
-        no_access = 'Enginn aðgangur að þessari skipun',
-        company_too_poor = 'Vinnuveitandi þinn er blankur',
-        item_not_exist = 'Varan er ekki til',
-        too_heavy = 'Birgðir of fullar',
-        location_not_exist = 'Staðsetning er ekki til',
-        duplicate_license = 'Afrit Rockstar leyfi fannst',
-        no_valid_license  = 'Ekkert gilt Rockstar leyfi fannst',
-        not_whitelisted = 'Þú  ert ekki á hvítlista fyrir þennan netþjón',
-        server_already_open = 'Miðlarinn er þegar opinn',
+        not_online            = 'ekki á netinu',
+        wrong_format          = 'rangt snið',
+        missing_args          = 'Ekki er búið að færa inn öll rök (x, y, z)',
+        missing_args2         = 'Öll rök verður að fylla út!',
+        no_access             = 'Enginn aðgangur að þessari skipun',
+        company_too_poor      = 'Vinnuveitandi þinn er blankur',
+        item_not_exist        = 'Varan er ekki til',
+        too_heavy             = 'Birgðir of fullar',
+        location_not_exist    = 'Staðsetning er ekki til',
+        duplicate_license     = 'Afrit Rockstar leyfi fannst',
+        no_valid_license      = 'Ekkert gilt Rockstar leyfi fannst',
+        not_whitelisted       = 'Þú  ert ekki á hvítlista fyrir þennan netþjón',
+        server_already_open   = 'Miðlarinn er þegar opinn',
         server_already_closed = 'Miðlarinn er þegar lokaður',
-        no_permission = 'Þú hefur ekki heimildir fyrir þessu..',
-        no_waypoint = 'Engin leiðarpunktur settur.',
-        tp_error = 'Villa við fjarflutning.',
+        no_permission         = 'Þú hefur ekki heimildir fyrir þessu..',
+        no_waypoint           = 'Engin leiðarpunktur settur.',
+        tp_error              = 'Villa við fjarflutning.',
     },
     success = {
         server_opened = 'Miðlarinn hefur verið opnaður',
@@ -39,9 +39,9 @@ local Translations = {
         tp = {
             help = 'TP Til leikmanns eða coords (Aðeins stjórnandi)',
             params = {
-                x = { name = 'id/x', help = 'ID af leikmanni eða X staða'},
-                y = { name = 'y', help = 'Y position'},
-                z = { name = 'z', help = 'Z position'},
+                x = { name = 'id/x', help = 'ID af leikmanni eða X staða' },
+                y = { name = 'y', help = 'Y position' },
+                z = { name = 'z', help = 'Z position' },
             },
         },
         tpm = { help = 'TP To Til Marker (Aðeins stjórnandi)' },
@@ -119,7 +119,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'is' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

@@ -1,22 +1,22 @@
 local Translations = {
     error = {
-        not_online = 'بازیکن آنلاین نیست',
-        wrong_format = 'فرمت نادرست',
-        missing_args = 'همه اطلاعات وارد نشده است (x, y, z)',
-        missing_args2 = 'باید همه فیلدهای لازم پر شوند!',
-        no_access = 'شما به این دستور دسترسی ندارید',
-        company_too_poor = 'کارفرمای شما پول کافی ندارد',
-        item_not_exist = 'آیتم وجود ندارد',
-        too_heavy = 'فضای کافی در کیف شما نیست',
-        location_not_exist = 'مکان وجود ندارد',
-        duplicate_license = 'لایسنس راکستار تکراری یافت شد',
-        no_valid_license  = 'لایسنس راکستار معتبر یافت نشد',
-        not_whitelisted = 'شما در این سرور لیست سفید نیستید',
-        server_already_open = 'سرور قبلاً باز است',
+        not_online            = 'بازیکن آنلاین نیست',
+        wrong_format          = 'فرمت نادرست',
+        missing_args          = 'همه اطلاعات وارد نشده است (x, y, z)',
+        missing_args2         = 'باید همه فیلدهای لازم پر شوند!',
+        no_access             = 'شما به این دستور دسترسی ندارید',
+        company_too_poor      = 'کارفرمای شما پول کافی ندارد',
+        item_not_exist        = 'آیتم وجود ندارد',
+        too_heavy             = 'فضای کافی در کیف شما نیست',
+        location_not_exist    = 'مکان وجود ندارد',
+        duplicate_license     = 'لایسنس راکستار تکراری یافت شد',
+        no_valid_license      = 'لایسنس راکستار معتبر یافت نشد',
+        not_whitelisted       = 'شما در این سرور لیست سفید نیستید',
+        server_already_open   = 'سرور قبلاً باز است',
         server_already_closed = 'سرور قبلاً بسته است',
-        no_permission = 'شما اجازه این کار را ندارید...',
-        no_waypoint = 'هیچ نقطه‌ای تنظیم نشده است.',
-        tp_error = 'خطا در هنگام انتقال.',
+        no_permission         = 'شما اجازه این کار را ندارید...',
+        no_waypoint           = 'هیچ نقطه‌ای تنظیم نشده است.',
+        tp_error              = 'خطا در هنگام انتقال.',
     },
     success = {
         server_opened = 'سرور باز شد',
@@ -119,7 +119,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'fa' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

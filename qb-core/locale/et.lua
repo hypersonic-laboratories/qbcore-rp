@@ -1,22 +1,22 @@
 local Translations = {
     error = {
-        not_online = 'Mängija pole serveris',
-        wrong_format = 'Vale vorming',
-        missing_args = 'Kõiki argumente pole sisestatud (x, y, z)',
-        missing_args2 = 'Kõik argumendid tuleb täita!',
-        no_access = 'Sellele käsule pole juurdepääsu',
-        company_too_poor = 'Teie tööandja on võlgades',
-        item_not_exist = 'Asi ei eksisteeri',
-        too_heavy = 'Inventuur on liiga täis',
-        location_not_exist = 'Asukoht ei eksisteeri',
-        duplicate_license = 'Leiti Rockstari litsentsi duplikaat',
-        no_valid_license  = 'Kehtivat Rockstari litsentsi ei leitud',
-        not_whitelisted = 'Te ei ole selle serveri jaoks Allowlisted',
-        server_already_open = 'Server on juba avatud',
+        not_online            = 'Mängija pole serveris',
+        wrong_format          = 'Vale vorming',
+        missing_args          = 'Kõiki argumente pole sisestatud (x, y, z)',
+        missing_args2         = 'Kõik argumendid tuleb täita!',
+        no_access             = 'Sellele käsule pole juurdepääsu',
+        company_too_poor      = 'Teie tööandja on võlgades',
+        item_not_exist        = 'Asi ei eksisteeri',
+        too_heavy             = 'Inventuur on liiga täis',
+        location_not_exist    = 'Asukoht ei eksisteeri',
+        duplicate_license     = 'Leiti Rockstari litsentsi duplikaat',
+        no_valid_license      = 'Kehtivat Rockstari litsentsi ei leitud',
+        not_whitelisted       = 'Te ei ole selle serveri jaoks Allowlisted',
+        server_already_open   = 'Server on juba avatud',
         server_already_closed = 'Server on juba suletud',
-        no_permission = 'Teil pole selleks õigusi..',
-        no_waypoint = 'Ühtegi punkti ei ole märgitud.',
-        tp_error = 'Teleportimise viga.',
+        no_permission         = 'Teil pole selleks õigusi..',
+        no_waypoint           = 'Ühtegi punkti ei ole märgitud.',
+        tp_error              = 'Teleportimise viga.',
     },
     success = {
         server_opened = 'Server on avatud',
@@ -39,9 +39,9 @@ local Translations = {
         tp = {
             help = 'TP mängijale või koordinaatidele (ainult administraator)',
             params = {
-                x = { name = 'id/x', help = 'ID mängija või X positsioon'},
-                y = { name = 'y', help = 'Y positsioon'},
-                z = { name = 'z', help = 'Z positsioon'},
+                x = { name = 'id/x', help = 'ID mängija või X positsioon' },
+                y = { name = 'y', help = 'Y positsioon' },
+                z = { name = 'z', help = 'Z positsioon' },
             },
         },
         tpm = { help = 'TP Markerile (ainult administraator)' },
@@ -119,7 +119,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'et' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

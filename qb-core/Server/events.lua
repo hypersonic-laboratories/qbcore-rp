@@ -1,5 +1,5 @@
 -- Player Dropped
-AddEventHandler('playerDropped', function(reason)
+RegisterServerEvent('playerDropped', function(reason)
     local src = source
     if not QBCore.Players[src] then return end
     local player = QBCore.Players[src]

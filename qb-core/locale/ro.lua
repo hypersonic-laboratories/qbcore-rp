@@ -1,27 +1,27 @@
 --[[
 Romanian base language translation for qb-core
 Translation done by wanderrer (Martin Riggs#0807 on Discord)
-]]--
+]] --
 local Translations = {
     error = {
-        not_online = 'Jucătorul nu este online',
-        wrong_format = 'Format incorect',
-        missing_args = 'Nu au fost introduse toate argumentele (x, y, z)',
-        missing_args2 = 'Trebuie completate toate argumentele!',
-        no_access = 'Nu ai acces la această comandă',
-        company_too_poor = 'Angajatorul tău este falit',
-        item_not_exist = 'Obiectul nu există',
-        too_heavy = 'Inventarul este prea plin',
-        location_not_exist = 'Locația nu există',
-        duplicate_license = 'Duplicate Rockstar License Found',
-        no_valid_license  = 'Nicio licență Rockstar validă găsită',
-        not_whitelisted = 'Nu ești în lista albă pentru acest server',
-        server_already_open = 'Serverul este deja deschis',
-        server_already_closed = 'Serverul este deja închis',
-        no_permission = 'Nu ai permisiuni pentru asta..',
-        no_waypoint = 'Nu a fost setat un punct de referință.',
-        tp_error = 'Eroare în timpul teleportării.',
-        connecting_database_error = 'A apărut o eroare de bază de date în timpul conectării la server. (Este serverul SQL pornit?)',
+        not_online                  = 'Jucătorul nu este online',
+        wrong_format                = 'Format incorect',
+        missing_args                = 'Nu au fost introduse toate argumentele (x, y, z)',
+        missing_args2               = 'Trebuie completate toate argumentele!',
+        no_access                   = 'Nu ai acces la această comandă',
+        company_too_poor            = 'Angajatorul tău este falit',
+        item_not_exist              = 'Obiectul nu există',
+        too_heavy                   = 'Inventarul este prea plin',
+        location_not_exist          = 'Locația nu există',
+        duplicate_license           = 'Duplicate Rockstar License Found',
+        no_valid_license            = 'Nicio licență Rockstar validă găsită',
+        not_whitelisted             = 'Nu ești în lista albă pentru acest server',
+        server_already_open         = 'Serverul este deja deschis',
+        server_already_closed       = 'Serverul este deja închis',
+        no_permission               = 'Nu ai permisiuni pentru asta..',
+        no_waypoint                 = 'Nu a fost setat un punct de referință.',
+        tp_error                    = 'Eroare în timpul teleportării.',
+        connecting_database_error   = 'A apărut o eroare de bază de date în timpul conectării la server. (Este serverul SQL pornit?)',
         connecting_database_timeout = 'Conexiunea la baza de date a expirat. (Este serverul SQL pornit?)',
     },
     success = {
@@ -124,7 +124,7 @@ local Translations = {
     },
 }
 
-Lang = Lang or Locale:new({
+Lang = Lang or Locale.new({
     phrases = Translations,
     warnOnMissing = true
 })

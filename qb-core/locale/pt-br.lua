@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = 'Jogador não está online',
-        wrong_format = 'Formato incorreto',
-        missing_args = 'Nem todos os argumentos foram inseridos (x, y, z)',
-        missing_args2 = 'Todos os argumentos devem ser preenchidos!',
-        no_access = 'Sem acesso a este comando',
-        company_too_poor = 'Seu empresa está quebrada',
-        item_not_exist = 'O item não existe',
-        too_heavy = 'Iventário cheio',
-        location_not_exist = 'O local não existe',
-        duplicate_license = 'Licença da Rockstar duplicada encontrada',
-        no_valid_license  = 'Nenhuma licença da Rockstar válida encontrada',
-        not_whitelisted = 'Você não está na lista branca(whitelist) deste servidor',
-        server_already_open = 'O servidor já está aberto',
-        server_already_closed = 'O servidor já está fechado',
-        no_permission = 'Você não tem permissões para isso..',
-        no_waypoint = 'Nenhum local definido.',
-        tp_error = 'Erro ao teletransportar.',
-        connecting_database_error = 'Ocorreu um erro de banco de dados ao conectar-se ao servidor. (O servidor SQL está ativado?)',
+        not_online                  = 'Jogador não está online',
+        wrong_format                = 'Formato incorreto',
+        missing_args                = 'Nem todos os argumentos foram inseridos (x, y, z)',
+        missing_args2               = 'Todos os argumentos devem ser preenchidos!',
+        no_access                   = 'Sem acesso a este comando',
+        company_too_poor            = 'Seu empresa está quebrada',
+        item_not_exist              = 'O item não existe',
+        too_heavy                   = 'Iventário cheio',
+        location_not_exist          = 'O local não existe',
+        duplicate_license           = 'Licença da Rockstar duplicada encontrada',
+        no_valid_license            = 'Nenhuma licença da Rockstar válida encontrada',
+        not_whitelisted             = 'Você não está na lista branca(whitelist) deste servidor',
+        server_already_open         = 'O servidor já está aberto',
+        server_already_closed       = 'O servidor já está fechado',
+        no_permission               = 'Você não tem permissões para isso..',
+        no_waypoint                 = 'Nenhum local definido.',
+        tp_error                    = 'Erro ao teletransportar.',
+        connecting_database_error   = 'Ocorreu um erro de banco de dados ao conectar-se ao servidor. (O servidor SQL está ativado?)',
         connecting_database_timeout = 'A conexão com o banco de dados expirou. (O servidor SQL está ativado?)',
     },
     success = {
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'TP Para Jogador ou Coordenadas (Somente administrador)',
             params = {
-                x = { name = 'id/x', help = 'ID do jogador ou posição X'},
-                y = { name = 'y', help = 'posição Y'},
-                z = { name = 'z', help = 'posição Z'},
+                x = { name = 'id/x', help = 'ID do jogador ou posição X' },
+                y = { name = 'y', help = 'posição Y' },
+                z = { name = 'z', help = 'posição Z' },
             },
         },
         tpm = { help = 'TP Para Marcador (Somente administrador)' },
@@ -121,7 +121,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'pt-br' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

@@ -119,7 +119,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'ru' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

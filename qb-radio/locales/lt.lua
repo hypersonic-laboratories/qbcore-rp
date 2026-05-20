@@ -12,7 +12,7 @@ local Translations = {
     ['increase_radio_volume'] = 'Radijas jau nustatytas į minimalų garsumą',
 }
 
-Lang = Lang or Locale:new({
+Lang = Lang or Locale.new({
     phrases = Translations,
     warnOnMissing = true
 })

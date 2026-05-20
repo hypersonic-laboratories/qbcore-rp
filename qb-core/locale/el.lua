@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = 'Ο παίκτης δεν είναι online',
-        wrong_format = 'Λανθασμένη μορφοποίηση',
-        missing_args = 'Δεν έχουν δωθεί όλοι οι παράμετροι (x, y, z)',
-        missing_args2 = 'Όλοι οι παράμετροι πρέπει να συμπληρωθούν!',
-        no_access = 'Δεν έχεις πρόσβαση σε αυτή την εντολή',
-        company_too_poor = 'Ο εργοδώτης σου, πτώχευσε',
-        item_not_exist = 'Δεν υπάρχει αυτό το αντικείμενο',
-        too_heavy = 'Πολύ βαρύ σακαίδιο',
-        location_not_exist = 'Δεν υπάρχει αυτή η τοποθεσία',
-        duplicate_license = 'Βρέθηκε διπλή Rockstar Άδεια χρήσης',
-        no_valid_license  = 'Μη έγκυρη Rockstar Άδεια χρήσης',
-        not_whitelisted = 'Δεν είναι προσκεκλημένος σε αυτό το server',
-        server_already_open = 'Αυτός ο server έχει ήδη ανοίξει',
-        server_already_closed = 'Αυτός ο server έχει ήδη κλείσει',
-        no_permission = 'Δεν έχεις άδεια για αυτό..',
-        no_waypoint = 'Δεν ορίστικε προορισμός.',
-        tp_error = 'Πρόβλημα καθώς μεταφερώσουν.',
-        connecting_database_error = 'Πρόβλημα στην σύνδεση της βάσης δεδομένων. (Είναι ενεργός ο SQL server?)',
+        not_online                  = 'Ο παίκτης δεν είναι online',
+        wrong_format                = 'Λανθασμένη μορφοποίηση',
+        missing_args                = 'Δεν έχουν δωθεί όλοι οι παράμετροι (x, y, z)',
+        missing_args2               = 'Όλοι οι παράμετροι πρέπει να συμπληρωθούν!',
+        no_access                   = 'Δεν έχεις πρόσβαση σε αυτή την εντολή',
+        company_too_poor            = 'Ο εργοδώτης σου, πτώχευσε',
+        item_not_exist              = 'Δεν υπάρχει αυτό το αντικείμενο',
+        too_heavy                   = 'Πολύ βαρύ σακαίδιο',
+        location_not_exist          = 'Δεν υπάρχει αυτή η τοποθεσία',
+        duplicate_license           = 'Βρέθηκε διπλή Rockstar Άδεια χρήσης',
+        no_valid_license            = 'Μη έγκυρη Rockstar Άδεια χρήσης',
+        not_whitelisted             = 'Δεν είναι προσκεκλημένος σε αυτό το server',
+        server_already_open         = 'Αυτός ο server έχει ήδη ανοίξει',
+        server_already_closed       = 'Αυτός ο server έχει ήδη κλείσει',
+        no_permission               = 'Δεν έχεις άδεια για αυτό..',
+        no_waypoint                 = 'Δεν ορίστικε προορισμός.',
+        tp_error                    = 'Πρόβλημα καθώς μεταφερώσουν.',
+        connecting_database_error   = 'Πρόβλημα στην σύνδεση της βάσης δεδομένων. (Είναι ενεργός ο SQL server?)',
         connecting_database_timeout = 'Έληξε ο χρόνος σύνδεσης της βάσης δεδοομένων. (Είναι ενεργός ο SQL server?)',
     },
     success = {
@@ -41,7 +41,7 @@ local Translations = {
         tp = {
             help = 'Τηλεμεταφορά σε παίκτη ή συντεταγμένες (Admin Μόνο)',
             params = {
-                x = { name = 'id/x', help = 'ID του παίκτη ή X θέση'},
+                x = { name = 'id/x', help = 'ID του παίκτη ή X θέση' },
                 y = { name = 'y', help = 'Y θέση' },
                 z = { name = 'z', help = 'Z θέση' },
             },
@@ -120,7 +120,7 @@ local Translations = {
     },
 }
 
-Lang = Lang or Locale:new({
+Lang = Lang or Locale.new({
     phrases = Translations,
     warnOnMissing = true
 })

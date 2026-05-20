@@ -355,11 +355,7 @@ Timer.SetTimeout(function()
     for job, zones in pairs(Config.BossMenus) do
         for index, coords in ipairs(zones) do
             local zoneName = job .. '_bossmenu_' .. index
-            exports['qb-target']:AddSphereZone(zoneName, {
-                X = coords.X,
-                Y = coords.Y,
-                Z = coords.Z
-            }, 100, {
+            exports['qb-target']:AddSphereZone(zoneName, coords, 100, {
                 debug = true,
                 distance = 1000
             }, {

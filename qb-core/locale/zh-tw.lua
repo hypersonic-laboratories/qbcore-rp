@@ -125,7 +125,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'zh-tw' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

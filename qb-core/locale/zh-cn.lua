@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = '玩家不在线',
-        wrong_format = '格式错误',
-        missing_args = '请输入必须参数 (x, y, z)',
-        missing_args2 = '请输入所有参数!',
-        no_access = '你没有权限',
-        company_too_poor = '你所在的公司账户目前发不起工资',
-        item_not_exist = '该物品不存在',
-        too_heavy = '背包已满',
-        location_not_exist = '位置不存在',
-        duplicate_license = '发现重复的 Rockstar 许可证',
-        no_valid_license  = '未找到有效的 Rockstar 许可证',
-        not_whitelisted = '您没有被列入此服务器的白名单',
-        server_already_open = '服务器已打开',
-        server_already_closed = '服务器已关闭',
-        no_permission = '您没有此权限..',
-        no_waypoint = '无GPS点位设置.',
-        tp_error = '传送时出错.',
-        connecting_database_error = '连接到服务器时发生数据库错误。(SQL server是否已打开?)',
+        not_online                  = '玩家不在线',
+        wrong_format                = '格式错误',
+        missing_args                = '请输入必须参数 (x, y, z)',
+        missing_args2               = '请输入所有参数!',
+        no_access                   = '你没有权限',
+        company_too_poor            = '你所在的公司账户目前发不起工资',
+        item_not_exist              = '该物品不存在',
+        too_heavy                   = '背包已满',
+        location_not_exist          = '位置不存在',
+        duplicate_license           = '发现重复的 Rockstar 许可证',
+        no_valid_license            = '未找到有效的 Rockstar 许可证',
+        not_whitelisted             = '您没有被列入此服务器的白名单',
+        server_already_open         = '服务器已打开',
+        server_already_closed       = '服务器已关闭',
+        no_permission               = '您没有此权限..',
+        no_waypoint                 = '无GPS点位设置.',
+        tp_error                    = '传送时出错.',
+        connecting_database_error   = '连接到服务器时发生数据库错误。(SQL server是否已打开?)',
         connecting_database_timeout = '与数据库的连接超时。(SQL server是否已打开?)',
     },
     success = {
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'TP至玩家或坐标(仅限管理员)',
             params = {
-                x = { name = 'id/x', help = '玩家ID或X位置'},
-                y = { name = 'y', help = 'Y位置'},
-                z = { name = 'z', help = 'Z位置'},
+                x = { name = 'id/x', help = '玩家ID或X位置' },
+                y = { name = 'y', help = 'Y位置' },
+                z = { name = 'z', help = 'Z位置' },
             },
         },
         tpm = { help = 'TP到标记(仅限管理员)' },
@@ -121,7 +121,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'zh-cn' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

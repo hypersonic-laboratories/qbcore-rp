@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = 'Spiller ikke online',
-        wrong_format = 'Forkert format',
-        missing_args = 'Du mangler nogle argumenter (x, y, z)',
-        missing_args2 = 'Alle argumenter skal udfyldes!',
-        no_access = 'Ingen adgang til denne kommando',
-        company_too_poor = 'Din arbejdsgiver er for fattig',
-        item_not_exist = 'Item findes ikke',
-        too_heavy = 'Tasken er fuld',
-        location_not_exist = 'Placering findes ikke',
-        duplicate_license = 'Dublet Rockstar-licens fundet',
-        no_valid_license  = 'Ingen gyldig Rockstar-licens fundet',
-        not_whitelisted = 'Du er ikke allowlisted på denne server',
-        server_already_open = 'Serveren er allerede åben',
-        server_already_closed = 'Serveren er allerede lukket',
-        no_permission = 'Du har ikke tilladelser til dette..',
-        no_waypoint = 'Intet waypoint indstillet.',
-        tp_error = 'Fejl under teleportering.',
-        connecting_database_error = 'Der opstod en databasefejl under forbindelse til serveren. (Er SQL-serveren tændt?)',
+        not_online                  = 'Spiller ikke online',
+        wrong_format                = 'Forkert format',
+        missing_args                = 'Du mangler nogle argumenter (x, y, z)',
+        missing_args2               = 'Alle argumenter skal udfyldes!',
+        no_access                   = 'Ingen adgang til denne kommando',
+        company_too_poor            = 'Din arbejdsgiver er for fattig',
+        item_not_exist              = 'Item findes ikke',
+        too_heavy                   = 'Tasken er fuld',
+        location_not_exist          = 'Placering findes ikke',
+        duplicate_license           = 'Dublet Rockstar-licens fundet',
+        no_valid_license            = 'Ingen gyldig Rockstar-licens fundet',
+        not_whitelisted             = 'Du er ikke allowlisted på denne server',
+        server_already_open         = 'Serveren er allerede åben',
+        server_already_closed       = 'Serveren er allerede lukket',
+        no_permission               = 'Du har ikke tilladelser til dette..',
+        no_waypoint                 = 'Intet waypoint indstillet.',
+        tp_error                    = 'Fejl under teleportering.',
+        connecting_database_error   = 'Der opstod en databasefejl under forbindelse til serveren. (Er SQL-serveren tændt?)',
         connecting_database_timeout = 'Forbindelsen til databasen fik timeout. (Er SQL-serveren tændt?)',
     },
     success = {
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'TP til spiller eller koordinater (kun admin)',
             params = {
-                x = { name = 'id/x', help = 'ID for spiller eller X-position'},
-                y = { name = 'y', help = 'Y position'},
-                z = { name = 'z', help = 'Z position'},
+                x = { name = 'id/x', help = 'ID for spiller eller X-position' },
+                y = { name = 'y', help = 'Y position' },
+                z = { name = 'z', help = 'Z position' },
             },
         },
         tpm = { help = 'TP til markør (kun admin)' },
@@ -121,7 +121,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'da' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,

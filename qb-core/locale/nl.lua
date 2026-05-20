@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = 'Speler niet online',
-        wrong_format = 'Onjuiste opmaak',
-        missing_args = 'Niet elk argument is ingevuld (x, y, z)',
-        missing_args2 = 'Alle argumenten moeten worden ingevuld!',
-        no_access = 'Geen toegang tot dit commando',
-        company_too_poor = 'Je werkgever is arm',
-        item_not_exist = 'Item bestaat niet',
-        too_heavy = 'Broekzakken zitten vol',
-        location_not_exist = 'Locatie bestaat niet',
-        duplicate_license = 'Dubbele Rockstar-licentie gevonden',
-        no_valid_license  = 'Geen geldige Rockstar-licentie gevonden',
-        not_whitelisted = 'U bent niet whitelisted voor deze server',
-        server_already_open = 'De server is al open',
-        server_already_closed = 'De server is al gesloten',
-        no_permission = 'Je hebt geen permissie voor dit..',
-        no_waypoint = 'Geen bestemming geselecteerd',
-        tp_error = 'Er is een foutje begaan tijdens het teleporteren',
-        connecting_database_error = 'Er is een databasefout opgetreden tijdens het maken van een verbinding met de server. (Is de SQL-server ingeschakeld?)',
+        not_online                  = 'Speler niet online',
+        wrong_format                = 'Onjuiste opmaak',
+        missing_args                = 'Niet elk argument is ingevuld (x, y, z)',
+        missing_args2               = 'Alle argumenten moeten worden ingevuld!',
+        no_access                   = 'Geen toegang tot dit commando',
+        company_too_poor            = 'Je werkgever is arm',
+        item_not_exist              = 'Item bestaat niet',
+        too_heavy                   = 'Broekzakken zitten vol',
+        location_not_exist          = 'Locatie bestaat niet',
+        duplicate_license           = 'Dubbele Rockstar-licentie gevonden',
+        no_valid_license            = 'Geen geldige Rockstar-licentie gevonden',
+        not_whitelisted             = 'U bent niet whitelisted voor deze server',
+        server_already_open         = 'De server is al open',
+        server_already_closed       = 'De server is al gesloten',
+        no_permission               = 'Je hebt geen permissie voor dit..',
+        no_waypoint                 = 'Geen bestemming geselecteerd',
+        tp_error                    = 'Er is een foutje begaan tijdens het teleporteren',
+        connecting_database_error   = 'Er is een databasefout opgetreden tijdens het maken van een verbinding met de server. (Is de SQL-server ingeschakeld?)',
         connecting_database_timeout = 'Er is een time-out opgetreden voor verbinding met database. (Is de SQL-server ingeschakeld?)',
     },
     success = {
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'Teleport naar speler of coördinaten (Alleen Admin)',
             params = {
-                x = { name = 'id/x', help = 'ID van speler of X-positie'},
-                y = { name = 'y', help = 'Y positie'},
-                z = { name = 'z', help = 'Z positie'},
+                x = { name = 'id/x', help = 'ID van speler of X-positie' },
+                y = { name = 'y', help = 'Y positie' },
+                z = { name = 'z', help = 'Z positie' },
             },
         },
         tpm = { help = 'Teleport naar bestemming (Alleen Admin)' },
@@ -121,10 +121,9 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'nl' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,
     })
 end
-

@@ -1,23 +1,23 @@
 local Translations = {
     error = {
-        not_online = 'Igrač nije na mreži',
-        wrong_format = 'Netačan format',
-        missing_args = 'Nije unesen svaki argument (X, Y, Z)',
-        missing_args2 = 'Svi argumenti moraju se popuniti!',
-        no_access = 'Nemate pristupa ovoj komandi',
-        company_too_poor = 'Vaš poslodavac je siromašan',
-        item_not_exist = 'Predmet ne postoji',
-        too_heavy = 'Inventar je prepun',
-        location_not_exist = 'Lokacija ne postoji',
-        duplicate_license = 'Duplicirana Rockstar licenca pronađena',
-        no_valid_license  = 'Nije pronađena nijedna važeća Rockstar licenca',
-        not_whitelisted = 'Niste na listi za čekanje na ovom serveru',
-        server_already_open = 'Server je već otvoren',
-        server_already_closed = 'Server je već zatvoren',
-        no_permission = 'Nemate dozvole za ovo..',
-        no_waypoint = 'Nema postavljen marker.',
-        tp_error = 'Greška tokom teleportiranja.',
-        connecting_database_error = 'Došlo je do pogreške u bazi podataka tokom povezivanja na serverom. (Je li SQL server uključen?)',
+        not_online                  = 'Igrač nije na mreži',
+        wrong_format                = 'Netačan format',
+        missing_args                = 'Nije unesen svaki argument (X, Y, Z)',
+        missing_args2               = 'Svi argumenti moraju se popuniti!',
+        no_access                   = 'Nemate pristupa ovoj komandi',
+        company_too_poor            = 'Vaš poslodavac je siromašan',
+        item_not_exist              = 'Predmet ne postoji',
+        too_heavy                   = 'Inventar je prepun',
+        location_not_exist          = 'Lokacija ne postoji',
+        duplicate_license           = 'Duplicirana Rockstar licenca pronađena',
+        no_valid_license            = 'Nije pronađena nijedna važeća Rockstar licenca',
+        not_whitelisted             = 'Niste na listi za čekanje na ovom serveru',
+        server_already_open         = 'Server je već otvoren',
+        server_already_closed       = 'Server je već zatvoren',
+        no_permission               = 'Nemate dozvole za ovo..',
+        no_waypoint                 = 'Nema postavljen marker.',
+        tp_error                    = 'Greška tokom teleportiranja.',
+        connecting_database_error   = 'Došlo je do pogreške u bazi podataka tokom povezivanja na serverom. (Je li SQL server uključen?)',
         connecting_database_timeout = 'Veza sa bazom podataka istekla. (Je li SQL server uključen?)',
     },
     success = {
@@ -41,9 +41,9 @@ local Translations = {
         tp = {
             help = 'TP igraču ili koordinatama (Samo Admin)',
             params = {
-                x = { name = 'id/x', help = 'ID igrača ili X kordinata'},
-                y = { name = 'y', help = 'Y kordinata'},
-                z = { name = 'z', help = 'Z kordinata'},
+                x = { name = 'id/x', help = 'ID igrača ili X kordinata' },
+                y = { name = 'y', help = 'Y kordinata' },
+                z = { name = 'z', help = 'Z kordinata' },
             },
         },
         tpm = { help = 'TP na Marker (Samo Admin)' },
@@ -121,7 +121,7 @@ local Translations = {
 }
 
 if GetConvar('qb_locale', 'en') == 'bs' then
-    Lang = Locale:new({
+    Lang = Locale.new({
         phrases = Translations,
         warnOnMissing = true,
         fallbackLang = Lang,
