@@ -193,7 +193,7 @@ local function PopulateGarage(playerData, entranceId, shellConfig, garageCoords)
         if spawnPos then
             local coords = Vector(garageCoords.X - spawnPos.offset.x, garageCoords.Y - spawnPos.offset.y, garageCoords.Z + spawnPos.offset.z)
             local vehicle, plate = exports['qb-core']:SpawnVehicle(playerData.source, vehicleData.vehicle, coords, spawnPos.heading, vehicleData.plate, playerData.citizenid, tonumber(vehicleData.drivingdistance))
-            print(string.format('[hl-properties] PopulateGarage - Spawning vehicle with plate: %s, vehicleName: %s', vehicleData.plate, vehicleData.vehicle))
+            print(string.format('[qb-houses] PopulateGarage - Spawning vehicle with plate: %s, vehicleName: %s', vehicleData.plate, vehicleData.vehicle))
             if vehicle then
                 vehicle = HVehicle.wrap(vehicle.Object)
                 vehicles[#vehicles + 1] = { entity = vehicle, plate = plate, id = vehicle:GetVehicleId() }
@@ -371,7 +371,7 @@ local function EnterInstancedUnit(source, propertyKey)
 
     inst.creating = false
 end
-exports('hl-properties', 'EnterInstancedUnit', EnterInstancedUnit)
+exports('qb-houses', 'EnterInstancedUnit', EnterInstancedUnit)
 
 local function LeaveInstancedUnit(source, propertyKey, isInVehicle)
     local Player = exports['qb-core']:GetPlayer(source)
@@ -413,7 +413,7 @@ local function LeaveInstancedUnit(source, propertyKey, isInVehicle)
             local VehicleManager = UE.USubsystemBlueprintLibrary.GetWorldSubsystem(HWorld, UE.UHVehicleManager)
             if VehicleManager then
                 for id, vehicleData in pairs(inst.garage.vehicles) do
-                    print(string.format('[hl-properties] LeaveInstancedUnit - Deleting Vehicle with id: %s', tostring(id)))
+                    print(string.format('[qb-houses] LeaveInstancedUnit - Deleting Vehicle with id: %s', tostring(id)))
                     if vehicleData.id then
                         VehicleManager:DestroyVehicle(vehicleData.id)
                     else
@@ -427,7 +427,7 @@ local function LeaveInstancedUnit(source, propertyKey, isInVehicle)
     end
     TriggerClientEvent(source, 'qb-houses:client:LeaveProperty')
 end
-exports('hl-properties', 'LeaveInstancedUnit', LeaveInstancedUnit)
+exports('qb-houses', 'LeaveInstancedUnit', LeaveInstancedUnit)
 
 local function IsPropertyOwner(source, propertyKey)
     local Player = exports['qb-core']:GetPlayer(source)
@@ -439,7 +439,7 @@ local function IsPropertyOwner(source, propertyKey)
     if not unit then return false end
     return unit.ownerCitizenId == Player.PlayerData.citizenid
 end
-exports('hl-properties', 'IsPropertyOwner', IsPropertyOwner)
+exports('qb-houses', 'IsPropertyOwner', IsPropertyOwner)
 
 -- Logout Handler
 
@@ -646,7 +646,7 @@ RegisterServerEvent('qb-houses:server:StoreVehicle', function(source, data)
         Player.PlayerData.citizenid,
     })
     if type(results) ~= 'table' or #results <= 0 then
-        print(string.format('[hl-properties] StoreVehicle - Vehicle not found for plate: %s, citizenid: %s', vehiclePlate, Player.PlayerData.citizenid))
+        print(string.format('[qb-houses] StoreVehicle - Vehicle not found for plate: %s, citizenid: %s', vehiclePlate, Player.PlayerData.citizenid))
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_vehicle_owner'), 'danger')
         return
     end
@@ -954,17 +954,17 @@ RegisterCallback('WithdrawVehicle', function(source, propertyKey)
     local vehiclePlate = vehicle:GetPlate()
     local success = exports['hl-garages']:WithdrawVehicle(source, vehiclePlate, unit.entranceId, nil, vehicle)
     if not success then return false end
-    print(string.format('[hl-properties] WithdrawVehicle - Withdrawing Vehicle with plate: %s, citizenid: %s, propertyKey: %s', vehiclePlate, Player.PlayerData.citizenid, propertyKey))
+    print(string.format('[qb-houses] WithdrawVehicle - Withdrawing Vehicle with plate: %s, citizenid: %s, propertyKey: %s', vehiclePlate, Player.PlayerData.citizenid, propertyKey))
 
     -- remove from cached vehicle entries to prevent being cleaned
     local garageData = PropertyInstances[propertyKey].garage
     local vehicles = garageData and garageData.vehicles
     if type(vehicles) ~= 'table' then return false end
     for index, vehicleData in pairs(vehicles) do
-        print(string.format('[hl-properties] WithdrawVehicle - Checking cached vehicle with plate: %s against withdrawn plate: %s', vehicleData.plate, vehiclePlate), vehicleData.plate == vehiclePlate)
+        print(string.format('[qb-houses] WithdrawVehicle - Checking cached vehicle with plate: %s against withdrawn plate: %s', vehicleData.plate, vehiclePlate), vehicleData.plate == vehiclePlate)
         if vehicleData.plate == vehiclePlate then
             vehicles[index] = nil
-            print(string.format('[hl-properties] WithdrawVehicle - Removing Vehicle from garage cache with plate: %s, index: %s', vehicleData.plate, index))
+            print(string.format('[qb-houses] WithdrawVehicle - Removing Vehicle from garage cache with plate: %s, index: %s', vehicleData.plate, index))
             break
         end
     end

@@ -17,7 +17,9 @@ local Translations = {
         ['logout_description'] = 'Logout of Character (Admin Only)',
 
         -- /closeNUI
-        ['closeNUI_description'] = 'Close Multi NUI'
+        ['closeNUI_description'] = 'Close Multi NUI',
+
+        ['droppedplayer'] = 'You have disconnected from QBCore'
     },
 
     misc = {

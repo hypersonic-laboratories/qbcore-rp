@@ -37,7 +37,7 @@ end
 function Locale.new(_, opts)
     local self = setmetatable({}, Locale)
 
-    self.fallback = opts.fallbackLang and Locale.new({
+    self.fallback = opts.fallbackLang and Locale:new({
         warnOnMissing = false,
         phrases = opts.fallbackLang.phrases,
     }) or false
