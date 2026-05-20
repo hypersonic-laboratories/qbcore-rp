@@ -21,7 +21,7 @@ QBCore.Config.Player.Bloodtypes = {
 }
 
 QBCore.Config.Player.PlayerDefaults = {
-    citizenid = function() return QBCore.Player.CreateCitizenId() end,
+    citizenid = function() return QBCore.Functions.CreateCitizenId() end,
     cid = 1,
     money = function()
         local moneyDefaults = {}
@@ -78,8 +78,8 @@ QBCore.Config.Player.PlayerDefaults = {
         currentapartment = nil,
         callsign = 'NO CALLSIGN',
         bloodtype = function() return QBCore.Config.Player.Bloodtypes[math.random(1, #QBCore.Config.Player.Bloodtypes)] end,
-        fingerprint = function() return QBCore.Player.CreateFingerId() end,
-        walletid = function() return QBCore.Player.CreateWalletId() end,
+        fingerprint = function() return QBCore.Functions.CreateFingerId() end,
+        walletid = function() return QBCore.Functions.CreateWalletId() end,
         criminalrecord = {
             hasRecord = false,
             date = nil
@@ -97,7 +97,7 @@ QBCore.Config.Player.PlayerDefaults = {
             }
         },
         phonedata = {
-            SerialNumber = function() return QBCore.Player.CreateSerialNumber() end,
+            SerialNumber = function() return QBCore.Functions.CreateSerialNumber() end,
             InstalledApps = {}
         }
     },
