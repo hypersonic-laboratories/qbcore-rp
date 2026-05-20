@@ -309,7 +309,7 @@ local function healPlayerToFull(player)
     if healAmount > 0 then
         UE.UHGameplaySystemGlobals.HealTarget(pawn, healAmount)
     else
-        healthComp:SetHealth(maxHealth)
+        UE.UHGameplaySystemGlobals.HealTarget(pawn, maxHealth)
     end
 
     return true
@@ -725,6 +725,7 @@ local function buildOpenAdminContext(src)
 
         teleportLocationOptions = buildTeleportLocationOptions(),
         spawnVehicleOptions = spawnVehicleOptions,
+        -- TO DO: Build object spawn options from a configured object catalog.
         spawnObjectOptions = {},
         currentCoordinates = 0,
         currentRotation = 0,
@@ -899,6 +900,7 @@ RegisterServerEvent('qb-admin:server:developer:spawnObject', function(source, _)
     local ForwardVec = playerPed:GetActorForwardVector()
     local SpawnPosition = playerCoords + (ForwardVec * 800)
     SpawnPosition = Vector(SpawnPosition.X, SpawnPosition.Y, SpawnPosition.Z - 100)
+    -- TO DO: Spawn the selected object model once an object catalog/asset mapping exists.
 end)
 
 RegisterServerEvent('qb-admin:server:players:context-action', function(source, data)
@@ -976,12 +978,15 @@ RegisterServerEvent('qb-admin:server:players:vehicleAction', function(source, da
         if not refuelOccupiedVehicle(targetSrc) then return end
         pushLogEntry('Vehicle Refuel', targetName, 'Refueled by ' .. adminName)
     elseif action == 'ownership' then
+        -- TO DO: Implement the client-side vehicle ownership viewer.
         TriggerClientEvent(source, 'qb-admin:client:openVehicleOwnership', targetPlayerId)
         pushLogEntry('Vehicle Ownership', targetName, 'Ownership viewed by ' .. adminName)
     elseif action == 'glovebox' then
+        -- TO DO: Implement admin vehicle glovebox inspection/opening.
         TriggerClientEvent(targetSrc, 'qb-admin:client:openVehicleGlovebox')
         pushLogEntry('Vehicle Glovebox', targetName, 'Opened by ' .. adminName)
     elseif action == 'trunk' then
+        -- TO DO: Implement admin vehicle trunk inspection/opening.
         TriggerClientEvent(targetSrc, 'qb-admin:client:openVehicleTrunk')
         pushLogEntry('Vehicle Trunk', targetName, 'Opened by ' .. adminName)
     elseif action == 'delete' then
@@ -1109,6 +1114,7 @@ RegisterServerEvent('qb-admin:server:players:quickControl', function(source, dat
         local targetName = GetPlayerName(targetSrc)
         local targetPlayer = exports['qb-core']:GetPlayer(targetSrc)
         local citizenId = targetPlayer and targetPlayer.PlayerData.citizenid or 'unknown'
+        -- TO DO: Persist bans in the bans table and honor ban duration/reason.
         TriggerLocalServerEvent('qb-log:server:CreateLog', 'admin', 'Player Banned', 'red',
             adminName .. ' banned ' .. targetName .. ' (citizenid: ' .. citizenId .. ')')
         targetSrc:Kick('Banned by admin')
@@ -1265,6 +1271,7 @@ RegisterServerEvent('qb-admin:server:dashboard:quickAction', function(source, da
         pushLogEntry('Invisibility', adminName, enabled and 'Enabled invisibility' or 'Disabled invisibility')
     elseif action == 'admin-duty' then
         local enabled = toggleAdminQuickActionState(source, 'adminDuty')
+        -- TO DO: Apply an actual admin-duty state/effect instead of only logging it.
         pushLogEntry('Admin Duty', adminName, enabled and 'Enabled admin duty' or 'Disabled admin duty')
         pushFeedEntry(adminName .. ' toggled admin duty')
     elseif action == 'overhead-names' then

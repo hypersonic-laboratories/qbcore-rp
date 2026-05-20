@@ -654,6 +654,7 @@
                         <div class="quick-actions">
                             <button v-for="action in ['goto', 'bring', 'heal', 'freeze']" :key="action" class="action-button" @click="handleInvestigationAction(action)">{{ formatActionName(action) }}</button>
                         </div>
+                        <!-- TO DO: Persist or send investigation chat notes; currently UI-only. -->
                         <textarea v-model="investigationChat" rows="4" placeholder="Internal admin-to-player chat notes..."></textarea>
                     </div>
                 </div>
