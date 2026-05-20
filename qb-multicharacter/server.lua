@@ -47,7 +47,7 @@ end
 
 -- Commands
 
--- QBCore.Commands.Add('logout', Lang:t('commands.logout_description'), {}, false, function(source)
+-- QBCore.Commands.Add('logout', Lang.t('commands.logout_description'), {}, false, function(source)
 --     local Player = exports['qb-core']:GetPlayer(source)
 --     if not Player then return end
 --     local inside_meta = Player.PlayerData.metadata.inside
@@ -65,7 +65,7 @@ RegisterServerEvent('QBCore:Server:OnPlayerUnload', function(source)
 end)
 
 RegisterServerEvent('qb-multicharacter:server:disconnect', function(source)
-    source:Kick(source, Lang:t('commands.droppedplayer'))
+    source:Kick(source, Lang.t('commands.droppedplayer'))
 end)
 
 RegisterServerEvent('qb-multicharacter:server:loadUserData', function(source, cData) -- TO DO ADD APARTMENTS SUPPORT
@@ -130,7 +130,7 @@ end)
 RegisterServerEvent('qb-multicharacter:server:deleteCharacter', function(source, citizenid)
     local Success = exports['qb-core']:DeleteCharacter(source, citizenid)
     if not Success then return end
-    TriggerClientEvent(source, 'QBCore:Notify', Lang:t('notifications.char_deleted'), 'success')
+    TriggerClientEvent(source, 'QBCore:Notify', Lang.t('notifications.char_deleted'), 'success')
     TriggerClientEvent(source, 'qb-multicharacter:client:chooseChar')
 end)
 

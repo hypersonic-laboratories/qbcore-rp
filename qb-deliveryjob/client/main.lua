@@ -19,7 +19,7 @@ local function setupPeds(peds)
             distance = 1500,
             options = {
                 {
-                    label = Lang:t('info.start_delivering'),
+                    label = Lang.t('info.start_delivering'),
                     icon = 'boxes-stacked',
                     job = Config.Job,
                     type = 'server',
@@ -27,7 +27,7 @@ local function setupPeds(peds)
                     depot = peds[i].Index,
                 },
                 {
-                    label = Lang:t('info.finish_delivering'),
+                    label = Lang.t('info.finish_delivering'),
                     icon = 'boxes-stacked',
                     job = Config.Job,
                     type = 'client',
@@ -42,7 +42,7 @@ local function deliverPackage()
     local Pawn = GetPlayerPawn(HPlayer)
     local PawnCoords = GetEntityCoords(Pawn)
     if PawnCoords and PawnCoords:Dist(CurrentLocation.Coords) > 1000 then
-        exports['qb-core']:Notify(Lang:t('error.too_far'), 'error')
+        exports['qb-core']:Notify(Lang.t('error.too_far'), 'error')
         return
     end
     TriggerCallback('deliverPackage', function(success)
@@ -62,7 +62,7 @@ RegisterClientEvent('qb-deliveryjob:client:pickupBox', function(targetData)
     CurrentLocation.jobId = targetData.jobId
     TriggerCallback('server.pickupBox', function(success)
         if not success then return end
-        exports['qb-core']:DrawText(Lang:t('info.deliver_package'))
+        exports['qb-core']:DrawText(Lang.t('info.deliver_package'))
         HoldingPackage = true
     end, targetData.jobId)
 end)
@@ -72,7 +72,7 @@ RegisterClientEvent('qb-deliveryjob:client:setupVehicleTarget', function(Vehicle
         distance = 4000,
         options = {
             {
-                label = Lang:t('info.pickup_box'),
+                label = Lang.t('info.pickup_box'),
                 icon = 'boxes-stacked',
                 job = Config.Job,
                 type = 'client',
@@ -117,7 +117,7 @@ RegisterClientEvent('qb-deliveryjob:client:setCurrentLocation', function(Locatio
     CurrentLocation.Coords = Location
 
     -- Update UI
-    exports['qb-core']:DrawText(Lang:t('status.location_info', { Current = CurrentStop, Max = MaxStops }))
+    exports['qb-core']:DrawText(Lang.t('status.location_info', { Current = CurrentStop, Max = MaxStops }))
 end)
 
 RegisterClientEvent('qb-deliveryjob:client:finishDelivering', function()

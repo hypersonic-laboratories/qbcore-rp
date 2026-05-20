@@ -122,7 +122,7 @@ RegisterClientEvent('qb-cityhall:client:requestId', function(data)
         TriggerServerEvent('qb-cityhall:server:requestId', data.type)
         exports['qb-core']:Notify(('You have received your %s for $%s'):format(license.label, data.cost), 'success', 3500)
     else
-        exports['qb-core']:Notify(Lang:t('error.not_in_range'), 'error')
+        exports['qb-core']:Notify(Lang.t('error.not_in_range'), 'error')
     end
 end)
 

@@ -15,7 +15,7 @@ local function leaveradio()
         if not success then return end
         RadioChannel = 0
         onRadio = false
-        exports['qb-core']:Notify(Lang:t('you_leave'), 'error')
+        exports['qb-core']:Notify(Lang.t('you_leave'), 'error')
         TriggerLocalClientEvent('qb-hud:client:onRadio', onRadio)
     end, RadioChannel)
 end
@@ -25,7 +25,7 @@ local function connecttoradio(channel)
 
     -- if Config.RestrictedChannels[channel] ~= nil then
     --     if not Config.RestrictedChannels[channel][player_data.job.name] or not player_data.job.onduty then
-    --         exports['qb-core']:Notify(Lang:t('restricted_channel_error'), 'error')
+    --         exports['qb-core']:Notify(Lang.t('restricted_channel_error'), 'error')
     --         return false
     --     end
     -- end
@@ -36,7 +36,7 @@ local function connecttoradio(channel)
         if not success then return end
         RadioChannel = intChannel
         onRadio = true
-        exports['qb-core']:Notify(Lang:t('joined_to_radio', { channel = intChannel .. ' MHz' }), 'success')
+        exports['qb-core']:Notify(Lang.t('joined_to_radio', { channel = intChannel .. ' MHz' }), 'success')
         TriggerLocalClientEvent('qb-hud:client:onRadio', onRadio)
         return true
     end, intChannel)
@@ -80,18 +80,18 @@ end)
 -- my_webui:RegisterEventHandler('volumeUp', function()
 --     if RadioVolume <= 95 then
 --         RadioVolume = RadioVolume + 5
---         exports['qb-core']:Notify(Lang:t('volume_radio', { value = RadioVolume }), 'success')
+--         exports['qb-core']:Notify(Lang.t('volume_radio', { value = RadioVolume }), 'success')
 --     else
---         exports['qb-core']:Notify(Lang:t('decrease_radio_volume'), 'error')
+--         exports['qb-core']:Notify(Lang.t('decrease_radio_volume'), 'error')
 --     end
 -- end)
 
 -- my_webui:RegisterEventHandler('volumeDown', function()
 --     if RadioVolume >= 10 then
 --         RadioVolume = RadioVolume - 5
---         exports['qb-core']:Notify(Lang:t('volume_radio', { value = RadioVolume }), 'success')
+--         exports['qb-core']:Notify(Lang.t('volume_radio', { value = RadioVolume }), 'success')
 --     else
---         exports['qb-core']:Notify(Lang:t('increase_radio_volume'), 'error')
+--         exports['qb-core']:Notify(Lang.t('increase_radio_volume'), 'error')
 --     end
 -- end)
 

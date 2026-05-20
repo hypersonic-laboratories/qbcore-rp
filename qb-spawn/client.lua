@@ -15,7 +15,7 @@ local function SetDisplay(bool, cData, new, apps)
     local translations = {}
     for k in pairs(Lang.fallback and Lang.fallback.phrases or Lang.phrases) do
         if k:sub(0, #'ui.') then
-            translations[k:sub(#'ui.' + 1)] = Lang:t(k)
+            translations[k:sub(#'ui.' + 1)] = Lang.t(k)
         end
     end
 

@@ -22,7 +22,7 @@ RegisterServerEvent('qb-ambulancejob:server:retrieveVehicle', function(source, d
     local vehicleData = Vehicles[vehicleName]
     local vehicleAsset = vehicleData and vehicleData.asset_name or nil
     local vehicle = HVehicle(Config.VehicleSpawn.coords, Rotator(0, Config.VehicleSpawn.heading, 0), vehicleAsset)
-    local plate = Lang:t('info.amb_plate') .. tostring(math.random(1000, 9999))
+    local plate = Lang.t('info.amb_plate') .. tostring(math.random(1000, 9999))
     vehicle:SetPlate(plate)
 end)
 
@@ -33,7 +33,7 @@ RegisterServerEvent('qb-ambulancejob:server:retrieveHelicopter', function(source
     local vehicleData = Vehicles[vehicleName]
     local vehicleAsset = vehicleData and vehicleData.asset_name or nil
     local vehicle = HVehicle(Config.HelicopterSpawn.coords, Rotator(0, Config.HelicopterSpawn.heading, 0), vehicleAsset)
-    local plate = Lang:t('info.heli_plate') .. tostring(math.random(1000, 9999))
+    local plate = Lang.t('info.heli_plate') .. tostring(math.random(1000, 9999))
     vehicle:SetPlate(plate)
 end)
 
@@ -147,7 +147,7 @@ RegisterServerEvent('qb-hospitaljob:server:treatLimb', function(source, data)
     gameplayTag.TagName = limbTag
     local success = UE.UHGameplaySystemGlobals.HealTargetLimb(targetPawn, gameplayTag, healAmount)
     if success then
-        TriggerClientEvent(source, "QBCore:Notify", limbName .. ' healed', 'success')
+        TriggerClientEvent(source, 'QBCore:Notify', limbName .. ' healed', 'success')
         local boneArray = UE.TArray(UE.FHLimbHealthState)
         UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(targetPawn, boneArray)
         local limbData = {}
@@ -168,7 +168,7 @@ RegisterServerEvent('qb-hospitaljob:server:treatLimb', function(source, data)
         end
         TriggerClientEvent(source, 'qb-hospitaljob:client:openStatusMenu', limbData)
     else
-        TriggerClientEvent(source, "QBCore:Notify", 'Failed to heal ' .. limbName, 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', 'Failed to heal ' .. limbName, 'error')
     end
 end)
 

@@ -54,13 +54,13 @@ function Job:CreateDeliveryProp()
     PlayAnims.LoopCount = -1
     PlayAnims.AnimSlotName = 'UpperBody'
     --Animation.Play(Pawn, Config.Prop.HoldingAnimation, PlayAnims)
-    
+
     return self.Prop
 end
 
 function Job:CreateRoute()
     local Route = {}
-    local PlayerPawn = GetPlayerPawn(self.Courier) 
+    local PlayerPawn = GetPlayerPawn(self.Courier)
     local PawnLocation = GetEntityCoords(PlayerPawn)
 
     -- Randomly select route locations
@@ -107,7 +107,7 @@ function Job:Payout()
     local amount = math.random(Config.Payout.Minimum, Config.Payout.Maximum)
     local completedRoute = self.CurrentStop > self.MaxStops
     -- Decrease amount if route is incomplete
-    if not completedRoute and self.CurrentStop == 1 then 
+    if not completedRoute and self.CurrentStop == 1 then
         amount = 0
     elseif not completedRoute then
         amount = math.floor(amount * 0.3)
@@ -118,7 +118,7 @@ function Job:Payout()
     local Success = Player.AddMoney('bank', amount, 'delivery-job-payout')
     if not Success then return end
 
-    exports['qb-core']:NotifyPlayer(self.Courier, completedRoute and Lang:t('success.paid', {Amount = amount}) or Lang:t('success.incomplete_paid', {Amount = amount}), 'success')
+    exports['qb-core']:NotifyPlayer(self.Courier, completedRoute and Lang.t('success.paid', { Amount = amount }) or Lang.t('success.incomplete_paid', { Amount = amount }), 'success')
 
     return true
 end

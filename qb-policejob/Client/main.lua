@@ -110,7 +110,7 @@ end)
 RegisterClientEvent('qb-policejob:client:vehicleMenu', function(data)
     local vehicleMenu = {
         {
-            header = Lang:t('menu.garage_title')
+            header = Lang.t('menu.garage_title')
         }
     }
 
@@ -131,7 +131,7 @@ RegisterClientEvent('qb-policejob:client:vehicleMenu', function(data)
     end
 
     vehicleMenu[#vehicleMenu + 1] = {
-        header = Lang:t('menu.close'),
+        header = Lang.t('menu.close'),
         txt = '',
         params = {
             event = 'qb-menu:client:closeMenu',
@@ -144,7 +144,7 @@ RegisterClientEvent('qb-policejob:client:escort', function(data)
     TriggerCallback('escort', function(success)
         if not success then return end
 
-        exports['qb-core']:DrawText(Lang:t('info.escort_toggle'))
+        exports['qb-core']:DrawText(Lang.t('info.escort_toggle'))
         IsEscorting = true
     end, data.entity)
 end)
@@ -378,7 +378,7 @@ for i = 1, #Config.Locations['vehicle'] do
         {
             {
                 event = 'qb-policejob:client:vehicleMenu',
-                label = Lang:t('menu.pol_garage'),
+                label = Lang.t('menu.pol_garage'),
                 icon = 'car',
                 locationIndex = i,
                 --jobType = 'leo'
@@ -399,7 +399,7 @@ for i = 1, #Config.Locations['stash'] do
             {
                 type = 'server',
                 event = 'qb-policejob:server:openStash',
-                label = Lang:t('target.open_personal_stash'),
+                label = Lang.t('target.open_personal_stash'),
                 icon = 'box',
                 --jobType = 'leo'
             },
@@ -415,7 +415,7 @@ for i = 1, #Config.Locations['evidence'] do
             {
                 type = 'client',
                 event = 'qb-policejob:client:evidence',
-                label = Lang:t('target.open_evidence_stash'),
+                label = Lang.t('target.open_evidence_stash'),
                 icon = 'box-open',
                 --jobType = 'leo'
             },
@@ -435,7 +435,7 @@ for i = 1, #Config.Locations['fingerprint'] do
             {
                 type = 'server',
                 event = 'qb-policejob:server:openFingerprint',
-                label = Lang:t('target.open_fingerprint'),
+                label = Lang.t('target.open_fingerprint'),
                 icon = 'fingerprint',
                 --jobType = 'leo'
             },

@@ -110,13 +110,13 @@ end
 -- Spawns a vehicle at the relevant garage, if a spot is free
 RegisterServerEvent('qb-garages:server:SpawnVehicle', function(source, plate, index, vehicleName, fuel)
     if OutsideVehicles[plate] and OutsideVehicles[plate].entity:IsValid() then
-        exports['qb-core']:NotifyPlayer(source, Lang:t('error.not_depot'), 'error', 5000)
+        exports['qb-core']:NotifyPlayer(source, Lang.t('error.not_depot'), 'error', 5000)
         return false
     end
 
     local SpawnPoint = GetSpawnPoint(index)
     if not SpawnPoint then
-        exports['qb-core']:NotifyPlayer(source, Lang:t('error.no_spawn'), 'error')
+        exports['qb-core']:NotifyPlayer(source, Lang.t('error.no_spawn'), 'error')
         return false
     end
 
@@ -230,9 +230,9 @@ RegisterNetEvent('qb-garages:server:trackVehicle', function(plate)
     local vehicleData = OutsideVehicles[plate]
     if vehicleData and DoesEntityExist(vehicleData.entity) then
         TriggerClientEvent('qb-garages:client:trackVehicle', src, GetEntityCoords(vehicleData.entity))
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('success.vehicle_tracked'), 'success')
+        TriggerClientEvent('QBCore:Notify', src, Lang.t('success.vehicle_tracked'), 'success')
     else
-        TriggerClientEvent('QBCore:Notify', src, Lang:t('error.vehicle_not_tracked'), 'error')
+        TriggerClientEvent('QBCore:Notify', src, Lang.t('error.vehicle_not_tracked'), 'error')
     end
 end)]]
 
@@ -246,7 +246,7 @@ RegisterServerEvent('qb-garages:server:PayDepotPrice', function(source, data)
         local depotPrice = tonumber(results[1].depotprice)
         local moneyType = (cashBalance >= depotPrice and 'cash') or (bankBalance >= depotPrice and 'bank')
         if not moneyType then
-            TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_enough'), 'error')
+            TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.not_enough'), 'error')
             return
         end
 
@@ -273,22 +273,22 @@ RegisterCallback('GetPlayerVehicles', function(source)
             for _, v in pairs(result) do
                 local VehicleData = SharedVehicles[v.vehicle]
 
-                local VehicleGarage = Lang:t('error.no_garage')
+                local VehicleGarage = Lang.t('error.no_garage')
                 if v.garage ~= nil then
                     if Config.Garages[v.garage] ~= nil then
                         VehicleGarage = Config.Garages[v.garage].label
                     else
-                        VehicleGarage = Lang:t('info.house')
+                        VehicleGarage = Lang.t('info.house')
                     end
                 end
 
                 local stateTranslation
                 if v.state == 0 then
-                    stateTranslation = Lang:t('status.out')
+                    stateTranslation = Lang.t('status.out')
                 elseif v.state == 1 then
-                    stateTranslation = Lang:t('status.garaged')
+                    stateTranslation = Lang.t('status.garaged')
                 elseif v.state == 2 then
-                    stateTranslation = Lang:t('status.impound')
+                    stateTranslation = Lang.t('status.impound')
                 end
 
                 local fullname

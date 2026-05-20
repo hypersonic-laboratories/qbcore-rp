@@ -30,7 +30,7 @@ RegisterServerEvent('qb-cityhall:server:ApplyJob', function(source, job)
 
     local JobInfo = sharedJobs[job]
     Player.SetJob(job, getHighestRank(job))
-    TriggerClientEvent(source, 'QBCore:Notify', Lang:t('info.new_job', { job = JobInfo.label }))
+    TriggerClientEvent(source, 'QBCore:Notify', Lang.t('info.new_job', { job = JobInfo.label }))
 end)
 
 RegisterServerEvent('qb-cityhall:server:requestId', function(source, item)

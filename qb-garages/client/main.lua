@@ -13,7 +13,7 @@ require('locales/en')
 local function OpenGarageMenu()
     TriggerCallback('server.GetGarageVehicles', function(result)
         if type(result) == 'string' then result = result:ToTable() end
-        if result == nil then return exports['qb-core']:Notify(Lang:t('error.no_vehicles'), 'error', 5000) end
+        if result == nil then return exports['qb-core']:Notify(Lang.t('error.no_vehicles'), 'error', 5000) end
         local formattedVehicles = {}
         for _, v in pairs(result) do
             local enginePercent = math.floor(v.engine + 0.5)
@@ -69,15 +69,15 @@ local function CreateZone(index, garage, zoneType)
         zone = ZoneData
         inZone = true
 
-        local displayText = Lang:t('info.car_e')
+        local displayText = Lang.t('info.car_e')
         if zone.vehicle == 'sea' then
-            displayText = Lang:t('info.sea_e')
+            displayText = Lang.t('info.sea_e')
         elseif zone.vehicle == 'air' then
-            displayText = Lang:t('info.air_e')
+            displayText = Lang.t('info.air_e')
         elseif zone.vehicle == 'rig' then
-            displayText = Lang:t('info.rig_e')
+            displayText = Lang.t('info.rig_e')
         elseif zone.type == 'depot' then
-            displayText = Lang:t('info.depot_e')
+            displayText = Lang.t('info.depot_e')
         end
         exports['qb-core']:DrawText(displayText, 'left')
     end, Color(255, 0, 0), {})
@@ -129,7 +129,7 @@ Input.BindKey('E', function()
     if Vehicle then
         if zone.type == 'depot' then return end
         if not IsVehicleAllowed(zone.category, Vehicle) then
-            QBCore.Functions.Notify(Lang:t('error.not_correct_type'), 'error', 3500)
+            QBCore.Functions.Notify(Lang.t('error.not_correct_type'), 'error', 3500)
             return
         end
 
@@ -216,7 +216,7 @@ local function CreateHouseZone(index, garage, zoneType)
                     end
                 end
             end)
-            exports['qb-core']:DrawText(Lang:t('info.house_garage'), 'left')
+            exports['qb-core']:DrawText(Lang.t('info.house_garage'), 'left')
         else
             listenForKeyHouse = false
             exports['qb-core']:HideText()

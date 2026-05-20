@@ -18,7 +18,7 @@ end
 local function MenuGarage()
     local vehicleMenu = {
         {
-            header = Lang:t('menu.amb_vehicles'),
+            header = Lang.t('menu.amb_vehicles'),
             isMenuHeader = true
         }
     }
@@ -38,7 +38,7 @@ local function MenuGarage()
         }
     end
     vehicleMenu[#vehicleMenu + 1] = {
-        header = Lang:t('menu.close'),
+        header = Lang.t('menu.close'),
         txt = '',
         params = {
             event = 'qb-menu:client:closeMenu'
@@ -63,7 +63,7 @@ end
 local function MenuHelicopter()
     local helicopterMenu = {
         {
-            header = Lang:t('menu.amb_helicopters'),
+            header = Lang.t('menu.amb_helicopters'),
             isMenuHeader = true
         }
     }
@@ -83,7 +83,7 @@ local function MenuHelicopter()
         }
     end
     helicopterMenu[#helicopterMenu + 1] = {
-        header = Lang:t('menu.close'),
+        header = Lang.t('menu.close'),
         txt = '',
         params = {
             event = 'qb-menu:client:closeMenu'
@@ -113,13 +113,13 @@ end)
 
 RegisterClientEvent('qb-ambulancejob:client:checkedIn', function()
     checkedIn = true
-    exports['qb-core']:DrawText(Lang:t('text.bed_out'))
+    exports['qb-core']:DrawText(Lang.t('text.bed_out'))
 end)
 
 RegisterClientEvent('qb-hospitaljob:client:openStatusMenu', function(limbData)
     local statusMenu = {
         {
-            header = Lang:t('menu.status'),
+            header = Lang.t('menu.status'),
             isMenuHeader = true
         }
     }
@@ -164,7 +164,7 @@ RegisterClientEvent('qb-hospitaljob:client:openStatusMenu', function(limbData)
         })
     end
     table.insert(statusMenu, {
-        header = Lang:t('menu.close'),
+        header = Lang.t('menu.close'),
         params = {
             event = 'qb-menu:client:closeMenu'
         }

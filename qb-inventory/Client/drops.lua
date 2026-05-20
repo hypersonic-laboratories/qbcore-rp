@@ -14,7 +14,7 @@ CurrentDrop = nil
 					options = {
 						{
 							icon = "backpack",
-							label = Lang:t("menu.o_bag"),
+							label = Lang.t("menu.o_bag"),
 							action = function()
 								TriggerServerEvent("qb-inventory:server:openDrop", k)
 								CurrentDrop = dropId

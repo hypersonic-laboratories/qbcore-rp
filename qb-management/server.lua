@@ -165,7 +165,8 @@ RegisterServerEvent('qb-management:server:GradeUpdate', function(source, data)
 end)
 
 RegisterServerEvent('qb-management:server:FireEmployee', function(source, target)
-    local Player = exports['qb-core']:GetPlayer(src)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player then return end
     local Employee = exports['qb-core']:GetPlayerByCitizenId(target) or exports['qb-core']:GetOfflinePlayerByCitizenId(target)
 
     -- if not Player.PlayerData.job.isboss then
@@ -326,12 +327,16 @@ RegisterCallback('GetPlayers', function(source)
     for _, pawn in pairs(worldPawns) do
         if PlayerPed ~= pawn then
             local controller = pawn:GetController()
-            if not controller then return end
-            local targetPlayer = exports['qb-core']:GetPlayer(controller)
-            players[#players + 1] = {
-                name = targetPlayer.PlayerData.charinfo.firstname .. ' ' .. targetPlayer.PlayerData.charinfo.lastname,
-                citizenid = targetPlayer.PlayerData.citizenid,
-            }
+            if controller then
+                local targetPlayer = exports['qb-core']:GetPlayer(controller)
+                if targetPlayer then
+                    players[#players + 1] = {
+                        name = targetPlayer.PlayerData.charinfo.firstname .. ' ' .. targetPlayer.PlayerData.charinfo.lastname,
+                        citizenid = targetPlayer.PlayerData.citizenid,
+                        source = targetPlayer.PlayerData.source,
+                    }
+                end
+            end
         end
     end
 

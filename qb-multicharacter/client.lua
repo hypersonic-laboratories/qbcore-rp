@@ -17,9 +17,9 @@ end)
 
 my_webui:RegisterEventHandler('createNewCharacter', function(data)
     local cData = data
-    if cData.gender == Lang:t('ui.male') then
+    if cData.gender == Lang.t('ui.male') then
         cData.gender = 0
-    elseif cData.gender == Lang:t('ui.female') then
+    elseif cData.gender == Lang.t('ui.female') then
         cData.gender = 1
     end
     TriggerServerEvent('qb-multicharacter:server:createCharacter', cData)
@@ -44,7 +44,7 @@ local function openCharMenu()
         local translations = {}
         for k in pairs(Lang.fallback and Lang.fallback.phrases or Lang.phrases) do
             if k:sub(0, ('ui.'):len()) then
-                translations[k:sub(('ui.'):len() + 1)] = Lang:t(k)
+                translations[k:sub(('ui.'):len() + 1)] = Lang.t(k)
             end
         end
         if my_webui then

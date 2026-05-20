@@ -27,38 +27,38 @@ RegisterClientEvent('qb-management:client:openBossMenu', function()
 
     local bossMenu = {
         {
-            header = Lang:t('headers.bsm') .. string.upper(PlayerJob.label),
+            header = Lang.t('headers.bsm') .. string.upper(PlayerJob.label),
             icon = 'circle-info',
             isMenuHeader = true,
         },
         {
-            header = Lang:t('body.manage'),
-            txt = Lang:t('body.managed'),
+            header = Lang.t('body.manage'),
+            txt = Lang.t('body.managed'),
             icon = 'list',
             params = {
                 event = 'qb-management:client:employeelist',
             }
         },
         {
-            header = Lang:t('body.hire'),
-            txt = Lang:t('body.hired'),
+            header = Lang.t('body.hire'),
+            txt = Lang.t('body.hired'),
             icon = 'hand-holding',
             params = {
                 event = 'qb-management:client:HireMenu',
             }
         },
         {
-            header = Lang:t('body.storage'),
-            txt = Lang:t('body.storaged'),
+            header = Lang.t('body.storage'),
+            txt = Lang.t('body.storaged'),
             icon = 'box-open',
             params = {
                 isServer = true,
-                event = 'qb-management:server:stash',
+                event = 'qb-management:server:jobStash',
             }
         },
         {
-            header = Lang:t('body.outfits'),
-            txt = Lang:t('body.outfitsd'),
+            header = Lang.t('body.outfits'),
+            txt = Lang.t('body.outfitsd'),
             icon = 'shirt',
             params = {
                 event = 'qb-management:client:Wardrobe',
@@ -67,10 +67,10 @@ RegisterClientEvent('qb-management:client:openBossMenu', function()
     }
 
     bossMenu[#bossMenu + 1] = {
-        header = Lang:t('body.exit'),
+        header = Lang.t('body.exit'),
         icon = 'angle-left',
         params = {
-            event = 'qb-menu:closeMenu',
+            event = 'qb-menu:client:closeMenu',
         }
     }
 
@@ -81,38 +81,38 @@ RegisterClientEvent('qb-management:client:OpenGangMenu', function()
     if not PlayerGang.name then return end
     local gangMenu = {
         {
-            header = Lang:t('headersgang.bsm') .. string.upper(PlayerGang.label),
+            header = Lang.t('headersgang.bsm') .. string.upper(PlayerGang.label),
             icon = 'circle-info',
             isMenuHeader = true,
         },
         {
-            header = Lang:t('bodygang.manage'),
-            txt = Lang:t('bodygang.managed'),
+            header = Lang.t('bodygang.manage'),
+            txt = Lang.t('bodygang.managed'),
             icon = 'list',
             params = {
                 event = 'qb-management:client:ManageGang',
             }
         },
         {
-            header = Lang:t('bodygang.hire'),
-            txt = Lang:t('bodygang.hired'),
+            header = Lang.t('bodygang.hire'),
+            txt = Lang.t('bodygang.hired'),
             icon = 'hand-holding',
             params = {
                 event = 'qb-management:client:HireMembers',
             }
         },
         {
-            header = Lang:t('bodygang.storage'),
-            txt = Lang:t('bodygang.storaged'),
+            header = Lang.t('bodygang.storage'),
+            txt = Lang.t('bodygang.storaged'),
             icon = 'box-open',
             params = {
                 isServer = true,
-                event = 'qb-management:server:stash',
+                event = 'qb-management:server:gangStash',
             }
         },
         {
-            header = Lang:t('bodygang.outfits'),
-            txt = Lang:t('bodygang.outfitsd'),
+            header = Lang.t('bodygang.outfits'),
+            txt = Lang.t('bodygang.outfitsd'),
             icon = 'shirt',
             params = {
                 event = 'qb-management:client:Warbobe',
@@ -121,10 +121,10 @@ RegisterClientEvent('qb-management:client:OpenGangMenu', function()
     }
 
     gangMenu[#gangMenu + 1] = {
-        header = Lang:t('bodygang.exit'),
+        header = Lang.t('bodygang.exit'),
         icon = 'angle-left',
         params = {
-            event = 'qb-menu:closeMenu',
+            event = 'qb-menu:client:closeMenu',
         }
     }
 
@@ -134,7 +134,7 @@ end)
 RegisterClientEvent('qb-management:client:employeelist', function()
     local EmployeesMenu = {
         {
-            header = Lang:t('body.mempl') .. string.upper(PlayerJob.label),
+            header = Lang.t('body.mempl') .. string.upper(PlayerJob.label),
             isMenuHeader = true,
             icon = 'circle-info',
         },
@@ -155,7 +155,7 @@ RegisterClientEvent('qb-management:client:employeelist', function()
             }
         end
         EmployeesMenu[#EmployeesMenu + 1] = {
-            header = Lang:t('body.return'),
+            header = Lang.t('body.return'),
             icon = 'angle-left',
             params = {
                 event = 'qb-management:client:openBossMenu',
@@ -168,7 +168,7 @@ end)
 RegisterClientEvent('qb-management:client:ManageEmployee', function(data)
     local EmployeeMenu = {
         {
-            header = Lang:t('body.mngpl') .. data.player.name .. ' - ' .. string.upper(PlayerJob.label),
+            header = Lang.t('body.mngpl') .. data.player.name .. ' - ' .. string.upper(PlayerJob.label),
             isMenuHeader = true,
             icon = 'circle-info'
         },
@@ -176,7 +176,7 @@ RegisterClientEvent('qb-management:client:ManageEmployee', function(data)
     for k, v in pairs(sharedJobs[data.work.name].grades) do
         EmployeeMenu[#EmployeeMenu + 1] = {
             header = v.name,
-            txt = Lang:t('body.grade') .. k,
+            txt = Lang.t('body.grade') .. k,
             params = {
                 isServer = true,
                 event = 'qb-management:server:GradeUpdate',
@@ -190,7 +190,7 @@ RegisterClientEvent('qb-management:client:ManageEmployee', function(data)
         }
     end
     EmployeeMenu[#EmployeeMenu + 1] = {
-        header = Lang:t('body.fireemp'),
+        header = Lang.t('body.fireemp'),
         icon = 'user-large-slash',
         params = {
             isServer = true,
@@ -199,7 +199,7 @@ RegisterClientEvent('qb-management:client:ManageEmployee', function(data)
         }
     }
     EmployeeMenu[#EmployeeMenu + 1] = {
-        header = Lang:t('body.return'),
+        header = Lang.t('body.return'),
         icon = 'angle-left',
         params = {
             event = 'qb-management:client:openBossMenu',
@@ -211,19 +211,19 @@ end)
 RegisterClientEvent('qb-management:client:ManageGang', function()
     local GangMembersMenu = {
         {
-            header = Lang:t('bodygang.mempl') .. string.upper(PlayerGang.label),
+            header = Lang.t('bodygang.mempl') .. string.upper(PlayerGang.label),
             icon = 'circle-info',
             isMenuHeader = true,
         },
     }
-    TriggerCallback('GetEmployees', function(cb)
+    TriggerCallback('GetMembers', function(cb)
         for _, v in pairs(cb) do
             GangMembersMenu[#GangMembersMenu + 1] = {
                 header = v.name,
                 txt = v.grade.name,
                 icon = 'circle-user',
                 params = {
-                    event = 'qb-management:lient:ManageMember',
+                    event = 'qb-management:client:ManageMember',
                     args = {
                         player = v,
                         work = PlayerGang
@@ -232,7 +232,7 @@ RegisterClientEvent('qb-management:client:ManageGang', function()
             }
         end
         GangMembersMenu[#GangMembersMenu + 1] = {
-            header = Lang:t('bodygang.return'),
+            header = Lang.t('bodygang.return'),
             icon = 'angle-left',
             params = {
                 event = 'qb-management:client:OpenGangMenu',
@@ -245,7 +245,7 @@ end)
 RegisterClientEvent('qb-management:client:ManageMember', function(data)
     local MemberMenu = {
         {
-            header = Lang:t('bodygang.mngpl') .. data.player.name .. ' - ' .. string.upper(PlayerGang.label),
+            header = Lang.t('bodygang.mngpl') .. data.player.name .. ' - ' .. string.upper(PlayerGang.label),
             isMenuHeader = true,
             icon = 'circle-info',
         },
@@ -253,10 +253,10 @@ RegisterClientEvent('qb-management:client:ManageMember', function(data)
     for k, v in pairs(sharedGangs[data.work.name].grades) do
         MemberMenu[#MemberMenu + 1] = {
             header = v.name,
-            txt = Lang:t('bodygang.grade') .. k,
+            txt = Lang.t('bodygang.grade') .. k,
             params = {
                 isServer = true,
-                event = 'qb-management:server:GradeUpdate',
+                event = 'qb-management:server:GradeUpdateGang',
                 icon = 'file-pen',
                 args = {
                     cid = data.player.empSource,
@@ -267,7 +267,7 @@ RegisterClientEvent('qb-management:client:ManageMember', function(data)
         }
     end
     MemberMenu[#MemberMenu + 1] = {
-        header = Lang:t('bodygang.fireemp'),
+        header = Lang.t('bodygang.fireemp'),
         icon = 'user-large-slash',
         params = {
             isServer = true,
@@ -276,7 +276,7 @@ RegisterClientEvent('qb-management:client:ManageMember', function(data)
         }
     }
     MemberMenu[#MemberMenu + 1] = {
-        header = Lang:t('bodygang.return'),
+        header = Lang.t('bodygang.return'),
         icon = 'angle-left',
         params = {
             event = 'qb-management:client:ManageGang',
@@ -288,7 +288,7 @@ end)
 RegisterClientEvent('qb-management:client:HireMenu', function()
     local HireMenu = {
         {
-            header = Lang:t('body.hireemp') .. string.upper(PlayerJob.label),
+            header = Lang.t('body.hireemp') .. string.upper(PlayerJob.label),
             isMenuHeader = true,
             icon = 'circle-info',
         },
@@ -297,7 +297,7 @@ RegisterClientEvent('qb-management:client:HireMenu', function()
         for _, v in pairs(players) do
             HireMenu[#HireMenu + 1] = {
                 header = v.name,
-                txt = Lang:t('body.cid') .. v.citizenid,
+                txt = Lang.t('body.cid') .. v.citizenid,
                 icon = 'user-check',
                 params = {
                     isServer = true,
@@ -307,7 +307,7 @@ RegisterClientEvent('qb-management:client:HireMenu', function()
             }
         end
         HireMenu[#HireMenu + 1] = {
-            header = Lang:t('body.return'),
+            header = Lang.t('body.return'),
             icon = 'angle-left',
             params = {
                 event = 'qb-management:client:openBossMenu',
@@ -320,7 +320,7 @@ end)
 RegisterClientEvent('qb-management:client:HireMembers', function()
     local HireMembersMenu = {
         {
-            header = Lang:t('bodygang.hireemp') .. string.upper(PlayerGang.label),
+            header = Lang.t('bodygang.hireemp') .. string.upper(PlayerGang.label),
             isMenuHeader = true,
             icon = 'circle-info',
         },
@@ -329,17 +329,17 @@ RegisterClientEvent('qb-management:client:HireMembers', function()
         for _, v in pairs(players) do
             HireMembersMenu[#HireMembersMenu + 1] = {
                 header = v.name,
-                txt = Lang:t('bodygang.cid') .. v.citizenid .. ' - ID: ' .. v.sourceplayer,
+                txt = Lang.t('bodygang.cid') .. v.citizenid .. ' - ID: ' .. v.source,
                 icon = 'user-check',
                 params = {
                     isServer = true,
                     event = 'qb-management:server:HireMember',
-                    args = v.sourceplayer
+                    args = v.source
                 }
             }
         end
         HireMembersMenu[#HireMembersMenu + 1] = {
-            header = Lang:t('bodygang.return'),
+            header = Lang.t('bodygang.return'),
             icon = 'angle-left',
             params = {
                 event = 'qb-management:client:OpenGangMenu',
@@ -362,7 +362,7 @@ Timer.SetTimeout(function()
                 {
                     icon = 'sign-in-alt',
                     event = 'qb-management:client:openBossMenu',
-                    label = Lang:t('target.label'),
+                    label = Lang.t('target.label'),
                 },
             })
         end
@@ -378,7 +378,7 @@ Timer.SetTimeout(function()
                 {
                     icon = 'sign-in-alt',
                     event = 'qb-management:client:OpenGangMenu',
-                    label = Lang:t('targetgang.label'),
+                    label = Lang.t('targetgang.label'),
                 },
             })
         end

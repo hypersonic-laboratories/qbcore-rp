@@ -80,11 +80,11 @@ local function CompleteJob(source, returnedTruck)
     if not Player then return end
 
     if not returnedTruck and route.vehicle and route.vehicle:IsValid() then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.truck_not_returned'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.truck_not_returned'), 'error')
         return
     end
 
-    TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.reward', { amount = route.pay }), 'success')
+    TriggerClientEvent(source, 'QBCore:Notify', Lang.t('success.reward', { amount = route.pay }), 'success')
     Player.AddMoney('bank', route.pay, 'qb-garbagejob:completedJob')
 
     if route.vehicle and route.vehicle:IsValid() then
@@ -108,7 +108,7 @@ RegisterServerEvent('qb-garbagejob:server:startJob', function(source, args)
         return
     end
     if routes[GetPlayerId(source)] then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.route_busy'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.route_busy'), 'error')
         return
     end
     SetupRoute(source)
@@ -116,7 +116,7 @@ RegisterServerEvent('qb-garbagejob:server:startJob', function(source, args)
     if not depot then return end
     local vehicle = HVehicle(depot.vehicleSpawn.coords, Rotator(0, depot.vehicleSpawn.heading, 0), Config.Vehicle)
     routes[GetPlayerId(source)].vehicle = vehicle
-    TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.new_route', { stops = routes[GetPlayerId(source)].maxStops }), 'success')
+    TriggerClientEvent(source, 'QBCore:Notify', Lang.t('success.new_route', { stops = routes[GetPlayerId(source)].maxStops }), 'success')
 end)
 
 RegisterServerEvent('qb-garbagejob:server:completeJob', function(source)
@@ -127,12 +127,12 @@ RegisterServerEvent('qb-garbagejob:server:completeJob', function(source)
     end
     local route = routes[GetPlayerId(source)]
     if not route then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.no_route'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.no_route'), 'error')
         return
     end
 
     if not route.vehicle or not route.vehicle:IsValid() then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.no_vehicle'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.no_vehicle'), 'error')
         return
     end
 
@@ -143,7 +143,7 @@ RegisterServerEvent('qb-garbagejob:server:completeJob', function(source)
     local distance = GetDistanceBetweenCoords(pedCoords, vehicleCoords)
 
     if distance > 2500 then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.truck_too_far'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.truck_too_far'), 'error')
         return
     end
 
@@ -159,7 +159,7 @@ RegisterServerEvent('qb-garbagejob:server:grabBag', function(source, data)
 
     local route = routes[GetPlayerId(source)]
     if not route then
-        print(source, 'QBCore:Notify', Lang:t('error.no_route'), 'error')
+        print(source, 'QBCore:Notify', Lang.t('error.no_route'), 'error')
         return
     end
 
@@ -169,19 +169,19 @@ RegisterServerEvent('qb-garbagejob:server:grabBag', function(source, data)
     end
 
     if route.holdingBag then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.already_holding_bag'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.already_holding_bag'), 'error')
         return
     end
 
     if route.collectedDumpsters[data.entity] then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.already_collected'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.already_collected'), 'error')
         return
     end
 
     local gotItem = HInventory.GiveAndEquipItemByName(source, 'ID_Misc_TrashBag')
     routes[GetPlayerId(source)].holdingBag = gotItem
     routes[GetPlayerId(source)].collectedDumpsters[data.entity] = true
-    TriggerClientEvent(source, 'QBCore:Notify', Lang:t('info.load_bag'))
+    TriggerClientEvent(source, 'QBCore:Notify', Lang.t('info.load_bag'))
 end)
 
 RegisterServerEvent('qb-garbagejob:server:loadBag', function(source)
@@ -197,7 +197,7 @@ RegisterServerEvent('qb-garbagejob:server:loadBag', function(source)
     end
 
     if not route.holdingBag then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.no_bag'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.no_bag'), 'error')
         return
     end
 
@@ -208,10 +208,10 @@ RegisterServerEvent('qb-garbagejob:server:loadBag', function(source)
     routes[GetPlayerId(source)].pay = route.pay + math.random(Config.BagLowerWorth, Config.BagUpperWorth)
 
     if routes[GetPlayerId(source)].stopsCompleted >= routes[GetPlayerId(source)].maxStops then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.route_complete'), 'success')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('success.route_complete'), 'success')
         return
     end
 
     local remaining = routes[GetPlayerId(source)].maxStops - routes[GetPlayerId(source)].stopsCompleted
-    TriggerClientEvent(source, 'QBCore:Notify', Lang:t('info.stops_remaining', { stops = remaining }))
+    TriggerClientEvent(source, 'QBCore:Notify', Lang.t('info.stops_remaining', { stops = remaining }))
 end)

@@ -201,7 +201,7 @@ RegisterServerEvent('qb-apartments:server:CreateApartment', function(source, apt
 		label,
 		Player.PlayerData.citizenid,
 	})
-	TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.receive_apart') .. ' (' .. label .. ')')
+	TriggerClientEvent(source, 'QBCore:Notify', Lang.t('success.receive_apart') .. ' (' .. label .. ')')
 	EnterApartment(source, apartmentId, aptName)
 end)
 
@@ -215,7 +215,7 @@ RegisterServerEvent('qb-apartments:server:UpdateApartment', function(source, dat
 		label,
 		Player.PlayerData.citizenid
 	})
-	TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.changed_apart'))
+	TriggerClientEvent(source, 'QBCore:Notify', Lang.t('success.changed_apart'))
 end)
 
 -- Target Events
@@ -234,7 +234,7 @@ RegisterServerEvent('qb-apartments:server:EnterApartment', function(source, data
 		local aptName = result[1].type
 		EnterApartment(source, apartmentId, aptName)
 	else
-		TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_owner'), 'error')
+		TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.not_owner'), 'error')
 	end
 end)
 
@@ -291,12 +291,12 @@ RegisterServerEvent('qb-apartments:server:RingDoor', function(source, data)
 	}
 
 	if not next(entry.players) then
-		TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.nobody_home'))
+		TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.nobody_home'))
 		return
 	end
 
 	for _, playerSrc in pairs(entry.players) do
-		TriggerClientEvent(playerSrc, 'QBCore:Notify', Lang:t('info.at_the_door'))
+		TriggerClientEvent(playerSrc, 'QBCore:Notify', Lang.t('info.at_the_door'))
 	end
 end)
 

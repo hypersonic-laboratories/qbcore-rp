@@ -56,7 +56,7 @@
 --                 local inventory = 'trunk-' .. plate
 --                 cb(inventory, class)
 --             else
---                 exports['qb-core']:Notify(Lang:t('notify.vlocked'), 'error')
+--                 exports['qb-core']:Notify(Lang.t('notify.vlocked'), 'error')
 --                 return
 --             end
 --         end

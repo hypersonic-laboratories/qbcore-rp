@@ -28,7 +28,7 @@ Config = {
         },
         ['hospital'] = {
             {
-                ['name'] = Lang:t('info.pb_hospital'),
+                ['name'] = Lang.t('info.pb_hospital'),
                 ['location'] = Vector(0, 0, 0),
                 ['beds'] = {
                     { coords = Vector(0, 0, 0), heading = 0, taken = false },
@@ -39,7 +39,7 @@ Config = {
                 },
             },
             -- {
-            --     ['name'] = Lang:t('info.paleto_hospital'),
+            --     ['name'] = Lang.t('info.paleto_hospital'),
             --     ['location'] = Vector(-254.54, 6331.78, 32.43),
             --     ['beds'] = {
             --         { coords = Vector(-252.43, 6312.25, 32.34, 313.48), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
@@ -49,7 +49,7 @@ Config = {
             -- },
         },
         ['stations'] = {
-            { label = Lang:t('info.pb_hospital'), coords = Vector(0, 0, 0) }
+            { label = Lang.t('info.pb_hospital'), coords = Vector(0, 0, 0) }
         }
     },
 

@@ -4,7 +4,7 @@ exports['qb-target']:AddTargetModel('SM_Dumpster', {
     options = {
         {
             icon = 'box',
-            label = Lang:t('target.collect_garbage'),
+            label = Lang.t('target.collect_garbage'),
             type = 'server',
             event = 'qb-garbagejob:server:grabBag',
             job = 'garbage'
@@ -16,7 +16,7 @@ exports['qb-target']:AddTargetModel('SM_Dumpster', {
 exports['qb-target']:AddTargetModel('GarbageTruck', {
     options = {
         {
-            label = Lang:t('target.deposit_garbage'),
+            label = Lang.t('target.deposit_garbage'),
             icon = 'truck-ramp-box',
             type = 'server',
             event = 'qb-garbagejob:server:loadBag',
@@ -36,14 +36,14 @@ local function setupPeds()
                 {
                     type = 'server',
                     event = 'QBCore:ToggleDuty',
-                    label = Lang:t('target.toggle_duty'),
+                    label = Lang.t('target.toggle_duty'),
                     icon = 'clipboard',
                     job = 'garbage',
                 },
                 {
                     type = 'server',
                     event = 'qb-garbagejob:server:startJob',
-                    label = Lang:t('target.start_job'),
+                    label = Lang.t('target.start_job'),
                     icon = 'truck-field',
                     job = 'garbage',
                     depot = jobPeds[i].depot
@@ -51,7 +51,7 @@ local function setupPeds()
                 {
                     type = 'server',
                     event = 'qb-garbagejob:server:completeJob',
-                    label = Lang:t('target.complete_route'),
+                    label = Lang.t('target.complete_route'),
                     icon = 'circle-check',
                     job = 'garbage',
                 }

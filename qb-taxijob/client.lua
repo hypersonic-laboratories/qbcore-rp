@@ -88,21 +88,21 @@ local function setupPeds()
                 {
                     type = 'server',
                     event = 'QBCore:ToggleDuty',
-                    label = Lang:t('target.toggle_duty'),
+                    label = Lang.t('target.toggle_duty'),
                     icon = 'clipboard',
                     job = 'taxi'
                 },
                 {
                     type = 'server',
                     event = 'qb-taxijob:server:takeVehicle',
-                    label = Lang:t('target.take_vehicle'),
+                    label = Lang.t('target.take_vehicle'),
                     icon = 'truck-field',
                     job = 'taxi',
                     depot = jobPeds[i].depot
                 },
                 {
                     event = 'qb-taxijob:client:finishWork',
-                    label = Lang:t('target.finish_work'),
+                    label = Lang.t('target.finish_work'),
                     icon = 'circle-check',
                     job = 'taxi'
                 }

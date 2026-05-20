@@ -131,7 +131,7 @@ RegisterServerEvent('qb-policejob:server:retrieveVehicle', function(source, data
     -- Spawn Vehicle
     local SpawnLocation = Config.Locations.vehicle[data.locationIndex].spawn
     local Vehicle = HVehicle(SpawnLocation.coords, SpawnLocation.rotation, VehicleData.asset_name)
-    Vehicle:SetPlate(Lang:t('info.police_plate') .. tostring(math.random(1000, 9999)))
+    Vehicle:SetPlate(Lang.t('info.police_plate') .. tostring(math.random(1000, 9999)))
 end)
 
 RegisterServerEvent('qb-policejob:server:evidence', function(source, drawer)
@@ -205,7 +205,7 @@ RegisterServerEvent('qb-policejob:server:handcuff', function(source, data)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' and not Player.PlayerData.job.onduty then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.on_duty_police_only'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.on_duty_police_only'), 'error')
         return
     end
     local ped = GetPlayerPawn(source)
@@ -316,8 +316,8 @@ RegisterServerEvent('qb-policejob:server:toggleTracker', function(source, args)
     local FirstName = TargetPlayer.PlayerData.charinfo.firstname
     local LastName = TargetPlayer.PlayerData.charinfo.lastname
     local NameData = { firstname = FirstName, lastname = LastName }
-    TriggerClientEvent(source, 'QBCore:Notify', NewTrackerState and Lang:t('success.put_anklet_on', NameData) or Lang:t('success.took_anklet_from', NameData), 'success')
-    TriggerClientEvent(TargetPlayer.PlayerData.source, 'QBCore:Notify', NewTrackerState and Lang:t('success.put_anklet') or Lang:t('success.anklet_taken_off'), 'success')
+    TriggerClientEvent(source, 'QBCore:Notify', NewTrackerState and Lang.t('success.put_anklet_on', NameData) or Lang.t('success.took_anklet_from', NameData), 'success')
+    TriggerClientEvent(TargetPlayer.PlayerData.source, 'QBCore:Notify', NewTrackerState and Lang.t('success.put_anklet') or Lang.t('success.anklet_taken_off'), 'success')
 
     TargetPlayer.PlayerData.metadata.tracker = NewTrackerState -- transient, used for UI update
     TriggerClientEvent(source, 'qb-policejob:client:viewCriminalRecord', { PlayerData = TargetPlayer.PlayerData })
@@ -358,13 +358,13 @@ Events.SubscribeRemote('qb-policejob:server:panicButton', function(source)
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' and not Player.PlayerData.job.onduty then
-        Events.CallRemote('QBCore:Notify', source, Lang:t('error.on_duty_police_only'), 'error')
+        Events.CallRemote('QBCore:Notify', source, Lang.t('error.on_duty_police_only'), 'error')
         return
     end
     local ped = source:GetControlledCharacter()
     local ped_coords = ped:GetLocation()
     local players = QBCore.Functions.GetQBPlayers()
-    local text = Lang:t('info.officer_down', { lastname = Player.PlayerData.charinfo.lastname, callsign = Player.PlayerData.metadata.callsign })
+    local text = Lang.t('info.officer_down', { lastname = Player.PlayerData.charinfo.lastname, callsign = Player.PlayerData.metadata.callsign })
     for _, v in pairs(players) do
         if v and v.PlayerData.job.type == 'leo' and v.PlayerData.job.onduty then
             Events.CallRemote('qb-policejob:client:policeAlert', v.PlayerData.source, ped_coords, text)
@@ -404,7 +404,7 @@ RegisterServerEvent('qb-policejob:server:useHandcuffs', function(source)
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' or not Player.PlayerData.job.onduty then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.on_duty_police_only'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.on_duty_police_only'), 'error')
         return
     end
     handcuff(source)

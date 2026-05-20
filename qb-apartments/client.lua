@@ -23,7 +23,7 @@ local function RegisterApartmentEntranceTarget(apartmentName, apartmentData)
 		options = {
 			{
 				icon = 'door-open',
-				label = Lang:t('text.enter'),
+				label = Lang.t('text.enter'),
 				type = 'server',
 				event = 'qb-apartments:server:EnterApartment',
 				ClosestApartment = ClosestApartment,
@@ -33,7 +33,7 @@ local function RegisterApartmentEntranceTarget(apartmentName, apartmentData)
 		options = {
 			{
 				icon = 'hotel',
-				label = Lang:t('text.move_here'),
+				label = Lang.t('text.move_here'),
 				type = 'server',
 				event = 'qb-apartments:server:UpdateApartment',
 				ClosestApartment = ClosestApartment,
@@ -45,7 +45,7 @@ local function RegisterApartmentEntranceTarget(apartmentName, apartmentData)
 		type = 'client',
 		event = 'qb-apartments:client:DoorbellMenu',
 		icon = 'concierge-bell',
-		label = Lang:t('text.ring_doorbell'),
+		label = Lang.t('text.ring_doorbell'),
 	}
 
 	exports['qb-target']:AddBoxZone(boxName, coords, boxData.length, boxData.width, {
@@ -109,13 +109,13 @@ local function SetInApartmentTargets(apartmentName)
 	RegisterInApartmentTarget('entrancePos', entrancePos, 0, {
 		{
 			icon = 'clipboard-list',
-			label = Lang:t('text.open_door'),
+			label = Lang.t('text.open_door'),
 			event = 'qb-apartments:client:DoorRequestMenu',
 			CurrentApartment = CurrentApartment,
 		},
 		{
 			icon = 'door-open',
-			label = Lang:t('text.leave'),
+			label = Lang.t('text.leave'),
 			type = 'server',
 			event = 'qb-apartments:server:LeaveApartment',
 			CurrentApartment = CurrentApartment,
@@ -124,7 +124,7 @@ local function SetInApartmentTargets(apartmentName)
 	RegisterInApartmentTarget('stashPos', stashPos, 0, {
 		{
 			icon = 'box',
-			label = Lang:t('text.open_stash'),
+			label = Lang.t('text.open_stash'),
 			type = 'server',
 			event = 'qb-apartments:server:OpenStash',
 			CurrentApartment = CurrentApartment,
@@ -135,13 +135,13 @@ local function SetInApartmentTargets(apartmentName)
 			type = 'client',
 			event = 'qb-apartments:client:ChangeOutfit',
 			icon = 'shirt',
-			label = Lang:t('text.change_outfit'),
+			label = Lang.t('text.change_outfit'),
 		},
 	})
 	RegisterInApartmentTarget('logoutPos', logoutPos, 0, {
 		{
 			icon = 'log-out',
-			label = Lang:t('text.logout'),
+			label = Lang.t('text.logout'),
 			type = 'server',
 			event = 'qb-apartments:server:LogoutApartment',
 			CurrentApartment = CurrentApartment,
@@ -270,12 +270,12 @@ end)
 RegisterClientEvent('qb-apartments:client:DoorbellMenu', function()
 	TriggerCallback('GetAvailableApartments', function(apartments)
 		if next(apartments) == nil then
-			exports['qb-core']:Notify(Lang:t('error.nobody_home'), 'error')
+			exports['qb-core']:Notify(Lang.t('error.nobody_home'), 'error')
 			exports['qb-menu']:closeMenu()
 		else
 			local apartmentMenu = {
 				{
-					header = Lang:t('text.tennants'),
+					header = Lang.t('text.tennants'),
 					isMenuHeader = true
 				}
 			}
@@ -297,7 +297,7 @@ RegisterClientEvent('qb-apartments:client:DoorbellMenu', function()
 			end
 
 			apartmentMenu[#apartmentMenu + 1] = {
-				header = Lang:t('text.close_menu'),
+				header = Lang.t('text.close_menu'),
 				txt = '',
 				params = {
 					event = 'qb-menu:client:closeMenu'
@@ -312,7 +312,7 @@ end)
 RegisterClientEvent('qb-apartments:client:DoorRequestMenu', function(data)
 	TriggerCallback('GetDoorRequests', function(requests)
 		if not requests or next(requests) == nil then
-			exports['qb-core']:Notify(Lang:t('error.nobody_at_door'))
+			exports['qb-core']:Notify(Lang.t('error.nobody_at_door'))
 			exports['qb-menu']:closeMenu()
 			return
 		end
@@ -341,7 +341,7 @@ RegisterClientEvent('qb-apartments:client:DoorRequestMenu', function(data)
 		end
 
 		menu[#menu + 1] = {
-			header = Lang:t('text.close_menu'),
+			header = Lang.t('text.close_menu'),
 			txt = '',
 			params = {
 				event = 'qb-menu:client:closeMenu'

@@ -164,7 +164,7 @@ my_webui:RegisterEventHandler('GiveItem', function(data, cb)
 			cb(success)
 		end, playerId, data.item.name, data.amount)
 	else
-		exports['qb-core']:Notify(Lang:t('notify.nonb'), 'error')
+		exports['qb-core']:Notify(Lang.t('notify.nonb'), 'error')
 	end
 end)
 
@@ -226,7 +226,7 @@ for _, model in pairs(Config.VendingObjects) do
 				type = 'server',
 				event = 'qb-inventory:server:openVending',
 				icon = 'cash-register',
-				label = Lang:t('menu.vending'),
+				label = Lang.t('menu.vending'),
 			},
 		},
 		distance = 1000

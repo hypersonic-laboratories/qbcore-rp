@@ -32,7 +32,7 @@ local function setupTargets()
                     type = 'server',
                     event = 'qb-vehicleshop:server:testDrive',
                     icon = 'car',
-                    label = Lang:t('menus.test_header'),
+                    label = Lang.t('menus.test_header'),
                     shop = shop,
                     index = i
                 },

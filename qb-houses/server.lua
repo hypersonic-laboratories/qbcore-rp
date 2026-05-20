@@ -517,7 +517,7 @@ RegisterServerEvent('qb-houses:server:EnterEntrance', function(source, data)
     end
     local propertyKey = getOwnedUnitKey(entranceId, Player.PlayerData.citizenid)
     if not propertyKey then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_owner'), 'danger')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.not_owner'), 'danger')
         return
     end
     EnterInstancedUnit(source, propertyKey)
@@ -552,7 +552,7 @@ RegisterServerEvent('qb-houses:server:PurchaseProperty', function(source, data)
     local money = Player.PlayerData.money or {}
     local cash = tonumber(money.cash) or 0
     if cash < price then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_enough_money'), 'danger')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.not_enough_money'), 'danger')
         return
     end
     local propertyKey = exports['qb-core']:CreateApartmentId()
@@ -564,7 +564,7 @@ RegisterServerEvent('qb-houses:server:PurchaseProperty', function(source, data)
         label = ('%s Furniture Stash'):format(propertyKey)
     })
     registerUnit(propertyKey, entranceId, cid, 'instanced', entrance.interiorRef)
-    TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.purchased_apart') .. (entrance.label or entranceId))
+    TriggerClientEvent(source, 'QBCore:Notify', Lang.t('success.purchased_apart') .. (entrance.label or entranceId))
     EnterInstancedUnit(source, propertyKey)
     TriggerClientEvent(source, 'qb-houses:client:PurchaseProperty')
 end)
@@ -613,7 +613,7 @@ RegisterServerEvent('qb-houses:server:StoreVehicle', function(source, data)
     local pawn = GetPlayerPawn(source)
     local vehicle = GetVehiclePedIsIn(pawn)
     if not vehicle then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_in_vehicle'), 'danger')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.not_in_vehicle'), 'danger')
         return
     end
     local entranceId = data.entranceId
@@ -624,7 +624,7 @@ RegisterServerEvent('qb-houses:server:StoreVehicle', function(source, data)
     local entrance = Entrances[entranceId]
     if not entrance or not entrance.garageCoords then return end
     if GetDistanceBetweenCoords(GetEntityCoords(pawn), entrance.garageCoords.coords) > 500 then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.too_far_from_garage'), 'danger')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.too_far_from_garage'), 'danger')
         return
     end
 
@@ -635,7 +635,7 @@ RegisterServerEvent('qb-houses:server:StoreVehicle', function(source, data)
     -- check ownership
     local propertyKey = getOwnedUnitKey(entranceId, Player.PlayerData.citizenid)
     if not propertyKey then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_owner'), 'danger')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.not_owner'), 'danger')
         return
     end
 
@@ -647,11 +647,11 @@ RegisterServerEvent('qb-houses:server:StoreVehicle', function(source, data)
     })
     if type(results) ~= 'table' or #results <= 0 then
         print(string.format('[qb-houses] StoreVehicle - Vehicle not found for plate: %s, citizenid: %s', vehiclePlate, Player.PlayerData.citizenid))
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.not_vehicle_owner'), 'danger')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.not_vehicle_owner'), 'danger')
         return
     end
     if #results > #shellData.garageVehicleOffsets then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.full_garage'), 'danger')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.full_garage'), 'danger')
         return
     end
 
@@ -1013,6 +1013,6 @@ end)
 --         label = ('%s Furniture Stash'):format(propertyKey)
 --     })
 --     registerUnit(propertyKey, entranceId, Player.PlayerData.citizenid, 'instanced', entrance.interiorRef)
---     TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.receive_apart') .. ' (' .. entrance.label .. ')')
+--     TriggerClientEvent(source, 'QBCore:Notify', Lang.t('success.receive_apart') .. ' (' .. entrance.label .. ')')
 --     EnterInstancedUnit(source, propertyKey)
 -- end)

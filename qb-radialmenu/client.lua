@@ -117,10 +117,10 @@ local function SetupVehicleMenu()
     --         VehicleMenu.items[seatIndex] = deepcopy(Config.VehicleSeats)
 
     --         local seatTable = {
-    --             [1] = Lang:t('options.driver_seat'),
-    --             [2] = Lang:t('options.passenger_seat'),
-    --             [3] = Lang:t('options.rear_left_seat'),
-    --             [4] = Lang:t('options.rear_right_seat'),
+    --             [1] = Lang.t('options.driver_seat'),
+    --             [2] = Lang.t('options.passenger_seat'),
+    --             [3] = Lang.t('options.rear_left_seat'),
+    --             [4] = Lang.t('options.rear_right_seat'),
     --         }
 
     --         local AmountOfSeats = GetVehicleModelNumberOfSeats(GetEntityModel(Vehicle))
@@ -128,7 +128,7 @@ local function SetupVehicleMenu()
     --             local newIndex = #VehicleMenu.items[seatIndex].items + 1
     --             VehicleMenu.items[seatIndex].items[newIndex] = {
     --                 id = i - 2,
-    --                 title = seatTable[i] or Lang:t('options.other_seats'),
+    --                 title = seatTable[i] or Lang.t('options.other_seats'),
     --                 icon = 'caret-up',
     --                 type = 'client',
     --                 event = 'qb-radialmenu:client:ChangeSeat',
@@ -159,7 +159,7 @@ local function SetupRadialMenu()
     --     FinalMenuItems = {
     --         [1] = {
     --             id = 'emergencybutton2',
-    --             title = Lang:t('options.emergency_button'),
+    --             title = Lang.t('options.emergency_button'),
     --             icon = 'circle-exclamation',
     --             type = 'client',
     --             event = 'police:client:SendPoliceEmergencyAlert',

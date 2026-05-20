@@ -68,7 +68,7 @@ RegisterCallback('server.pickupBox', function(source, jobId)
     local CurrentJob = Jobs[jobId]
     if not CurrentJob or CurrentJob.Courier ~= source then return end
     if CurrentJob.CurrentStop > CurrentJob.MaxStops then
-        exports['qb-core']:NotifyPlayer(source, Lang:t('error.no_packages'), 'error')
+        exports['qb-core']:NotifyPlayer(source, Lang.t('error.no_packages'), 'error')
         return
     end
 
@@ -81,7 +81,7 @@ RegisterCallback('deliverPackage', function(source, jobId)
     local CurrentJob = Jobs[jobId]
     if not CurrentJob or CurrentJob.Courier ~= source then return end
     if IsPedInAnyVehicle(GetPlayerPawn(source)) then
-        exports['qb-core']:NotifyPlayer(source, Lang:t('error.inside_vehicle'), 'error')
+        exports['qb-core']:NotifyPlayer(source, Lang.t('error.inside_vehicle'), 'error')
         return
     end
 
@@ -104,7 +104,7 @@ RegisterCallback('finishDelivering', function(source, jobId)
 
     local Paid = CurrentJob:Payout()
     if not Paid then return end
-    
+
     CurrentJob:Cleanup()
     Jobs[CurrentJob.DeliveryId] = nil
     TriggerClientEvent(source, 'qb-deliveryjob:client:setCurrentLocation', nil)

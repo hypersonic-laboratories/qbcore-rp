@@ -76,7 +76,7 @@ RegisterServerEvent('qb-vehicleshop:server:purchaseVehicle', function(source, da
     if cash >= price then moneyType = 'cash' elseif bank >= price then moneyType = 'bank' else moneyType = nil end
 
     if not moneyType then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.notenoughmoney'), 'error')
+        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.notenoughmoney'), 'error')
         return
     end
 
@@ -94,7 +94,7 @@ RegisterServerEvent('qb-vehicleshop:server:purchaseVehicle', function(source, da
     local pVehicle = HVehicle(spawnLocation.location, spawnLocation.rotation, vehicleInfo.asset_name)
     pVehicle:SetPlate(plate)
     pVehicle:SetFuel(100.0)
-    TriggerClientEvent(source, 'QBCore:Notify', Lang:t('success.purchased'), 'success')
+    TriggerClientEvent(source, 'QBCore:Notify', Lang.t('success.purchased'), 'success')
 end)
 
 -- Callbacks

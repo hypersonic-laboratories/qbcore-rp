@@ -9,19 +9,19 @@ local shotAmount = 0
 local StatusTimer = nil
 
 local StatusList = {
-    ['fight'] = Lang:t('evidence.red_hands'),
-    ['widepupils'] = Lang:t('evidence.wide_pupils'),
-    ['redeyes'] = Lang:t('evidence.red_eyes'),
-    ['weedsmell'] = Lang:t('evidence.weed_smell'),
-    ['gunpowder'] = Lang:t('evidence.gunpowder'),
-    ['chemicals'] = Lang:t('evidence.chemicals'),
-    ['heavybreath'] = Lang:t('evidence.heavy_breathing'),
-    ['sweat'] = Lang:t('evidence.sweat'),
-    ['handbleed'] = Lang:t('evidence.handbleed'),
-    ['confused'] = Lang:t('evidence.confused'),
-    ['alcohol'] = Lang:t('evidence.alcohol'),
-    ['heavyalcohol'] = Lang:t('evidence.heavy_alcohol'),
-    ['agitated'] = Lang:t('evidence.agitated')
+    ['fight'] = Lang.t('evidence.red_hands'),
+    ['widepupils'] = Lang.t('evidence.wide_pupils'),
+    ['redeyes'] = Lang.t('evidence.red_eyes'),
+    ['weedsmell'] = Lang.t('evidence.weed_smell'),
+    ['gunpowder'] = Lang.t('evidence.gunpowder'),
+    ['chemicals'] = Lang.t('evidence.chemicals'),
+    ['heavybreath'] = Lang.t('evidence.heavy_breathing'),
+    ['sweat'] = Lang.t('evidence.sweat'),
+    ['handbleed'] = Lang.t('evidence.handbleed'),
+    ['confused'] = Lang.t('evidence.confused'),
+    ['alcohol'] = Lang.t('evidence.alcohol'),
+    ['heavyalcohol'] = Lang.t('evidence.heavy_alcohol'),
+    ['agitated'] = Lang.t('evidence.agitated')
 }
 
 --[[@TODO:
@@ -67,7 +67,7 @@ end)
 RegisterClientEvent('qb-policejob:client:SyncNewCasing', function(Casing)
     Casings[Casing.id] = {
         type = Casing.weapon,
-        serialNumber = Casing.serialNumber and Casing.serialNumber or Lang:t('evidence.serial_not_visible'),
+        serialNumber = Casing.serialNumber and Casing.serialNumber or Lang.t('evidence.serial_not_visible'),
         coords = {
             x = Casing.coords.X,
             y = Casing.coords.Y,

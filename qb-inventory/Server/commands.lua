@@ -4,14 +4,14 @@ QBCore.Commands.Add('giveitem', 'Give An Item (Admin Only)', { { name = 'id', he
     local id = tonumber(args[1])
     local player = exports['qb-core']:GetPlayer(id)
     if not player then
-        exports['qb-core']:NotifyPlayer(source, Lang:t('notify.pdne'), 'error')
+        exports['qb-core']:NotifyPlayer(source, Lang.t('notify.pdne'), 'error')
         return
     end
     local amount = tonumber(args[3])
     if not amount then amount = 1 end
     local itemData = QBShared.Items[tostring(args[2]):lower()]
     if not itemData then
-        exports['qb-core']:NotifyPlayer(source, Lang:t('notify.idne'), 'error')
+        exports['qb-core']:NotifyPlayer(source, Lang.t('notify.idne'), 'error')
         return
     end
     local info = {}
@@ -40,11 +40,11 @@ QBCore.Commands.Add('giveitem', 'Give An Item (Admin Only)', { { name = 'id', he
     end
 
     if AddItem(id, itemData['name'], amount, false, info, 'give item command') then
-        exports['qb-core']:NotifyPlayer(source, Lang:t('notify.yhg') .. player.PlayerData.name .. ' ' .. amount .. ' ' .. itemData['name'] .. '', 'success')
+        exports['qb-core']:NotifyPlayer(source, Lang.t('notify.yhg') .. player.PlayerData.name .. ' ' .. amount .. ' ' .. itemData['name'] .. '', 'success')
         TriggerClientEvent('qb-inventory:client:ItemBox', player.PlayerData.source, itemData, 'add', amount)
         --if Player(id).state.inv_busy then TriggerClientEvent('qb-inventory:client:updateInventory', id) end
     else
-        exports['qb-core']:NotifyPlayer(source, Lang:t('notify.cgitem'), 'error')
+        exports['qb-core']:NotifyPlayer(source, Lang.t('notify.cgitem'), 'error')
     end
 end, 'admin')
 
