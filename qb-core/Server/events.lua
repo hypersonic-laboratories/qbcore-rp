@@ -4,7 +4,7 @@ AddEventHandler('playerDropped', function(reason)
     if not QBCore.Players[src] then return end
     local player = QBCore.Players[src]
     TriggerLocalServerEvent('qb-log:server:CreateLog', 'joinleave', 'Dropped', 'red', '**' .. GetPlayerName(src) .. '** (' .. player.PlayerData.license .. ') left..' .. '\n **Reason:** ' .. reason)
-    player.Functions.Save()
+    player:Save()
     TriggerLocalServerEvent('QBCore:Server:OnPlayerUnload', src)
     QBCore.PlayersByCitizenId[player.PlayerData.citizenid] = nil
     QBCore.Players[src] = nil
@@ -92,19 +92,19 @@ RegisterServerEvent('QBCore:UpdatePlayer', function(source)
     end
     Player.PlayerData.metadata['hunger'] = newHunger
     Player.PlayerData.metadata['thirst'] = newThirst
-    Player.Functions.UpdateClient('metadata', Player.PlayerData.metadata)
+    Player:UpdateClient('metadata', Player.PlayerData.metadata)
     TriggerClientEvent(source, 'hud:client:UpdateNeeds', newHunger, newThirst)
-    Player.Functions.Save()
+    Player:Save()
 end)
 
 RegisterServerEvent('QBCore:ToggleDuty', function(source)
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return end
     if Player.PlayerData.job.onduty then
-        Player.Functions.SetJobDuty(false)
+        Player:SetJobDuty(false)
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('info.off_duty'))
     else
-        Player.Functions.SetJobDuty(true)
+        Player:SetJobDuty(true)
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('info.on_duty'))
     end
 

@@ -129,16 +129,16 @@ function PaycheckInterval()
                             if account < payment then
                                 TriggerClientEvent(Player.PlayerData.source, 'QBCore:Notify', Lang:t('error.company_too_poor'), 'error')
                             else
-                                Player.Functions.AddMoney('bank', payment, 'paycheck')
+                                Player:AddMoney('bank', payment, 'paycheck')
                                 exports['qb-banking']:RemoveMoney(Player.PlayerData.job.name, payment, 'Employee Paycheck')
                                 TriggerClientEvent(Player.PlayerData.source, 'QBCore:Notify', Lang:t('info.received_paycheck', { value = payment }))
                             end
                         else
-                            Player.Functions.AddMoney('bank', payment, 'paycheck')
+                            Player:AddMoney('bank', payment, 'paycheck')
                             TriggerClientEvent(Player.PlayerData.source, 'QBCore:Notify', Lang:t('info.received_paycheck', { value = payment }))
                         end
                     else
-                        Player.Functions.AddMoney('bank', payment, 'paycheck')
+                        Player:AddMoney('bank', payment, 'paycheck')
                         TriggerClientEvent(Player.PlayerData.source, 'QBCore:Notify', Lang:t('info.received_paycheck', { value = payment }))
                     end
                 end
@@ -183,40 +183,11 @@ end
 -- Items
 
 function QBCore.Functions.CreateUseableItem(item, data)
-    local rawFunc = nil
-
-    if type(data) == 'table' then
-        if rawget(data, '__cfx_functionReference') then
-            rawFunc = data
-        elseif data.cb and rawget(data.cb, '__cfx_functionReference') then
-            rawFunc = data.cb
-        elseif data.callback and rawget(data.callback, '__cfx_functionReference') then
-            rawFunc = data.callback
-        end
-    elseif type(data) == 'function' then
-        rawFunc = data
-    end
-
-    if rawFunc then
-        QBCore.UsableItems[item] = {
-            func = rawFunc,
-            resource = GetInvokingResource()
-        }
-    end
+    QBCore.UsableItems[item] = data
 end
 
 function QBCore.Functions.CanUseItem(item)
     return QBCore.UsableItems[item]
-end
-
-function QBCore.Functions.UseItem(source, item)
-    if GetResourceState('qb-inventory') == 'missing' then return end
-    exports['qb-inventory']:UseItem(source, item)
-end
-
-function QBCore.Functions.HasItem(source, items, amount)
-    if GetResourceState('qb-inventory') == 'missing' then return end
-    return exports['qb-inventory']:HasItem(source, items, amount)
 end
 
 -- Permissions
@@ -314,7 +285,7 @@ function QBCore.Functions.ToggleOptin(source)
     if not license or not QBCore.Functions.HasPermission(source, 'admin') then return end
     local Player = QBCore.Functions.GetPlayer(source)
     Player.PlayerData.optin = not Player.PlayerData.optin
-    Player.Functions.SetPlayerData('optin', Player.PlayerData.optin)
+    Player:SetPlayerData('optin', Player.PlayerData.optin)
 end
 
 function QBCore.Functions.IsPlayerBanned(source)
