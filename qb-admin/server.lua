@@ -11,6 +11,7 @@ local ticketsState = {}
 local disciplinaryFeedState = {}
 local chatMessagesState = {}
 local logsHistoryState = {}
+local adminQuickActionStates = {}
 
 local nextReportId = 1
 local nextTicketId = 1
@@ -248,6 +249,327 @@ local function buildVehiclesCatalog(vehiclesShared)
     return vehiclesCatalog
 end
 
+local function getPlayerPawnAndHealthComponent(player)
+    local pawn = GetPlayerPawn(player)
+    if not pawn then
+        return nil, nil
+    end
+
+    local ok, healthComp = pcall(function()
+        return pawn:GetComponentByClass(UE.UHActorHealthComponent)
+    end)
+
+    if not ok then
+        return pawn, nil
+    end
+
+    return pawn, healthComp
+end
+
+local function getPlayerHealthPercent(player)
+    local _, healthComp = getPlayerPawnAndHealthComponent(player)
+    if not healthComp then
+        return nil
+    end
+
+    local currentHealth = tonumber(healthComp:GetHealth()) or 0
+    local maxHealth = tonumber(healthComp:GetMaxHealth()) or 0
+    if maxHealth <= 0 then
+        return nil
+    end
+
+    return math.max(0, math.min(100, (currentHealth / maxHealth) * 100))
+end
+
+local function healPlayerToFull(player)
+    local pawn, healthComp = getPlayerPawnAndHealthComponent(player)
+    if not pawn or not healthComp then
+        return false
+    end
+
+    if healthComp:IsDeadOrDying() then
+        local coords = GetEntityCoords(pawn)
+        if not coords then
+            return false
+        end
+
+        local spawnTransform = Transform()
+        spawnTransform.Translation = Vector(coords.X, coords.Y, coords.Z)
+        UE.UHGameplaySystemGlobals.RespawnPlayerByCharacterAtTransform(pawn, spawnTransform)
+        return true
+    end
+
+    local currentHealth = tonumber(healthComp:GetHealth()) or 0
+    local maxHealth = tonumber(healthComp:GetMaxHealth()) or 0
+    if maxHealth <= 0 then
+        return false
+    end
+
+    local healAmount = maxHealth - currentHealth
+    if healAmount > 0 then
+        UE.UHGameplaySystemGlobals.HealTarget(pawn, healAmount)
+    else
+        healthComp:SetHealth(maxHealth)
+    end
+
+    return true
+end
+
+local function killPlayerOnServer(player)
+    local _, healthComp = getPlayerPawnAndHealthComponent(player)
+    if not healthComp then
+        return false
+    end
+
+    healthComp:SetHealth(0)
+    return true
+end
+
+local function setPlayerArmorOnServer(player, value)
+    local pawn = GetPlayerPawn(player)
+    if not pawn then
+        return false
+    end
+
+    local armorValue = math.max(0, math.min(100, tonumber(value) or 0))
+    local applied = false
+
+    pcall(function()
+        local armorComp = pawn:GetComponentByClass(UE.UHActorArmorComponent)
+        if armorComp then
+            armorComp:SetArmor(armorValue)
+            applied = true
+        end
+    end)
+
+    pcall(function()
+        local healthComp = pawn:GetComponentByClass(UE.UHActorHealthComponent)
+        if healthComp and healthComp.SetArmor then
+            healthComp:SetArmor(armorValue)
+            applied = true
+        end
+    end)
+
+    return applied
+end
+
+local function setPlayerFrozenOnServer(player, frozen)
+    local pawn = GetPlayerPawn(player)
+    if not pawn then
+        return false
+    end
+
+    local isFrozen = frozen == true
+    local applied = false
+
+    pcall(function()
+        local movement = pawn:GetComponentByClass(UE.UCharacterMovementComponent)
+        if movement then
+            movement:SetMovementMode(isFrozen and UE.EMovementMode.MOVE_None or UE.EMovementMode.MOVE_Walking, nil)
+            applied = true
+        end
+    end)
+
+    local controller = player
+    pcall(function()
+        local pawnController = pawn:GetController()
+        if pawnController then
+            controller = pawnController
+        end
+    end)
+
+    pcall(function()
+        controller:SetIgnoreMoveInput(isFrozen)
+        controller:SetIgnoreLookInput(isFrozen)
+        applied = true
+    end)
+
+    pcall(function()
+        if isFrozen then
+            pawn:DisableInput(controller)
+        else
+            pawn:EnableInput(controller)
+        end
+        applied = true
+    end)
+
+    return applied
+end
+
+local function getAdminQuickActionState(player)
+    local playerId = GetPlayerId(player)
+    local stateKey = tostring(playerId or player)
+    adminQuickActionStates[stateKey] = adminQuickActionStates[stateKey] or {}
+    return adminQuickActionStates[stateKey]
+end
+
+local function toggleAdminQuickActionState(player, stateName)
+    local state = getAdminQuickActionState(player)
+    state[stateName] = not state[stateName]
+    return state[stateName]
+end
+
+local function setPlayerGodModeOnServer(player, enabled)
+    local pawn = GetPlayerPawn(player)
+    if not pawn then
+        return false
+    end
+
+    SetEntityInvincible(pawn, enabled == true)
+    return true
+end
+
+local function setPlayerInvisibilityOnServer(player, enabled)
+    local pawn = GetPlayerPawn(player)
+    if not pawn then
+        return false
+    end
+
+    pawn:SetActorHiddenInGame(enabled == true)
+    return true
+end
+
+local function getOccupiedVehicle(player)
+    local pawn = GetPlayerPawn(player)
+    if not pawn then
+        return nil
+    end
+
+    local ok, vehicle = pcall(function()
+        return pawn:GetAttachParentActor()
+    end)
+
+    if ok and vehicle and vehicle:IsValid() then
+        return vehicle
+    end
+
+    return nil
+end
+
+local function repairOccupiedVehicle(player)
+    local vehicle = getOccupiedVehicle(player)
+    if not vehicle then
+        return false
+    end
+
+    local repaired = false
+
+    pcall(function()
+        if vehicle.Repair then
+            vehicle:Repair()
+            repaired = true
+        end
+    end)
+
+    local vehicleWrapper = HVehicle and HVehicle.wrap and HVehicle.wrap(vehicle) or nil
+    if vehicleWrapper then
+        pcall(function()
+            local healthComp = vehicleWrapper:GetVehicleHealthComponent()
+            if healthComp then
+                healthComp:SetHealth(healthComp:GetMaxHealth())
+                repaired = true
+            end
+        end)
+
+        pcall(function()
+            vehicleWrapper:SetEngineHealth(1.0)
+            repaired = true
+        end)
+    end
+
+    return repaired
+end
+
+local function refuelOccupiedVehicle(player)
+    local vehicle = getOccupiedVehicle(player)
+    if not vehicle then
+        return false
+    end
+
+    local refueled = false
+    local vehicleWrapper = HVehicle and HVehicle.wrap and HVehicle.wrap(vehicle) or nil
+
+    if vehicleWrapper then
+        pcall(function()
+            vehicleWrapper:SetFuel(100.0)
+            refueled = true
+        end)
+    end
+
+    pcall(function()
+        if vehicle.SetFuel then
+            vehicle:SetFuel(100.0)
+            refueled = true
+        elseif vehicle.SetFuelLevel then
+            vehicle:SetFuelLevel(100.0)
+            refueled = true
+        end
+    end)
+
+    return refueled
+end
+
+local function deleteOccupiedVehicle(player)
+    local vehicle = getOccupiedVehicle(player)
+    if not vehicle then
+        return false
+    end
+
+    vehicle:DestroyActor()
+    return true
+end
+
+local function cleanupNearbyEntities(player, cleanType, radius)
+    local pawn = GetPlayerPawn(player)
+    if not pawn then
+        return 0
+    end
+
+    local coords = GetEntityCoords(pawn)
+    if not coords then
+        return 0
+    end
+
+    local radiusCm = (tonumber(radius) or 50) * 100
+    local targetType = tostring(cleanType or 'all')
+    local removed = 0
+
+    pcall(function()
+        local objectTypes = UE.TArray(0)
+        objectTypes:Add(UE.ECollisionChannel.ECC_WorldDynamic)
+
+        local hits = UE.TArray(UE.AActor)
+        UE.UKismetSystemLibrary.SphereOverlapActors(HWorld, coords, radiusCm, objectTypes, nil, nil, hits)
+
+        for i = 1, hits:Length() do
+            local actor = hits:Get(i)
+            if actor and actor:IsValid() and actor ~= pawn then
+                local isVehicle = pcall(function() return actor:IsA(UE.AHVehicleCar) end) and actor:IsA(UE.AHVehicleCar)
+                local isCharacter = pcall(function() return actor:IsA(UE.ACharacter) end) and actor:IsA(UE.ACharacter)
+                local isPlayer = isCharacter and actor:IsPlayerControlled()
+
+                if not isPlayer then
+                    if targetType == 'vehicles' and isVehicle then
+                        actor:DestroyActor()
+                        removed = removed + 1
+                    elseif targetType == 'peds' and isCharacter then
+                        actor:DestroyActor()
+                        removed = removed + 1
+                    elseif targetType == 'objects' and not isVehicle and not isCharacter then
+                        actor:DestroyActor()
+                        removed = removed + 1
+                    elseif targetType == 'all' and (isVehicle or isCharacter) then
+                        actor:DestroyActor()
+                        removed = removed + 1
+                    end
+                end
+            end
+        end
+    end)
+
+    return removed
+end
+
 local function buildPlayerList(qbPlayers, jobsShared, gangsShared)
     local players = {}
 
@@ -273,6 +595,7 @@ local function buildPlayerList(qbPlayers, jobsShared, gangsShared)
         local gangKey = gang.name
         local sharedJob = jobKey and jobsShared[jobKey] or nil
         local sharedGang = gangKey and gangsShared[gangKey] or nil
+        local healthPercent = getPlayerHealthPercent(playerId)
 
         players[#players + 1] = {
             id = playerSource,
@@ -297,7 +620,7 @@ local function buildPlayerList(qbPlayers, jobsShared, gangsShared)
                 crypto = tonumber(money.crypto) or 0,
             },
             vitals = {
-                health = tonumber(metadata.health) or 100,
+                health = healthPercent or tonumber(metadata.health) or 100,
                 armor = tonumber(metadata.armor) or 0,
                 hunger = tonumber(metadata.hunger) or 100,
                 thirst = tonumber(metadata.thirst) or 100,
@@ -613,7 +936,7 @@ RegisterServerEvent('qb-admin:server:players:context-action', function(source, d
     elseif action == 'freeze' then
         local targetSrc = getSourceByPlayerId(targetPlayerId)
         if not targetSrc then return end
-        TriggerClientEvent(targetSrc, 'qb-admin:client:setFrozen', true)
+        if not setPlayerFrozenOnServer(targetSrc, true) then return end
         pushLogEntry('Freeze', GetPlayerName(targetSrc), 'Frozen by ' .. adminName)
         pushFeedEntry(adminName .. ' froze player #' .. targetPlayerId)
     elseif action == 'heal' then
@@ -621,11 +944,11 @@ RegisterServerEvent('qb-admin:server:players:context-action', function(source, d
         if not targetSrc then return end
         local targetPlayer = exports['qb-core']:GetPlayer(targetSrc)
         if not targetPlayer then return end
+        if not healPlayerToFull(targetSrc) then return end
         targetPlayer.SetMetaData('hunger', 100)
         targetPlayer.SetMetaData('thirst', 100)
         targetPlayer.SetMetaData('stress', 0)
         targetPlayer.SetMetaData('isdead', false)
-        TriggerClientEvent(targetSrc, 'qb-admin:client:setHealth', 100)
         pushLogEntry('Heal', GetPlayerName(targetSrc), 'Healed by ' .. adminName)
         pushFeedEntry(adminName .. ' healed player #' .. targetPlayerId)
     else
@@ -647,10 +970,10 @@ RegisterServerEvent('qb-admin:server:players:vehicleAction', function(source, da
     local targetName = GetPlayerName(targetSrc)
 
     if action == 'repair' then
-        TriggerClientEvent(targetSrc, 'qb-admin:client:vehicleRepair')
+        if not repairOccupiedVehicle(targetSrc) then return end
         pushLogEntry('Vehicle Repair', targetName, 'Repaired by ' .. adminName)
     elseif action == 'refuel' then
-        TriggerClientEvent(targetSrc, 'qb-admin:client:vehicleRefuel')
+        if not refuelOccupiedVehicle(targetSrc) then return end
         pushLogEntry('Vehicle Refuel', targetName, 'Refueled by ' .. adminName)
     elseif action == 'ownership' then
         TriggerClientEvent(source, 'qb-admin:client:openVehicleOwnership', targetPlayerId)
@@ -662,7 +985,7 @@ RegisterServerEvent('qb-admin:server:players:vehicleAction', function(source, da
         TriggerClientEvent(targetSrc, 'qb-admin:client:openVehicleTrunk')
         pushLogEntry('Vehicle Trunk', targetName, 'Opened by ' .. adminName)
     elseif action == 'delete' then
-        TriggerClientEvent(targetSrc, 'qb-admin:client:vehicleDelete')
+        if not deleteOccupiedVehicle(targetSrc) then return end
         pushLogEntry('Vehicle Delete', targetName, 'Vehicle deleted by ' .. adminName)
         pushFeedEntry(adminName .. ' deleted vehicle of ' .. targetName)
     else
@@ -794,7 +1117,7 @@ RegisterServerEvent('qb-admin:server:players:quickControl', function(source, dat
     elseif action == 'freeze' then
         local targetSrc = getSourceByPlayerId(targetPlayerId)
         if not targetSrc then return end
-        TriggerClientEvent(targetSrc, 'qb-admin:client:setFrozen', true)
+        if not setPlayerFrozenOnServer(targetSrc, true) then return end
         pushLogEntry('Freeze', GetPlayerName(targetSrc), 'Frozen by ' .. adminName)
         pushFeedEntry(adminName .. ' froze player #' .. targetPlayerId)
     elseif action == 'clothing' then
@@ -810,21 +1133,21 @@ RegisterServerEvent('qb-admin:server:players:quickControl', function(source, dat
     elseif action == 'revive' then
         local targetSrc = getSourceByPlayerId(targetPlayerId)
         if not targetSrc then return end
+        if not healPlayerToFull(targetSrc) then return end
         local targetPlayer = exports['qb-core']:GetPlayer(targetSrc)
         if targetPlayer then
             targetPlayer.SetMetaData('isdead', false)
         end
-        TriggerClientEvent(targetSrc, 'qb-admin:client:revivePlayer')
         pushLogEntry('Revive', GetPlayerName(targetSrc), 'Revived by ' .. adminName)
         pushFeedEntry(adminName .. ' revived player #' .. targetPlayerId)
     elseif action == 'kill' then
         local targetSrc = getSourceByPlayerId(targetPlayerId)
         if not targetSrc then return end
+        if not killPlayerOnServer(targetSrc) then return end
         local targetPlayer = exports['qb-core']:GetPlayer(targetSrc)
         if targetPlayer then
             targetPlayer.SetMetaData('isdead', true)
         end
-        TriggerClientEvent(targetSrc, 'qb-admin:client:killPlayer')
         pushLogEntry('Kill', GetPlayerName(targetSrc), 'Killed by ' .. adminName)
         pushFeedEntry(adminName .. ' killed player #' .. targetPlayerId)
     else
@@ -848,13 +1171,13 @@ RegisterServerEvent('qb-admin:server:players:replenishVital', function(source, d
     local targetName = GetPlayerName(targetSrc)
 
     if vitalKey == 'health' then
+        if not healPlayerToFull(targetSrc) then return end
         targetPlayer.SetMetaData('isdead', false)
-        TriggerClientEvent(targetSrc, 'qb-admin:client:setHealth', 100)
         pushLogEntry('Replenish Health', targetName, 'By ' .. adminName)
         pushFeedEntry(adminName .. ' replenished health of ' .. targetName)
     elseif vitalKey == 'armor' then
+        setPlayerArmorOnServer(targetSrc, 100)
         targetPlayer.SetMetaData('armor', 100)
-        TriggerClientEvent(targetSrc, 'qb-admin:client:setArmor', 100)
         pushLogEntry('Replenish Armor', targetName, 'By ' .. adminName)
     elseif vitalKey == 'hunger' then
         targetPlayer.SetMetaData('hunger', 100)
@@ -933,34 +1256,36 @@ RegisterServerEvent('qb-admin:server:dashboard:quickAction', function(source, da
         TriggerClientEvent(source, 'qb-admin:client:toggleNoclip')
         pushLogEntry('Noclip', adminName, 'Toggled noclip')
     elseif action == 'god-mode' then
-        TriggerClientEvent(source, 'qb-admin:client:toggleGodMode')
-        pushLogEntry('God Mode', adminName, 'Toggled god mode')
+        local enabled = toggleAdminQuickActionState(source, 'godMode')
+        if not setPlayerGodModeOnServer(source, enabled) then return end
+        pushLogEntry('God Mode', adminName, enabled and 'Enabled god mode' or 'Disabled god mode')
     elseif action == 'invisibility' then
-        TriggerClientEvent(source, 'qb-admin:client:toggleInvisibility')
-        pushLogEntry('Invisibility', adminName, 'Toggled invisibility')
+        local enabled = toggleAdminQuickActionState(source, 'invisibility')
+        if not setPlayerInvisibilityOnServer(source, enabled) then return end
+        pushLogEntry('Invisibility', adminName, enabled and 'Enabled invisibility' or 'Disabled invisibility')
     elseif action == 'admin-duty' then
-        TriggerClientEvent(source, 'qb-admin:client:toggleAdminDuty')
-        pushLogEntry('Admin Duty', adminName, 'Toggled admin duty')
+        local enabled = toggleAdminQuickActionState(source, 'adminDuty')
+        pushLogEntry('Admin Duty', adminName, enabled and 'Enabled admin duty' or 'Disabled admin duty')
         pushFeedEntry(adminName .. ' toggled admin duty')
     elseif action == 'overhead-names' then
         TriggerClientEvent(source, 'qb-admin:client:toggleOverheadNames')
         pushLogEntry('Overhead Names', adminName, 'Toggled overhead names')
     elseif action == 'self-heal' then
         local player = exports['qb-core']:GetPlayer(source)
+        if not healPlayerToFull(source) then return end
         if player then
             player.SetMetaData('hunger', 100)
             player.SetMetaData('thirst', 100)
             player.SetMetaData('stress', 0)
             player.SetMetaData('isdead', false)
         end
-        TriggerClientEvent(source, 'qb-admin:client:setHealth', 100)
         pushLogEntry('Self Heal', adminName, 'Healed self')
     elseif action == 'self-revive' then
         local player = exports['qb-core']:GetPlayer(source)
+        if not healPlayerToFull(source) then return end
         if player then
             player.SetMetaData('isdead', false)
         end
-        TriggerClientEvent(source, 'qb-admin:client:revivePlayer')
         pushLogEntry('Self Revive', adminName, 'Revived self')
     else
         return
@@ -977,19 +1302,19 @@ RegisterServerEvent('qb-admin:server:environment:cleanup', function(source, data
     local adminName = GetPlayerName(source)
 
     if action == 'vehicles-50m' then
-        TriggerClientEvent(source, 'qb-admin:client:cleanupNearby', { type = 'vehicles', radius = 50 })
+        cleanupNearbyEntities(source, 'vehicles', 50)
         pushLogEntry('Cleanup', adminName, 'Cleared vehicles within 50m')
         pushFeedEntry(adminName .. ' cleared vehicles within 50m')
     elseif action == 'peds-50m' then
-        TriggerClientEvent(source, 'qb-admin:client:cleanupNearby', { type = 'peds', radius = 50 })
+        cleanupNearbyEntities(source, 'peds', 50)
         pushLogEntry('Cleanup', adminName, 'Cleared peds within 50m')
         pushFeedEntry(adminName .. ' cleared peds within 50m')
     elseif action == 'objects-50m' then
-        TriggerClientEvent(source, 'qb-admin:client:cleanupNearby', { type = 'objects', radius = 50 })
+        cleanupNearbyEntities(source, 'objects', 50)
         pushLogEntry('Cleanup', adminName, 'Cleared objects within 50m')
         pushFeedEntry(adminName .. ' cleared objects within 50m')
     elseif action == 'everything-100m' then
-        TriggerClientEvent(source, 'qb-admin:client:cleanupNearby', { type = 'all', radius = 100 })
+        cleanupNearbyEntities(source, 'all', 100)
         pushLogEntry('Cleanup', adminName, 'Cleared all entities within 100m')
         pushFeedEntry(adminName .. ' cleared all entities within 100m')
     else
@@ -1047,16 +1372,16 @@ RegisterServerEvent('qb-admin:server:reports:investigationAction', function(sour
         pushFeedEntry(adminName .. ' brought report player ' .. targetName)
     elseif action == 'heal' then
         local targetPlayer = exports['qb-core']:GetPlayer(targetSrc)
+        if not healPlayerToFull(targetSrc) then return end
         if targetPlayer then
             targetPlayer.SetMetaData('hunger', 100)
             targetPlayer.SetMetaData('thirst', 100)
             targetPlayer.SetMetaData('isdead', false)
         end
-        TriggerClientEvent(targetSrc, 'qb-admin:client:setHealth', 100)
         pushLogEntry('Heal Reporter', targetName, 'Healed by ' .. adminName)
         pushFeedEntry(adminName .. ' healed report player ' .. targetName)
     elseif action == 'freeze' then
-        TriggerClientEvent(targetSrc, 'qb-admin:client:setFrozen', true)
+        if not setPlayerFrozenOnServer(targetSrc, true) then return end
         pushLogEntry('Freeze Reporter', targetName, 'Frozen by ' .. adminName)
         pushFeedEntry(adminName .. ' froze report player ' .. targetName)
     else

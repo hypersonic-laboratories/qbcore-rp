@@ -205,102 +205,6 @@ end)
 
 RegisterClientEvent('qb-admin:client:dashboardAnnounce', function() end)
 
--- Admin action handlers
-
-local frozenState = {}
-RegisterClientEvent('qb-admin:client:setFrozen', function(frozen)
-    local pawn = GetPlayerPawn()
-    if not pawn then return end
-    local controller = pawn:GetController()
-    if frozen then
-        pawn:DisableInput(controller)
-    else
-        pawn:EnableInput(controller)
-    end
-end)
-
-RegisterClientEvent('qb-admin:client:setHealth', function(value)
-    local pawn = GetPlayerPawn()
-    if not pawn then return end
-    pcall(function()
-        local comps = pawn:GetComponentsByClass(UE.UHActorHealthComponent)
-        if comps and comps:Length() > 0 then
-            local comp = comps:Get(1)
-            comp:SetHealth(comp:GetMaxHealth() * (value / 100))
-        end
-    end)
-end)
-
-RegisterClientEvent('qb-admin:client:setArmor', function(value)
-    local pawn = GetPlayerPawn()
-    if not pawn then return end
-    pcall(function()
-        local comps = pawn:GetComponentsByClass(UE.UHActorArmorComponent)
-        if comps and comps:Length() > 0 then
-            comps:Get(1):SetArmor(value)
-        end
-    end)
-end)
-
-RegisterClientEvent('qb-admin:client:revivePlayer', function()
-    local pawn = GetPlayerPawn()
-    if not pawn then return end
-    pcall(function()
-        local comps = pawn:GetComponentsByClass(UE.UHActorHealthComponent)
-        if comps and comps:Length() > 0 then
-            local comp = comps:Get(1)
-            comp:SetHealth(comp:GetMaxHealth())
-        end
-    end)
-end)
-
-RegisterClientEvent('qb-admin:client:killPlayer', function()
-    local pawn = GetPlayerPawn()
-    if not pawn then return end
-    pcall(function()
-        local comps = pawn:GetComponentsByClass(UE.UHActorHealthComponent)
-        if comps and comps:Length() > 0 then
-            comps:Get(1):SetHealth(0)
-        end
-    end)
-end)
-
-local function getOccupiedVehicle(pawn)
-    if not pawn then return nil end
-    local parent = pawn:GetAttachParentActor()
-    if parent and parent:IsValid() then
-        return parent
-    end
-    return nil
-end
-
-RegisterClientEvent('qb-admin:client:vehicleRepair', function()
-    local pawn = GetPlayerPawn()
-    local vehicle = getOccupiedVehicle(pawn)
-    if not vehicle then return end
-    pcall(function()
-        if vehicle.Repair then vehicle:Repair() end
-    end)
-end)
-
-RegisterClientEvent('qb-admin:client:vehicleRefuel', function()
-    local pawn = GetPlayerPawn()
-    local vehicle = getOccupiedVehicle(pawn)
-    if not vehicle then return end
-    pcall(function()
-        if vehicle.SetFuelLevel then
-            vehicle:SetFuelLevel(100)
-        end
-    end)
-end)
-
-RegisterClientEvent('qb-admin:client:vehicleDelete', function()
-    local pawn = GetPlayerPawn()
-    local vehicle = getOccupiedVehicle(pawn)
-    if not vehicle then return end
-    vehicle:DestroyActor()
-end)
-
 RegisterClientEvent('qb-admin:client:openClothing', function()
     TriggerLocalEvent('qb-clothing:client:openMenu')
 end)
@@ -326,29 +230,6 @@ RegisterClientEvent('qb-admin:client:toggleNoclip', function()
     end)
 end)
 
-local godModeActive = false
-RegisterClientEvent('qb-admin:client:toggleGodMode', function()
-    local pawn = GetPlayerPawn()
-    if not pawn then return end
-    godModeActive = not godModeActive
-    pcall(function()
-        SetEntityInvincible(pawn, godModeActive)
-    end)
-end)
-
-local invisActive = false
-RegisterClientEvent('qb-admin:client:toggleInvisibility', function()
-    local pawn = GetPlayerPawn()
-    if not pawn then return end
-    invisActive = not invisActive
-    pawn:SetActorHiddenInGame(invisActive)
-end)
-
-local adminDutyActive = false
-RegisterClientEvent('qb-admin:client:toggleAdminDuty', function()
-    adminDutyActive = not adminDutyActive
-end)
-
 local overheadNamesActive = false
 RegisterClientEvent('qb-admin:client:toggleOverheadNames', function()
     overheadNamesActive = not overheadNamesActive
@@ -362,41 +243,6 @@ RegisterClientEvent('qb-admin:client:spectatePlayer', function(targetPlayerId)
         return
     end
     spectateTargetId = targetPlayerId
-end)
-
-RegisterClientEvent('qb-admin:client:cleanupNearby', function(data)
-    local pawn = GetPlayerPawn()
-    if not pawn then return end
-    local coords = GetEntityCoords(pawn)
-    local radiusCm = (tonumber(data.radius) or 50) * 100
-    local cleanType = tostring(data.type or 'all')
-
-    pcall(function()
-        local ObjectTypes = UE.TArray(0)
-        ObjectTypes:Add(UE.ECollisionChannel.ECC_WorldDynamic)
-        local hits = UE.TArray(UE.AActor)
-        UE.UKismetSystemLibrary.SphereOverlapActors(HWorld, coords, radiusCm, ObjectTypes, nil, nil, hits)
-
-        for i = 1, hits:Length() do
-            local actor = hits:Get(i)
-            if actor and actor:IsValid() and actor ~= pawn then
-                local isVehicle = pcall(function() return actor:IsA(UE.AHVehicleCar) end) and actor:IsA(UE.AHVehicleCar)
-                local isChar = pcall(function() return actor:IsA(UE.ACharacter) end) and actor:IsA(UE.ACharacter)
-                local isPlayer = isChar and actor:IsPlayerControlled()
-                if not isPlayer then
-                    if cleanType == 'vehicles' and isVehicle then
-                        actor:DestroyActor()
-                    elseif cleanType == 'peds' and isChar then
-                        actor:DestroyActor()
-                    elseif cleanType == 'objects' and not isVehicle and not isChar then
-                        actor:DestroyActor()
-                    elseif cleanType == 'all' and (isVehicle or isChar) then
-                        actor:DestroyActor()
-                    end
-                end
-            end
-        end
-    end)
 end)
 
 -- Commands
