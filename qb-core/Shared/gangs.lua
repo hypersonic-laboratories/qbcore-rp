@@ -1,57 +1,58 @@
+QBCore.Shared = QBCore.Shared or {}
 QBCore.Shared.Gangs = {
-    none = { label = 'No Gang', grades = { { name = 'Unaffiliated' } } },
+    none = { label = 'No Gang', grades = { ['0'] = { name = 'Unaffiliated' } } },
     lostmc = {
         label = 'The Lost MC',
         grades = {
-            { name = 'Recruit' },
-            { name = 'Enforcer' },
-            { name = 'Shot Caller' },
-            { name = 'Boss',       isboss = true },
+            ['0'] = { name = 'Recruit' },
+            ['1'] = { name = 'Enforcer' },
+            ['2'] = { name = 'Shot Caller' },
+            ['3'] = { name = 'Boss', isboss = true },
         },
     },
     ballas = {
         label = 'Ballas',
         grades = {
-            { name = 'Recruit' },
-            { name = 'Enforcer' },
-            { name = 'Shot Caller' },
-            { name = 'Boss',       isboss = true },
+            ['0'] = { name = 'Recruit' },
+            ['1'] = { name = 'Enforcer' },
+            ['2'] = { name = 'Shot Caller' },
+            ['3'] = { name = 'Boss', isboss = true },
         },
     },
     vagos = {
         label = 'Vagos',
         grades = {
-            { name = 'Recruit' },
-            { name = 'Enforcer' },
-            { name = 'Shot Caller' },
-            { name = 'Boss',       isboss = true },
+            ['0'] = { name = 'Recruit' },
+            ['1'] = { name = 'Enforcer' },
+            ['2'] = { name = 'Shot Caller' },
+            ['3'] = { name = 'Boss', isboss = true },
         },
     },
     cartel = {
         label = 'Cartel',
         grades = {
-            { name = 'Recruit' },
-            { name = 'Enforcer' },
-            { name = 'Shot Caller' },
-            { name = 'Boss',       isboss = true },
+            ['0'] = { name = 'Recruit' },
+            ['1'] = { name = 'Enforcer' },
+            ['2'] = { name = 'Shot Caller' },
+            ['3'] = { name = 'Boss', isboss = true },
         },
     },
     families = {
         label = 'Families',
         grades = {
-            { name = 'Recruit' },
-            { name = 'Enforcer' },
-            { name = 'Shot Caller' },
-            { name = 'Boss',       isboss = true },
+            ['0'] = { name = 'Recruit' },
+            ['1'] = { name = 'Enforcer' },
+            ['2'] = { name = 'Shot Caller' },
+            ['3'] = { name = 'Boss', isboss = true },
         },
     },
     triads = {
         label = 'Triads',
         grades = {
-            { name = 'Recruit' },
-            { name = 'Enforcer' },
-            { name = 'Shot Caller' },
-            { name = 'Boss',       isboss = true },
+            ['0'] = { name = 'Recruit' },
+            ['1'] = { name = 'Enforcer' },
+            ['2'] = { name = 'Shot Caller' },
+            ['3'] = { name = 'Boss', isboss = true },
         },
     }
 }

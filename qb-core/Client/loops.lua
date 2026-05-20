@@ -1,19 +1,12 @@
 Timer.SetInterval(function()
-	TriggerServerEvent('QBCore:UpdatePlayer')
+    if not QBCore.IsLoggedIn then return end
+    TriggerServerEvent('QBCore:UpdatePlayer')
 end, (1000 * 60) * QBCore.Config.UpdateInterval)
 
--- Timer.SetInterval(function()
--- 	if Client.GetValue('isLoggedIn', false) then
--- 		if not QBCore.PlayerData.metadata then return end
--- 		if
--- 			(QBCore.PlayerData.metadata['hunger'] <= 0 or QBCore.PlayerData.metadata['thirst'] <= 0)
--- 			and not (QBCore.PlayerData.metadata['isdead'] or QBCore.PlayerData.metadata['inlaststand'])
--- 		then
--- 			local player = Client.GetLocalPlayer()
--- 			local ped = player:GetControlledCharacter()
--- 			if not ped then return end
--- 			local decreaseThreshold = math.random(5, 10)
--- 			TriggerServerEvent('qb-ambulancejob:server:decreaseHealth', decreaseThreshold)
--- 		end
--- 	end
--- end, QBCore.Config.StatusInterval)
+Timer.SetInterval(function()
+    if not QBCore.IsLoggedIn then return end
+    local metadata = QBCore.PlayerData.metadata
+    if (metadata['hunger'] <= 0 or metadata['thirst'] <= 0) and not (metadata['isdead'] or metadata['inlaststand']) then
+        TriggerServerEvent('QBCore:Server:ApplyHungerThirstDamage', math.random(5, 10))
+    end
+end, QBCore.Config.StatusInterval)

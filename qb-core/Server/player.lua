@@ -1,19 +1,3 @@
---[[
-    Getting a player:
-
-        local Player = exports['qb-core']:GetPlayer(source)          -- online, by server id
-        local Player = exports['qb-core']:GetPlayerByCitizenId(cid)  -- online, by citizenid
-        local Player = exports['qb-core']:GetOfflinePlayerByCitizenId(cid) -- offline, DB lookup
-
-    Calling functions:
-
-        Player.AddMoney('cash', 500, 'reason')
-        Player.RemoveMoney('bank', 200, 'reason')
-        Player.SetJob('police', 2)
-        Player.SetMetaData('hunger', 100)
-        Player.Save()
-]]
-
 QBCore.Players            = {}
 QBCore.Player             = {}
 QBCore.PlayersByCitizenId = {}
@@ -24,10 +8,10 @@ local Player              = {}
 Player.__index            = Player
 
 function Player.new(PlayerData, Offline)
-    local instance      = setmetatable({}, Player)
-    instance.PlayerData = PlayerData
-    instance.Offline    = Offline or false
-    return instance
+    local self      = setmetatable({}, Player)
+    self.PlayerData = PlayerData
+    self.Offline    = Offline or false
+    return self
 end
 
 -- ─────────────────────────── server-event hooks ─────────────────────────────
@@ -87,18 +71,20 @@ end
 
 -- ─────────────────────────── instance methods ───────────────────────────────
 
-function Player:UpdateClient(key, value)
-    if self.Offline then return end
-    if key ~= nil then
-        TriggerClientEvent(self.PlayerData.source, 'QBCore:Player:OnFieldUpdate', key, value)
-    else
-        TriggerClientEvent(self.PlayerData.source, 'QBCore:Player:SetPlayerData', self.PlayerData)
-    end
+function Player:GetPlayerData()
+    return self.PlayerData
 end
 
-function Player:UpdateClientSub(key, subKey, value)
+function Player:UpdateClient(key, val)
     if self.Offline then return end
-    TriggerClientEvent(self.PlayerData.source, 'QBCore:Player:OnSubFieldUpdate', key, subKey, value)
+    if key ~= nil then
+        TriggerLocalServerEvent('QBCore:Server:OnPlayerUpdated', self.PlayerData.source, key, val)
+        TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnPlayerUpdated', key, val)
+    else
+        TriggerLocalServerEvent('QBCore:Player:SetPlayerData', self.PlayerData)
+        TriggerLocalServerEvent('QBCore:Server:OnPlayerUpdated', self.PlayerData.source, 'all', self.PlayerData)
+        TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnPlayerUpdated', 'all', self.PlayerData)
+    end
 end
 
 function Player:SetJob(job, grade)
@@ -121,7 +107,7 @@ function Player:SetJob(job, grade)
         self.PlayerData.job.isboss        = gradeInfo.isboss or false
     end
     if not self.Offline then
-        TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnJobUpdate', self.PlayerData.job)
+        self:UpdateClient('job', self.PlayerData.job)
     end
     return true
 end
@@ -143,7 +129,7 @@ function Player:SetGang(gang, grade)
         self.PlayerData.gang.isboss       = gradeInfo.isboss or false
     end
     if not self.Offline then
-        TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnGangUpdate', self.PlayerData.gang)
+        self:UpdateClient('gang', self.PlayerData.gang)
     end
     return true
 end
@@ -192,7 +178,7 @@ end
 function Player:SetJobDuty(onDuty)
     self.PlayerData.job.onduty = not not onDuty
     if not self.Offline then
-        self:UpdateClientSub('job', 'onduty', self.PlayerData.job.onduty)
+        self:UpdateClient('job', self.PlayerData.job)
     end
 end
 
@@ -208,7 +194,7 @@ function Player:SetMetaData(meta, val)
         val = math.min(100, math.max(0, val))
     end
     self.PlayerData.metadata[meta] = val
-    self:UpdateClientSub('metadata', meta, val)
+    self:UpdateClient('metadata', self.PlayerData.metadata)
 end
 
 function Player:GetMetaData(meta)
@@ -236,7 +222,7 @@ end
 function Player:SetLicence(licence, val)
     if not licence or type(licence) ~= 'string' then return end
     self.PlayerData.metadata.licences[licence] = not not val
-    self:UpdateClientSub('metadata', 'licences', self.PlayerData.metadata.licences)
+    self:UpdateClient('metadata', self.PlayerData.metadata)
 end
 
 function Player:AddRep(rep, amount)
@@ -244,7 +230,7 @@ function Player:AddRep(rep, amount)
     local addAmount                      = tonumber(amount)
     local currentRep                     = self.PlayerData.metadata['rep'][rep] or 0
     self.PlayerData.metadata['rep'][rep] = currentRep + addAmount
-    self:UpdateClientSub('metadata', 'rep', self.PlayerData.metadata.rep)
+    self:UpdateClient('metadata', self.PlayerData.metadata)
 end
 
 function Player:RemoveRep(rep, amount)
@@ -252,7 +238,7 @@ function Player:RemoveRep(rep, amount)
     local removeAmount                   = tonumber(amount)
     local currentRep                     = self.PlayerData.metadata['rep'][rep] or 0
     self.PlayerData.metadata['rep'][rep] = math.max(0, currentRep - removeAmount)
-    self:UpdateClientSub('metadata', 'rep', self.PlayerData.metadata.rep)
+    self:UpdateClient('metadata', self.PlayerData.metadata)
 end
 
 function Player:GetRep(rep)
@@ -264,13 +250,22 @@ function Player:AddMoney(moneytype, amount, reason)
     reason    = reason or 'unknown'
     moneytype = moneytype:lower()
     amount    = tonumber(amount)
-    if amount < 0 then return end
+    if not amount or amount < 0 then return end
     if not self.PlayerData.money[moneytype] then return false end
     self.PlayerData.money[moneytype] = self.PlayerData.money[moneytype] + amount
     if not self.Offline then
-        self:UpdateClientSub('money', moneytype, self.PlayerData.money[moneytype])
-        TriggerClientEvent(self.PlayerData.source, 'qb-hud:client:OnMoneyChange', moneytype, amount, false)
+        self:UpdateClient('money', self.PlayerData.money)
+        local logExtra = amount > 100000
+        TriggerLocalServerEvent('qb-log:server:CreateLog', 'playermoney', 'AddMoney', 'lightgreen',
+            '**' .. self.PlayerData.name ..
+            ' (citizenid: ' .. self.PlayerData.citizenid ..
+            ' | id: ' .. tostring(self.PlayerData.source) .. ')** $' .. amount ..
+            ' (' .. moneytype .. ') added, new ' .. moneytype ..
+            ' balance: ' .. self.PlayerData.money[moneytype] ..
+            ' reason: ' .. reason, logExtra)
+        TriggerClientEvent(self.PlayerData.source, 'hud:client:OnMoneyChange', moneytype, amount, false)
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnMoneyChange', moneytype, amount, 'add', reason)
+        TriggerLocalServerEvent('QBCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'add', reason)
     end
     return true
 end
@@ -279,21 +274,31 @@ function Player:RemoveMoney(moneytype, amount, reason)
     reason    = reason or 'unknown'
     moneytype = moneytype:lower()
     amount    = tonumber(amount)
-    if amount < 0 then return end
+    if not amount or amount < 0 then return end
     if not self.PlayerData.money[moneytype] then return false end
     for _, mtype in pairs(QBCore.Config.Money.DontAllowMinus) do
         if mtype == moneytype and (self.PlayerData.money[moneytype] - amount) < 0 then
             return false
         end
     end
+    if self.PlayerData.money[moneytype] - amount < QBCore.Config.Money.MinusLimit then return false end
     self.PlayerData.money[moneytype] = self.PlayerData.money[moneytype] - amount
     if not self.Offline then
-        self:UpdateClientSub('money', moneytype, self.PlayerData.money[moneytype])
-        TriggerClientEvent(self.PlayerData.source, 'qb-hud:client:OnMoneyChange', moneytype, amount, true)
+        self:UpdateClient('money', self.PlayerData.money)
+        local logExtra = amount > 100000
+        TriggerLocalServerEvent('qb-log:server:CreateLog', 'playermoney', 'RemoveMoney', 'red',
+            '**' .. self.PlayerData.name ..
+            ' (citizenid: ' .. self.PlayerData.citizenid ..
+            ' | id: ' .. tostring(self.PlayerData.source) .. ')** $' .. amount ..
+            ' (' .. moneytype .. ') removed, new ' .. moneytype ..
+            ' balance: ' .. self.PlayerData.money[moneytype] ..
+            ' reason: ' .. reason, logExtra)
+        TriggerClientEvent(self.PlayerData.source, 'hud:client:OnMoneyChange', moneytype, amount, true)
         if moneytype == 'bank' then
             TriggerClientEvent(self.PlayerData.source, 'qb-phone:client:RemoveBankMoney', amount)
         end
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnMoneyChange', moneytype, amount, 'remove', reason)
+        TriggerLocalServerEvent('QBCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'remove', reason)
     end
     return true
 end
@@ -302,22 +307,29 @@ function Player:SetMoney(moneytype, amount, reason)
     reason    = reason or 'unknown'
     moneytype = moneytype:lower()
     amount    = tonumber(amount)
-    if amount < 0 then return false end
+    if not amount or amount < 0 then return false end
     if not self.PlayerData.money[moneytype] then return false end
     local difference = amount - self.PlayerData.money[moneytype]
     self.PlayerData.money[moneytype] = amount
     if not self.Offline then
-        self:UpdateClientSub('money', moneytype, amount)
-        TriggerClientEvent(self.PlayerData.source, 'qb-hud:client:OnMoneyChange', moneytype, math.abs(difference), difference < 0)
+        self:UpdateClient('money', self.PlayerData.money)
+        TriggerLocalServerEvent('qb-log:server:CreateLog', 'playermoney', 'SetMoney', 'green',
+            '**' .. self.PlayerData.name ..
+            ' (citizenid: ' .. self.PlayerData.citizenid ..
+            ' | id: ' .. tostring(self.PlayerData.source) .. ')** $' .. amount ..
+            ' (' .. moneytype .. ') set, new ' .. moneytype ..
+            ' balance: ' .. self.PlayerData.money[moneytype] ..
+            ' reason: ' .. reason)
+        TriggerClientEvent(self.PlayerData.source, 'hud:client:OnMoneyChange', moneytype, math.abs(difference), difference < 0)
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnMoneyChange', moneytype, amount, 'set', reason)
+        TriggerLocalServerEvent('QBCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'set', reason)
     end
     return true
 end
 
 function Player:GetMoney(moneytype)
     if not moneytype then return false end
-    moneytype = moneytype:lower()
-    return self.PlayerData.money[moneytype]
+    return self.PlayerData.money[moneytype:lower()]
 end
 
 function Player:CanAfford(moneytype, amount)
@@ -337,12 +349,12 @@ end
 function Player:SetCharInfo(key, val)
     if not key or type(key) ~= 'string' then return end
     self.PlayerData.charinfo[key] = val
-    self:UpdateClientSub('charinfo', key, val)
+    self:UpdateClient('charinfo', self.PlayerData.charinfo)
 end
 
 function Player:SetCreditCard(cardNumber)
     self.PlayerData.charinfo.card = cardNumber
-    self:UpdateClientSub('charinfo', 'card', cardNumber)
+    self:UpdateClient('charinfo', self.PlayerData.charinfo)
 end
 
 function Player:GetCardSlot(cardNumber, cardType)
@@ -369,7 +381,6 @@ function Player:Logout()
     QBCore.Player.Logout(self.PlayerData.source)
 end
 
--- Adds a method to this specific instance (does not affect other players).
 function Player:AddMethod(methodName, handler)
     if type(methodName) ~= 'string' or type(handler) ~= 'function' then return false end
     self[methodName] = handler
@@ -382,7 +393,7 @@ function Player:AddField(fieldName, data)
     return true
 end
 
--- ─────────────────────────── static functions ───────────────────────────────
+-- ─────────────────────────── login / logout ─────────────────────────────────
 
 function QBCore.Player.Login(source, citizenid, newData)
     if not source then return false end
@@ -400,6 +411,11 @@ function QBCore.Player.Login(source, citizenid, newData)
             PlayerData.charinfo = JSON.parse(PlayerData.charinfo)
             PlayerData.items    = formatItems(JSON.parse(PlayerData.inventory))
             QBCore.Player.CheckPlayerData(source, PlayerData)
+        else
+            source:Kick(Lang:t('info.exploit_dropped'))
+            TriggerLocalServerEvent('qb-log:server:CreateLog', 'anticheat', 'Anti-Cheat', 'white',
+                tostring(source) .. ' Has Been Dropped For Character Joining Exploit', false)
+            return false
         end
     else
         QBCore.Player.CheckPlayerData(source, newData)
@@ -408,6 +424,18 @@ function QBCore.Player.Login(source, citizenid, newData)
     TriggerLocalServerEvent('QBCore:Server:OnPlayerLoaded', source)
     return true
 end
+
+function QBCore.Player.Logout(source)
+    if not QBCore.Players[source] then return end
+    local player = QBCore.Players[source]
+    player:Save()
+    TriggerClientEvent(source, 'QBCore:Client:OnPlayerUnload')
+    TriggerLocalServerEvent('QBCore:Server:OnPlayerUnload', source)
+    QBCore.PlayersByCitizenId[player.PlayerData.citizenid] = nil
+    QBCore.Players[source] = nil
+end
+
+-- ─────────────────────────── offline player lookups ─────────────────────────
 
 function QBCore.Player.GetOfflinePlayer(citizenid)
     if not citizenid then return nil end
@@ -427,8 +455,8 @@ end
 function QBCore.Player.GetPlayerByLicense(license)
     if not license then return nil end
     local source = QBCore.Functions.GetSource(license)
-    if source > 0 then return QBCore.Players[source] end
-    return nil
+    if source and source > 0 then return QBCore.Players[source] end
+    return QBCore.Player.GetOfflinePlayerByLicense(license)
 end
 
 function QBCore.Player.GetOfflinePlayerByLicense(license)
@@ -446,9 +474,12 @@ function QBCore.Player.GetOfflinePlayerByLicense(license)
     return QBCore.Player.CheckPlayerData(nil, PlayerData)
 end
 
+-- ─────────────────────────── data validation / construction ─────────────────
+
 function QBCore.Player.CheckPlayerData(source, PlayerData)
     PlayerData    = PlayerData or {}
     local Offline = not source
+
     if source then
         PlayerData.source  = source
         local PlayerState  = source:GetLyraPlayerState()
@@ -516,21 +547,14 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
         QBCore.Players[PlayerData.source]               = player
         QBCore.PlayersByCitizenId[PlayerData.citizenid] = player
         QBCore.Player.Save(PlayerData.source)
+        TriggerLocalServerEvent('QBCore:Server:PlayerLoaded', player)
         player:UpdateClient()
     end
 
     return player
 end
 
-function QBCore.Player.Logout(source)
-    if not QBCore.Players[source] then return end
-    local player = QBCore.Players[source]
-    player:Save()
-    TriggerClientEvent(source, 'QBCore:Client:OnPlayerUnload')
-    TriggerLocalServerEvent('QBCore:Server:OnPlayerUnload', source)
-    QBCore.PlayersByCitizenId[player.PlayerData.citizenid] = nil
-    QBCore.Players[source] = nil
-end
+-- ─────────────────────────── save / persistence ─────────────────────────────
 
 local function writePlayerToDatabase(PlayerData, position)
     local ItemsJson = {}
@@ -576,9 +600,9 @@ local function writePlayerToDatabase(PlayerData, position)
 end
 
 function QBCore.Player.Save(source)
-    local PlayerData = QBCore.Players[source].PlayerData
+    local PlayerData = QBCore.Players[source] and QBCore.Players[source].PlayerData
     if not PlayerData then
-        print('ERROR QBCORE.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
+        print('[ERROR] QBCORE.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
         return
     end
 
@@ -592,13 +616,15 @@ end
 
 function QBCore.Player.SaveOffline(PlayerData)
     if not PlayerData then
-        print('ERROR QBCORE.PLAYER.SAVEOFFLINE - PLAYERDATA IS EMPTY!')
+        print('[ERROR] QBCORE.PLAYER.SAVEOFFLINE - PLAYERDATA IS EMPTY!')
         return
     end
 
     writePlayerToDatabase(PlayerData, PlayerData.position)
     print(('[QBCORE] Saved offline player data for %s (Citizen ID: %s)'):format(PlayerData.name, PlayerData.citizenid))
 end
+
+-- ─────────────────────────── character deletion ─────────────────────────────
 
 local playertables = {
     { table = 'players' },
@@ -609,6 +635,7 @@ local playertables = {
     { table = 'phone_messages' },
     { table = 'playerskins' },
     { table = 'player_contacts' },
+    --{ table = 'player_houses' },
     { table = 'player_mails' },
     { table = 'player_outfits' },
     { table = 'player_vehicles' },
@@ -616,7 +643,7 @@ local playertables = {
 
 function QBCore.Player.DeleteCharacter(source, citizenid)
     if not source or not citizenid then
-        print('[Error] qb-core couldn\'t delete character')
+        print('[ERROR] qb-core couldn\'t delete character')
         return false
     end
     local PlayerState = source:GetLyraPlayerState()
@@ -624,26 +651,69 @@ function QBCore.Player.DeleteCharacter(source, citizenid)
     local result      = Database.Select('SELECT license FROM players WHERE citizenid = ? LIMIT 1', { citizenid })
     if not result or #result == 0 or license ~= result[1].Columns:ToTable().license then
         source:Kick(Lang:t('info.exploit_dropped'))
+        TriggerLocalServerEvent('qb-log:server:CreateLog', 'anticheat', 'Anti-Cheat', 'white',
+            tostring(source) .. ' Has Been Dropped For Character Deletion Exploit', true)
         return false
     end
     if not Database.Execute('BEGIN TRANSACTION') then
-        print('[Error] qb-core couldn\'t start a transaction when deleting a character.')
+        print('[ERROR] qb-core couldn\'t start a transaction when deleting a character.')
         return false
     end
     local query   = 'DELETE FROM %s WHERE citizenid = ?'
-    local Success = true
+    local success = true
     for i = 1, #playertables do
         if not Database.Execute(query:format(playertables[i].table), { citizenid }) then
-            Success = false
+            success = false
             break
         end
     end
-    if not Success then
+    if not success then
         Database.Execute('ROLLBACK')
         return false
     end
     Database.Execute('COMMIT')
+    TriggerLocalServerEvent('qb-log:server:CreateLog', 'joinleave', 'Character Deleted', 'red',
+        tostring(source) .. ' (' .. license .. ') deleted **' .. citizenid .. '**')
     return true
+end
+
+function QBCore.Player.ForceDeleteCharacter(citizenid)
+    local result = Database.Select('SELECT license FROM players WHERE citizenid = ? LIMIT 1', { citizenid })
+    if not result or #result == 0 then return end
+    local existing = QBCore.Functions.GetPlayerByCitizenId(citizenid)
+    if existing then
+        existing.PlayerData.source:Kick('An admin deleted the character which you are currently using')
+        QBCore.Player.Logout(existing.PlayerData.source)
+    end
+    local query = 'DELETE FROM %s WHERE citizenid = ?'
+    for i = 1, #playertables do
+        Database.Execute(query:format(playertables[i].table), { citizenid })
+    end
+    TriggerLocalServerEvent('qb-log:server:CreateLog', 'joinleave', 'Character Force Deleted', 'red',
+        'Character **' .. citizenid .. '** got deleted')
+end
+
+-- ─────────────────────────── runtime extension API ──────────────────────────
+
+local function forEachPlayer(ids, fn)
+    local idType = type(ids)
+    if idType == 'number' then
+        if ids == -1 then
+            for _, v in pairs(QBCore.Players) do fn(v) end
+        elseif QBCore.Players[ids] then
+            fn(QBCore.Players[ids])
+        end
+    elseif idType == 'table' then
+        for i = 1, #ids do forEachPlayer(ids[i], fn) end
+    end
+end
+
+function QBCore.Functions.AddPlayerMethod(ids, methodName, handler)
+    forEachPlayer(ids, function(v) v:AddMethod(methodName, handler) end)
+end
+
+function QBCore.Functions.AddPlayerField(ids, fieldName, data)
+    forEachPlayer(ids, function(v) v:AddField(fieldName, data) end)
 end
 
 -- ─────────────────────────── export bridge ──────────────────────────────────

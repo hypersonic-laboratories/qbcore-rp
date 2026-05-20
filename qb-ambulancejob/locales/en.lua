@@ -1,11 +1,4 @@
-local function getScriptDir()
-    local str = debug.getinfo(2, 'S').source:sub(2)
-    return str:match('(.*/)')
-end
-local currentDir = getScriptDir()
-local qbCorePath = currentDir .. '../../qb-core/Shared/locale.lua'
-qbCorePath = qbCorePath:gsub('\\', '/')
-local Locale = dofile(qbCorePath)
+local Locale = exports['qb-core']:GetLocale()
 
 local Translations = {
     error = {

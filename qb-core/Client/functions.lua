@@ -1,122 +1,94 @@
+QBCore.PlayerData = {}
 QBCore.Functions = {}
-local my_webui = WebUI('qb-core', 'qb-core/Client/html/index.html', 0)
 
--- Getter Functions
+QBCore.webui = WebUI('qb-core', 'qb-core/html/index.html')
+QBCore.webui:RegisterEventHandler('getNotifyConfig', function()
+    QBCore.webui:SendEvent('notifyConfig', QBCore.Config.Notify)
+end)
 
-function QBCore.Functions.GetPlayerData()
-    return QBCore.PlayerData
+-- Callbacks
+
+function QBCore.Functions.CreateClientCallback(name, cb)
+    QBCore.ClientCallbacks[name] = cb
 end
 
-function QBCore.Functions.GetCitizenId()
-    return QBCore.PlayerData.citizenid
+function QBCore.Functions.TriggerCallback(name, ...)
+    local cb = nil
+    local args = { ... }
+
+    if type(args[1]) == 'function' then
+        cb = args[1]
+        table.remove(args, 1)
+    end
+
+    QBCore.ServerCallbacks[name] = {
+        callback = cb,
+        promise = promise.new()
+    }
+
+    TriggerServerEvent('QBCore:Server:TriggerCallback', name, table.unpack(args))
+
+    if cb == nil then
+        Citizen.Await(QBCore.ServerCallbacks[name].promise)
+        return QBCore.ServerCallbacks[name].promise.value
+    end
 end
 
-function QBCore.Functions.GetJob()
-    return QBCore.PlayerData.job
+function QBCore.Debug(resource, obj, depth)
+    TriggerServerEvent('QBCore:DebugSomething', resource, obj, depth)
 end
 
-function QBCore.Functions.GetGang()
-    return QBCore.PlayerData.gang
+-- Player
+
+function QBCore.Functions.GetPlayerData(cb)
+    if not cb then return QBCore.PlayerData end
+    cb(QBCore.PlayerData)
 end
 
-function QBCore.Functions.IsOnDuty()
-    return QBCore.PlayerData.job and QBCore.PlayerData.job.onduty or false
+function QBCore.Functions.GetName()
+    local charinfo = QBCore.PlayerData.charinfo
+    return charinfo.firstname .. ' ' .. charinfo.lastname
 end
 
-function QBCore.Functions.IsBoss()
-    return QBCore.PlayerData.job and QBCore.PlayerData.job.isboss or false
+function QBCore.Functions.HasItem(items, amount)
+    return exports['qb-inventory']:HasItem(items, amount)
 end
 
-function QBCore.Functions.IsGangBoss()
-    return QBCore.PlayerData.gang and QBCore.PlayerData.gang.isboss or false
+function QBCore.Functions.GetCoords(entity)
+    local coords = GetEntityCoords(entity)
+    return vector4(coords.x, coords.y, coords.z, GetEntityHeading(entity))
 end
 
-function QBCore.Functions.IsDead()
-    return QBCore.PlayerData.metadata and QBCore.PlayerData.metadata['isdead'] or false
+function QBCore.Functions.GetPlate(vehicle)
+    if vehicle == 0 then return end
+    return QBCore.Shared.Trim(GetVehicleNumberPlateText(vehicle))
 end
 
-function QBCore.Functions.IsHandcuffed()
-    return QBCore.PlayerData.metadata and QBCore.PlayerData.metadata['ishandcuffed'] or false
-end
-
-function QBCore.Functions.IsInJail()
-    return QBCore.PlayerData.metadata and QBCore.PlayerData.metadata['injail'] or false
-end
-
-function QBCore.Functions.HasLicence(licence)
-    local licences = QBCore.PlayerData.metadata and QBCore.PlayerData.metadata.licences
-    if not licences then return false end
-    return licences[licence] or false
-end
-
-function QBCore.Functions.GetCharInfo(key)
-    if not QBCore.PlayerData.charinfo then return nil end
-    return QBCore.PlayerData.charinfo[key]
-end
-
-function QBCore.Functions.CanAfford(moneytype, amount)
-    if not QBCore.PlayerData.money then return false end
-    return (QBCore.PlayerData.money[moneytype] or 0) >= amount
-end
-
--- Functions
-
-function QBCore.Functions.Debug(tbl)
-    if not HPlayer then return end
-    HELIXTable.Dump(tbl)
-end
-
--- UI
-
-function QBCore.Functions.HideText()
-    if not my_webui then return end
-    my_webui:SendEvent('hideText')
-    my_webui:SetInputMode(0)
-end
-
-function QBCore.Functions.DrawText(text, position)
-    if not my_webui then return end
-    if type(position) ~= 'string' then position = 'left' end
-    my_webui:SendEvent('drawText', text, position)
-end
-
-function QBCore.Functions.ChangeText(text, position)
-    if not my_webui then return end
-    if type(position) ~= 'string' then position = 'left' end
-    my_webui:SendEvent('changeText', text, position)
-end
-
-function QBCore.Functions.KeyPressed()
-    if not my_webui then return end
-    my_webui:SendEvent('keyPressed')
-    QBCore.Functions.HideText()
-end
+-- Notifications
 
 function QBCore.Functions.Notify(text, texttype, length, icon)
-    if not HPlayer then return end
-    if not my_webui then return end
-    local noti_type = texttype or 'primary'
+    local message = {
+        action = 'notify',
+        type = texttype or 'primary',
+        length = length or 5000,
+    }
+
     if type(text) == 'table' then
-        my_webui:SendEvent('showNotif', {
-            text = text.text,
-            length = length or 5000,
-            type = noti_type,
-            caption = text.caption or '',
-            icon = icon or nil
-        })
+        message.text = text.text or 'Placeholder'
+        message.caption = text.caption or 'Placeholder'
     else
-        my_webui:SendEvent('showNotif', {
-            text = text,
-            length = length or 5000,
-            type = noti_type,
-            caption = '',
-            icon = icon or nil
-        })
+        message.text = text
     end
+
+    if icon then
+        message.icon = icon
+    end
+
+    QBCore.webui:SendEvent(message.action, message)
 end
 
 for functionName, func in pairs(QBCore.Functions) do
     if type(func) == 'function' then
-        exports('qb-core', functionName, func)
+        exports(functionName, func)
     end
 end

@@ -1,3 +1,4 @@
+QBCore.Shared = QBCore.Shared or {}
 QBCore.Shared.Weapons = {
     --[[ weapon_acm = {
         ammo_type = 'rifle_ammo',

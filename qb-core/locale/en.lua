@@ -17,15 +17,14 @@ local Translations = {
         no_permission               = 'You don\'t have permissions for this..',
         no_waypoint                 = 'No Waypoint Set.',
         tp_error                    = 'Error While Teleporting.',
-        connecting_database_error   = '[QBCORE] - A database error occurred while connecting to the server. (Is the SQL server on?)',
-        connecting_database_timeout = '[QBCORE] - Connection to database timed out. (Is the SQL server on?)',
-        vehicle_creation_failed     = '[QBCORE] - Failed to create vehicle',
+        ban_table_not_found         = '[QBCORE] - Unable to find the bans table in the database. Please ensure you have imported the SQL file correctly.',
+        connecting_database_error   = '[QBCORE] - An error occurred while connecting to the database. Ensure that the SQL server is running and that the details in the server.cfg file are correct.',
+        connecting_database_timeout = '[QBCORE] - The database connection has timed out. Ensure that the SQL server is running and that the details in the server.cfg file are correct.',
     },
     success = {
         server_opened = 'The server has been opened',
         server_closed = 'The server has been closed',
         teleported_waypoint = 'Teleported To Waypoint.',
-        vehicle_spawned = 'Vehicle Spawned',
     },
     info = {
         received_paycheck = 'You received your paycheck of $%{value}',
@@ -40,6 +39,14 @@ local Translations = {
         exploit_dropped = 'You Have Been Kicked For Exploitation',
     },
     command = {
+        tp = {
+            help = 'TP To Player or Coords (Admin Only)',
+            params = {
+                x = { name = 'id/x', help = 'ID of player or X position' },
+                y = { name = 'y', help = 'Y position' },
+                z = { name = 'z', help = 'Z position' },
+            },
+        },
         tpm = { help = 'TP To Marker (Admin Only)' },
         togglepvp = { help = 'Toggle PVP on the server (Admin Only)' },
         addpermission = {
@@ -67,12 +74,6 @@ local Translations = {
             help = 'Spawn Vehicle (Admin Only)',
             params = {
                 model = { name = 'model', help = 'Model name of the vehicle' },
-            },
-        },
-        weapon = {
-            help = 'Spawn Weapon (Admin Only)',
-            params = {
-                model = { name = 'model', help = 'Model name of the weapon' },
             },
         },
         dv = { help = 'Delete Vehicle (Admin Only)' },
