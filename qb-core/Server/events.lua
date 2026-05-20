@@ -14,8 +14,8 @@ end)
 
 local updateCooldowns = {}
 RegisterServerEvent('QBCore:UpdatePlayer', function(source)
-    local now = GetGameTimer()
-    if updateCooldowns[source] and (now - updateCooldowns[source]) < 10000 then return end
+    local now = os.time()
+    if updateCooldowns[source] and (now - updateCooldowns[source]) < 10 then return end
     updateCooldowns[source] = now
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return end

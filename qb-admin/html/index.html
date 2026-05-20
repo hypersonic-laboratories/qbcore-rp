@@ -181,28 +181,28 @@
                                                     <div class="vital-chip-label"><i data-lucide="heart" class="ui-icon" aria-hidden="true"></i><span>Health</span></div>
                                                     <button class="vital-replenish" title="Replenish Health" @click="replenishVital('health')"><i data-lucide="plus" class="ui-icon" aria-hidden="true"></i></button>
                                                 </div>
-                                                <span class="vital-chip-value health">{{ selectedPlayer?.vitals?.health || 0 }}%</span>
+                                                <span class="vital-chip-value health">{{ Math.floor(selectedPlayer?.vitals?.health || 0) }}%</span>
                                             </div>
                                             <div class="vital-chip">
                                                 <div class="vital-chip-top">
                                                     <div class="vital-chip-label"><i data-lucide="shield" class="ui-icon" aria-hidden="true"></i><span>Armor</span></div>
                                                     <button class="vital-replenish" title="Replenish Armor" @click="replenishVital('armor')"><i data-lucide="plus" class="ui-icon" aria-hidden="true"></i></button>
                                                 </div>
-                                                <span class="vital-chip-value armor">{{ selectedPlayer?.vitals?.armor || 0 }}%</span>
+                                                <span class="vital-chip-value armor">{{ Math.floor(selectedPlayer?.vitals?.armor || 0) }}%</span>
                                             </div>
                                             <div class="vital-chip">
                                                 <div class="vital-chip-top">
                                                     <div class="vital-chip-label"><i data-lucide="hamburger" class="ui-icon" aria-hidden="true"></i><span>Hunger</span></div>
                                                     <button class="vital-replenish" title="Replenish Hunger" @click="replenishVital('hunger')"><i data-lucide="plus" class="ui-icon" aria-hidden="true"></i></button>
                                                 </div>
-                                                <span class="vital-chip-value hunger">{{ selectedPlayer?.vitals?.hunger || 0 }}%</span>
+                                                <span class="vital-chip-value hunger">{{ Math.floor(selectedPlayer?.vitals?.hunger || 0) }}%</span>
                                             </div>
                                             <div class="vital-chip">
                                                 <div class="vital-chip-top">
                                                     <div class="vital-chip-label"><i data-lucide="droplets" class="ui-icon" aria-hidden="true"></i><span>Thirst</span></div>
                                                     <button class="vital-replenish" title="Replenish Thirst" @click="replenishVital('thirst')"><i data-lucide="plus" class="ui-icon" aria-hidden="true"></i></button>
                                                 </div>
-                                                <span class="vital-chip-value thirst">{{ selectedPlayer?.vitals?.thirst || 0 }}%</span>
+                                                <span class="vital-chip-value thirst">{{ Math.floor(selectedPlayer?.vitals?.thirst || 0) }}%</span>
                                             </div>
                                         </div>
                                     </div>
