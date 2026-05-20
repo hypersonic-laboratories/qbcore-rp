@@ -45,13 +45,11 @@ RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
     player_data = {}
 end)
 
-RegisterClientEvent('QBCore:Player:OnFieldUpdate', function(key, val)
-    player_data[key] = val
-end)
-
-RegisterClientEvent('QBCore:Player:OnSubFieldUpdate', function(key, subKey, val)
-    if player_data[key] then
-        player_data[key][subKey] = val
+RegisterClientEvent('QBCore:Client:OnPlayerUpdated', function(key, val)
+    if key == 'all' then
+        player_data = val or {}
+    elseif key then
+        player_data[key] = val
     end
 end)
 
@@ -73,8 +71,9 @@ end)
 
 RegisterClientEvent('qb-hud:client:OnMoneyChange', function(type, amount, isMinus)
     if not my_webui then return end
-    local cashAmount = player_data.money['cash']
-    local bankAmount = player_data.money['bank']
+    local money = player_data.money or {}
+    local cashAmount = money['cash'] or 0
+    local bankAmount = money['bank'] or 0
     my_webui:SendEvent('UpdateMoney', {
         cashAmount = round(cashAmount),
         bankAmount = round(bankAmount),

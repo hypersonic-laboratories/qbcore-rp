@@ -206,11 +206,11 @@ end)
 RegisterClientEvent('qb-admin:client:dashboardAnnounce', function() end)
 
 RegisterClientEvent('qb-admin:client:openClothing', function()
-    TriggerLocalEvent('qb-clothing:client:openMenu')
+    TriggerLocalClientEvent('qb-clothing:client:openMenu')
 end)
 
 RegisterClientEvent('qb-admin:client:openInventory', function(targetPlayerId)
-    TriggerLocalEvent('qb-inventory:client:openInventory', targetPlayerId)
+    TriggerLocalClientEvent('qb-inventory:client:openInventory', targetPlayerId)
 end)
 
 local noclipActive = false
@@ -233,7 +233,7 @@ end)
 local overheadNamesActive = false
 RegisterClientEvent('qb-admin:client:toggleOverheadNames', function()
     overheadNamesActive = not overheadNamesActive
-    TriggerLocalEvent('qb-admin:client:overheadNamesChanged', overheadNamesActive)
+    TriggerLocalClientEvent('qb-admin:client:overheadNamesChanged', overheadNamesActive)
 end)
 
 local spectateTargetId = nil
