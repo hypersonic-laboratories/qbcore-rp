@@ -10,70 +10,7 @@ AddEventHandler('playerDropped', function(reason)
     QBCore.Players[src] = nil
 end)
 
--- Open & Close Server (prevents players from joining)
-
-RegisterServerEvent('QBCore:Server:CloseServer', function(source, reason)
-    if QBCore.Functions.HasPermission(source, 'admin') then
-        reason = reason or 'No reason specified'
-        QBCore.Config.Server.Closed = true
-        QBCore.Config.Server.ClosedReason = reason
-        for k in pairs(QBCore.Players) do
-            if not QBCore.Functions.HasPermission(k, QBCore.Config.Server.WhitelistPermission) then
-                QBCore.Functions.Kick(k, reason, nil, nil)
-            end
-        end
-    else
-        QBCore.Functions.Kick(source, Lang:t('error.no_permission'), nil, nil)
-    end
-end)
-
-RegisterServerEvent('QBCore:Server:OpenServer', function(source)
-    if QBCore.Functions.HasPermission(source, 'admin') then
-        QBCore.Config.Server.Closed = false
-    else
-        QBCore.Functions.Kick(source, Lang:t('error.no_permission'), nil, nil)
-    end
-end)
-
--- Hunger/Thirst Damage --
-
-RegisterServerEvent('QBCore:Server:ApplyHungerThirstDamage', function(source, amount)
-    local pawn = GetPlayerPawn(source)
-    if not pawn then return end
-    local healthComp = pawn:GetComponentByClass(UE.UHActorHealthComponent)
-    if not healthComp then return end
-    local currentHealth = healthComp:GetHealth()
-    if currentHealth > 0 then
-        healthComp:SetHealth(math.max(0, currentHealth - amount))
-    end
-end)
-
--- Callback Events --
-
--- Client Callback
-RegisterServerEvent('QBCore:Server:TriggerClientCallback', function(source, name, ...)
-    local ClientCallback = QBCore.ClientCallbacks[name .. source]
-    if ClientCallback then
-        ClientCallback.promise:resolve(...)
-
-        if ClientCallback.callback then
-            ClientCallback.callback(...)
-        end
-
-        QBCore.ClientCallbacks[name .. source] = nil
-    end
-end)
-
--- Server Callback
-RegisterServerEvent('QBCore:Server:TriggerCallback', function(source, name, ...)
-    if not QBCore.ServerCallbacks[name] then return end
-
-    QBCore.ServerCallbacks[name](source, function(...)
-        TriggerClientEvent(source, 'QBCore:Client:TriggerCallback', name, ...)
-    end, ...)
-end)
-
--- Player
+-- Events
 
 local updateCooldowns = {}
 RegisterServerEvent('QBCore:UpdatePlayer', function(source)
@@ -97,6 +34,17 @@ RegisterServerEvent('QBCore:UpdatePlayer', function(source)
     Player:Save()
 end)
 
+RegisterServerEvent('QBCore:Server:ApplyHungerThirstDamage', function(source, amount)
+    local pawn = GetPlayerPawn(source)
+    if not pawn then return end
+    local healthComp = pawn:GetComponentByClass(UE.UHActorHealthComponent)
+    if not healthComp then return end
+    local currentHealth = healthComp:GetHealth()
+    if currentHealth > 0 then
+        healthComp:SetHealth(math.max(0, currentHealth - amount))
+    end
+end)
+
 RegisterServerEvent('QBCore:ToggleDuty', function(source)
     local Player = QBCore.Functions.GetPlayer(source)
     if not Player then return end
@@ -107,43 +55,27 @@ RegisterServerEvent('QBCore:ToggleDuty', function(source)
         Player:SetJobDuty(true)
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('info.on_duty'))
     end
-
-    TriggerLocalServerEvent('QBCore:Server:SetDuty', source, Player.PlayerData.job.onduty)
-    TriggerClientEvent(source, 'QBCore:Client:SetDuty', Player.PlayerData.job.onduty)
 end)
 
-RegisterServerEvent('QBCore:Server:OnPlayerLoaded', function(source)
-    if not QBCore.Players[source] then return end
-    TriggerClientEvent(source, 'QBCore:Client:SharedUpdate', QBCore.Shared)
-    TriggerClientEvent(source, 'QBCore:Client:OnPlayerLoaded')
-end)
+-- Client Callback
+RegisterServerEvent('QBCore:Server:TriggerClientCallback', function(source, name, ...)
+    local ClientCallback = QBCore.ClientCallbacks[name .. source]
+    if ClientCallback then
+        ClientCallback.promise:resolve(...)
 
--- Central server-side data change handler — re-fires legacy events for backward compat
-AddEventHandler('QBCore:Server:OnPlayerUpdated', function(src, key, val)
-    if key == 'job' then
-        TriggerLocalServerEvent('QBCore:Server:OnJobUpdate', src, val)
-    elseif key == 'gang' then
-        TriggerLocalServerEvent('QBCore:Server:OnGangUpdate', src, val)
-    elseif key == 'all' then
-        TriggerLocalServerEvent('QBCore:Server:OnJobUpdate', src, val.job)
-        TriggerLocalServerEvent('QBCore:Server:OnGangUpdate', src, val.gang)
-    end
-end)
-
--- Non-Chat Command Calling (ex: qb-adminmenu)
-
-RegisterServerEvent('QBCore:CallCommand', function(source, command, args)
-    if not QBCore.Commands.List[command] then return end
-    local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
-    local hasPerm = QBCore.Functions.HasPermission(source, 'command.' .. QBCore.Commands.List[command].name)
-    if hasPerm then
-        if QBCore.Commands.List[command].argsrequired and #QBCore.Commands.List[command].arguments ~= 0 and not args[#QBCore.Commands.List[command].arguments] then
-            TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.missing_args2'), 'error')
-        else
-            QBCore.Commands.List[command].callback(source, args)
+        if ClientCallback.callback then
+            ClientCallback.callback(...)
         end
-    else
-        TriggerClientEvent(source, 'QBCore:Notify', Lang:t('error.no_access'), 'error')
+
+        QBCore.ClientCallbacks[name .. source] = nil
     end
+end)
+
+-- Server Callback
+RegisterServerEvent('QBCore:Server:TriggerCallback', function(source, name, ...)
+    if not QBCore.ServerCallbacks[name] then return end
+
+    QBCore.ServerCallbacks[name](source, function(...)
+        TriggerClientEvent(source, 'QBCore:Client:TriggerCallback', name, ...)
+    end, ...)
 end)
