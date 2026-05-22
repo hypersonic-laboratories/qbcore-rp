@@ -229,6 +229,14 @@ my_webui:RegisterEventHandler('sendMessage', function(data)
     TriggerServerEvent('qb-phone:server:sendMessage', data.number, data.text)
 end)
 
+my_webui:RegisterEventHandler('sendMoney', function(data)
+    TriggerServerEvent('qb-phone:server:sendMoney', data.number, data.amount)
+end)
+
+RegisterClientEvent('qb-phone:client:moneyTransferResult', function(success, resultData)
+    my_webui:SendEvent('moneyTransferResult', success, resultData)
+end)
+
 my_webui:RegisterEventHandler('deleteConversation', function(data)
     TriggerServerEvent('qb-phone:server:deleteConversation', data.number)
 end)

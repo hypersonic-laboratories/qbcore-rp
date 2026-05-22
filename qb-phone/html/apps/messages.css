@@ -895,3 +895,144 @@
 .dark .voice-player-them .voice-player-time {
     color: rgb(161 161 170);
 }
+
+/* ── Money picker ────────────────────────────────────────────── */
+
+.money-picker {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.money-picker-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-align: center;
+    color: rgb(63 63 70);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.money-picker-input-wrap {
+    display: flex;
+    align-items: center;
+    background: rgb(244 244 245);
+    border: 1px solid rgb(228 228 231);
+    border-radius: 0.75rem;
+    padding: 0.45rem 0.75rem;
+    gap: 0.2rem;
+}
+
+.money-picker-currency {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: rgb(22 163 74);
+    line-height: 1;
+}
+
+.money-picker-input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    font-size: 1.15rem;
+    font-weight: 600;
+    outline: none;
+    color: rgb(24 24 27);
+}
+
+.money-picker-input::-webkit-inner-spin-button,
+.money-picker-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+}
+
+.money-picker-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.money-picker-error {
+    font-size: 0.75rem;
+    color: rgb(220 38 38);
+    text-align: center;
+}
+
+.money-picker-send-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 0.6rem;
+    background: rgb(22 163 74);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.money-picker-send-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* ── $ composer button ───────────────────────────────────────── */
+
+.messages-composer-money-btn {
+    width: auto;
+    padding: 0 0.4rem;
+}
+
+.messages-composer-money-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: rgb(22 163 74);
+}
+
+/* ── Payment bubble ──────────────────────────────────────────── */
+
+.payment-bubble-card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.1rem 0;
+}
+
+.payment-bubble-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+.payment-bubble-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.payment-bubble-amount {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.payment-bubble-label {
+    font-size: 0.7rem;
+    opacity: 0.72;
+}
+
+/* ── Dark mode additions ─────────────────────────────────────── */
+
+.dark .money-picker-title {
+    color: rgb(212 212 216);
+}
+
+.dark .money-picker-input-wrap {
+    background: rgb(39 39 45);
+    border-color: rgb(55 55 63);
+}
+
+.dark .money-picker-input {
+    color: rgb(244 244 245);
+}
+
+.dark .messages-composer-money-label {
+    color: rgb(74 222 128);
+}

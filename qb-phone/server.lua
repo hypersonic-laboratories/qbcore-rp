@@ -1086,6 +1086,52 @@ RegisterServerEvent('qb-phone:server:uploadPhoto', function(source, filePath)
     TriggerClientEvent(source, 'qb-phone:client:photoUploaded', nil)
 end)
 
+RegisterServerEvent('qb-phone:server:sendMoney', function(source, targetNumber, amount)
+    local sender = getPlayer(source)
+    if not sender then return end
+
+    amount = math.floor(tonumber(amount) or 0)
+    if amount <= 0 then
+        TriggerClientEvent(source, 'qb-phone:client:moneyTransferResult', false, 'Invalid amount')
+        return
+    end
+
+    if sender.PlayerData.money.bank < amount then
+        TriggerClientEvent(source, 'qb-phone:client:moneyTransferResult', false, 'Insufficient funds')
+        return
+    end
+
+    local target = exports['qb-core']:GetPlayerByPhone(tostring(targetNumber))
+    if not target then
+        TriggerClientEvent(source, 'qb-phone:client:moneyTransferResult', false, 'Recipient is unavailable')
+        return
+    end
+
+    sender.RemoveMoney('bank', amount, 'Phone transfer')
+    target.AddMoney('bank', amount, 'Phone transfer')
+
+    local senderPhone = sender.PlayerData.charinfo.phone
+    exports['qb-banking']:CreateBankStatement(source, 'checking', amount, 'Phone transfer to ' .. tostring(targetNumber), 'withdraw', 'player')
+    exports['qb-banking']:CreateBankStatement(target.PlayerData.source, 'checking', amount, 'Phone transfer from ' .. senderPhone, 'deposit', 'player')
+
+    local senderName     = getFullName(sender)
+    local senderCitizenId = getCitizenIdFromPlayer(sender)
+    local targetCitizenId = syncPlayerAccount(target)
+    local time = os.date('%H:%M')
+    local key  = pairKey(senderPhone, tostring(targetNumber))
+    local text = '[PAYMENT:' .. amount .. ']'
+
+    ensureTable(messages, key)
+    local msg = { id = genId(), senderNumber = senderPhone, senderName = senderName, text = text, time = time }
+    table.insert(messages[key], msg)
+
+    appendConversationMessage(senderCitizenId, targetNumber, tostring(targetNumber), '', { id = msg.id, sender = 'me',   text = text, time = time })
+    appendConversationMessage(targetCitizenId, senderPhone,  senderName,             '', { id = msg.id, sender = 'them', text = text, time = time })
+
+    TriggerClientEvent(target.PlayerData.source, 'qb-phone:client:messageReceived', senderName, senderPhone, text, time)
+    TriggerClientEvent(source, 'qb-phone:client:moneyTransferResult', true, amount)
+end)
+
 RegisterServerEvent('qb-phone:server:deletePhoto', function(source, photoId)
     local player = getPlayer(source)
     if not player then return end

@@ -145,11 +145,32 @@ const MessagesApp = {
                                 </div>
                                 <span class="voice-player-time">{{ getAudioTimeDisplay(msg) }}</span>
                             </div>
+                            <div v-else-if="isPaymentMessage(msg.text)" class="payment-bubble-card">
+                                <span class="payment-bubble-icon">💸</span>
+                                <div class="payment-bubble-content">
+                                    <div class="payment-bubble-amount">{{ '$' + getPaymentAmount(msg.text).toLocaleString() }}</div>
+                                    <div class="payment-bubble-label">{{ msg.sender === 'me' ? 'Sent' : 'Received' }}</div>
+                                </div>
+                            </div>
                             <div v-else>{{ msg.text }}</div>
                             <div class="message-bubble-time">{{ msg.time }}</div>
                         </div>
                     </div>
                 </div>
+                <!-- Money picker -->
+                <div v-if="showMoneyPicker" class="emoji-picker money-picker">
+                    <div class="money-picker-title">Send Money</div>
+                    <div class="money-picker-input-wrap">
+                        <span class="money-picker-currency">$</span>
+                        <input v-model="moneyAmount" type="number" min="1" step="1" placeholder="0" class="money-picker-input" @keyup.enter="sendMoney" />
+                    </div>
+                    <div v-if="moneyError" class="money-picker-error">{{ moneyError }}</div>
+                    <button type="button" class="money-picker-send-btn" :disabled="!moneyAmountValid || sendingMoney" @click="sendMoney">
+                        {{ sendingMoney ? 'Sending…' : 'Send' }}
+                    </button>
+                </div>
+                <div v-if="showMoneyPicker" class="emoji-picker-backdrop" @click="showMoneyPicker = false; moneyError = ''"></div>
+
                 <!-- GIF picker -->
                 <div v-if="showGifPicker" class="emoji-picker gif-picker">
                     <div class="gif-picker-search-wrap">
@@ -220,6 +241,9 @@ const MessagesApp = {
                             </button>
                             <button type="button" :class="['messages-composer-icon-btn', showGalleryPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="Gallery" @click.stop="showGalleryPicker = !showGalleryPicker">
                                 <i data-lucide="image" style="width:1.25rem;height:1.25rem"></i>
+                            </button>
+                            <button type="button" :class="['messages-composer-icon-btn messages-composer-money-btn', showMoneyPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="Send money" @click.stop="toggleMoneyPicker">
+                                <span class="messages-composer-money-label">$</span>
                             </button>
                         </div>
                         <button v-if="messageDraft.trim()" type="button" class="messages-send-button" aria-label="Send message" @click="sendMessage">
@@ -476,6 +500,15 @@ const MessagesApp = {
                 return false;
             }
         }
+        const showMoneyPicker = ref(false);
+        const moneyAmount = ref('');
+        const moneyError = ref('');
+        const sendingMoney = ref(false);
+        const moneyAmountValid = Vue.computed(() => {
+            const n = parseFloat(moneyAmount.value);
+            return Number.isFinite(n) && n >= 1;
+        });
+
         const showGifPicker = ref(false);
         const gifQuery = ref("");
         const gifResults = ref([]);
@@ -546,6 +579,7 @@ const MessagesApp = {
             if (!last) return "No messages yet";
             if (isImageUrl(last.text)) return "[Image]";
             if (isAudioUrl(last.text)) return "[Voice message]";
+            if (isPaymentMessage(last.text)) return last.sender === 'me' ? '💸 Sent $' + getPaymentAmount(last.text) : '💸 Received $' + getPaymentAmount(last.text);
             return last.text;
         }
 
@@ -592,6 +626,52 @@ const MessagesApp = {
             messageDraft.value = "";
         }
 
+        function isPaymentMessage(text) {
+            return typeof text === 'string' && /^\[PAYMENT:\d+\]$/.test(text);
+        }
+
+        function getPaymentAmount(text) {
+            const m = text && text.match(/^\[PAYMENT:(\d+)\]$/);
+            return m ? parseInt(m[1]) : 0;
+        }
+
+        function toggleMoneyPicker() {
+            showMoneyPicker.value = !showMoneyPicker.value;
+            if (showMoneyPicker.value) {
+                showEmojiPicker.value = false;
+                showGifPicker.value = false;
+                showGalleryPicker.value = false;
+                moneyError.value = '';
+            }
+        }
+
+        function sendMoney() {
+            const amount = Math.floor(parseFloat(moneyAmount.value));
+            if (!amount || amount <= 0) return;
+            const conv = currentConversation.value;
+            if (!conv) return;
+            sendingMoney.value = true;
+            moneyError.value = '';
+            hEvent('sendMoney', { number: conv.number, amount });
+        }
+
+        const _moneyResultHandler = function(event) {
+            const { name, args = [] } = event.data;
+            if (name !== 'moneyTransferResult') return;
+            const [success, resultData] = args;
+            sendingMoney.value = false;
+            if (success) {
+                const conv = currentConversation.value;
+                if (conv) conv.messages.push({ id: Date.now(), sender: 'me', text: '[PAYMENT:' + resultData + ']', time: 'Now' });
+                showMoneyPicker.value = false;
+                moneyAmount.value = '';
+            } else {
+                moneyError.value = resultData || 'Transfer failed';
+            }
+        };
+        window.addEventListener('message', _moneyResultHandler);
+        Vue.onUnmounted(() => window.removeEventListener('message', _moneyResultHandler));
+
         function insertEmoji(em) {
             messageDraft.value += em;
         }
@@ -613,6 +693,7 @@ const MessagesApp = {
             showEmojiPicker.value = false;
             showGalleryPicker.value = false;
             showGifPicker.value = false;
+            showMoneyPicker.value = false;
         }
 
         function onBack() {
@@ -651,6 +732,15 @@ const MessagesApp = {
             getBarProgress,
             getAudioTimeDisplay,
             isAudioUrl,
+            showMoneyPicker,
+            moneyAmount,
+            moneyError,
+            sendingMoney,
+            moneyAmountValid,
+            toggleMoneyPicker,
+            sendMoney,
+            isPaymentMessage,
+            getPaymentAmount,
             showGifPicker,
             gifQuery,
             gifResults,
