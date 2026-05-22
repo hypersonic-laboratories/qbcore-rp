@@ -318,12 +318,125 @@
     border-top: 1px solid rgb(252 165 165);
 }
 
-.message-bubble-audio {
-    display: block;
-    width: 100%;
-    min-width: 180px;
-    height: 36px;
-    border-radius: 0.5rem;
+/* ── Voice recording bar ────────────────────────────────────── */
+
+.voice-cancel-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 0;
+    border-radius: 9999px;
+    background: rgb(254 226 226);
+    color: rgb(220 38 38);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+
+.voice-rec-live {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+}
+
+.voice-rec-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 9999px;
+    background: rgb(239 68 68);
+    animation: pulse-dot 1s ease-in-out infinite;
+    flex: 0 0 auto;
+}
+
+.voice-rec-label {
+    font-size: 0.875rem;
+    color: rgb(239 68 68);
+    font-weight: 500;
+    flex: 1;
+}
+
+.voice-rec-timer {
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    color: rgb(239 68 68);
+    font-weight: 600;
+    min-width: 2.6rem;
+    text-align: right;
+}
+
+/* ── Voice message player bubble ────────────────────────────── */
+
+.voice-player {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 160px;
+    padding: 0.1rem 0;
+}
+
+.voice-play-btn {
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+
+.voice-player-me .voice-play-btn {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+}
+
+.voice-player-them .voice-play-btn {
+    background: rgba(59, 130, 246, 0.15);
+    color: rgb(59 130 246);
+}
+
+.voice-player-waveform {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.voice-player-bar {
+    width: 3px;
+    border-radius: 9999px;
+    transition: opacity 0.15s;
+    flex: 0 0 auto;
+}
+
+.voice-player-me .voice-player-bar {
+    background: white;
+}
+
+.voice-player-them .voice-player-bar {
+    background: rgb(59 130 246);
+}
+
+.voice-player-time {
+    font-size: 0.7rem;
+    font-variant-numeric: tabular-nums;
+    flex: 0 0 auto;
+    min-width: 1.8rem;
+    text-align: right;
+}
+
+.voice-player-me .voice-player-time {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.voice-player-them .voice-player-time {
+    color: rgb(113 113 122);
 }
 
 .messages-mic-button {
@@ -763,5 +876,22 @@
 }
 
 .dark .messages-eyebrow {
+    color: rgb(161 161 170);
+}
+
+.dark .voice-cancel-btn {
+    background: rgb(69 10 10);
+    color: rgb(248 113 113);
+}
+
+.dark .voice-player-them .voice-play-btn {
+    background: rgba(59, 130, 246, 0.2);
+}
+
+.dark .voice-player-them .voice-player-bar {
+    background: rgb(96 165 250);
+}
+
+.dark .voice-player-them .voice-player-time {
     color: rgb(161 161 170);
 }

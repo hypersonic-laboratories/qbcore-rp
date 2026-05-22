@@ -127,7 +127,24 @@ const MessagesApp = {
                     <div v-for="msg in currentConversation.messages" :key="msg.id" :class="['message-bubble-row', msg.sender === 'me' ? 'message-bubble-row-me' : '']">
                         <div :class="['message-bubble', msg.sender === 'me' ? 'message-bubble-me' : 'message-bubble-them']">
                             <img v-if="isImageUrl(msg.text)" :src="msg.text" class="message-bubble-image" @click="viewingImage = msg.text" @error="e => e.target.style.display='none'" />
-                            <audio v-else-if="isAudioUrl(msg.text)" :src="msg.text" class="message-bubble-audio" controls preload="none"></audio>
+                            <div v-else-if="isAudioUrl(msg.text)" :class="['voice-player', msg.sender === 'me' ? 'voice-player-me' : 'voice-player-them']">
+                                <button type="button" class="voice-play-btn" @click="toggleAudio(msg)">
+                                    <svg v-if="playingAudioId === msg.id" viewBox="0 0 16 16" fill="currentColor" style="width:0.875rem;height:0.875rem;display:block">
+                                        <rect x="3" y="2" width="4" height="12" rx="1"/>
+                                        <rect x="9" y="2" width="4" height="12" rx="1"/>
+                                    </svg>
+                                    <svg v-else viewBox="0 0 16 16" fill="currentColor" style="width:0.875rem;height:0.875rem;display:block;margin-left:1px">
+                                        <polygon points="3,1 14,8 3,15"/>
+                                    </svg>
+                                </button>
+                                <div class="voice-player-waveform" @click="seekAudio(msg, $event)">
+                                    <span v-for="(h, i) in getWaveHeights(msg.id)" :key="i"
+                                          class="voice-player-bar"
+                                          :style="{ height: h + 'px', opacity: getBarProgress(i, 28, msg) }">
+                                    </span>
+                                </div>
+                                <span class="voice-player-time">{{ getAudioTimeDisplay(msg) }}</span>
+                            </div>
                             <div v-else>{{ msg.text }}</div>
                             <div class="message-bubble-time">{{ msg.time }}</div>
                         </div>
@@ -174,22 +191,44 @@ const MessagesApp = {
                 </div>
                 <div v-if="showEmojiPicker" class="emoji-picker-backdrop" @click="showEmojiPicker = false"></div>
 
+                <div v-if="audioError" class="phone-empty-state" style="padding-top: 0.35rem; padding-bottom: 0.35rem; color: #f87171;">
+                    {{ audioError }}
+                </div>
                 <div class="messages-composer">
-                    <div class="messages-composer-pill">
-                        <input v-model="messageDraft" placeholder="Message" class="messages-composer-input" @keyup.enter="sendMessage" />
-                        <button type="button" :class="['messages-composer-icon-btn', showEmojiPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="Emoji" @click.stop="showEmojiPicker = !showEmojiPicker">
-                            <i data-lucide="smile" style="width:1.25rem;height:1.25rem"></i>
+                    <template v-if="isRecording">
+                        <button type="button" class="voice-cancel-btn" aria-label="Cancel recording" @click="cancelRecording">
+                            <i data-lucide="trash-2" style="width:1rem;height:1rem"></i>
                         </button>
-                        <button type="button" :class="['messages-composer-icon-btn messages-composer-gif-btn', showGifPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="GIF" @click.stop="toggleGifPicker">
-                            <span class="messages-composer-gif-label">GIF</span>
+                        <div class="voice-rec-live">
+                            <span class="voice-rec-dot"></span>
+                            <span class="voice-rec-label">Recording</span>
+                            <span class="voice-rec-timer">{{ recordingDisplay }}</span>
+                        </div>
+                        <button type="button" class="messages-send-button" :disabled="isUploadingAudio" aria-label="Send voice message" @click="stopRecording">
+                            <i v-if="isUploadingAudio" data-lucide="loader-2" class="messages-send-icon messages-send-spin"></i>
+                            <i v-else data-lucide="send-horizontal" class="messages-send-icon"></i>
                         </button>
-                        <button type="button" :class="['messages-composer-icon-btn', showGalleryPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="Gallery" @click.stop="showGalleryPicker = !showGalleryPicker">
-                            <i data-lucide="image" style="width:1.25rem;height:1.25rem"></i>
+                    </template>
+                    <template v-else>
+                        <div class="messages-composer-pill">
+                            <input v-model="messageDraft" placeholder="Message" class="messages-composer-input" @keyup.enter="sendMessage" />
+                            <button type="button" :class="['messages-composer-icon-btn', showEmojiPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="Emoji" @click.stop="showEmojiPicker = !showEmojiPicker">
+                                <i data-lucide="smile" style="width:1.25rem;height:1.25rem"></i>
+                            </button>
+                            <button type="button" :class="['messages-composer-icon-btn messages-composer-gif-btn', showGifPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="GIF" @click.stop="toggleGifPicker">
+                                <span class="messages-composer-gif-label">GIF</span>
+                            </button>
+                            <button type="button" :class="['messages-composer-icon-btn', showGalleryPicker ? 'messages-composer-icon-btn-active' : '']" aria-label="Gallery" @click.stop="showGalleryPicker = !showGalleryPicker">
+                                <i data-lucide="image" style="width:1.25rem;height:1.25rem"></i>
+                            </button>
+                        </div>
+                        <button v-if="messageDraft.trim()" type="button" class="messages-send-button" aria-label="Send message" @click="sendMessage">
+                            <i data-lucide="send-horizontal" class="messages-send-icon"></i>
                         </button>
-                    </div>
-                    <button type="button" class="messages-send-button" aria-label="Send message" @click="sendMessage">
-                        <i data-lucide="send-horizontal" class="messages-send-icon"></i>
-                    </button>
+                        <button v-else type="button" class="messages-send-button" aria-label="Record voice message" @click="startRecording">
+                            <i data-lucide="mic" class="messages-send-icon"></i>
+                        </button>
+                    </template>
                 </div>
             </div>
         </div>
@@ -215,22 +254,30 @@ const MessagesApp = {
         const showGalleryPicker = ref(false);
         const isRecording = ref(false);
         const isUploadingAudio = ref(false);
-        const audioError = ref('');
+        const audioError = ref("");
         const recordingSeconds = ref(0);
         const recordingDisplay = Vue.computed(() => {
             const s = recordingSeconds.value;
-            return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+            return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
         });
         let _mediaRecorder = null;
         let _audioChunks = [];
         let _recordingTimer = null;
+
+        const playingAudioId = ref(null);
+        const audioCurrentTime = ref(0);
+        const audioDurations = Vue.reactive({});
+        let _playerAudio = null;
+        const _waveCache = {};
 
         async function startRecording() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 _audioChunks = [];
                 _mediaRecorder = new MediaRecorder(stream);
-                _mediaRecorder.ondataavailable = e => { if (e.data.size > 0) _audioChunks.push(e.data); };
+                _mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) _audioChunks.push(e.data);
+                };
                 _mediaRecorder.start();
                 isRecording.value = true;
                 recordingSeconds.value = 0;
@@ -238,16 +285,18 @@ const MessagesApp = {
             } catch (err) {
                 isRecording.value = false;
                 const name = err?.name ?? String(err);
-                if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-                    audioError.value = 'Microphone access denied.';
-                } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
-                    audioError.value = 'No microphone found.';
+                if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+                    audioError.value = "Microphone access denied.";
+                } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+                    audioError.value = "No microphone found.";
                 } else if (!navigator.mediaDevices) {
-                    audioError.value = 'Microphone not supported in this context.';
+                    audioError.value = "Microphone not supported in this context.";
                 } else {
-                    audioError.value = 'Could not start recording (' + name + ').';
+                    audioError.value = "Could not start recording (" + name + ").";
                 }
-                setTimeout(() => { audioError.value = ''; }, 4000);
+                setTimeout(() => {
+                    audioError.value = "";
+                }, 4000);
             }
         }
 
@@ -257,10 +306,10 @@ const MessagesApp = {
             _recordingTimer = null;
             isRecording.value = false;
 
-            const blob = await new Promise(resolve => {
-                _mediaRecorder.onstop = () => resolve(new Blob(_audioChunks, { type: 'audio/webm' }));
+            const blob = await new Promise((resolve) => {
+                _mediaRecorder.onstop = () => resolve(new Blob(_audioChunks, { type: "audio/ogg" }));
                 _mediaRecorder.stop();
-                _mediaRecorder.stream.getTracks().forEach(t => t.stop());
+                _mediaRecorder.stream.getTracks().forEach((t) => t.stop());
             });
             _mediaRecorder = null;
             _audioChunks = [];
@@ -268,18 +317,154 @@ const MessagesApp = {
             isUploadingAudio.value = true;
             try {
                 const fd = new FormData();
-                fd.append('file', blob, 'voice_message.webm');
-                const res = await fetch('https://api.fivemanage.com/api/v3/file', {
-                    method: 'POST',
-                    headers: { Authorization: 'zvYWd23h2vlgppAbwFalDYJPhM0bCoRk' },
+                fd.append("file", blob, "voice_message.ogg");
+                const res = await fetch("https://api.fivemanage.com/api/v3/file", {
+                    method: "POST",
+                    headers: { Authorization: "zvYWd23h2vlgppAbwFalDYJPhM0bCoRk" },
                     body: fd,
                 });
                 const json = await res.json();
                 const url = json?.data?.url;
-                if (url) { messageDraft.value = url; sendMessage(); }
-            } catch { } finally {
+                if (url) {
+                    messageDraft.value = url;
+                    sendMessage();
+                }
+            } catch {
+            } finally {
                 isUploadingAudio.value = false;
             }
+        }
+
+        function cancelRecording() {
+            if (_mediaRecorder) {
+                clearInterval(_recordingTimer);
+                _recordingTimer = null;
+                try {
+                    _mediaRecorder.ondataavailable = null;
+                    _mediaRecorder.stream.getTracks().forEach((t) => t.stop());
+                    _mediaRecorder.stop();
+                } catch {}
+                _mediaRecorder = null;
+            }
+            _audioChunks = [];
+            isRecording.value = false;
+            recordingSeconds.value = 0;
+        }
+
+        function getWaveHeights(msgId) {
+            if (_waveCache[msgId]) return _waveCache[msgId];
+            const seed = typeof msgId === "number" ? msgId % 1000 : 0;
+            const bars = Array.from({ length: 28 }, (_, i) => {
+                const h = Math.abs(
+                    Math.sin(i * 0.45 + seed * 0.008) * 9 +
+                    Math.sin(i * 0.82 + seed * 0.014) * 5 +
+                    Math.sin(i * 1.3 + seed * 0.005) * 3
+                ) + 3;
+                return Math.min(Math.max(Math.round(h), 3), 18);
+            });
+            _waveCache[msgId] = bars;
+            return bars;
+        }
+
+        function getBarProgress(barIndex, total, msg) {
+            if (playingAudioId.value !== msg.id) return 1;
+            const duration = audioDurations[msg.id];
+            if (!duration || !isFinite(duration)) return 1;
+            return (barIndex / total) <= (audioCurrentTime.value / duration) ? 1 : 0.3;
+        }
+
+        function fmtTime(secs) {
+            const s = Math.floor(secs);
+            return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+        }
+
+        function getAudioTimeDisplay(msg) {
+            if (playingAudioId.value === msg.id) return fmtTime(audioCurrentTime.value);
+            const dur = audioDurations[msg.id];
+            return (dur && isFinite(dur)) ? fmtTime(dur) : "";
+        }
+
+        function seekAudio(msg, event) {
+            const duration = audioDurations[msg.id];
+            if (playingAudioId.value !== msg.id || !duration || !isFinite(duration)) {
+                toggleAudio(msg);
+                return;
+            }
+            const rect = event.currentTarget.getBoundingClientRect();
+            const ratio = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+            _playerAudio.currentTime = ratio * duration;
+            audioCurrentTime.value = _playerAudio.currentTime;
+        }
+
+        function toggleAudio(msg) {
+            if (playingAudioId.value === msg.id) {
+                if (_playerAudio) _playerAudio.pause();
+                playingAudioId.value = null;
+                return;
+            }
+            if (_playerAudio) {
+                _playerAudio.onloadedmetadata = null;
+                _playerAudio.ondurationchange = null;
+                _playerAudio.onseeked = null;
+                _playerAudio.ontimeupdate = null;
+                _playerAudio.onended = null;
+                _playerAudio.onerror = null;
+                _playerAudio.pause();
+                _playerAudio.src = "";
+            }
+            const audio = new Audio(msg.text);
+            _playerAudio = audio;
+
+            // MediaRecorder WebM omits the duration header so audio.duration is
+            // Infinity until we seek past the end, which forces Chrome to scan the
+            // file and fire ondurationchange with the real value.
+            //
+            // State machine gates onended/ontimeupdate until we're actually ready:
+            //   discovering → seeking to 1e10 to resolve duration
+            //   resetting   → seeking back to 0 after resolution
+            //   ready       → normal playback
+            let durState = "discovering";
+
+            audio.onloadedmetadata = () => {
+                if (isFinite(audio.duration)) {
+                    audioDurations[msg.id] = audio.duration;
+                    durState = "ready";
+                } else if (isFinite(audioDurations[msg.id])) {
+                    // Duration already known from a prior play — skip the scan
+                    durState = "ready";
+                } else {
+                    audio.currentTime = 1e10;
+                }
+            };
+
+            audio.ondurationchange = () => {
+                if (isFinite(audio.duration)) audioDurations[msg.id] = audio.duration;
+            };
+
+            audio.onseeked = () => {
+                if (durState === "discovering") {
+                    durState = "resetting";
+                    audio.currentTime = 0;
+                } else if (durState === "resetting") {
+                    durState = "ready";
+                    if (_playerAudio === audio) audio.play().catch(() => {});
+                }
+            };
+
+            audio.ontimeupdate = () => {
+                if (durState === "ready") audioCurrentTime.value = audio.currentTime;
+            };
+
+            audio.onended = () => {
+                if (durState !== "ready") return;
+                playingAudioId.value = null;
+                audioCurrentTime.value = 0;
+            };
+
+            audio.onerror = () => { playingAudioId.value = null; };
+            playingAudioId.value = msg.id;
+            audioCurrentTime.value = 0;
+            audio.play().catch(() => { playingAudioId.value = null; });
         }
 
         function isAudioUrl(text) {
@@ -287,7 +472,9 @@ const MessagesApp = {
             try {
                 const url = new URL(text);
                 return /\.(mp3|ogg|wav|webm|m4a|aac)(\?.*)?$/i.test(url.pathname);
-            } catch { return false; }
+            } catch {
+                return false;
+            }
         }
         const showGifPicker = ref(false);
         const gifQuery = ref("");
@@ -303,9 +490,7 @@ const MessagesApp = {
 
         async function fetchGifs(q) {
             gifLoading.value = true;
-            const endpoint = q
-                ? `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(q)}&limit=12&rating=pg13`
-                : `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=12&rating=pg13`;
+            const endpoint = q ? `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(q)}&limit=12&rating=pg13` : `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=12&rating=pg13`;
             try {
                 const res = await fetch(endpoint);
                 const json = await res.json();
@@ -330,7 +515,7 @@ const MessagesApp = {
         }
         const emojiCategories = window.EMOJI_CATEGORIES;
         const activeEmojiTab = ref(emojiCategories[0].name);
-        const activeEmojiList = Vue.computed(() => emojiCategories.find(c => c.name === activeEmojiTab.value)?.emojis ?? []);
+        const activeEmojiList = Vue.computed(() => emojiCategories.find((c) => c.name === activeEmojiTab.value)?.emojis ?? []);
 
         const contactSuggestions = computed(() => {
             const q = newQuery.value.trim().toLowerCase();
@@ -458,6 +643,13 @@ const MessagesApp = {
             recordingDisplay,
             startRecording,
             stopRecording,
+            cancelRecording,
+            playingAudioId,
+            toggleAudio,
+            seekAudio,
+            getWaveHeights,
+            getBarProgress,
+            getAudioTimeDisplay,
             isAudioUrl,
             showGifPicker,
             gifQuery,

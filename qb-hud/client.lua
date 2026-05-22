@@ -25,6 +25,7 @@ local function disableDefaultHUD()
         Healthbar = false,
         Inventory = false,
         Shortcuts = false,
+        --Minimap = false
     })
 end
 
