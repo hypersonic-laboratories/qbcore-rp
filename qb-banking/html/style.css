@@ -1,63 +1,88 @@
 :root {
-    /* Material Design Dark Theme Variables */
-    --md-primary: #f44336;
-    --md-on-primary: #ffffff;
-    --md-primary-container: #ffdad6;
-    --md-on-primary-container: #410002;
-    --md-secondary: #d32f2f;
-    --md-on-secondary: #ffffff;
-    --md-secondary-container: #ffdad5;
-    --md-on-secondary-container: #410001;
-    --md-tertiary: #ff8a65;
-    --md-on-tertiary: #ffffff;
-    --md-tertiary-container: #ffdacc;
-    --md-on-tertiary-container: #410002;
-    --md-surface: #1c1b1f;
-    --md-on-surface: #e6e1e5;
-    --md-surface-variant: #49454f;
-    --md-on-surface-variant: #cac4d0;
-    --md-surface-container-lowest: #0f0d13;
-    --md-surface-container-low: #1d1b20;
-    --md-surface-container: #211f26;
-    --md-surface-container-high: #2b2930;
-    --md-surface-container-highest: #36343b;
-    --md-error: #b3261e;
-    --md-on-error: #ffffff;
-    --md-error-container: #93000a;
-    --md-on-error-container: #ffdad5;
-    --md-outline: #79747e;
-    --md-outline-variant: #49454f;
-    --md-inverse-surface: #e6e1e5;
-    --md-inverse-on-surface: #1c1b1f;
-    --md-scrim: rgba(0, 0, 0, 0.6);
-    --md-shadow: rgba(0, 0, 0, 0.15);
-    --md-success: #9bd880;
-    --md-on-success: #193800;
-    --md-success-container: #275000;
-    --md-on-success-container: #b6f397;
-    --md-warning: #ffba47;
-    --md-on-warning: #422b00;
-    --md-warning-container: #5f3f00;
-    --md-on-warning-container: #ffddb0;
-    --md-info: #b3c5ff;
-    --md-on-info: #002a77;
-    --md-info-container: #003ea7;
-    --md-on-info-container: #dae1ff;
+    /* HELIX Secondary Palette */
+    --helix-yellow: #F5D90A;
+    --helix-green: #00FA7B;
+    --helix-red: #E5484D;
+    --helix-purple: #B048E5;
+    --helix-pink: #E548CA;
+    --helix-orange: #FA9600;
 
-    /* Elevation */
-    --md-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
-    --md-elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
-    --md-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
-    --md-elevation-4: 0px 6px 10px 4px rgba(0, 0, 0, 0.15);
-    --md-elevation-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.15);
+    /* Surface scale — true black base */
+    --md-surface: #000000;
+    --md-on-surface: #FFFFFF;
+    --md-surface-variant: #1A1A1A;
+    --md-on-surface-variant: #888888;
+    --md-surface-container-lowest: #000000;
+    --md-surface-container-low: #0D0D0D;
+    --md-surface-container: #111111;
+    --md-surface-container-high: #1A1A1A;
+    --md-surface-container-highest: #242424;
+
+    /* Primary — white, for default buttons and chrome */
+    --md-primary: #FFFFFF;
+    --md-on-primary: #000000;
+    --md-primary-container: #1A1A1A;
+    --md-on-primary-container: #FFFFFF;
+
+    /* Secondary — HELIX Green (deposit) */
+    --md-secondary: var(--helix-green);
+    --md-on-secondary: #000000;
+    --md-secondary-container: rgba(0, 250, 123, 0.12);
+    --md-on-secondary-container: var(--helix-green);
+
+    /* Tertiary — HELIX Orange (external transfer) */
+    --md-tertiary: var(--helix-orange);
+    --md-on-tertiary: #000000;
+    --md-tertiary-container: rgba(250, 150, 0, 0.12);
+    --md-on-tertiary-container: var(--helix-orange);
+
+    /* Error / Withdraw — HELIX Red */
+    --md-error: var(--helix-red);
+    --md-on-error: #FFFFFF;
+    --md-error-container: rgba(229, 72, 77, 0.12);
+    --md-on-error-container: var(--helix-red);
+
+    /* Outlines */
+    --md-outline: #3A3A3A;
+    --md-outline-variant: #222222;
+    --md-inverse-surface: #FFFFFF;
+    --md-inverse-on-surface: #000000;
+    --md-scrim: rgba(0, 0, 0, 0.8);
+    --md-shadow: rgba(0, 0, 0, 0.5);
+
+    /* Semantic — Success (deposit / positive) — HELIX Green */
+    --md-success: var(--helix-green);
+    --md-on-success: #000000;
+    --md-success-container: rgba(0, 250, 123, 0.12);
+    --md-on-success-container: var(--helix-green);
+
+    /* Semantic — Warning (external) — HELIX Orange */
+    --md-warning: var(--helix-orange);
+    --md-on-warning: #000000;
+    --md-warning-container: rgba(250, 150, 0, 0.12);
+    --md-on-warning-container: var(--helix-orange);
+
+    /* Semantic — Info (internal transfer) — HELIX Purple */
+    --md-info: var(--helix-purple);
+    --md-on-info: #FFFFFF;
+    --md-info-container: rgba(176, 72, 229, 0.12);
+    --md-on-info-container: var(--helix-purple);
+
+    /* Elevation — deeper shadows on true black */
+    --md-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.4);
+    --md-elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.4);
+    --md-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.4);
+    --md-elevation-4: 0px 6px 10px 4px rgba(0, 0, 0, 0.4);
+    --md-elevation-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.4);
 
     /* Shapes */
-    --md-radius-small: 8px;
-    --md-radius-medium: 12px;
-    --md-radius-large: 16px;
-    --md-radius-extra-large: 28px;
+    --md-radius-small: 2px;
+    --md-radius-medium: 4px;
+    --md-radius-large: 6px;
+    --md-radius-extra-large: 8px;
 
     /* Typography */
+    --md-typescale-title-medium-size: 16px;
     --md-typescale-body-large-size: 16px;
     --md-typescale-body-medium-size: 14px;
     --md-typescale-body-small-size: 12px;
@@ -71,7 +96,8 @@
     --accent-color: var(--md-surface-container-high);
     --button-color: var(--md-primary);
     --box-shadow: var(--md-elevation-2);
-    --font: "Exo 2", sans-serif;
+    --font: "Tomorrow", sans-serif;
+    --font-secondary: "Barlow", sans-serif;
     --font-weight-regular: 400;
     --font-weight-medium: 500;
     --font-weight-bold: 700;
@@ -102,6 +128,7 @@ label {
     display: block;
     margin: 10px 0 5px;
     font-size: var(--md-typescale-label-medium-size);
+    font-family: var(--font-secondary);
 }
 
 select,
@@ -112,8 +139,9 @@ input {
     background-color: var(--accent-color);
     color: var(--text-color);
     font-weight: var(--font-weight-medium);
-    font-family: var(--font);
+    font-family: var(--font-secondary);
     border: 1px solid var(--md-outline-variant);
+    border-radius: var(--md-radius-small);
     box-shadow: var(--box-shadow);
     text-align: center;
 }
@@ -128,35 +156,6 @@ input:focus {
     border-color: transparent;
 }
 
-.v-select {
-    width: 52%;
-    padding: 0;
-    margin: 0;
-    border-radius: 0;
-}
-
-.v-select .vs__dropdown-toggle {
-    border-radius: 0;
-    background-color: var(--accent-color);
-    color: var(--text-color);
-    font-weight: var(--font-weight-medium);
-    font-family: var(--font);
-    border: 1px solid var(--md-outline-variant);
-    box-shadow: var(--box-shadow);
-    text-align: center;
-}
-
-.v-select .vs__dropdown-menu {
-    background-color: var(--accent-color);
-    color: var(--text-color);
-    border-radius: 0;
-}
-
-.v-select .vs__selected,
-.v-select .vs__selected-options {
-    color: var(--text-color);
-    text-align: center;
-}
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -172,6 +171,7 @@ input[type="number"]::-webkit-outer-spin-button {
     position: absolute;
     transform: translate(-50%, -50%);
     background-color: var(--md-surface-container);
+    border-radius: var(--md-radius-extra-large);
     box-shadow: var(--md-elevation-3);
 }
 
@@ -193,6 +193,7 @@ input[type="number"]::-webkit-outer-spin-button {
     margin: 10px;
     padding: 10px 20px;
     border: none;
+    border-radius: var(--md-radius-medium);
     box-shadow: var(--box-shadow);
 }
 
@@ -201,6 +202,7 @@ input[type="number"]::-webkit-outer-spin-button {
     margin: 10px;
     padding: 10px 20px;
     border: none;
+    border-radius: var(--md-radius-medium);
     box-shadow: var(--box-shadow);
 }
 
@@ -219,12 +221,13 @@ input[type="number"]::-webkit-outer-spin-button {
     margin-right: 10px;
     margin-left: 10px;
     padding: 10px 20px;
+    border-radius: var(--md-radius-small);
     cursor: pointer;
     box-shadow: var(--box-shadow);
 }
 
 .sidebar-selected {
-    border-right: 2px solid var(--md-primary);
+    border-right: 2px solid var(--helix-yellow);
 }
 
 .main-content {
@@ -261,6 +264,7 @@ input[type="number"]::-webkit-outer-spin-button {
     margin-left: 10px;
     padding: 10px 20px;
     border: none;
+    border-radius: var(--md-radius-small);
     cursor: pointer;
     box-shadow: var(--box-shadow);
     transition: background-color 0.2s ease;
@@ -274,31 +278,142 @@ input[type="number"]::-webkit-outer-spin-button {
     display: flex;
     flex-grow: 1;
     flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    margin-left: 20px;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    overflow: hidden;
+    margin: 10px 20px 10px 20px;
 }
 
-.transactions li {
+.transactions-header {
+    display: grid;
+    grid-template-columns: 115px 1fr 2fr 90px;
+    padding: 6px 20px;
+    margin-right: 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--md-outline-variant);
+    font-size: var(--md-typescale-label-small-size);
+    color: var(--md-on-surface-variant);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.transactions-header span:last-child {
+    text-align: right;
+}
+
+.transactions-body {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    flex-grow: 1;
+}
+
+.transaction-row {
+    display: grid;
+    grid-template-columns: 115px 1fr 2fr 90px;
+    align-items: center;
     background-color: var(--accent-color);
-    margin-right: 30px;
-    margin-bottom: 10px;
-    padding: 10px 20px;
-    border: none;
+    margin-right: 10px;
+    margin-bottom: 6px;
+    padding: 9px 20px;
+    border-radius: var(--md-radius-small);
     font-size: var(--md-typescale-body-medium-size);
+    font-family: var(--font-secondary);
+}
+
+.tx-amount {
+    text-align: right;
+    font-weight: var(--font-weight-bold);
+}
+
+.tx-reason {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 10px;
 }
 
 .money {
     display: flex;
     flex-grow: 1;
     flex-direction: row;
+    padding: 15px;
+    gap: 15px;
+}
+
+.money-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    margin-top: 20px;
-    margin-bottom: 30px;
+    background-color: var(--md-surface-container-low);
+    border-radius: var(--md-radius-large);
+    border: 1px solid var(--md-outline-variant);
+    border-top-width: 3px;
+    padding: 20px 25px;
+    box-sizing: border-box;
+}
+
+.money-panel.withdraw {
+    border-top-color: var(--md-primary);
+}
+
+.money-panel.deposit {
+    border-top-color: var(--md-success);
+}
+
+.money-panel-divider {
+    display: none;
+}
+
+.money-title {
+    font-size: var(--md-typescale-title-medium-size);
+    font-weight: var(--font-weight-bold);
+    width: 100%;
+    text-align: center;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--md-outline-variant);
+}
+
+.money-panel.withdraw .money-title {
+    color: var(--md-primary);
+}
+
+.money-panel.deposit .money-title {
+    color: var(--md-success);
+}
+
+.money-field {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 4px;
+}
+
+.money-field label {
+    margin: 6px 0 3px;
+    font-size: var(--md-typescale-label-medium-size);
+    color: var(--md-on-surface-variant);
+}
+
+.money-field input,
+.money-field select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.money-panel .action-button {
+    width: 80%;
+    margin-top: 14px;
+}
+
+.action-button.deposit-btn {
+    background-color: var(--md-success);
+    color: var(--md-on-success);
 }
 
 .manage-money {
@@ -312,42 +427,47 @@ input[type="number"]::-webkit-outer-spin-button {
     padding: 20px;
 }
 
-.money-title {
-    font-size: var(--md-typescale-title-medium-size);
-    font-weight: var(--font-weight-bold);
+.money-panel.internal {
+    border-top-color: var(--md-info);
+}
+
+.money-panel.external {
+    border-top-color: var(--md-warning);
+}
+
+.money-panel.internal .money-title {
+    color: var(--md-info);
+}
+
+.money-panel.external .money-title {
+    color: var(--md-warning);
+}
+
+.action-button.internal-btn {
+    background-color: var(--md-info);
+    color: var(--md-on-info);
+}
+
+.action-button.external-btn {
+    background-color: var(--md-warning);
+    color: var(--md-on-warning);
 }
 
 .transfer {
     display: flex;
     flex-grow: 1;
-    flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    margin-top: 10px;
-    margin-bottom: 30px;
-}
-
-.transfer-header {
-    display: flex;
     flex-direction: row;
-    align-items: center;
-    justify-content: space-evenly;
-    height: 10%;
-}
-
-.transfer-options {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+    padding: 15px;
+    gap: 15px;
 }
 
 .account-options {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     flex-grow: 1;
-    flex-wrap: wrap;
-    flex-direction: row;
+    padding: 15px;
+    gap: 15px;
 }
 
 .debit-card,
@@ -358,39 +478,61 @@ input[type="number"]::-webkit-outer-spin-button {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    height: 21.5vh;
-    width: 19.8vw;
-    border-right: 1px solid var(--md-outline-variant);
-    border-top: 1px solid var(--md-outline-variant);
-    margin: 1px;
-    padding: 20px;
-    box-sizing: border-box;
     background-color: var(--md-surface-container-low);
+    border-radius: var(--md-radius-large);
+    border: 1px solid var(--md-outline-variant);
+    border-top-width: 3px;
+    padding: 16px 20px;
+    box-sizing: border-box;
 }
 
-.options-labels {
+.debit-card { border-top-color: var(--helix-yellow); }
+.create-account { border-top-color: var(--helix-green); }
+.edit-account { border-top-color: var(--helix-purple); }
+.manage-account { border-top-color: var(--helix-orange); }
+
+.debit-card .money-title { color: var(--helix-yellow); }
+.create-account .money-title { color: var(--helix-green); }
+.edit-account .money-title { color: var(--helix-purple); }
+.manage-account .money-title { color: var(--helix-orange); }
+
+.debit-card .money-field {
+    width: 80%;
+}
+
+.debit-card .action-button,
+.create-account .action-button:only-of-type {
+    width: 80%;
+}
+
+.options-row {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
-    width: 65%;
-}
-
-.options-inputs {
+    gap: 10px;
     width: 100%;
-    max-height: 3.6vh;
+    flex-grow: 1;
+    align-items: flex-start;
+    padding: 4px 0;
+}
+
+.options-field {
+    flex: 1;
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex-direction: column;
 }
 
-#createAccountName,
-#editAccount,
-#manageAccountName {
-    margin-right: 25px;
+.options-field label {
+    margin: 4px 0 3px;
+    font-size: var(--md-typescale-label-medium-size);
+    color: var(--md-on-surface-variant);
+    font-family: var(--font-secondary);
 }
 
-#manageUserName {
-    width: 95%;
+.options-field input,
+.options-field select {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0;
 }
 
 .combo-input {
@@ -407,6 +549,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .list-container {
     width: fit-content;
     background-color: var(--accent-color);
+    border-radius: var(--md-radius-small);
     box-shadow: var(--md-elevation-3);
 }
 
@@ -419,6 +562,7 @@ input[type="number"]::-webkit-outer-spin-button {
     margin: 10px;
     padding: 10px 20px;
     border: none;
+    border-radius: var(--md-radius-small);
     cursor: pointer;
     background-color: var(--button-color);
     font-family: var(--font);
@@ -456,6 +600,7 @@ input[type="number"]::-webkit-outer-spin-button {
     position: absolute;
     transform: translate(-50%, -50%);
     background-color: var(--md-surface-container);
+    border-radius: var(--md-radius-medium);
     box-shadow: var(--md-elevation-4);
 }
 
@@ -478,6 +623,7 @@ input[type="number"]::-webkit-outer-spin-button {
     height: 20%;
     margin: 5px;
     border: none;
+    border-radius: var(--md-radius-small);
     cursor: pointer;
     background-color: var(--accent-color);
     font-family: var(--font);
@@ -502,6 +648,7 @@ input[type="number"]::-webkit-outer-spin-button {
     align-items: center;
     margin: 10px;
     padding: 10px 20px;
+    border-radius: var(--md-radius-medium);
     box-shadow: var(--box-shadow);
 }
 

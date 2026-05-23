@@ -442,46 +442,48 @@ my_webui:RegisterEventHandler('takePhoto', function(_)
     UE.UKismetRenderingLibrary.ExportRenderTarget(character, sceneCap.RenderTarget, saveDir, fileName)
 
     local filePath = (saveDir .. fileName):gsub('\\', '/')
-    -- local responsePath = filePath .. '.json'
-    -- os.execute('start "" /b curl -s -X POST -F "file=@' .. filePath .. '" -H "Authorization: ' .. FIVEMANAGE_IMAGE_KEY .. '" "https://api.fivemanage.com/api/v3/file" -o "' .. responsePath .. '"')
+    local responsePath = filePath .. '.json'
 
     my_webui:SendEvent('showAfterCapture')
 
-    Timer.SetTimeout(function()
-        local f = io.open(filePath, 'rb')
-        if not f then
-            my_webui:SendEvent('photoFailed')
-            return
-        end
-        local fileData = f:read('*all')
-        f:close()
-        os.remove(filePath)
+    -- Fire curl in a detached background process so the game thread never blocks.
+    -- HTTP.Request can't send binary PNGs (UTF-16 corruption), so we use curl directly.
+    local winPath = filePath:gsub('/', '\\')
+    local winResponsePath = responsePath:gsub('/', '\\')
+    local cmd = 'start "" /b curl -s -X POST'
+        .. ' -F "file=@' .. winPath .. '"'
+        .. ' -H "Authorization: ' .. FIVEMANAGE_IMAGE_KEY .. '"'
+        .. ' "' .. FIVEMANAGE_URL .. '"'
+        .. ' -o "' .. winResponsePath .. '"'
+    os.execute(cmd)
 
-        local boundary = 'HELIXphoto' .. tostring(os.time())
-        local body = '--' .. boundary .. '\r\n'
-            .. 'Content-Disposition: form-data; name="file"; filename="' .. fileName .. '"\r\n'
-            .. 'Content-Type: image/png\r\n\r\n'
-            .. fileData .. '\r\n--' .. boundary .. '--\r\n'
-
-        HTTP.Request(FIVEMANAGE_URL, {
-            Method = 'POST',
-            Headers = {
-                Authorization = FIVEMANAGE_IMAGE_KEY,
-                ['Content-Type'] = 'multipart/form-data; boundary=' .. boundary,
-            },
-            Body = body,
-        }, function(response)
+    local attempts = 0
+    local function pollResponse()
+        attempts = attempts + 1
+        local f = io.open(responsePath, 'r')
+        if f then
+            local result = f:read('*all')
+            f:close()
+            os.remove(responsePath)
+            os.remove(filePath)
             local url = nil
-            if response.Ok and response.Body then
-                local ok, parsed = pcall(JSON.parse, response.Body)
+            if result and result ~= '' then
+                local ok, parsed = pcall(JSON.parse, result)
                 url = ok and parsed and parsed.data and parsed.data.url
             end
             if url and url ~= '' then
                 TriggerServerEvent('qb-phone:server:savePhoto', url)
             end
             my_webui:SendEvent(url and url ~= '' and 'photoTaken' or 'photoFailed', url)
-        end)
-    end, 500)
+        elseif attempts < 30 then
+            Timer.SetTimeout(pollResponse, 500)
+        else
+            os.remove(filePath)
+            my_webui:SendEvent('photoFailed')
+        end
+    end
+
+    Timer.SetTimeout(pollResponse, 500)
 end)
 
 function handlePhotoUploaded(url)

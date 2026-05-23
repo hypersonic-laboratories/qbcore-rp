@@ -1,53 +1,78 @@
 :root {
-    /* Material Design Dark Theme Variables */
-    --md-primary: #f44336;
-    --md-on-primary: #ffffff;
-    --md-primary-container: #ffdad6;
-    --md-on-primary-container: #410002;
-    --md-secondary: #d32f2f;
-    --md-on-secondary: #ffffff;
-    --md-secondary-container: #ffdad5;
-    --md-on-secondary-container: #410001;
-    --md-tertiary: #ff8a65;
-    --md-on-tertiary: #ffffff;
-    --md-tertiary-container: #ffdacc;
-    --md-on-tertiary-container: #410002;
-    --md-surface: #1c1b1f;
-    --md-on-surface: #e6e1e5;
-    --md-surface-variant: #49454f;
-    --md-on-surface-variant: #cac4d0;
-    --md-surface-container-lowest: #0f0d13;
-    --md-surface-container-low: #1d1b20;
-    --md-surface-container: #211f26;
-    --md-surface-container-high: #2b2930;
-    --md-surface-container-highest: #36343b;
-    --md-error: #b3261e;
-    --md-on-error: #ffffff;
-    --md-error-container: #93000a;
-    --md-on-error-container: #ffdad5;
-    --md-outline: #79747e;
-    --md-outline-variant: #49454f;
-    --md-inverse-surface: #e6e1e5;
-    --md-inverse-on-surface: #1c1b1f;
-    --md-scrim: rgba(0, 0, 0, 0.6);
-    --md-success: #9bd880;
-    --md-on-success: #193800;
-    --md-success-container: #275000;
-    --md-on-success-container: #b6f397;
-    --md-warning: #ffba47;
-    --md-on-warning: #422b00;
-    --md-warning-container: #5f3f00;
-    --md-on-warning-container: #ffddb0;
-    --md-info: #b3c5ff;
-    --md-on-info: #002a77;
-    --md-info-container: #003ea7;
-    --md-on-info-container: #dae1ff;
+    /* HELIX Secondary Palette */
+    --helix-yellow: #F5D90A;
+    --helix-green: #00FA7B;
+    --helix-red: #E5484D;
+    --helix-purple: #B048E5;
+    --helix-pink: #E548CA;
+    --helix-orange: #FA9600;
+
+    /* Surface scale — true black base */
+    --md-surface: #000000;
+    --md-on-surface: #FFFFFF;
+    --md-surface-variant: #1A1A1A;
+    --md-on-surface-variant: #888888;
+    --md-surface-container-lowest: #000000;
+    --md-surface-container-low: #0D0D0D;
+    --md-surface-container: #111111;
+    --md-surface-container-high: #1A1A1A;
+    --md-surface-container-highest: #242424;
+
+    /* Primary — white, for default buttons and chrome */
+    --md-primary: #FFFFFF;
+    --md-on-primary: #000000;
+    --md-primary-container: #1A1A1A;
+    --md-on-primary-container: #FFFFFF;
+
+    /* Secondary — HELIX Green */
+    --md-secondary: var(--helix-green);
+    --md-on-secondary: #000000;
+    --md-secondary-container: rgba(0, 250, 123, 0.12);
+    --md-on-secondary-container: var(--helix-green);
+
+    /* Tertiary — HELIX Orange */
+    --md-tertiary: var(--helix-orange);
+    --md-on-tertiary: #000000;
+    --md-tertiary-container: rgba(250, 150, 0, 0.12);
+    --md-on-tertiary-container: var(--helix-orange);
+
+    /* Error — HELIX Red */
+    --md-error: var(--helix-red);
+    --md-on-error: #FFFFFF;
+    --md-error-container: rgba(229, 72, 77, 0.12);
+    --md-on-error-container: var(--helix-red);
+
+    /* Outlines */
+    --md-outline: #3A3A3A;
+    --md-outline-variant: #222222;
+    --md-inverse-surface: #FFFFFF;
+    --md-inverse-on-surface: #000000;
+    --md-scrim: rgba(0, 0, 0, 0.8);
+    --md-shadow: rgba(0, 0, 0, 0.5);
+
+    /* Semantic — Success — HELIX Green */
+    --md-success: var(--helix-green);
+    --md-on-success: #000000;
+    --md-success-container: rgba(0, 250, 123, 0.12);
+    --md-on-success-container: var(--helix-green);
+
+    /* Semantic — Warning — HELIX Orange */
+    --md-warning: var(--helix-orange);
+    --md-on-warning: #000000;
+    --md-warning-container: rgba(250, 150, 0, 0.12);
+    --md-on-warning-container: var(--helix-orange);
+
+    /* Semantic — Info — HELIX Purple */
+    --md-info: var(--helix-purple);
+    --md-on-info: #FFFFFF;
+    --md-info-container: rgba(176, 72, 229, 0.12);
+    --md-on-info-container: var(--helix-purple);
 
     /* Elevation */
-    --md-elevation-2: 0px 2px 8px rgba(0, 0, 0, 0.24);
-    --md-elevation-3: 0px 6px 14px rgba(0, 0, 0, 0.28);
-    --md-elevation-4: 0px 10px 22px rgba(0, 0, 0, 0.32);
-    --md-elevation-5: 0px 16px 34px rgba(0, 0, 0, 0.4);
+    --md-elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.4);
+    --md-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.4);
+    --md-elevation-4: 0px 6px 10px 4px rgba(0, 0, 0, 0.4);
+    --md-elevation-5: 0px 8px 12px 6px rgba(0, 0, 0, 0.4);
 
     /* Shape & motion */
     --radius-xs: 2px;
@@ -62,9 +87,9 @@
     --state-focus-opacity: 0.14;
     --state-pressed-opacity: 0.12;
     --surface-stroke: color-mix(in srgb, var(--md-outline-variant) 75%, transparent);
-    --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
-    --focus-ring: 0 0 0 3px rgba(244, 67, 54, 0.35);
-    --panel-backdrop: radial-gradient(120% 90% at 0% 0%, rgba(244, 67, 54, 0.12), transparent 45%), linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+    --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+    --focus-ring: 0 0 0 3px rgba(255, 255, 255, 0.2);
+    --panel-backdrop: linear-gradient(180deg, rgba(245, 217, 10, 0.06), transparent 40%), linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
 
     /* Typography roles */
     --type-label-sm: 0.75rem;
@@ -92,7 +117,8 @@
     --text-color: var(--md-on-surface);
     --accent-color: var(--md-surface-container-high);
     --box-shadow: var(--md-elevation-2);
-    --font: "Exo 2", sans-serif;
+    --font: "Tomorrow", sans-serif;
+    --font-secondary: "Barlow", sans-serif;
     --font-weight-regular: 400;
     --font-weight-medium: 500;
     --font-weight-bold: 700;
@@ -257,7 +283,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .panel-sidebar {
-    background: linear-gradient(180deg, rgba(244, 67, 54, 0.1), transparent 20%), var(--md-surface-container-lowest);
+    background: linear-gradient(180deg, rgba(245, 217, 10, 0.06), transparent 20%), var(--md-surface-container-lowest);
     border-right: 1px solid var(--surface-stroke);
     padding: 12px;
     display: flex;
@@ -271,9 +297,9 @@ input[type="number"]::-webkit-outer-spin-button {
     font-size: 1rem;
     padding: 10px;
     border: 1px solid var(--surface-stroke);
-    border-left: 3px solid var(--md-primary);
+    border-left: 3px solid var(--helix-yellow);
     border-radius: var(--radius-sm);
-    background: linear-gradient(180deg, rgba(244, 67, 54, 0.14), var(--md-surface-container-low));
+    background: linear-gradient(180deg, rgba(245, 217, 10, 0.10), var(--md-surface-container-low));
 }
 
 .sidebar-nav {
@@ -320,7 +346,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .panel-header {
     padding: 14px 16px;
-    background: linear-gradient(180deg, rgba(244, 67, 54, 0.07), transparent 60%), var(--md-surface-container);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 60%), var(--md-surface-container);
     border-bottom: 1px solid var(--surface-stroke);
     display: flex;
     flex-direction: row;
@@ -626,7 +652,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .toggle-item input[type="checkbox"]:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.28);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
 }
 
 .action-button {
@@ -685,7 +711,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .action-button-outline {
     background: transparent;
     border-color: color-mix(in srgb, var(--md-primary) 45%, var(--surface-stroke));
-    color: var(--md-primary-container);
+    color: var(--md-on-primary-container);
 }
 
 .action-button-outline:hover {
@@ -766,7 +792,7 @@ input[type="range"]::-webkit-slider-thumb {
     border-radius: 50%;
     border: 2px solid var(--md-primary);
     background: var(--md-primary-container);
-    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
     transition:
         transform 0.12s ease,
         box-shadow 0.12s ease;
@@ -774,7 +800,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 input[type="range"]:hover::-webkit-slider-thumb {
     transform: scale(1.05);
-    box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.3);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
 }
 
 input[type="range"]:active::-webkit-slider-thumb {
@@ -794,7 +820,7 @@ input[type="range"]::-moz-range-thumb {
     border: 2px solid var(--md-primary);
     border-radius: 50%;
     background: var(--md-primary-container);
-    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
     transition:
         transform 0.12s ease,
         box-shadow 0.12s ease;
@@ -802,14 +828,14 @@ input[type="range"]::-moz-range-thumb {
 
 input[type="range"]:hover::-moz-range-thumb {
     transform: scale(1.05);
-    box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.3);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
 }
 
 input[type="range"]:focus-visible {
     outline: none;
     box-shadow:
         inset 0 0 0 1px var(--md-outline-variant),
-        0 0 0 3px rgba(244, 67, 54, 0.25);
+        0 0 0 3px rgba(255, 255, 255, 0.2);
 }
 
 .players-layout {
@@ -1068,13 +1094,13 @@ input[type="range"]:focus-visible {
 }
 
 .vital-chip-value.health {
-    color: #e35a5a;
+    color: var(--helix-red);
 }
 .vital-chip-value.armor {
     color: #68a0ff;
 }
 .vital-chip-value.hunger {
-    color: #ffba47;
+    color: var(--helix-orange);
 }
 .vital-chip-value.thirst {
     color: #71c3ff;
@@ -1391,7 +1417,7 @@ input[type="range"]:focus-visible {
 }
 
 .incoming-zone .kanban-column-header {
-    background: linear-gradient(180deg, rgba(179, 38, 30, 0.3), transparent);
+    background: linear-gradient(180deg, rgba(229, 72, 77, 0.25), transparent);
 }
 
 .progress-zone .kanban-column-header {
@@ -1566,7 +1592,7 @@ input[type="range"]:focus-visible {
 
 .job-grades-dropdown summary {
     cursor: pointer;
-    color: var(--md-primary-container);
+    color: var(--helix-yellow);
     font-size: var(--type-label-md);
     user-select: none;
 }
@@ -1615,7 +1641,7 @@ input[type="range"]:focus-visible {
 
 .gang-grades-dropdown summary {
     cursor: pointer;
-    color: var(--md-primary-container);
+    color: var(--helix-yellow);
     font-size: var(--type-label-md);
     user-select: none;
 }
@@ -1818,7 +1844,7 @@ input[type="range"]:focus-visible {
 }
 
 .value-cash {
-    color: #7ed28f;
+    color: var(--helix-green);
     font-weight: 600;
 }
 
@@ -1828,12 +1854,12 @@ input[type="range"]:focus-visible {
 }
 
 .value-crypto {
-    color: #c18cff;
+    color: var(--helix-purple);
     font-weight: 600;
 }
 
 .value-wealth {
-    color: #f5d58a;
+    color: var(--helix-yellow);
     font-weight: 700;
 }
 

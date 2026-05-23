@@ -1,7 +1,4 @@
 const bankingApp = Vue.createApp({
-    components: {
-        vSelect: window["vue-select"],
-    },
     data() {
         return {
             isBankOpen: false,
@@ -15,26 +12,32 @@ const bankingApp = Vue.createApp({
             playerName: "",
             accountNumber: "",
             playerCash: 0,
-            selectedMoneyAccount: null,
+            selectedMoneyAccount: "",
             selectedMoneyAmount: 0,
             moneyReason: "",
-            transferType: "internal",
-            internalFromAccount: null,
-            internalToAccount: null,
+            bankWithdrawAccount: "",
+            bankWithdrawAmount: 0,
+            bankWithdrawReason: "",
+            bankDepositAccount: "",
+            bankDepositAmount: 0,
+            bankDepositReason: "",
+            internalFromAccount: "",
+            internalToAccount: "",
             internalTransferAmount: 0,
+            internalTransferReason: "",
             externalAccountNumber: "",
-            externalFromAccount: null,
+            externalFromAccount: "",
             externalTransferAmount: 0,
-            transferReason: "",
+            externalTransferReason: "",
             debitPin: "",
             enteredPin: "",
             acceptablePins: [],
             tempBankData: null,
             createAccountName: "",
             createAccountAmount: 0,
-            editAccount: null,
+            editAccount: "",
             editAccountName: "",
-            manageAccountName: null,
+            manageAccountName: "",
             manageUserName: "",
             filteredUsers: [],
             showUsersDropdown: false,
@@ -49,7 +52,7 @@ const bankingApp = Vue.createApp({
         },
     },
     watch: {
-        "manageAccountName.users": function () {
+        manageAccountName: function () {
             this.filterUsers();
         },
     },
@@ -116,16 +119,16 @@ const bankingApp = Vue.createApp({
             hEvent(
                 "withdraw",
                 {
-                    accountName: this.selectedMoneyAccount.name,
+                    accountName: this.selectedMoneyAccount,
                     amount: this.selectedMoneyAmount,
                     reason: this.moneyReason,
                 },
                 (response) => {
                     if (response.success) {
-                        this.addStatement(this.accountNumber, this.selectedMoneyAccount.name, this.moneyReason, this.selectedMoneyAmount, "withdraw");
+                        this.addStatement(this.accountNumber, this.selectedMoneyAccount, this.moneyReason, this.selectedMoneyAmount, "withdraw");
                         this.selectedMoneyAmount = 0;
                         this.moneyReason = "";
-                        this.selectedMoneyAccount = null;
+                        this.selectedMoneyAccount = "";
                         this.addNotification(response.message, "success");
                     } else {
                         this.addNotification(response.message, "error");
@@ -157,6 +160,34 @@ const bankingApp = Vue.createApp({
                 }
             );
         },
+        withdrawMoneyBank() {
+            if (!this.bankWithdrawAccount || this.bankWithdrawAmount <= 0) return;
+            hEvent("withdraw", { accountName: this.bankWithdrawAccount, amount: this.bankWithdrawAmount, reason: this.bankWithdrawReason }, (response) => {
+                if (response.success) {
+                    this.addStatement(this.accountNumber, this.bankWithdrawAccount, this.bankWithdrawReason, this.bankWithdrawAmount, "withdraw");
+                    this.bankWithdrawAmount = 0;
+                    this.bankWithdrawReason = "";
+                    this.bankWithdrawAccount = "";
+                    this.addNotification(response.message, "success");
+                } else {
+                    this.addNotification(response.message, "error");
+                }
+            });
+        },
+        depositMoneyBank() {
+            if (!this.bankDepositAccount || this.bankDepositAmount <= 0) return;
+            hEvent("deposit", { accountName: this.bankDepositAccount, amount: this.bankDepositAmount, reason: this.bankDepositReason }, (response) => {
+                if (response.success) {
+                    this.addStatement(this.accountNumber, this.bankDepositAccount, this.bankDepositReason, this.bankDepositAmount, "deposit");
+                    this.bankDepositAmount = 0;
+                    this.bankDepositReason = "";
+                    this.bankDepositAccount = "";
+                    this.addNotification(response.message, "success");
+                } else {
+                    this.addNotification(response.message, "error");
+                }
+            });
+        },
         internalTransfer() {
             if (!this.internalFromAccount || !this.internalToAccount || this.internalTransferAmount <= 0) {
                 return;
@@ -165,27 +196,27 @@ const bankingApp = Vue.createApp({
             hEvent(
                 "internalTransfer",
                 {
-                    fromAccountName: this.internalFromAccount.name,
-                    toAccountName: this.internalToAccount.name,
+                    fromAccountName: this.internalFromAccount,
+                    toAccountName: this.internalToAccount,
                     amount: this.internalTransferAmount,
-                    reason: this.transferReason,
+                    reason: this.internalTransferReason,
                 },
                 (response) => {
                     if (response.success) {
-                        const fromAccount = this.accounts.find((acc) => acc.name === this.internalFromAccount.name);
+                        const fromAccount = this.accounts.find((acc) => acc.name === this.internalFromAccount);
                         if (fromAccount) {
                             fromAccount.balance -= this.internalTransferAmount;
                         }
-                        const toAccount = this.accounts.find((acc) => acc.name === this.internalToAccount.name);
+                        const toAccount = this.accounts.find((acc) => acc.name === this.internalToAccount);
                         if (toAccount) {
                             toAccount.balance += this.internalTransferAmount;
                         }
-                        this.addStatement(this.accountNumber, this.internalFromAccount.name, this.transferReason, this.internalTransferAmount, "withdraw");
-                        this.addStatement(this.accountNumber, this.internalToAccount.name, this.transferReason, this.internalTransferAmount, "deposit");
+                        this.addStatement(this.accountNumber, this.internalFromAccount, this.internalTransferReason, this.internalTransferAmount, "withdraw");
+                        this.addStatement(this.accountNumber, this.internalToAccount, this.internalTransferReason, this.internalTransferAmount, "deposit");
                         this.internalTransferAmount = 0;
-                        this.transferReason = "";
-                        this.internalFromAccount = null;
-                        this.internalToAccount = null;
+                        this.internalTransferReason = "";
+                        this.internalFromAccount = "";
+                        this.internalToAccount = "";
                         this.addNotification(response.message, "success");
                     } else {
                         this.addNotification(response.message, "error");
@@ -201,21 +232,21 @@ const bankingApp = Vue.createApp({
             hEvent(
                 "externalTransfer",
                 {
-                    fromAccountName: this.externalFromAccount.name,
+                    fromAccountName: this.externalFromAccount,
                     toAccountNumber: this.externalAccountNumber,
                     amount: this.externalTransferAmount,
-                    reason: this.transferReason,
+                    reason: this.externalTransferReason,
                 },
                 (response) => {
                     if (response.success) {
-                        const fromAccount = this.accounts.find((acc) => acc.name === this.externalFromAccount.name);
+                        const fromAccount = this.accounts.find((acc) => acc.name === this.externalFromAccount);
                         if (fromAccount) {
                             fromAccount.balance -= this.externalTransferAmount;
                         }
-                        this.addStatement(this.accountNumber, this.externalFromAccount.name, this.transferReason, this.externalTransferAmount, "withdraw");
+                        this.addStatement(this.accountNumber, this.externalFromAccount, this.externalTransferReason, this.externalTransferAmount, "withdraw");
                         this.externalTransferAmount = 0;
-                        this.transferReason = "";
-                        this.externalFromAccount = null;
+                        this.externalTransferReason = "";
+                        this.externalFromAccount = "";
                         this.externalAccountNumber = "";
                         this.addNotification(response.message, "success");
                     } else {
@@ -280,16 +311,16 @@ const bankingApp = Vue.createApp({
             hEvent(
                 "renameAccount",
                 {
-                    oldName: this.editAccount.name,
+                    oldName: this.editAccount,
                     newName: this.editAccountName,
                 },
                 (response) => {
                     if (response.success) {
-                        const account = this.accounts.find((acc) => acc.name === this.editAccount.name);
+                        const account = this.accounts.find((acc) => acc.name === this.editAccount);
                         if (account) {
                             account.name = this.editAccountName;
                         }
-                        this.editAccount = null;
+                        this.editAccount = "";
                         this.editAccountName = "";
                         this.addNotification(response.message, "success");
                     } else {
@@ -306,12 +337,12 @@ const bankingApp = Vue.createApp({
             hEvent(
                 "deleteAccount",
                 {
-                    accountName: this.editAccount.name,
+                    accountName: this.editAccount,
                 },
                 (response) => {
                     if (response.success) {
-                        this.accounts = this.accounts.filter((acc) => acc.name !== this.editAccount.name);
-                        this.editAccount = null;
+                        this.accounts = this.accounts.filter((acc) => acc.name !== this.editAccount);
+                        this.editAccount = "";
                         this.addNotification(response.message, "success");
                     } else {
                         this.addNotification(response.message, "error");
@@ -327,14 +358,15 @@ const bankingApp = Vue.createApp({
             hEvent(
                 "addUser",
                 {
-                    accountName: this.manageAccountName.name,
+                    accountName: this.manageAccountName,
                     userName: this.manageUserName,
                 },
                 (response) => {
                     if (response.success) {
-                        let usersArray = JSON.parse(this.manageAccountName.users);
+                        const account = this.accounts.find((a) => a.name === this.manageAccountName);
+                        let usersArray = JSON.parse(account.users);
                         usersArray.push(this.manageUserName);
-                        this.manageAccountName.users = JSON.stringify(usersArray);
+                        account.users = JSON.stringify(usersArray);
                         this.manageUserName = "";
                         this.addNotification(response.message, "success");
                     } else {
@@ -351,14 +383,15 @@ const bankingApp = Vue.createApp({
             hEvent(
                 "removeUser",
                 {
-                    accountName: this.manageAccountName.name,
+                    accountName: this.manageAccountName,
                     userName: this.manageUserName,
                 },
                 (response) => {
                     if (response.success) {
-                        let usersArray = JSON.parse(this.manageAccountName.users);
+                        const account = this.accounts.find((a) => a.name === this.manageAccountName);
+                        let usersArray = JSON.parse(account.users);
                         usersArray = usersArray.filter((user) => user !== this.manageUserName);
-                        this.manageAccountName.users = JSON.stringify(usersArray);
+                        account.users = JSON.stringify(usersArray);
                         this.manageUserName = "";
                         this.addNotification(response.message, "success");
                     } else {
@@ -398,9 +431,6 @@ const bankingApp = Vue.createApp({
         selectAccount(account) {
             this.selectedAccountStatement = account.name;
         },
-        setTransferType(type) {
-            this.transferType = type;
-        },
         setActiveView(view) {
             this.activeView = view;
         },
@@ -408,13 +438,14 @@ const bankingApp = Vue.createApp({
             return new Intl.NumberFormat().format(amount);
         },
         filterUsers() {
-            if (!this.manageAccountName || typeof this.manageAccountName.users !== "string") {
+            const account = this.accounts.find((a) => a.name === this.manageAccountName);
+            if (!account || typeof account.users !== "string") {
                 this.filteredUsers = [];
                 return;
             }
             let usersArray;
             try {
-                usersArray = JSON.parse(this.manageAccountName.users);
+                usersArray = JSON.parse(account.users);
             } catch (e) {
                 this.filteredUsers = [];
                 return;
