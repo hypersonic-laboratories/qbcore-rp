@@ -1,10 +1,10 @@
 :root {
     /* Material Design Dark Theme Variables */
-    --md-primary: #ff5a45;
+    --md-primary: #f44336;
     --md-on-primary: #ffffff;
     --md-primary-container: #ffdad6;
     --md-on-primary-container: #410002;
-    --md-secondary: #ff7a5b;
+    --md-secondary: #d32f2f;
     --md-on-secondary: #ffffff;
     --md-secondary-container: #ffdad5;
     --md-on-secondary-container: #410001;
@@ -12,21 +12,21 @@
     --md-on-tertiary: #ffffff;
     --md-tertiary-container: #ffdacc;
     --md-on-tertiary-container: #410002;
-    --md-surface: #151219;
-    --md-on-surface: #f2ebf0;
-    --md-surface-variant: #4b444f;
-    --md-on-surface-variant: #d1c5d1;
-    --md-surface-container-lowest: #100d13;
-    --md-surface-container-low: #1a1620;
-    --md-surface-container: #211c28;
-    --md-surface-container-high: #2a2432;
-    --md-surface-container-highest: #362f3f;
+    --md-surface: #1c1b1f;
+    --md-on-surface: #e6e1e5;
+    --md-surface-variant: #49454f;
+    --md-on-surface-variant: #cac4d0;
+    --md-surface-container-lowest: #0f0d13;
+    --md-surface-container-low: #1d1b20;
+    --md-surface-container: #211f26;
+    --md-surface-container-high: #2b2930;
+    --md-surface-container-highest: #36343b;
     --md-error: #b3261e;
     --md-on-error: #ffffff;
     --md-error-container: #93000a;
     --md-on-error-container: #ffdad5;
-    --md-outline: #8c8390;
-    --md-outline-variant: #514958;
+    --md-outline: #79747e;
+    --md-outline-variant: #49454f;
     --md-inverse-surface: #e6e1e5;
     --md-inverse-on-surface: #1c1b1f;
     --md-scrim: rgba(0, 0, 0, 0.6);
@@ -50,11 +50,11 @@
     --md-elevation-5: 0px 16px 34px rgba(0, 0, 0, 0.4);
 
     /* Shape & motion */
-    --radius-xs: 8px;
-    --radius-sm: 12px;
-    --radius-md: 16px;
-    --radius-lg: 24px;
-    --radius-pill: 999px;
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-pill: 6px;
     --duration-fast: 120ms;
     --duration-base: 180ms;
     --easing-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -64,7 +64,7 @@
     --surface-stroke: color-mix(in srgb, var(--md-outline-variant) 75%, transparent);
     --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
     --focus-ring: 0 0 0 3px rgba(244, 67, 54, 0.35);
-    --panel-backdrop: radial-gradient(120% 90% at 0% 0%, rgba(255, 90, 69, 0.12), transparent 45%), linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+    --panel-backdrop: radial-gradient(120% 90% at 0% 0%, rgba(244, 67, 54, 0.12), transparent 45%), linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
 
     /* Typography roles */
     --type-label-sm: 0.75rem;
@@ -273,7 +273,7 @@ input[type="number"]::-webkit-outer-spin-button {
     border: 1px solid var(--surface-stroke);
     border-left: 3px solid var(--md-primary);
     border-radius: var(--radius-sm);
-    background: linear-gradient(180deg, rgba(255, 90, 69, 0.14), var(--md-surface-container-low));
+    background: linear-gradient(180deg, rgba(244, 67, 54, 0.14), var(--md-surface-container-low));
 }
 
 .sidebar-nav {
@@ -320,7 +320,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .panel-header {
     padding: 14px 16px;
-    background: linear-gradient(180deg, rgba(255, 90, 69, 0.07), transparent 60%), var(--md-surface-container);
+    background: linear-gradient(180deg, rgba(244, 67, 54, 0.07), transparent 60%), var(--md-surface-container);
     border-bottom: 1px solid var(--surface-stroke);
     display: flex;
     flex-direction: row;
@@ -1736,7 +1736,7 @@ input[type="range"]:focus-visible {
     border: 1px solid var(--surface-stroke);
     background: transparent;
     color: var(--md-on-surface-variant);
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     padding: 7px 12px;
     cursor: pointer;
     transition:
