@@ -11,11 +11,11 @@
 //   warnHigh  — turn red when value >= this (null = disabled)
 
 const STAT_CONFIG = [
-    { id: "health", icon: "heart", color: "#3FA554", warnLow: 30, warnHigh: null },
-    { id: "armor", icon: "shield", color: "#326dbf", warnLow: 30, warnHigh: null },
-    { id: "hunger", icon: "coffee", color: "#dd6e14", warnLow: 30, warnHigh: null },
-    { id: "thirst", icon: "droplets", color: "#1a7cad", warnLow: 30, warnHigh: null },
-    { id: "stress", icon: "brain", color: "#9F7AEA", warnLow: null, warnHigh: 30 },
+    { id: "health", icon: "heart",    color: "#00FA7B", warnLow: 30,   warnHigh: null },
+    { id: "armor",  icon: "shield",   color: "#B048E5", warnLow: 30,   warnHigh: null },
+    { id: "hunger", icon: "coffee",   color: "#FA9600", warnLow: 30,   warnHigh: null },
+    { id: "thirst", icon: "droplets", color: "#0090FF", warnLow: 30,   warnHigh: null },
+    { id: "stress", icon: "brain",    color: "#E548CA", warnLow: null, warnHigh: 30  },
 
     // ── Adding a new stat is one object ───────────────────
     // { id: "oxygen", icon: "wind", color: "#5DCAA5", warnLow: 25, warnHigh: null },
@@ -88,17 +88,6 @@ function buildPill() {
         pill.appendChild(seg);
     });
 
-    // Divider + cash — always last
-    pill.insertAdjacentHTML(
-        "beforeend",
-        `
-        <div class="seg-divider"></div>
-        <div class="seg">
-            <span class="cash-label">cash</span>
-            <span class="cash-val" id="val-cash">$0</span>
-        </div>`,
-    );
-
     // Initialise voice icon to muted state
     setVoice("mute");
 }
@@ -161,7 +150,7 @@ function setVoice(mode) {
                     .join(" ")}/>`,
         )
         .join("");
-    ico.setAttribute("stroke", mode === "radio" ? "#5DCAA5" : mode === "talking" ? "#FFFF3E" : "rgba(255,255,255,0.3)");
+    ico.setAttribute("stroke", mode === "radio" ? "#00FA7B" : mode === "talking" ? "#F5D90A" : "rgba(255,255,255,0.3)");
 
     if (mode === "mute") return;
 
@@ -235,3 +224,6 @@ window.addEventListener("message", function (event) {
 // ── Init ─────────────────────────────────────────────────
 
 buildPill();
+
+const cashIco = document.getElementById("cash-icon");
+if (cashIco) cashIco.innerHTML = lucideIcon("circle-dollar-sign");

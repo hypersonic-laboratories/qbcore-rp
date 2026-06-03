@@ -447,6 +447,7 @@ success = Database.Execute([[
 if success then
     Database.Execute([[CREATE INDEX IF NOT EXISTS idx_playerskins_citizenid ON playerskins(citizenid)]])
     Database.Execute([[CREATE INDEX IF NOT EXISTS idx_playerskins_active ON playerskins(active)]])
+    Database.Execute([[CREATE UNIQUE INDEX IF NOT EXISTS idx_playerskins_unique_citizenid ON playerskins(citizenid)]])
 end
 
 success = Database.Execute([[

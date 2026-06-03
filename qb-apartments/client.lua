@@ -1,5 +1,58 @@
 local Lang = require('locales/en')
 local isLoggedIn = false
+
+-- Skin helpers
+
+local function SerializeSkin(System)
+	local Loadout = System:GetCosmeticLoadout()
+	local data = {
+		gender   = (Loadout.Gender == UE.EHCharacterCosmeticsGender.Female) and 'Female' or 'Male',
+		bodyType = (Loadout.BodyType == UE.EHCosmeticBodyType.Underweight) and 'Underweight' or 'Average',
+		items    = {}
+	}
+	local Slots = Loadout.Slots
+	for i = 1, Slots:Length() do
+		local Entry = Slots:Get(i)
+		if Entry.ItemID ~= '' then
+			data.items[#data.items + 1] = {
+				slot   = tostring(Entry.SlotTag.TagName),
+				itemId = Entry.ItemID
+			}
+		end
+	end
+	return JSON.stringify(data)
+end
+
+local function ApplySkin(System, skinJson)
+	local data = JSON.parse(skinJson)
+	local gender = data.gender == 'Female'
+		and UE.EHCharacterCosmeticsGender.Female
+		or  UE.EHCharacterCosmeticsGender.Male
+	local body = data.bodyType == 'Underweight'
+		and UE.EHCosmeticBodyType.Underweight
+		or  UE.EHCosmeticBodyType.Average
+	System:SetCosmeticGender(gender)
+	System:SetCosmeticBodyType(body)
+	System:ClearAllCosmeticSlots()
+	local Items = UE.TArray(UE.FString)
+	for _, entry in ipairs(data.items) do
+		Items:Add(entry.itemId)
+	end
+	System:EquipCosmeticItems(Items)
+end
+
+local function WaitForCosmeticsAndRun(fn)
+	local pawn = GetPlayerPawn()
+	if not pawn then return end
+	local checkId
+	checkId = Timer.SetInterval(function()
+		if not pawn:IsInitialCosmeticsLoadDone() then return end
+		Timer.ClearInterval(checkId)
+		local System = pawn:GetCosmeticsSystem()
+		if not System then return end
+		fn(System)
+	end, 500)
+end
 local InApartment = false
 local ClosestApartment = nil
 local CurrentApartment = nil
@@ -247,9 +300,27 @@ RegisterClientEvent('qb-apartments:client:EnterApartment', function(coords, offs
 	ClosestApartment = apartmentName
 	IsOwned = true
 	SetInApartmentTargets(apartmentName)
+
+	TriggerCallback('GetPlayerSkin', function(skinJson)
+		WaitForCosmeticsAndRun(function(System)
+			if skinJson then
+				ApplySkin(System, skinJson)
+			else
+				System:ShowCharacterCustomizationUI()
+			end
+		end)
+	end)
 end)
 
 RegisterClientEvent('qb-apartments:client:LeaveApartment', function()
+	local pawn = GetPlayerPawn()
+	if pawn then
+		local System = pawn:GetCosmeticsSystem()
+		if System then
+			TriggerServerEvent('qb-apartments:server:SaveSkin', SerializeSkin(System))
+		end
+	end
+
 	exports['qb-interior']:DespawnInterior_C(ApartmentObj)
 	CurrentApartment = nil
 	ClosestApartment = nil
@@ -357,7 +428,11 @@ RegisterClientEvent('qb-apartments:client:LastLocationHouse', function(apartment
 end)
 
 RegisterClientEvent('qb-apartments:client:ChangeOutfit', function()
-	HPlayer:ClothingMenu()
+	local pawn = GetPlayerPawn()
+	if not pawn then return end
+	local System = pawn:GetCosmeticsSystem()
+	if not System then return end
+	System:ShowCharacterCustomizationUI()
 end)
 
 -- Visibility & Voice

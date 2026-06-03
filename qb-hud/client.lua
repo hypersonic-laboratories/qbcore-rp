@@ -129,6 +129,22 @@ RegisterClientEvent('HEvent:VoiceStateChanged', function(isTalking)
     my_webui:SendEvent('IsTalking', isTalking)
 end)
 
+-- Map Settings Menu
+-- TODO: Create a small UI menu (WebUI or NativeUI) the player can open to adjust these settings live.
+--
+-- Minimap:
+--   HMap.SetMinimapRotateWithPlayer(bool)  -- toggle player-up rotation (on/off)
+--   HMap.SetMinimapZoom(number)            -- zoom level 0.0 (zoomed out) to 1.5 (zoomed in)
+--   HMap.SetMinimapIconSize(number)        -- icon pixel size 1.0–256.0
+--   HMap.SetMinimapUseCameraYaw(bool)      -- camera yaw vs pawn yaw for the player arrow
+--
+-- Full Map:
+--   HMap.SetFullMapOpenOnPlayer(bool)      -- open map centered on player (true) or map center (false)
+--   HMap.SetFullMapZoomScaleStep(number)   -- scroll-to-zoom sensitivity per tick
+--   HMap.SetFullMapZoomInterpSpeed(number) -- zoom animation speed (higher = snappier)
+--   HMap.SetFullMapPanInterpSpeed(number)  -- pan/drag animation speed (higher = snappier)
+--   HMap.SetFullMapIconSize(number)        -- full map icon pixel size 1.0–256.0
+
 -- HUD Thread
 
 inputTimer = Timer.SetInterval(function()

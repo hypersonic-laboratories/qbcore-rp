@@ -15,7 +15,7 @@ end)
 local function GiveStarterItems(source)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
-    for item, amount in pairs(exports['qb-core']:GetConfig().StarterItems) do
+    for item, amount in pairs(exports['qb-core']:GetShared('StarterItems')) do
         local info = {}
         if item == 'id_card' then
             info.citizenid = Player.PlayerData.citizenid
