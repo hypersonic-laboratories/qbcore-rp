@@ -7,19 +7,19 @@ const VariantDefinitions = {
     // ── Core ──────────────────────────────────────────────
     success: {
         icon: "check-circle",
-        accent: "#1D9E75",
+        accent: "#00FA7B",
     },
     error: {
         icon: "x-circle",
-        accent: "#E24B4A",
+        accent: "#E5484D",
     },
     primary: {
         icon: "info",
-        accent: "#378ADD",
+        accent: "#0090ff",
     },
     warning: {
         icon: "triangle-alert",
-        accent: "#EF9F27",
+        accent: "#FA9600",
     },
 
     // ── Emergency services ────────────────────────────────
