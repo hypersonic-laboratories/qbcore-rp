@@ -2,9 +2,9 @@ local StringCharset = {}
 local NumberCharset = {}
 
 QBCore.Shared.StarterItems = {
-    ['phone'] = { amount = 1, item = 'phone' },
-    ['id_card'] = { amount = 1, item = 'id_card' },
-    ['driver_license'] = { amount = 1, item = 'driver_license' },
+    ['phone'] = 1,
+    ['id_card'] = 1,
+    ['driver_license'] = 1,
 }
 
 for i = 48, 57 do NumberCharset[#NumberCharset + 1] = string.char(i) end
