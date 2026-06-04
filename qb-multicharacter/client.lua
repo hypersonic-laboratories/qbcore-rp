@@ -1,42 +1,10 @@
 local Lang = require('locales/en')
 local my_webui = WebUI('qb-multicharacter', 'qb-multicharacter/html/index.html')
 
--- Cosmetics state
-local pendingGender = nil -- 0 = male, 1 = female
-local pendingIsNew  = false
-
-local function applyInitialCosmetics()
-    if pendingGender == nil then return end
-    local pawn = GetPlayerPawn()
-    if not pawn then return end
-
-    local gender = pendingGender == 1
-        and UE.EHCharacterCosmeticsGender.Female
-        or UE.EHCharacterCosmeticsGender.Male
-    local isNew = pendingIsNew
-    pendingGender = nil
-    pendingIsNew  = false
-
-    local checkId
-    checkId = Timer.SetInterval(function()
-        if not pawn:IsInitialCosmeticsLoadDone() then return end
-        Timer.ClearInterval(checkId)
-        local System = pawn:GetCosmeticsSystem()
-        if not System then return end
-        if isNew then
-            System:ResetCosmeticsToDefaults(gender, UE.EHCosmeticBodyType.Average)
-        else
-            System:SetCosmeticGender(gender)
-        end
-    end, 500)
-end
-
 -- UI
 
 my_webui:RegisterEventHandler('selectCharacter', function(data)
     local cData = data.cData
-    pendingGender = cData.charinfo and cData.charinfo.gender or 0
-    pendingIsNew  = false
     TriggerServerEvent('qb-multicharacter:server:loadUserData', cData)
     my_webui:SendEvent('ui', Config.customNationality, false, 0, false, translations)
 end)
@@ -54,8 +22,6 @@ my_webui:RegisterEventHandler('createNewCharacter', function(data)
     elseif cData.gender == Lang.t('ui.female') then
         cData.gender = 1
     end
-    pendingGender = cData.gender or 0
-    pendingIsNew  = true
     TriggerServerEvent('qb-multicharacter:server:createCharacter', cData)
 end)
 
@@ -96,10 +62,6 @@ local function openCharMenu()
 end
 
 -- Events
-
-RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
-    applyInitialCosmetics()
-end)
 
 RegisterClientEvent('HEvent:PlayerReady', function()
     TriggerServerEvent('qb-multicharacter:server:chooseChar')

@@ -7,7 +7,6 @@
         <link href="reset.css" rel="stylesheet" />
         <link href="style.css" rel="stylesheet" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tomorrow:wght@400;500;600;700&display=swap" />
         <title>QB-Multicharacter</title>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.3/axios.min.js"></script>
         <script src="countries.js"></script>
@@ -97,8 +96,8 @@
                             <div class="character-delete" v-if="show.delete">
                                 <p>{{translate('deletechar_description')}}</p>
                                 <div class="character-delete-btns">
-                                    <v-btn class="confirm-btn" v-ripple @click="delete_character">{{translate('confirm')}}</v-btn>
-                                    <v-btn class="cancel-btn" v-ripple @click="cancelDelete">{{translate('cancel')}}</v-btn>
+                                    <v-btn class="confirm-btn" :ripple="false" @click="delete_character">{{translate('confirm')}}</v-btn>
+                                    <v-btn class="cancel-btn" :ripple="false" @click="cancelDelete">{{translate('cancel')}}</v-btn>
                                 </div>
                             </div>
                         </transition>
@@ -114,20 +113,20 @@
                                     <v-text-field :placeholder="translate('firstname')" solo hide-details="auto" v-model="registerData.firstname"></v-text-field>
                                     <v-text-field :placeholder="translate('lastname')" solo hide-details="auto" v-model="registerData.lastname"></v-text-field>
                                     <v-text-field v-if="customNationality" :placeholder="translate('nationality')" solo hide-details="auto" v-model="registerData.nationality"></v-text-field>
-                                    <v-select v-else solo :placeholder="translate('nationality')" :items="nationalities" hide-details="auto" v-ripple v-model="registerData.nationality"></v-select>
-                                    <v-select solo :placeholder="translate('gender')" :items="[translate('male'), translate('female')]" hide-details="auto" v-ripple v-model="registerData.gender"></v-select>
+                                    <v-select v-else solo :placeholder="translate('nationality')" :items="nationalities" hide-details="auto" :menu-props="{ transition: false }" v-model="registerData.nationality"></v-select>
+                                    <v-select solo :placeholder="translate('gender')" :items="[translate('male'), translate('female')]" hide-details="auto" :menu-props="{ transition: false }" v-model="registerData.gender"></v-select>
                                     <v-dialog ref="dialog" v-model="dataPickerMenu" :return-value.sync="registerData.date" persistent width="290px">
                                         <template v-slot:activator="{ on, attrs }">
                                             <v-text-field v-model="registerData.date" :label="translate('birthdate')" readonly v-bind="attrs" v-on="on" solo></v-text-field>
                                         </template>
                                         <v-date-picker v-model="registerData.date" min="1900-01-01" max="2100-12-31">
                                             <v-spacer></v-spacer>
-                                            <v-btn text class="date-cancel-btn" @click="dataPickerMenu = false">{{translate('cancel')}}</v-btn>
-                                            <v-btn text class="date-confirm-btn" @click="$refs.dialog.save(registerData.date)">{{translate('confirm')}}</v-btn>
+                                            <v-btn text class="date-cancel-btn" :ripple="false" @click="dataPickerMenu = false">{{translate('cancel')}}</v-btn>
+                                            <v-btn text class="date-confirm-btn" :ripple="false" @click="$refs.dialog.save(registerData.date)">{{translate('confirm')}}</v-btn>
                                         </v-date-picker>
                                     </v-dialog>
                                 </div>
-                                <v-btn class="character-reg-btn" v-ripple @click="create_character" large>{{translate('create_button')}}</v-btn>
+                                <v-btn class="character-reg-btn" :ripple="false" @click="create_character" large>{{translate('create_button')}}</v-btn>
                             </div>
                         </transition>
                     </div>
