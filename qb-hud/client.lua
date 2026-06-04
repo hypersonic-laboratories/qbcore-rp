@@ -1,24 +1,13 @@
-local isLoggedIn = false
-local inputTimer = nil
-local my_webui = WebUI('qb-hud', 'qb-hud/html/index.html')
-local player_data = {}
-local playerPawn = nil
-local health = 100
-local hunger = 100
-local thirst = 100
-local playerDead = false
-local round = math.floor
+-- State
 
-function onShutdown()
-    if inputTimer then
-        Timer.ClearInterval(inputTimer)
-        inputTimer = nil
-    end
-    if my_webui then
-        my_webui:Destroy()
-        my_webui = nil
-    end
-end
+local isLoggedIn  = false
+local my_webui    = WebUI('qb-hud', 'qb-hud/html/index.html')
+local player_data = {}
+local health      = 100
+local playerDead  = false
+local round       = math.floor
+
+-- Helpers
 
 local function disableDefaultHUD()
     SetHUDVisibility({
@@ -29,37 +18,98 @@ local function disableDefaultHUD()
     })
 end
 
--- Event Handlers
+local function GetPackageDir()
+    local info = debug.getinfo(1, 'S')
+    local src  = info.source or ''
+    if src:sub(1, 1) == '@' then src = src:sub(2) end
+    return src:match('^(.*)[/\\].-$') or '.'
+end
+
+local function SendHUDUpdate()
+    if not my_webui or not isLoggedIn then return end
+    local meta = player_data.metadata
+    if not meta then return end
+    my_webui:SendEvent('UpdateHUD', health, meta['armor'], meta['hunger'], meta['thirst'], meta['stress'], playerDead)
+end
+
+-- Markers
+
+local MarkerTextures = {}
+local MarkerHandles  = {}
+local nextMarkerId   = 0
+
+local function GetMarkerTexture(iconName)
+    if not iconName then return nil end
+    if not MarkerTextures[iconName] then
+        MarkerTextures[iconName] = UE.UKismetRenderingLibrary.ImportFileAsTexture2D(
+            HWorld, GetPackageDir() .. '/images/' .. iconName .. '.png'
+        )
+    end
+    return MarkerTextures[iconName]
+end
+
+exports('qb-hud', 'AddMarker', function(coords, opts)
+    opts = opts or {}
+    local handle = HMap.AddMarkerAt(coords, {
+        Title           = opts.title or '',
+        Description     = opts.description or '',
+        MarkerType      = opts.markerType or 'Store',
+        SizeMultiplier  = opts.size or 1.0,
+        OverrideColor   = opts.color,
+        OverrideTexture = GetMarkerTexture(opts.icon),
+    })
+    if not handle or handle == 0 then return nil end
+    nextMarkerId = nextMarkerId + 1
+    MarkerHandles[nextMarkerId] = handle
+    return nextMarkerId
+end)
+
+exports('qb-hud', 'RemoveMarker', function(id)
+    local handle = MarkerHandles[id]
+    if not handle then return end
+    HMap.RemoveMarkerAt(handle)
+    MarkerHandles[id] = nil
+end)
+
+-- Lifecycle
+
+function onShutdown()
+    if my_webui then
+        my_webui:Destroy()
+        my_webui = nil
+    end
+end
+
+-- Player Events
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
-    isLoggedIn = true
-    disableDefaultHUD()
+    isLoggedIn  = true
     player_data = exports['qb-core']:GetPlayerData()
+    disableDefaultHUD()
     if my_webui and player_data.money then
         my_webui:SendEvent('ShowCashAmount', round(player_data.money['cash'] or 0))
     end
+    SendHUDUpdate()
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
-    isLoggedIn = false
-    playerPawn = nil
+    isLoggedIn  = false
     player_data = {}
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUpdated', function(key, val)
     if key == 'all' then
         player_data = val or {}
+        SendHUDUpdate()
+    elseif key == 'metadata' then
+        player_data.metadata = val
+        SendHUDUpdate()
     elseif key then
         player_data[key] = val
     end
 end)
 
-RegisterClientEvent('qb-hud:client:onRadio', function(bool)
-    if not my_webui then return end
-    my_webui:SendEvent('onRadio', bool)
-end)
-
--- Money HUD
+-- Money Events
 
 RegisterClientEvent('qb-hud:client:ShowAccounts', function(type, amount)
     if not my_webui then return end
@@ -72,56 +122,29 @@ end)
 
 RegisterClientEvent('qb-hud:client:OnMoneyChange', function(type, amount, isMinus)
     if not my_webui then return end
-    local money = player_data.money or {}
+    local money      = player_data.money or {}
     local cashAmount = money['cash'] or 0
     local bankAmount = money['bank'] or 0
     my_webui:SendEvent('UpdateMoney', {
-        cashAmount = round(cashAmount),
-        bankAmount = round(bankAmount),
+        cashAmount   = round(cashAmount),
+        bankAmount   = round(bankAmount),
         changeAmount = round(amount),
-        isMinus = isMinus,
-        type = type
+        isMinus      = isMinus,
+        type         = type,
     })
 end)
 
 -- Game Events
 
 RegisterClientEvent('HEvent:HealthChanged', function(_, newHealth)
-    if not my_webui then return end
     health = newHealth
     if newHealth > 0 and playerDead then playerDead = false end
+    SendHUDUpdate()
 end)
 
 RegisterClientEvent('HEvent:Death', function()
     playerDead = true
-end)
-
-RegisterClientEvent('HEvent:WeaponEquipped', function(displayName, weaponName)
-    if not my_webui then return end
-    print('Equipped weapon: ' .. weaponName .. ' (' .. displayName .. ')')
-end)
-
-RegisterClientEvent('HEvent:WeaponUnequipped', function()
-    if not my_webui then return end
-    print('Unequipped weapon')
-end)
-
-RegisterClientEvent('HEvent:EnteredVehicle', function(seat)
-    if not my_webui then return end
-    print('Entered vehicle, seat: ' .. seat)
-end)
-
-RegisterClientEvent('HEvent:ExitedVehicle', function(seat)
-    if not my_webui then return end
-    print('Exited vehicle, seat: ' .. seat)
-end)
-
-RegisterClientEvent('HEvent:PlayerPossessed', function()
-    playerPawn = GetPlayerPawn()
-end)
-
-RegisterClientEvent('HEvent:PlayerUnPossessed', function()
-    playerPawn = nil
+    SendHUDUpdate()
 end)
 
 RegisterClientEvent('HEvent:VoiceStateChanged', function(isTalking)
@@ -129,35 +152,23 @@ RegisterClientEvent('HEvent:VoiceStateChanged', function(isTalking)
     my_webui:SendEvent('IsTalking', isTalking)
 end)
 
--- Map Settings Menu
--- TODO: Create a small UI menu (WebUI or NativeUI) the player can open to adjust these settings live.
---
--- Minimap:
---   HMap.SetMinimapRotateWithPlayer(bool)  -- toggle player-up rotation (on/off)
---   HMap.SetMinimapZoom(number)            -- zoom level 0.0 (zoomed out) to 1.5 (zoomed in)
---   HMap.SetMinimapIconSize(number)        -- icon pixel size 1.0–256.0
---   HMap.SetMinimapUseCameraYaw(bool)      -- camera yaw vs pawn yaw for the player arrow
---
--- Full Map:
---   HMap.SetFullMapOpenOnPlayer(bool)      -- open map centered on player (true) or map center (false)
---   HMap.SetFullMapZoomScaleStep(number)   -- scroll-to-zoom sensitivity per tick
---   HMap.SetFullMapZoomInterpSpeed(number) -- zoom animation speed (higher = snappier)
---   HMap.SetFullMapPanInterpSpeed(number)  -- pan/drag animation speed (higher = snappier)
---   HMap.SetFullMapIconSize(number)        -- full map icon pixel size 1.0–256.0
+RegisterClientEvent('HEvent:WeaponEquipped', function(displayName, weaponName)
+    print('Equipped weapon: ' .. weaponName .. ' (' .. displayName .. ')')
+end)
 
--- HUD Thread
+RegisterClientEvent('HEvent:WeaponUnequipped', function()
+    print('Unequipped weapon')
+end)
 
-inputTimer = Timer.SetInterval(function()
-    if not isLoggedIn then return end
-    if not GetPlayerPawn() then return end
-    if not player_data then return end
-    local armor  = player_data.metadata['armor']
-    hunger       = player_data.metadata['hunger']
-    thirst       = player_data.metadata['thirst']
-    local stress = player_data.metadata['stress']
-    --local playerDead = player_data.metadata['inlaststand'] or player_data.metadata['isdead'] or false
+RegisterClientEvent('HEvent:EnteredVehicle', function(seat)
+    print('Entered vehicle, seat: ' .. seat)
+end)
 
-    if my_webui then
-        my_webui:SendEvent('UpdateHUD', health, armor, hunger, thirst, stress, playerDead)
-    end
-end, 1000)
+RegisterClientEvent('HEvent:ExitedVehicle', function(seat)
+    print('Exited vehicle, seat: ' .. seat)
+end)
+
+RegisterClientEvent('qb-hud:client:onRadio', function(bool)
+    if not my_webui then return end
+    my_webui:SendEvent('onRadio', bool)
+end)
