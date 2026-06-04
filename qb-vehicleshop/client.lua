@@ -2,12 +2,30 @@ local Lang = require('locales/en')
 local Vehicles = exports['qb-core']:GetShared('Vehicles')
 local player_data = {}
 local testDriveVeh, inTestDrive = 0, false
+local shopMarkers = {}
+
+local function clearShopMarkers()
+    for _, id in ipairs(shopMarkers) do
+        exports['qb-hud']:RemoveMarker(id)
+    end
+    shopMarkers = {}
+end
 
 -- Handlers
 
 local function setupTargets()
     for shop, shopData in pairs(Config.Shops) do
         local vehicles = shopData['ShowroomVehicles']
+
+        if shopData['ShowBlip'] then
+            local markerId = exports['qb-hud']:AddMarker(shopData['BlipCoords'], {
+                title      = shopData['Label'] or shop,
+                icon       = shopData['BlipIcon'] or 'car-rental',
+                color      = shopData['BlipColor'],
+                markerType = 'Store',
+            })
+            if markerId then shopMarkers[#shopMarkers + 1] = markerId end
+        end
 
         exports['qb-target']:AddBoxZone(shop .. '_finance', shopData['FinanceZone'], 500, 500, {
             name = shop .. '_finance',
@@ -80,6 +98,10 @@ RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     -- local citizenid = player_data.citizenid
     -- TriggerServerEvent('qb-vehicleshop:server:addPlayer', citizenid)
     -- TriggerServerEvent('qb-vehicleshop:server:checkFinance')
+end)
+
+RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+    clearShopMarkers()
 end)
 
 -- Functions

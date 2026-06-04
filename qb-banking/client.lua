@@ -170,6 +170,14 @@ Timer.SetTimeout(function()
         )
     end
 
+    for i = 1, #Config.markers do
+        exports['qb-hud']:AddMarker(Config.markers[i].coords, {
+            title      = Config.markers[i].label,
+            icon       = 'bank',
+            markerType = 'Bank',
+        })
+    end
+
     -- for i = 1, #Config.atmModels do
     --     local atmModel = Config.atmModels[i]
     --     exports['qb-target']:AddTargetModel(atmModel, {

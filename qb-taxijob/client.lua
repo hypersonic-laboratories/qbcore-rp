@@ -1,6 +1,7 @@
 local Lang = require('locales/en')
 local my_webui = WebUI('qb-taxijob', 'qb-taxijob/html/index.html')
 local meterOpen = false
+local depotMarkers = {}
 local meterActive = false
 local inPickupZone = false
 local inDropoffZone = false
@@ -44,6 +45,27 @@ end)
 
 -- Functions
 
+local function createDepotMarkers()
+    for _, depot in ipairs(Config.Locations.Depots) do
+        if depot.showBlip then
+            local markerId = exports['qb-hud']:AddMarker(depot.pedSpawn.coords, {
+                title      = depot.label,
+                icon       = depot.blipIcon or 'taxi',
+                color      = depot.blipColor,
+                markerType = 'Store',
+            })
+            if markerId then depotMarkers[#depotMarkers + 1] = markerId end
+        end
+    end
+end
+
+local function clearDepotMarkers()
+    for _, id in ipairs(depotMarkers) do
+        exports['qb-hud']:RemoveMarker(id)
+    end
+    depotMarkers = {}
+end
+
 function onShutdown()
     if my_webui then
         my_webui:Destroy()
@@ -53,6 +75,7 @@ function onShutdown()
         Timer.ClearInterval(distance_timer)
         distance_timer = nil
     end
+    clearDepotMarkers()
 end
 
 -- Events
@@ -114,6 +137,11 @@ end
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     setupPeds()
+    createDepotMarkers()
+end)
+
+RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+    clearDepotMarkers()
 end)
 
 RegisterClientEvent('qb-taxijob:client:finishWork', function()

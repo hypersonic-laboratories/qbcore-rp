@@ -17,13 +17,11 @@ Config.Garages = {
                 heading = 177,
             }
         },
-        -- showBlip = true,             -- Unused
-        -- blipName = 'Public Parking', -- Unused
-        -- blipNumber = 357,            -- Unused
-        -- blipColor = 3,               -- Unused
+        showBlip = true,
+        blipName = 'Brightside Motel Parking',
+        blipIcon = 'parking',
+        blipColor = LinearColor(0.2, 0.6, 1.0, 1.0),
         type = 'public', -- public, gang, job, depot
-        -- job = ''
-        -- jobType = ''
         category = Config.VehicleClass.Car
     },
     apartment2 = {
@@ -35,13 +33,11 @@ Config.Garages = {
                 heading = 88,
             }
         },
-        -- showBlip = true,             -- Unused
-        -- blipName = 'Public Parking', -- Unused
-        -- blipNumber = 357,            -- Unused
-        -- blipColor = 3,               -- Unused
+        showBlip = true,
+        blipName = 'Marlin Hotel Parking',
+        blipIcon = 'parking',
+        blipColor = LinearColor(0.2, 0.6, 1.0, 1.0),
         type = 'public', -- public, gang, job, depot
-        -- job = ''
-        -- jobType = ''
         category = Config.VehicleClass.Car
     },
     apartment3 = {
@@ -53,13 +49,11 @@ Config.Garages = {
                 heading = 87,
             }
         },
-        -- showBlip = true,             -- Unused
-        -- blipName = 'Public Parking', -- Unused
-        -- blipNumber = 357,            -- Unused
-        -- blipColor = 3,               -- Unused
+        showBlip = true,
+        blipName = 'Docks Condo Parking',
+        blipIcon = 'parking',
+        blipColor = LinearColor(0.2, 0.6, 1.0, 1.0),
         type = 'public', -- public, gang, job, depot
-        -- job = ''
-        -- jobType = ''
         category = Config.VehicleClass.Car
     },
 
@@ -68,37 +62,13 @@ Config.Garages = {
         label = 'Parking Garage',
         takeVehicle = Vector(566196, 527552, 4573),
         spawnPoint = { { coords = Vector(566567, 527181, 4553), heading = 357, } },
+        showBlip = true,
+        blipName = 'Parking Garage',
+        blipIcon = 'parking-garage',
+        blipColor = LinearColor(0.2, 0.6, 1.0, 1.0),
         type = 'public',
         category = Config.VehicleClass.Car
     },
-    -- parkinggarageB = {
-    --     label = 'Parking Garage',
-    --     takeVehicle = Vector(-352600, -185040, -1670),
-    --     spawnPoint = { { coords = Vector(-353030, -184770, -1767), heading = 180, } },
-    --     type = 'public',
-    --     category = Config.VehicleClass.Car
-    -- },
-    -- parkinggarageC = {
-    --     label = 'Parking Garage',
-    --     takeVehicle = Vector(-352600, -185030, -2070),
-    --     spawnPoint = { { coords = Vector(-353030, -184770, -2167), heading = 180, } },
-    --     type = 'public',
-    --     category = Config.VehicleClass.Car
-    -- },
-    -- parkinggarageD = {
-    --     label = 'Parking Garage',
-    --     takeVehicle = Vector(-352590, -185030, -2470),
-    --     spawnPoint = { { coords = Vector(-353030, -184770, -2567), heading = 180, } },
-    --     type = 'public',
-    --     category = Config.VehicleClass.Car
-    -- },
-    -- parkinggarageE = {
-    --     label = 'Parking Garage',
-    --     takeVehicle = Vector(-352600, -185030, -2870),
-    --     spawnPoint = { { coords = Vector(-353030, -184770, -2967), heading = 180, } },
-    --     type = 'public',
-    --     category = Config.VehicleClass.Car
-    -- },
 
     cardealer = {
         label = 'Car Dealer',
@@ -109,13 +79,11 @@ Config.Garages = {
                 heading = 180,
             }
         },
-        -- showBlip = true,             -- Unused
-        -- blipName = 'Public Parking', -- Unused
-        -- blipNumber = 357,            -- Unused
-        -- blipColor = 3,               -- Unused
+        showBlip = true,
+        blipName = 'Car Dealer Parking',
+        blipIcon = 'parking',
+        blipColor = LinearColor(0.2, 0.6, 1.0, 1.0),
         type = 'public', -- public, gang, job, depot
-        -- job = ''
-        -- jobType = ''
         category = Config.VehicleClass.Car
     },
     hospital = {
@@ -126,9 +94,9 @@ Config.Garages = {
             heading = 358,
         },
         showBlip = false,
-        blipName = 'Police',
-        blipNumber = 357,
-        blipColor = 3,
+        blipName = 'Hospital Garage',
+        blipIcon = 'hospital',
+        blipColor = LinearColor(1.0, 0.2, 0.2, 1.0),
         type = 'job',
         category = Config.VehicleClass['car'], --car, air, sea, rig
         job = 'ambulance',
@@ -142,9 +110,9 @@ Config.Garages = {
             heading = 180,
         },
         showBlip = false,
-        blipName = 'Police',
-        blipNumber = 357,
-        blipColor = 3,
+        blipName = 'Police Garage',
+        blipIcon = 'police',
+        blipColor = LinearColor(0.2, 0.4, 1.0, 1.0),
         type = 'job',
         category = Config.VehicleClass['car'], --car, air, sea, rig
         job = 'police',

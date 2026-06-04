@@ -4,9 +4,10 @@ local PlayerData = {}
 local PlayerGang = {}
 local PlayerJob = {}
 local garageZones = {}
+local garageMarkers = {}
 local inZone = false
 local zone = {}
-require('locales/en')
+local Lang = require('locales/en')
 
 -- Functions
 
@@ -101,9 +102,6 @@ local function CreateBlipsZones()
 
     for index, garage in pairs(Config.Garages) do
         local zone
-        --[[         if garage.showBlip then
-            CreateBlips(garage)
-        end ]]
         if garage.type == 'job' and (PlayerJob.name == garage.job or PlayerJob.type == garage.jobType) then
             zone = CreateZone(index, garage, 'job')
         elseif garage.type == 'gang' and PlayerGang.name == garage.job then
@@ -117,7 +115,26 @@ local function CreateBlipsZones()
         if zone then
             garageZones[#garageZones + 1] = zone
         end
+
+        if garage.showBlip ~= false then
+            local markerId = exports['qb-hud']:AddMarker(garage.takeVehicle, {
+                title      = garage.blipName or garage.label or 'Garage',
+                icon       = garage.blipIcon or 'parking',
+                color      = garage.blipColor,
+                markerType = 'Store',
+            })
+            if markerId then
+                garageMarkers[#garageMarkers + 1] = markerId
+            end
+        end
     end
+end
+
+local function ClearGarageMarkers()
+    for _, id in ipairs(garageMarkers) do
+        exports['qb-hud']:RemoveMarker(id)
+    end
+    garageMarkers = {}
 end
 
 Input.BindKey('E', function()
@@ -313,6 +330,10 @@ end) ]]
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     CreateBlipsZones()
+end)
+
+RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+    ClearGarageMarkers()
 end)
 
 RegisterClientEvent('QBCore:Client:OnGangUpdate', function(gang)

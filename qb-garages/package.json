@@ -3,9 +3,9 @@
         "config.lua"
     ],
     "client": [
-        "Client/main.lua"
+        "client.lua"
     ],
     "server": [
-        "Server/main.lua"
+        "server.lua"
     ]
 }

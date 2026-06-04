@@ -8,6 +8,9 @@ Config = {
                 label = 'Taxi Depot',
                 pedSpawn = { coords = Vector(-355290, -131250, -2880), heading = 165 },
                 vehicleSpawn = { coords = Vector(-355917, -130990, -2977), heading = 180 },
+                showBlip = true,
+                blipIcon = 'taxi',
+                blipColor = LinearColor(1.0, 0.85, 0.1, 1.0),
             },
         },
 

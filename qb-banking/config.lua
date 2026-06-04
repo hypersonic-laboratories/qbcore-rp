@@ -2,15 +2,14 @@ Config = {
     atmModels = { 'SM_ATM' },
     maxAccounts = 2,
     locations = {
-        { coords = Vector(574915, 596388, 4685),    heading = 180.0 },
-        { coords = Vector(574612, 596359, 4553),    heading = 180.0 },
-        { coords = Vector(574177, 596511, 4553),    heading = 90.0 },
-        { coords = Vector(-337655, -141290, -2678), heading = 90.0 },
-        { coords = Vector(-337835, -142015, -2678), heading = 0.0 },
-        { coords = Vector(-338085, -142015, -2678), heading = 0.0 },
+        { coords = Vector(566133, 510080, 4563), heading = -90.0 },
+        { coords = Vector(566133, 509780, 4563), heading = -90.0 },
+        { coords = Vector(566133, 510380, 4563), heading = -90.0 },
     },
     atm_locations = {
-        { coords = Vector(563350, 562497, 4470), heading = 90 },
-        { coords = Vector(569115, 543244, 4470), heading = -90.0 },
+        { coords = Vector(566200, 509460, 4473), heading = -90.0 },
+    },
+    markers = {
+        { coords = Vector(567546, 509934, 4567), label = 'Bank of Pacifica' },
     }
 }
