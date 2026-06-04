@@ -4,131 +4,121 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
         <title>QBCore - Spawnlocation</title>
-        <link rel="stylesheet" type="text/css" href="reset.css" />
         <link rel="stylesheet" type="text/css" href="style.css" />
-        <script src="vue.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-        <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet" />
     </head>
     <body>
-        <v-app data-app>
-            <div id="app">
-                <div class="container">
-                    <div class="noselect">
-                        <div class="spawn-locations" :class="{'slide-top-fade-leave-active': show == false, 'slide-top-fade-leave-to': show == false}">
-                            <div class="spawn_locations-header">
-                                <p>
-                                    <span id="null">{{translate('where_would_you_like_to_start')}}</span>
-                                </p>
-                            </div>
-
-                            <v-btn elevation="0" color="#00000000" v-if="newChar !== true" class="location" x-large v-ripple :class="{'selected': 'current' == selectedValue.type && 'current' == selectedValue.name}" @click="click_location('current', 'current')"> {{translate('last_location')}} </v-btn>
-
-                            <div v-for="(locations, locationGroupIdx) in positions">
-                                <v-btn v-for="(location, locationIdx) in locations" :key="locationGroupIdx + '-' + locationIdx" elevation="0" color="#00000000" :class="{'selected': locationGroupIdx == selectedValue.type && ((locationGroupIdx !== 'house' && locationIdx == selectedValue.name) || (locationGroupIdx == 'house' && location.house == selectedValue.name))}" class="location" x-large v-ripple @click="click_location(locationGroupIdx, locationGroupIdx == 'house' ? location.house : locationIdx)"> {{ location.label }} </v-btn>
-                            </div>
-
-                            <v-btn @click="submit_spawn" v-ripple x-large class="submit-spawn" v-if="selectedValue.type !== '' && selectedValue.name !== ''"> {{translate('confirm')}} </v-btn>
+        <div id="app">
+            <div class="container">
+                <div class="noselect">
+                    <div class="spawn-locations hidden" id="spawn-panel">
+                        <div class="spawn_locations-header">
+                            <p id="header-text"></p>
                         </div>
+                        <div id="location-list"></div>
+                        <button class="submit-spawn" id="submit-btn" style="display: none"></button>
                     </div>
                 </div>
             </div>
-        </v-app>
+        </div>
 
         <script>
-            const viewmodel = new Vue({
-                el: "#app",
-                vuetify: new Vuetify(),
-                data: {
-                    positions: {
-                        normal: [],
-                        appartment: [],
-                        house: [],
-                    },
-
-                    selectedValue: {
-                        type: "",
-                        name: "",
-                    },
-
+            (function () {
+                const state = {
+                    positions: { normal: [], appartment: [], house: [] },
+                    selectedValue: { type: "", name: "" },
                     newChar: false,
-                    show: false,
                     translations: {},
-                },
+                };
 
-                methods: {
-                    click_location: function (type, name) {
-                        if (type == "normal" || type == "current") {
-                            hEvent("qb-spawn:setCam", {
-                                posname: name,
-                                type: type,
-                            });
-                        }
-                        this.selectedValue = { type: type, name: name };
-                    },
+                const panel = document.getElementById("spawn-panel");
+                const list = document.getElementById("location-list");
+                const submitBtn = document.getElementById("submit-btn");
+                const headerText = document.getElementById("header-text");
 
-                    submit_spawn: function () {
-                        this.show = false;
-                        const data = this.selectedValue;
-                        if (data.type !== "appartment") {
-                            hEvent("qb-spawn:spawnplayer", {
-                                spawnloc: data.name,
-                                typeLoc: data.type,
-                            });
-                        } else {
-                            hEvent("qb-spawn:chooseAppa", {
-                                appType: data.name,
-                            });
-                        }
-                    },
+                function t(phrase) {
+                    return state.translations[phrase] || phrase;
+                }
 
-                    translate(phrase) {
-                        return this.translations[phrase] || `Could not find phrase: ${phrase}`;
-                    },
-                },
+                function makeBtn(label, onClick) {
+                    const btn = document.createElement("button");
+                    btn.className = "location";
+                    btn.textContent = label;
+                    btn.addEventListener("click", onClick);
+                    return btn;
+                }
 
-                mounted() {
-                    function showUi(status, translations) {
-                        viewmodel.show = status;
-                        viewmodel.translations = translations;
+                function clickLocation(type, name) {
+                    if (type === "normal" || type === "current") {
+                        hEvent("qb-spawn:setCam", { posname: name, type });
+                    }
+                    state.selectedValue = { type, name };
+                    render();
+                }
+
+                function render() {
+                    list.innerHTML = "";
+
+                    if (!state.newChar) {
+                        const btn = makeBtn(t("last_location"), () => clickLocation("current", "current"));
+                        if (state.selectedValue.type === "current") btn.classList.add("selected");
+                        list.appendChild(btn);
                     }
 
-                    function setupLocations(locations, houses, isNew) {
-                        viewmodel.positions = { normal: [], appartment: [], house: [] };
-                        viewmodel.selectedValue = { type: "", index: -1 };
-                        viewmodel.positions.normal = locations;
-                        viewmodel.positions.house = houses;
-                        viewmodel.newChar = isNew;
-                    }
-
-                    function setupApartments(locations, isNew) {
-                        viewmodel.positions = { normal: [], appartment: [], house: [] };
-                        viewmodel.selectedValue = { type: "", index: -1 };
-                        viewmodel.positions.appartment = locations;
-                        viewmodel.newChar = isNew;
-                    }
-
-                    window.showUi = showUi;
-                    window.setupLocations = setupLocations;
-                    window.setupApartments = setupApartments;
-
-                    window.addEventListener('message', function(event) {
-                        if (!event.data || !event.data.name) return;
-                        
-                        switch(event.data.name) {
-                            case "showUi":
-                                showUi(...event.data.args);
-                                break;
-                            case "setupLocations":
-                                setupLocations(...event.data.args);
-                                break;
-                            case "setupApartments":
-                                setupApartments(...event.data.args);
-                                break;
+                    for (const [groupKey, locations] of Object.entries(state.positions)) {
+                        for (const [idx, location] of Object.entries(locations)) {
+                            const name = groupKey === "house" ? location.house : idx;
+                            const btn = makeBtn(location.label, () => clickLocation(groupKey, name));
+                            if (state.selectedValue.type === groupKey && state.selectedValue.name === name) {
+                                btn.classList.add("selected");
+                            }
+                            list.appendChild(btn);
                         }
-                    });
-                },
-            });
+                    }
+
+                    submitBtn.style.display = state.selectedValue.type && state.selectedValue.name ? "block" : "none";
+                }
+
+                submitBtn.addEventListener("click", () => {
+                    panel.classList.add("hidden");
+                    const { type, name } = state.selectedValue;
+                    if (type !== "appartment") {
+                        hEvent("qb-spawn:spawnplayer", { spawnloc: name, typeLoc: type });
+                    } else {
+                        hEvent("qb-spawn:chooseAppa", { appType: name });
+                    }
+                });
+
+                function showUi(status, translations) {
+                    state.translations = translations;
+                    headerText.textContent = t("where_would_you_like_to_start");
+                    submitBtn.textContent = t("confirm");
+                    panel.classList.toggle("hidden", !status);
+                }
+
+                function setupLocations(locations, houses, isNew) {
+                    state.positions = { normal: locations, appartment: [], house: houses };
+                    state.selectedValue = { type: "", name: "" };
+                    state.newChar = isNew;
+                    render();
+                }
+
+                function setupApartments(locations, isNew) {
+                    state.positions = { normal: [], appartment: locations, house: [] };
+                    state.selectedValue = { type: "", name: "" };
+                    state.newChar = isNew;
+                    render();
+                }
+
+                window.showUi = showUi;
+                window.setupLocations = setupLocations;
+                window.setupApartments = setupApartments;
+
+                window.addEventListener("message", (e) => {
+                    if (!e.data?.name) return;
+                    const handlers = { showUi, setupLocations, setupApartments };
+                    handlers[e.data.name]?.(...e.data.args);
+                });
+            })();
         </script>
     </body>
 </html>

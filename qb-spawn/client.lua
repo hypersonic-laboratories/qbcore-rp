@@ -97,6 +97,7 @@ my_webui:RegisterEventHandler('qb-spawn:spawnplayer', function(data)
         TriggerServerEvent('qb-spawn:server:spawnPlayer', coords)
         SetDisplay(false)
     end
+    exports['qb-clothing']:LoadAndApplySkin()
 end)
 
 -- Events
