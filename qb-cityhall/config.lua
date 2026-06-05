@@ -18,16 +18,20 @@ Config = {
 
     Cityhalls = {
         {
-            coords = Vector(-338525, -155350, -2458),
-            heading = 90,
-            -- showBlip = true,
-            -- blipData = {
-            --     sprite = 487,
-            --     display = 4,
-            --     scale = 0.65,
-            --     colour = 0,
-            --     title = 'City Services'
-            -- },
+            marker = {
+                coords = Vector(567287, 572779, 4672),
+                blipData = {
+                    title = 'City Hall',
+                    description = 'City services, licenses & jobs',
+                    markerType = 'Objective',
+                    icon = 'city',
+                },
+            },
+            spots = {
+                { coords = Vector(567321, 573059, 4672), heading = 90 },
+                { coords = Vector(567287, 572779, 4672), heading = 90 },
+                { coords = Vector(567290, 572465, 4672), heading = 90 },
+            },
             licenses = {
                 id_card = {
                     label = 'ID Card',
@@ -45,89 +49,35 @@ Config = {
                 },
             }
         },
-        {
-            coords = Vector(-338525, -155950, -2458),
-            heading = 90,
-            -- showBlip = true,
-            -- blipData = {
-            --     sprite = 487,
-            --     display = 4,
-            --     scale = 0.65,
-            --     colour = 0,
-            --     title = 'City Services'
-            -- },
-            licenses = {
-                id_card = {
-                    label = 'ID Card',
-                    cost = 50,
-                },
-                driver_license = {
-                    label = 'Driver License',
-                    cost = 50,
-                    metadata = 'driver'
-                },
-                weaponlicense = {
-                    label = 'Weapon License',
-                    cost = 50,
-                    metadata = 'weapon'
-                },
-            }
-        },
-        {
-            coords = Vector(-338525, -155650, -2458),
-            heading = 90,
-            -- showBlip = true,
-            -- blipData = {
-            --     sprite = 487,
-            --     display = 4,
-            --     scale = 0.65,
-            --     colour = 0,
-            --     title = 'City Services'
-            -- },
-            licenses = {
-                id_card = {
-                    label = 'ID Card',
-                    cost = 50,
-                },
-                driver_license = {
-                    label = 'Driver License',
-                    cost = 50,
-                    metadata = 'driver'
-                },
-                weaponlicense = {
-                    label = 'Weapon License',
-                    cost = 50,
-                    metadata = 'weapon'
-                },
-            }
-        },
-        {
-            coords = Vector(-338525, -156250, -2458),
-            heading = 90,
-            -- showBlip = true,
-            -- blipData = {
-            --     sprite = 487,
-            --     display = 4,
-            --     scale = 0.65,
-            --     colour = 0,
-            --     title = 'City Services'
-            -- },
-            licenses = {
-                id_card = {
-                    label = 'ID Card',
-                    cost = 50,
-                },
-                driver_license = {
-                    label = 'Driver License',
-                    cost = 50,
-                    metadata = 'driver'
-                },
-                weaponlicense = {
-                    label = 'Weapon License',
-                    cost = 50,
-                    metadata = 'weapon'
-                },
-            }
-        },
+        -- {
+        --     marker = {
+        --         coords = Vector(0, 0, 0),
+        --         blipData = {
+        --             title = 'City Hall',
+        --             description = 'City services, licenses & jobs',
+        --             markerType = 'Objective',
+        --             icon = 'city',
+        --         },
+        --     },
+        --     spots = {
+        --         { coords = Vector(0, 0, 0), heading = 90 },
+        --     },
+        --     licenses = {
+        --         id_card = {
+        --             label = 'ID Card',
+        --             cost = 50,
+        --         },
+        --         driver_license = {
+        --             label = 'Driver License',
+        --             cost = 50,
+        --             metadata = 'driver'
+        --         },
+        --         weaponlicense = {
+        --             label = 'Weapon License',
+        --             cost = 50,
+        --             metadata = 'weapon'
+        --         },
+        --     }
+        -- },
     }
 }

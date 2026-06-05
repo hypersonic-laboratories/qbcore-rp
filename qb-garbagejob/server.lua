@@ -14,7 +14,7 @@ RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
     end
 end)
 
-function OnShutdown()
+function onShutdown()
     for _, v in pairs(dumpsters) do
         if v and v:IsValid() then
             DeleteEntity(v)

@@ -1,6 +1,32 @@
 local Lang = require('locales/en')
 local sharedJobs = exports['qb-core']:GetShared('Jobs')
 
+-- Blip markers
+
+local markerIds = {}
+
+local function addCityhallMarkers()
+    for i = 1, #Config.Cityhalls do
+        local m = Config.Cityhalls[i].marker
+        if m then
+            local d = m.blipData
+            markerIds[i] = exports['qb-hud']:AddMarker(m.coords, {
+                title       = d.title or '',
+                description = d.description or '',
+                markerType  = d.markerType or 'Store',
+                icon        = d.icon or 'city',
+            })
+        end
+    end
+end
+
+local function removeCityhallMarkers()
+    for i, id in pairs(markerIds) do
+        exports['qb-hud']:RemoveMarker(id)
+        markerIds[i] = nil
+    end
+end
+
 -- Functions
 
 local function openCityhallMenu()
@@ -126,22 +152,32 @@ RegisterClientEvent('qb-cityhall:client:requestId', function(data)
     end
 end)
 
+-- Markers
+
+addCityhallMarkers()
+
+function onShutdown()
+    removeCityhallMarkers()
+end
+
 -- Targets
 
 for i = 1, #Config.Cityhalls do
-    local coords = Config.Cityhalls[i].coords
-    local heading = Config.Cityhalls[i].heading
-    exports['qb-target']:AddMeshTarget(
-        'cityhall_' .. i,
-        coords,
-        Rotator(0, heading, 0),
-        '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-        {
+    local spots = Config.Cityhalls[i].spots
+    for j = 1, #spots do
+        local spot = spots[j]
+        exports['qb-target']:AddMeshTarget(
+            'cityhall_' .. i .. '_' .. j,
+            spot.coords,
+            Rotator(0, spot.heading, 0),
+            '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
             {
-                icon = 'city',
-                label = 'Open City Hall',
-                event = 'qb-cityhall:client:openCityhallMenu',
+                {
+                    icon = 'landmark',
+                    label = 'Open City Hall',
+                    event = 'qb-cityhall:client:openCityhallMenu',
+                }
             }
-        }
-    )
+        )
+    end
 end
