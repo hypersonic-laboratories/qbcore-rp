@@ -8,6 +8,12 @@ Config.Shops = {
     -- type = 'accessories' → Accessories tab only
     -- type = 'shoes'       → Shoes slot only
     -- type = 'hats'        → Hat slot only
+    -- type = 'makeup'      → Makeup sub-slots only (eyeshadow, eyeliner, lipstick, blush)
+    -- type = 'eyewear'     → Glasses & sunglasses only
+    -- type = 'tops'        → Tops & sets only
+    -- type = 'bottoms'     → Bottoms only
+    -- type = 'nails'       → Nail salon (nails only)
+    -- type = 'mask'        → Face masks & coverings only
 
     ['jessica_co'] = {
         label   = 'Jessica & Co.',

@@ -1,17 +1,4 @@
--- Helpers for building gameplay tags when slot-filtered store/barbershop UI is implemented
----@diagnostic disable-next-line: unused-local, unused-function
-local function Tag(name)
-    return UE.UHelixResourceUtility.RequestGameplayTag(name)
-end
-
----@diagnostic disable-next-line: unused-local, unused-function
-local function MakeTagContainer(names)
-    local arr = {}
-    for _, name in ipairs(names) do
-        arr[#arr + 1] = Tag(name)
-    end
-    return UE.UBlueprintGameplayTagLibrary.MakeGameplayTagContainerFromArray(arr)
-end
+-- Functions
 
 local function SerializeSkin(System)
     local Loadout = System:GetCosmeticLoadout()
@@ -64,16 +51,6 @@ local function WaitForCosmeticsAndRun(fn)
     end, 500)
 end
 
--- Named visibility presets — each JSON lists widgets to HIDE (Visibility:false).
--- Anything not listed remains visible. Add entries here for new shop types.
--- Callers may also pass a raw JSON string directly instead of a preset name.
---
--- Full widget tree reference (from DA_CharacterCustomizationData):
---   Gender, Custom, Presets
---   Head > Cosmetic.Preset.Head | Cosmetic.Slot.Body.Head | Cosmetic.Slot.Appearance.Eyes (Eyebrows/Eyelashes/Iris) | Cosmetic.Slot.Appearance.Hair (Main/Mustache/Beard) | Cosmetic.Slot.Appearance.Makeup (Eyeshadow/Eyeliner/Lipstick/Blush) | Cosmetic.Slot.Appearance.Skin.FaceTattoo
---   Body > Cosmetic.Preset.Body | Cosmetic.Slot.Appearance.Skin.BodyTattoo
---   Outfits > Cosmetic.Preset.Outfit | Cosmetic.Slot.Clothing.Top/Set/Bottoms/Backpack/Socks/Shoes | Cosmetic.Slot.Clothing.Underwear.Leg/Top/Bottom
---   Accessories > Cosmetic.Slot.Accessory.Head.Hat | Cosmetic.Slot.Accessory.Face.Mask/Eyewear | Cosmetic.Slot.Accessory.Neck.Necklace | Cosmetic.Slot.Accessory.Ears.Earrings | Cosmetic.Slot.Accessory.Hands.Nails/Gloves
 local SHOP_TYPES = {
     -- Clothing store: only Outfits
     clothing    = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Accessories":{}},"Visibility":false,"Default":"Outfits"}',
@@ -89,6 +66,18 @@ local SHOP_TYPES = {
     shoes       = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Accessories":{},"Outfits":{"Cosmetic.Preset.Outfit":{},"Cosmetic.Slot.Clothing.Top":{},"Cosmetic.Slot.Clothing.Set":{},"Cosmetic.Slot.Clothing.Bottoms":{},"Cosmetic.Slot.Clothing.Backpack":{},"Cosmetic.Slot.Clothing.Socks":{},"Cosmetic.Slot.Clothing.Underwear.Leg":{},"Cosmetic.Slot.Clothing.Underwear.Top":{},"Cosmetic.Slot.Clothing.Underwear.Bottom":{}}},"Visibility":false,"Default":"Outfits"}',
     -- Hat store: only Hat slot within Accessories
     hats        = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Outfits":{},"Accessories":{"Cosmetic.Slot.Accessory.Face.Mask":{},"Cosmetic.Slot.Accessory.Face.Eyewear":{},"Cosmetic.Slot.Accessory.Neck.Necklace":{},"Cosmetic.Slot.Accessory.Ears.Earrings":{},"Cosmetic.Slot.Accessory.Hands.Nails":{},"Cosmetic.Slot.Accessory.Hands.Gloves":{}}},"Visibility":false,"Default":"Accessories"}',
+    -- Makeup/beauty store: only Makeup sub-slots within Head
+    makeup      = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{"Cosmetic.Preset.Head":{},"Cosmetic.Slot.Body.Head":{},"Cosmetic.Slot.Appearance.Eyes":{},"Cosmetic.Slot.Appearance.Hair":{},"Cosmetic.Slot.Appearance.Skin.FaceTattoo":{}},"Body":{},"Outfits":{},"Accessories":{}},"Visibility":false,"Default":"Head"}',
+    -- Eyewear store: only Face.Eyewear within Accessories
+    eyewear     = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Outfits":{},"Accessories":{"Cosmetic.Slot.Accessory.Head.Hat":{},"Cosmetic.Slot.Accessory.Face.Mask":{},"Cosmetic.Slot.Accessory.Neck.Necklace":{},"Cosmetic.Slot.Accessory.Ears.Earrings":{},"Cosmetic.Slot.Accessory.Hands.Nails":{},"Cosmetic.Slot.Accessory.Hands.Gloves":{}}},"Visibility":false,"Default":"Accessories"}',
+    -- Tops store: only Top and Set slots within Outfits
+    tops        = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Accessories":{},"Outfits":{"Cosmetic.Preset.Outfit":{},"Cosmetic.Slot.Clothing.Bottoms":{},"Cosmetic.Slot.Clothing.Backpack":{},"Cosmetic.Slot.Clothing.Underwear.Leg":{},"Cosmetic.Slot.Clothing.Underwear.Top":{},"Cosmetic.Slot.Clothing.Underwear.Bottom":{},"Cosmetic.Slot.Clothing.Socks":{},"Cosmetic.Slot.Clothing.Shoes":{}}},"Visibility":false,"Default":"Outfits"}',
+    -- Bottoms store: only Bottoms slot within Outfits
+    bottoms     = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Accessories":{},"Outfits":{"Cosmetic.Preset.Outfit":{},"Cosmetic.Slot.Clothing.Top":{},"Cosmetic.Slot.Clothing.Set":{},"Cosmetic.Slot.Clothing.Backpack":{},"Cosmetic.Slot.Clothing.Underwear.Leg":{},"Cosmetic.Slot.Clothing.Underwear.Top":{},"Cosmetic.Slot.Clothing.Underwear.Bottom":{},"Cosmetic.Slot.Clothing.Socks":{},"Cosmetic.Slot.Clothing.Shoes":{}}},"Visibility":false,"Default":"Outfits"}',
+    -- Nail salon: only Hands.Nails within Accessories
+    nails       = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Outfits":{},"Accessories":{"Cosmetic.Slot.Accessory.Head.Hat":{},"Cosmetic.Slot.Accessory.Face.Mask":{},"Cosmetic.Slot.Accessory.Face.Eyewear":{},"Cosmetic.Slot.Accessory.Neck.Necklace":{},"Cosmetic.Slot.Accessory.Ears.Earrings":{},"Cosmetic.Slot.Accessory.Hands.Gloves":{}}},"Visibility":false,"Default":"Accessories"}',
+    -- Mask shop: only Face.Mask within Accessories
+    mask        = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Outfits":{},"Accessories":{"Cosmetic.Slot.Accessory.Head.Hat":{},"Cosmetic.Slot.Accessory.Face.Eyewear":{},"Cosmetic.Slot.Accessory.Neck.Necklace":{},"Cosmetic.Slot.Accessory.Ears.Earrings":{},"Cosmetic.Slot.Accessory.Hands.Nails":{},"Cosmetic.Slot.Accessory.Hands.Gloves":{}}},"Visibility":false,"Default":"Accessories"}',
 }
 
 local function OpenClothing(shopType)
@@ -162,13 +151,19 @@ end
 -- Add a new row here to support a new shop type. Each entry in Config.Shops
 -- references one of these by its 'type' field.
 local SHOP_DEFS = {
-    clothing    = { zonePrefix = 'clothingShop',    targetIcon = 'shirt',       markerIcon = 'clothing-store', markerDesc = 'Browse & purchase clothing', markerColor = LinearColor(1.0, 0.5, 0.8, 1.0) },
-    barbershop  = { zonePrefix = 'barbershop',      targetIcon = 'scissors',    markerIcon = 'hairdresser',    markerDesc = 'Haircuts & styling',          markerColor = LinearColor(0.6, 0.4, 1.0, 1.0) },
-    tattoo      = { zonePrefix = 'tattooShop',      targetIcon = 'pen',         markerIcon = 'art-gallery',    markerDesc = 'Tattoo parlor',               markerColor = LinearColor(0.3, 0.3, 0.3, 1.0) },
-    surgeon     = { zonePrefix = 'plasticSurgeon',  targetIcon = 'stethoscope', markerIcon = 'hospital',       markerDesc = 'Cosmetic surgery',            markerColor = LinearColor(0.2, 0.8, 0.8, 1.0) },
-    accessories = { zonePrefix = 'accessoriesShop', targetIcon = 'gem',         markerIcon = 'jewelry-store',  markerDesc = 'Accessories & jewelry',       markerColor = LinearColor(0.9, 0.75, 0.2, 1.0) },
-    shoes       = { zonePrefix = 'shoeShop',        targetIcon = 'shoe',        markerIcon = 'shoe-store',     markerDesc = 'Footwear & shoes',             markerColor = LinearColor(0.6, 0.4, 0.2, 1.0) },
-    hats        = { zonePrefix = 'hatShop',         targetIcon = 'hat',         markerIcon = 'hat-store',      markerDesc = 'Hats & headwear',              markerColor = LinearColor(0.4, 0.7, 0.4, 1.0) },
+    clothing    = { zonePrefix = 'clothingShop', targetIcon = 'shirt', markerIcon = 'clothing-store', markerDesc = 'Browse & purchase clothing', markerColor = LinearColor(1.0, 0.5, 0.8, 1.0) },
+    barbershop  = { zonePrefix = 'barbershop', targetIcon = 'scissors', markerIcon = 'hairdresser', markerDesc = 'Haircuts & styling', markerColor = LinearColor(0.6, 0.4, 1.0, 1.0) },
+    tattoo      = { zonePrefix = 'tattooShop', targetIcon = 'pen', markerIcon = 'art-gallery', markerDesc = 'Tattoo parlor', markerColor = LinearColor(0.3, 0.3, 0.3, 1.0) },
+    surgeon     = { zonePrefix = 'plasticSurgeon', targetIcon = 'stethoscope', markerIcon = 'hospital', markerDesc = 'Cosmetic surgery', markerColor = LinearColor(0.2, 0.8, 0.8, 1.0) },
+    accessories = { zonePrefix = 'accessoriesShop', targetIcon = 'gem', markerIcon = 'jewelry-store', markerDesc = 'Accessories & jewelry', markerColor = LinearColor(0.9, 0.75, 0.2, 1.0) },
+    shoes       = { zonePrefix = 'shoeShop',      targetIcon = 'shoe',        markerIcon = 'shoe-store',     markerDesc = 'Footwear & shoes',        markerColor = LinearColor(0.6, 0.4, 0.2, 1.0) },
+    hats        = { zonePrefix = 'hatShop',       targetIcon = 'hat',         markerIcon = 'hat-store',      markerDesc = 'Hats & headwear',         markerColor = LinearColor(0.4, 0.7, 0.4, 1.0) },
+    makeup      = { zonePrefix = 'makeupShop',    targetIcon = 'lipstick',    markerIcon = 'beauty-salon',   markerDesc = 'Makeup & cosmetics',      markerColor = LinearColor(1.0, 0.4, 0.6, 1.0) },
+    eyewear     = { zonePrefix = 'eyewearShop',   targetIcon = 'glasses',     markerIcon = 'optician',       markerDesc = 'Glasses & sunglasses',    markerColor = LinearColor(0.3, 0.6, 0.9, 1.0) },
+    tops        = { zonePrefix = 'topsShop',      targetIcon = 'shirt',       markerIcon = 'clothing-store', markerDesc = 'Tops & shirts',           markerColor = LinearColor(0.8, 0.4, 0.4, 1.0) },
+    bottoms     = { zonePrefix = 'bottomsShop',   targetIcon = 'pants',       markerIcon = 'clothing-store', markerDesc = 'Pants & bottoms',         markerColor = LinearColor(0.4, 0.4, 0.8, 1.0) },
+    nails       = { zonePrefix = 'nailSalon',     targetIcon = 'hand',        markerIcon = 'nail-salon',     markerDesc = 'Nail salon',              markerColor = LinearColor(1.0, 0.6, 0.7, 1.0) },
+    mask        = { zonePrefix = 'maskShop',      targetIcon = 'mask',        markerIcon = 'store',          markerDesc = 'Masks & face coverings',  markerColor = LinearColor(0.5, 0.5, 0.5, 1.0) },
 }
 
 local function RegisterAllShopZones()
