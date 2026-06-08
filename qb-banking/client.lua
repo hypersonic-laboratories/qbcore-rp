@@ -1,4 +1,123 @@
 local my_webui = WebUI('qb-banking', 'qb-banking/html/index.html')
+local bankTargets = {}
+local bankMarkers = {}
+
+-- Functions
+
+function onShutdown()
+    if my_webui then
+        my_webui:Destroy()
+        my_webui = nil
+    end
+end
+
+local function OpenBank()
+    my_webui:BringToFront()
+    my_webui:SetInputMode(1)
+    TriggerCallback('openBank', function(data)
+        my_webui:SendEvent('openBank', {
+            accounts = data.accounts,
+            statements = data.statements,
+            playerData = data.playerData
+        })
+    end)
+end
+
+local function OpenATM()
+    my_webui:BringToFront()
+    my_webui:SetInputMode(1)
+    TriggerCallback('openATM', function(data)
+        my_webui:SendEvent('openATM', {
+            accounts = data.accounts,
+            pinNumbers = data.acceptablePins,
+            playerData = data.playerData
+        })
+    end)
+end
+
+local function SetupBanking()
+    for i = 1, #Config.locations do
+        local zoneId = 'bank_' .. i
+        exports['qb-target']:AddMeshTarget(
+            zoneId,
+            Config.locations[i].coords,
+            Rotator(0, Config.locations[i].heading, 0),
+            '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+            {
+                {
+                    icon = 'university',
+                    label = 'Open Bank',
+                    event = 'qb-banking:client:openBank',
+                }
+            }
+        )
+        bankTargets[#bankTargets + 1] = zoneId
+    end
+
+    for i = 1, #Config.atm_locations do
+        local zoneId = 'atm_' .. i
+        exports['qb-target']:AddMeshTarget(
+            zoneId,
+            Config.atm_locations[i].coords,
+            Rotator(0, Config.atm_locations[i].heading, 0),
+            '/QBCoreAssets/Meshes/SM_ATM.SM_ATM', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
+            {
+                {
+                    icon = 'university',
+                    label = 'Open ATM',
+                    -- event = 'qb-banking:client:openATM',
+                    event = 'qb-banking:client:openBank',
+                }
+            }
+        )
+        bankTargets[#bankTargets + 1] = zoneId
+    end
+
+    for i = 1, #Config.markers do
+        local markerId = exports['qb-hud']:AddMarker(Config.markers[i].coords, {
+            title      = Config.markers[i].label,
+            icon       = 'bank',
+            markerType = 'Bank',
+        })
+        if markerId then bankMarkers[#bankMarkers + 1] = markerId end
+    end
+
+    -- for i = 1, #Config.atmModels do
+    --     local atmModel = Config.atmModels[i]
+    --     exports['qb-target']:AddTargetModel(atmModel, {
+    --         options = {
+    --             {
+    --                 icon = 'university',
+    --                 label = 'Open ATM',
+    --                 --item = 'bank_card',
+    --                 event = 'qb-banking:client:openATM',
+    --             }
+    --         },
+    --         distance = 1000
+    --     })
+    -- end
+end
+
+local function ClearBanking()
+    for _, zoneId in ipairs(bankTargets) do
+        exports['qb-target']:RemoveZone(zoneId)
+    end
+    bankTargets = {}
+    for _, id in ipairs(bankMarkers) do
+        exports['qb-hud']:RemoveMarker(id)
+    end
+    bankMarkers = {}
+end
+
+-- Events
+
+RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
+    SetupBanking()
+end)
+
+RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+    ClearBanking()
+end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUpdated', function(key, val)
     if key == 'money' and my_webui then
@@ -9,7 +128,15 @@ RegisterClientEvent('QBCore:Client:OnPlayerUpdated', function(key, val)
     end
 end)
 
--- Functions
+RegisterClientEvent('qb-banking:client:openBank', function()
+    OpenBank()
+end)
+
+RegisterClientEvent('qb-banking:client:openATM', function()
+    OpenATM()
+end)
+
+-- NUI Events
 
 my_webui:RegisterEventHandler('closeApp', function()
     my_webui:SetInputMode(0)
@@ -74,122 +201,3 @@ my_webui:RegisterEventHandler('removeUser', function(data, cb)
         cb(status)
     end, data)
 end)
-
-function onShutdown()
-    if my_webui then
-        my_webui:Destroy()
-        my_webui = nil
-    end
-end
-
-local function OpenBank()
-    my_webui:BringToFront()
-    my_webui:SetInputMode(1)
-    TriggerCallback('openBank', function(data)
-        my_webui:SendEvent('openBank', {
-            accounts = data.accounts,
-            statements = data.statements,
-            playerData = data.playerData
-        })
-    end)
-end
-
-RegisterClientEvent('qb-banking:client:openBank', function()
-    OpenBank()
-end)
-
-local function OpenATM()
-    my_webui:BringToFront()
-    my_webui:SetInputMode(1)
-    TriggerCallback('openATM', function(data)
-        my_webui:SendEvent('openATM', {
-            accounts = data.accounts,
-            pinNumbers = data.acceptablePins,
-            playerData = data.playerData
-        })
-    end)
-end
-
-RegisterClientEvent('qb-banking:client:openATM', function()
-    OpenATM()
-end)
-
--- Events
-
--- RegisterClientEvent('qb-banking:client:useCard', function()
---     if NearATM() then OpenATM() end
--- end)
-
--- Threads
-
--- CreateThread(function()
---     for i = 1, #Config.locations do
---         local blip = AddBlipForCoord(Config.locations[i])
---         SetBlipSprite(blip, Config.blipInfo.sprite)
---         SetBlipDisplay(blip, 4)
---         SetBlipScale(blip, Config.blipInfo.scale)
---         SetBlipColour(blip, Config.blipInfo.color)
---         SetBlipAsShortRange(blip, true)
---         BeginTextCommandSetBlipName('STRING')
---         AddTextComponentSubstringPlayerName(tostring(Config.blipInfo.name))
---         EndTextCommandSetBlipName(blip)
---     end
--- end)
-
-Timer.SetTimeout(function()
-    for i = 1, #Config.locations do
-        exports['qb-target']:AddMeshTarget(
-            'bank_' .. i,
-            Config.locations[i].coords,
-            Rotator(0, Config.locations[i].heading, 0),
-            '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-            {
-                {
-                    icon = 'university',
-                    label = 'Open Bank',
-                    event = 'qb-banking:client:openBank',
-                }
-            }
-        )
-    end
-
-    for i = 1, #Config.atm_locations do
-        exports['qb-target']:AddMeshTarget(
-            'atm_' .. i,
-            Config.atm_locations[i].coords,
-            Rotator(0, Config.atm_locations[i].heading, 0),
-            '/QBCoreAssets/Meshes/SM_ATM.SM_ATM', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-            {
-                {
-                    icon = 'university',
-                    label = 'Open ATM',
-                    -- event = 'qb-banking:client:openATM',
-                    event = 'qb-banking:client:openBank',
-                }
-            }
-        )
-    end
-
-    for i = 1, #Config.markers do
-        exports['qb-hud']:AddMarker(Config.markers[i].coords, {
-            title      = Config.markers[i].label,
-            icon       = 'bank',
-            markerType = 'Bank',
-        })
-    end
-
-    -- for i = 1, #Config.atmModels do
-    --     local atmModel = Config.atmModels[i]
-    --     exports['qb-target']:AddTargetModel(atmModel, {
-    --         options = {
-    --             {
-    --                 icon = 'university',
-    --                 label = 'Open ATM',
-    --                 --item = 'bank_card',
-    --                 event = 'qb-banking:client:openATM',
-    --             }
-    --         },
-    --         distance = 1000
-    --     })
-    -- end
-end, 2000)

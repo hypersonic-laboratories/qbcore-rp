@@ -49,10 +49,11 @@ local function createDepotMarkers()
     for _, depot in ipairs(Config.Locations.Depots) do
         if depot.showBlip then
             local markerId = exports['qb-hud']:AddMarker(depot.pedSpawn.coords, {
-                title      = depot.label,
-                icon       = depot.blipIcon or 'taxi',
-                color      = depot.blipColor,
-                markerType = 'Store',
+                title       = depot.label,
+                description = depot.description or '',
+                icon        = depot.blipIcon or 'taxi',
+                color       = depot.blipColor,
+                markerType  = 'Store',
             })
             if markerId then depotMarkers[#depotMarkers + 1] = markerId end
         end

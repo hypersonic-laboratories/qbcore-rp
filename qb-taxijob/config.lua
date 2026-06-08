@@ -11,6 +11,7 @@ Config = {
                 showBlip = true,
                 blipIcon = 'taxi',
                 blipColor = LinearColor(1.0, 0.85, 0.1, 1.0),
+                description = 'Pick up & return taxi vehicles',
             },
         },
 

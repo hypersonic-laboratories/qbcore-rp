@@ -21,6 +21,7 @@ Config.Garages = {
         blipName = 'Brightside Motel Parking',
         blipIcon = 'parking',
         blipColor = LinearColor(0.2, 0.6, 1.0, 1.0),
+        description = 'Park & retrieve your vehicle',
         type = 'public', -- public, gang, job, depot
         category = Config.VehicleClass.Car
     },
@@ -37,6 +38,7 @@ Config.Garages = {
         blipName = 'Marlin Hotel Parking',
         blipIcon = 'parking',
         blipColor = LinearColor(0.2, 0.6, 1.0, 1.0),
+        description = 'Park & retrieve your vehicle',
         type = 'public', -- public, gang, job, depot
         category = Config.VehicleClass.Car
     },
@@ -53,6 +55,7 @@ Config.Garages = {
         blipName = 'Docks Condo Parking',
         blipIcon = 'parking',
         blipColor = LinearColor(0.2, 0.6, 1.0, 1.0),
+        description = 'Park & retrieve your vehicle',
         type = 'public', -- public, gang, job, depot
         category = Config.VehicleClass.Car
     },
@@ -66,6 +69,7 @@ Config.Garages = {
         blipName = 'Parking Garage',
         blipIcon = 'parking-garage',
         blipColor = LinearColor(0.2, 0.6, 1.0, 1.0),
+        description = 'Public parking garage',
         type = 'public',
         category = Config.VehicleClass.Car
     },
@@ -83,6 +87,7 @@ Config.Garages = {
         blipName = 'Car Dealer Parking',
         blipIcon = 'parking',
         blipColor = LinearColor(0.2, 0.6, 1.0, 1.0),
+        description = 'Dealership parking',
         type = 'public', -- public, gang, job, depot
         category = Config.VehicleClass.Car
     },

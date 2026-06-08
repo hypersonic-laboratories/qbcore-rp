@@ -12,6 +12,7 @@ Config.HideCategorySelectForOne = true -- will hide the category selection menu 
 Config.Shops = {
     ['pdm'] = {
         ['Label'] = 'Premium Deluxe Motorsport',
+        ['Description'] = 'New & used vehicle sales',
         ['Type'] = 'free-use',
         ['Job'] = 'none',
         ['ShowBlip'] = true,

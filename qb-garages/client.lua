@@ -118,10 +118,11 @@ local function CreateBlipsZones()
 
         if garage.showBlip ~= false then
             local markerId = exports['qb-hud']:AddMarker(garage.takeVehicle, {
-                title      = garage.blipName or garage.label or 'Garage',
-                icon       = garage.blipIcon or 'parking',
-                color      = garage.blipColor,
-                markerType = 'Store',
+                title       = garage.blipName or garage.label or 'Garage',
+                description = garage.description or '',
+                icon        = garage.blipIcon or 'parking',
+                color       = garage.blipColor,
+                markerType  = 'Store',
             })
             if markerId then
                 garageMarkers[#garageMarkers + 1] = markerId

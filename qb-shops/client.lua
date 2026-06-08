@@ -21,10 +21,11 @@ local function RegisterShopsAndMarkers()
 
         if shopData.showblip then
             local markerId = exports['qb-hud']:AddMarker(shopData.coords, {
-                title      = shopData.label,
-                icon       = shopData.blipIcon or 'grocery',
-                color      = shopData.blipColor,
-                markerType = 'Store',
+                title       = shopData.label,
+                description = shopData.description or '',
+                icon        = shopData.blipIcon or 'grocery',
+                color       = shopData.blipColor,
+                markerType  = 'Store',
             })
             if markerId then shopMarkers[#shopMarkers + 1] = markerId end
         end

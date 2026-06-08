@@ -29,10 +29,11 @@ local function CreateApartmentMarkers()
         local markerId = exports['qb-hud']:AddMarker(
             Vector(apartment.coords[1], apartment.coords[2], apartment.coords[3]),
             {
-                title      = apartment.label,
-                icon       = 'building',
-                color      = (OwnedApartmentName == id) and COLOR_OWNED or COLOR_UNOWNED,
-                markerType = 'Store',
+                title       = apartment.label,
+                description = apartment.description or '',
+                icon        = 'building',
+                color       = (OwnedApartmentName == id) and COLOR_OWNED or COLOR_UNOWNED,
+                markerType  = 'Store',
             }
         )
         if markerId then

@@ -19,10 +19,11 @@ local function setupTargets()
 
         if shopData['ShowBlip'] then
             local markerId = exports['qb-hud']:AddMarker(shopData['BlipCoords'], {
-                title      = shopData['Label'] or shop,
-                icon       = shopData['BlipIcon'] or 'car-rental',
-                color      = shopData['BlipColor'],
-                markerType = 'Store',
+                title       = shopData['Label'] or shop,
+                description = shopData['Description'] or '',
+                icon        = shopData['BlipIcon'] or 'car-rental',
+                color       = shopData['BlipColor'],
+                markerType  = 'Store',
             })
             if markerId then shopMarkers[#shopMarkers + 1] = markerId end
         end
