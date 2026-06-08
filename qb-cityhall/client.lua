@@ -10,21 +10,22 @@ local function addCityhallMarkers()
         local m = Config.Cityhalls[i].marker
         if m then
             local d = m.blipData
-            markerIds[i] = exports['qb-hud']:AddMarker(m.coords, {
+            local markerId = exports['qb-hud']:AddMarker(m.coords, {
                 title       = d.title or '',
                 description = d.description or '',
                 markerType  = d.markerType or 'Store',
                 icon        = d.icon or 'city',
             })
+            if markerId then markerIds[#markerIds + 1] = markerId end
         end
     end
 end
 
 local function removeCityhallMarkers()
-    for i, id in pairs(markerIds) do
+    for _, id in ipairs(markerIds) do
         exports['qb-hud']:RemoveMarker(id)
-        markerIds[i] = nil
     end
+    markerIds = {}
 end
 
 -- Functions
@@ -124,6 +125,14 @@ end
 
 -- Events
 
+RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
+    addCityhallMarkers()
+end)
+
+RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+    removeCityhallMarkers()
+end)
+
 RegisterClientEvent('qb-cityhall:client:openCityhallMenu', function()
     Timer.SetTimeout(function()
         openCityhallMenu()
@@ -153,8 +162,6 @@ RegisterClientEvent('qb-cityhall:client:requestId', function(data)
 end)
 
 -- Markers
-
-addCityhallMarkers()
 
 function onShutdown()
     removeCityhallMarkers()
