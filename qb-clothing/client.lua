@@ -85,6 +85,10 @@ local SHOP_TYPES = {
     surgeon     = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{"Cosmetic.Slot.Appearance.Hair":{},"Cosmetic.Slot.Appearance.Makeup":{},"Cosmetic.Slot.Appearance.Skin.FaceTattoo":{}},"Body":{},"Outfits":{},"Accessories":{}},"Visibility":false,"Default":"Head"}',
     -- Accessories store: only the Accessories tab
     accessories = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Outfits":{}},"Visibility":false,"Default":"Accessories"}',
+    -- Shoe store: only Shoes slot within Outfits
+    shoes       = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Accessories":{},"Outfits":{"Cosmetic.Preset.Outfit":{},"Cosmetic.Slot.Clothing.Top":{},"Cosmetic.Slot.Clothing.Set":{},"Cosmetic.Slot.Clothing.Bottoms":{},"Cosmetic.Slot.Clothing.Backpack":{},"Cosmetic.Slot.Clothing.Socks":{},"Cosmetic.Slot.Clothing.Underwear.Leg":{},"Cosmetic.Slot.Clothing.Underwear.Top":{},"Cosmetic.Slot.Clothing.Underwear.Bottom":{}}},"Visibility":false,"Default":"Outfits"}',
+    -- Hat store: only Hat slot within Accessories
+    hats        = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Outfits":{},"Accessories":{"Cosmetic.Slot.Accessory.Face.Mask":{},"Cosmetic.Slot.Accessory.Face.Eyewear":{},"Cosmetic.Slot.Accessory.Neck.Necklace":{},"Cosmetic.Slot.Accessory.Ears.Earrings":{},"Cosmetic.Slot.Accessory.Hands.Nails":{},"Cosmetic.Slot.Accessory.Hands.Gloves":{}}},"Visibility":false,"Default":"Accessories"}',
 }
 
 local function OpenClothing(shopType)
@@ -155,40 +159,41 @@ local function RegisterShopZone(zoneId, coords, heading, options)
     registeredZones[zoneId] = true
 end
 
--- Descriptor table drives zone registration for every shop category.
--- Add a new row here (and a matching Config table) to support a new shop type.
+-- Add a new row here to support a new shop type. Each entry in Config.Shops
+-- references one of these by its 'type' field.
 local SHOP_DEFS = {
-    { configKey = 'ClothingShops',    shopType = 'clothing',    zonePrefix = 'clothingShop',    targetIcon = 'shirt',       markerIcon = 'clothing-store', markerDesc = 'Browse & purchase clothing', markerColor = LinearColor(1.0, 0.5, 0.8, 1.0) },
-    { configKey = 'Barbershops',      shopType = 'barbershop',  zonePrefix = 'barbershop',      targetIcon = 'scissors',    markerIcon = 'hairdresser',    markerDesc = 'Haircuts & styling',          markerColor = LinearColor(0.6, 0.4, 1.0, 1.0) },
-    { configKey = 'TattooShops',      shopType = 'tattoo',      zonePrefix = 'tattooShop',      targetIcon = 'pen',         markerIcon = 'art-gallery',    markerDesc = 'Tattoo parlor',               markerColor = LinearColor(0.3, 0.3, 0.3, 1.0) },
-    { configKey = 'PlasticSurgeons',  shopType = 'surgeon',     zonePrefix = 'plasticSurgeon',  targetIcon = 'stethoscope', markerIcon = 'hospital',       markerDesc = 'Cosmetic surgery',            markerColor = LinearColor(0.2, 0.8, 0.8, 1.0) },
-    { configKey = 'AccessoriesShops', shopType = 'accessories', zonePrefix = 'accessoriesShop', targetIcon = 'gem',         markerIcon = 'jewelry-store',  markerDesc = 'Accessories & jewelry',       markerColor = LinearColor(0.9, 0.75, 0.2, 1.0) },
+    clothing    = { zonePrefix = 'clothingShop',    targetIcon = 'shirt',       markerIcon = 'clothing-store', markerDesc = 'Browse & purchase clothing', markerColor = LinearColor(1.0, 0.5, 0.8, 1.0) },
+    barbershop  = { zonePrefix = 'barbershop',      targetIcon = 'scissors',    markerIcon = 'hairdresser',    markerDesc = 'Haircuts & styling',          markerColor = LinearColor(0.6, 0.4, 1.0, 1.0) },
+    tattoo      = { zonePrefix = 'tattooShop',      targetIcon = 'pen',         markerIcon = 'art-gallery',    markerDesc = 'Tattoo parlor',               markerColor = LinearColor(0.3, 0.3, 0.3, 1.0) },
+    surgeon     = { zonePrefix = 'plasticSurgeon',  targetIcon = 'stethoscope', markerIcon = 'hospital',       markerDesc = 'Cosmetic surgery',            markerColor = LinearColor(0.2, 0.8, 0.8, 1.0) },
+    accessories = { zonePrefix = 'accessoriesShop', targetIcon = 'gem',         markerIcon = 'jewelry-store',  markerDesc = 'Accessories & jewelry',       markerColor = LinearColor(0.9, 0.75, 0.2, 1.0) },
+    shoes       = { zonePrefix = 'shoeShop',        targetIcon = 'shoe',        markerIcon = 'shoe-store',     markerDesc = 'Footwear & shoes',             markerColor = LinearColor(0.6, 0.4, 0.2, 1.0) },
+    hats        = { zonePrefix = 'hatShop',         targetIcon = 'hat',         markerIcon = 'hat-store',      markerDesc = 'Hats & headwear',              markerColor = LinearColor(0.4, 0.7, 0.4, 1.0) },
 }
 
 local function RegisterAllShopZones()
-    for _, def in ipairs(SHOP_DEFS) do
-        ---@diagnostic disable-next-line: assign-type-mismatch
-        local shops = Config[def.configKey] or {}
-        for id, shop in pairs(shops) do
-            RegisterShopZone(def.zonePrefix .. '_' .. id, shop.coords, shop.heading, {
-                {
-                    type     = 'client',
-                    event    = 'qb-clothing:client:OpenShop',
-                    icon     = def.targetIcon,
-                    label    = shop.label,
-                    shopId   = id,
-                    shopType = shop.type or def.shopType,
-                },
-            })
-            local markerId = exports['qb-hud']:AddMarker(shop.coords, {
-                title       = shop.label or '',
-                description = shop.description or def.markerDesc or '',
-                icon        = def.markerIcon or 'store',
-                color       = shop.color or def.markerColor,
-                markerType  = 'Store',
-            })
-            if markerId then shopMarkers[#shopMarkers + 1] = markerId end
-        end
+    for id, shop in pairs(Config.Shops) do
+        local def = SHOP_DEFS[shop.type]
+        if not def then goto continue end
+        RegisterShopZone(def.zonePrefix .. '_' .. id, shop.coords, shop.heading, {
+            {
+                type     = 'client',
+                event    = 'qb-clothing:client:OpenShop',
+                icon     = def.targetIcon,
+                label    = shop.label,
+                shopId   = id,
+                shopType = shop.type,
+            },
+        })
+        local markerId = exports['qb-hud']:AddMarker(shop.coords, {
+            title       = shop.label or '',
+            description = shop.description or def.markerDesc or '',
+            icon        = def.markerIcon or 'store',
+            color       = shop.color or def.markerColor,
+            markerType  = 'Store',
+        })
+        if markerId then shopMarkers[#shopMarkers + 1] = markerId end
+        ::continue::
     end
 end
 
