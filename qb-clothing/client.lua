@@ -64,8 +64,30 @@ local function WaitForCosmeticsAndRun(fn)
     end, 500)
 end
 
--- Opens the character customization UI and saves on close
-local function OpenClothing()
+-- Named visibility presets — each JSON lists widgets to HIDE (Visibility:false).
+-- Anything not listed remains visible. Add entries here for new shop types.
+-- Callers may also pass a raw JSON string directly instead of a preset name.
+--
+-- Full widget tree reference (from DA_CharacterCustomizationData):
+--   Gender, Custom, Presets
+--   Head > Cosmetic.Preset.Head | Cosmetic.Slot.Body.Head | Cosmetic.Slot.Appearance.Eyes (Eyebrows/Eyelashes/Iris) | Cosmetic.Slot.Appearance.Hair (Main/Mustache/Beard) | Cosmetic.Slot.Appearance.Makeup (Eyeshadow/Eyeliner/Lipstick/Blush) | Cosmetic.Slot.Appearance.Skin.FaceTattoo
+--   Body > Cosmetic.Preset.Body | Cosmetic.Slot.Appearance.Skin.BodyTattoo
+--   Outfits > Cosmetic.Preset.Outfit | Cosmetic.Slot.Clothing.Top/Set/Bottoms/Backpack/Socks/Shoes | Cosmetic.Slot.Clothing.Underwear.Leg/Top/Bottom
+--   Accessories > Cosmetic.Slot.Accessory.Head.Hat | Cosmetic.Slot.Accessory.Face.Mask/Eyewear | Cosmetic.Slot.Accessory.Neck.Necklace | Cosmetic.Slot.Accessory.Ears.Earrings | Cosmetic.Slot.Accessory.Hands.Nails/Gloves
+local SHOP_TYPES = {
+    -- Clothing store: only Outfits
+    clothing    = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Accessories":{}},"Visibility":false,"Default":"Outfits"}',
+    -- Barbershop: Head (Hair, Eyes, Makeup) — no face presets, no head shape, no face tattoos
+    barbershop  = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{"Cosmetic.Preset.Head":{},"Cosmetic.Slot.Body.Head":{},"Cosmetic.Slot.Appearance.Skin.FaceTattoo":{}},"Body":{},"Outfits":{},"Accessories":{}},"Visibility":false,"Default":"Head"}',
+    -- Tattoo parlor: Face tattoos and body tattoos only
+    tattoo      = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{"Cosmetic.Preset.Head":{},"Cosmetic.Slot.Body.Head":{},"Cosmetic.Slot.Appearance.Eyes":{},"Cosmetic.Slot.Appearance.Hair":{},"Cosmetic.Slot.Appearance.Makeup":{}},"Body":{"Cosmetic.Preset.Body":{}},"Outfits":{},"Accessories":{}},"Visibility":false,"Default":"Body"}',
+    -- Surgeon: structural face changes (face presets, head shape, eyes) — no hair, no makeup, no tattoos
+    surgeon     = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{"Cosmetic.Slot.Appearance.Hair":{},"Cosmetic.Slot.Appearance.Makeup":{},"Cosmetic.Slot.Appearance.Skin.FaceTattoo":{}},"Body":{},"Outfits":{},"Accessories":{}},"Visibility":false,"Default":"Head"}',
+    -- Accessories store: only the Accessories tab
+    accessories = '{"Widgets":{"Gender":{},"Custom":{},"Presets":{},"Head":{},"Body":{},"Outfits":{}},"Visibility":false,"Default":"Accessories"}',
+}
+
+local function OpenClothing(shopType)
     local pawn = GetPlayerPawn()
     if not pawn then return end
     local System = pawn:GetCosmeticsSystem()
@@ -78,10 +100,20 @@ local function OpenClothing()
         end
     end
     System:BindOnCosmeticsCustomizationFinished(onFinished)
-    System:ShowCharacterCustomizationUI()
+    local visibilityJson = shopType and (SHOP_TYPES[shopType] or shopType)
+    if visibilityJson then
+        local BP_JsonObjectWrapper = LoadClass('/HelixRemoteResourceModel/Utility/BP_JsonObjectWrapper.BP_JsonObjectWrapper_C')
+        local wrapper = NewObject(BP_JsonObjectWrapper)
+        if wrapper:LoadFromString(visibilityJson) then
+            System:ShowCharacterCustomizationUIEx(wrapper)
+        else
+            System:ShowCharacterCustomizationUI()
+        end
+    else
+        System:ShowCharacterCustomizationUI()
+    end
 end
 
--- Serializes the current cosmetics and persists to the server
 local function SaveCurrentSkin()
     local pawn = GetPlayerPawn()
     if not pawn then return end
@@ -90,7 +122,6 @@ local function SaveCurrentSkin()
     TriggerServerEvent('qb-clothing:server:SaveSkin', SerializeSkin(System))
 end
 
--- Fetches saved skin from the server and applies it; opens customization if none exists
 local function LoadAndApplySkin()
     TriggerCallback('GetPlayerSkin', function(skinJson)
         WaitForCosmeticsAndRun(function(System)
@@ -105,60 +136,57 @@ local function LoadAndApplySkin()
     end)
 end
 
-exports('qb-clothing', 'OpenClothing',    OpenClothing)
+exports('qb-clothing', 'OpenClothing', OpenClothing)
 exports('qb-clothing', 'SaveCurrentSkin', SaveCurrentSkin)
 exports('qb-clothing', 'LoadAndApplySkin', LoadAndApplySkin)
 
--- Shop / barbershop target zone registration
+-- Zone registration
 
 local registeredZones = {}
 local shopMarkers = {}
 
 local function RegisterShopZone(zoneId, coords, heading, options)
     if registeredZones[zoneId] then return end
+    if not coords then return end
     exports['qb-target']:AddBoxZone(zoneId, coords, 1.5, 1.5, {
-        name     = zoneId,
         heading  = heading or 0,
         distance = 2.5,
     }, options)
     registeredZones[zoneId] = true
 end
 
-local function RegisterAllShopZones()
-    for id, shop in pairs(Config.ClothingShops or {}) do
-        RegisterShopZone('clothingShop_' .. id, shop.coords, shop.heading, {
-            {
-                type   = 'client',
-                event  = 'qb-clothing:client:OpenShop',
-                icon   = 'shirt',
-                label  = shop.label,
-                shopId = id,
-            },
-        })
-        local markerId = exports['qb-hud']:AddMarker(shop.coords, {
-            title      = shop.label,
-            icon       = 'clothing-store',
-            markerType = 'Store',
-        })
-        if markerId then shopMarkers[#shopMarkers + 1] = markerId end
-    end
+-- Descriptor table drives zone registration for every shop category.
+-- Add a new row here (and a matching Config table) to support a new shop type.
+local SHOP_DEFS = {
+    { configKey = 'ClothingShops',    shopType = 'clothing',    zonePrefix = 'clothingShop',    targetIcon = 'shirt',       markerIcon = 'clothing-store' },
+    { configKey = 'Barbershops',      shopType = 'barbershop',  zonePrefix = 'barbershop',      targetIcon = 'scissors',    markerIcon = 'hairdresser' },
+    { configKey = 'TattooShops',      shopType = 'tattoo',      zonePrefix = 'tattooShop',      targetIcon = 'pen',         markerIcon = 'art-gallery' },
+    { configKey = 'PlasticSurgeons',  shopType = 'surgeon',     zonePrefix = 'plasticSurgeon',  targetIcon = 'stethoscope', markerIcon = 'hospital' },
+    { configKey = 'AccessoriesShops', shopType = 'accessories', zonePrefix = 'accessoriesShop', targetIcon = 'gem',         markerIcon = 'jewelry-store' },
+}
 
-    for id, shop in pairs(Config.Barbershops or {}) do
-        RegisterShopZone('barbershop_' .. id, shop.coords, shop.heading, {
-            {
-                type   = 'client',
-                event  = 'qb-clothing:client:OpenBarbershop',
-                icon   = 'scissors',
-                label  = shop.label,
-                shopId = id,
-            },
-        })
-        local markerId = exports['qb-hud']:AddMarker(shop.coords, {
-            title      = shop.label,
-            icon       = 'hairdresser',
-            markerType = 'Store',
-        })
-        if markerId then shopMarkers[#shopMarkers + 1] = markerId end
+local function RegisterAllShopZones()
+    for _, def in ipairs(SHOP_DEFS) do
+        ---@diagnostic disable-next-line: assign-type-mismatch
+        local shops = Config[def.configKey] or {}
+        for id, shop in pairs(shops) do
+            RegisterShopZone(def.zonePrefix .. '_' .. id, shop.coords, shop.heading, {
+                {
+                    type     = 'client',
+                    event    = 'qb-clothing:client:OpenShop',
+                    icon     = def.targetIcon,
+                    label    = shop.label,
+                    shopId   = id,
+                    shopType = shop.type or def.shopType,
+                },
+            })
+            local markerId = exports['qb-hud']:AddMarker(shop.coords, {
+                title      = shop.label,
+                icon       = def.markerIcon,
+                markerType = 'Store',
+            })
+            if markerId then shopMarkers[#shopMarkers + 1] = markerId end
+        end
     end
 end
 
@@ -183,11 +211,7 @@ RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
     UnregisterAllShopZones()
 end)
 
--- Opens the full character creator; slot list in Config available for future filtered UI
-RegisterClientEvent('qb-clothing:client:OpenShop', function(_)
-    OpenClothing()
-end)
-
-RegisterClientEvent('qb-clothing:client:OpenBarbershop', function(_)
-    OpenClothing()
+-- Single event for all shop types; shopType comes from the target zone data
+RegisterClientEvent('qb-clothing:client:OpenShop', function(data)
+    OpenClothing(data and data.shopType)
 end)
