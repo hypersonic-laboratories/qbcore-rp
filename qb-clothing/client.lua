@@ -158,11 +158,11 @@ end
 -- Descriptor table drives zone registration for every shop category.
 -- Add a new row here (and a matching Config table) to support a new shop type.
 local SHOP_DEFS = {
-    { configKey = 'ClothingShops',    shopType = 'clothing',    zonePrefix = 'clothingShop',    targetIcon = 'shirt',       markerIcon = 'clothing-store', markerDesc = 'Browse & purchase clothing' },
-    { configKey = 'Barbershops',      shopType = 'barbershop',  zonePrefix = 'barbershop',      targetIcon = 'scissors',    markerIcon = 'hairdresser',    markerDesc = 'Haircuts & styling' },
-    { configKey = 'TattooShops',      shopType = 'tattoo',      zonePrefix = 'tattooShop',      targetIcon = 'pen',         markerIcon = 'art-gallery',    markerDesc = 'Tattoo parlor' },
-    { configKey = 'PlasticSurgeons',  shopType = 'surgeon',     zonePrefix = 'plasticSurgeon',  targetIcon = 'stethoscope', markerIcon = 'hospital',       markerDesc = 'Cosmetic surgery' },
-    { configKey = 'AccessoriesShops', shopType = 'accessories', zonePrefix = 'accessoriesShop', targetIcon = 'gem',         markerIcon = 'jewelry-store',  markerDesc = 'Accessories & jewelry' },
+    { configKey = 'ClothingShops',    shopType = 'clothing',    zonePrefix = 'clothingShop',    targetIcon = 'shirt',       markerIcon = 'clothing-store', markerDesc = 'Browse & purchase clothing', markerColor = LinearColor(1.0, 0.5, 0.8, 1.0) },
+    { configKey = 'Barbershops',      shopType = 'barbershop',  zonePrefix = 'barbershop',      targetIcon = 'scissors',    markerIcon = 'hairdresser',    markerDesc = 'Haircuts & styling',          markerColor = LinearColor(0.6, 0.4, 1.0, 1.0) },
+    { configKey = 'TattooShops',      shopType = 'tattoo',      zonePrefix = 'tattooShop',      targetIcon = 'pen',         markerIcon = 'art-gallery',    markerDesc = 'Tattoo parlor',               markerColor = LinearColor(0.3, 0.3, 0.3, 1.0) },
+    { configKey = 'PlasticSurgeons',  shopType = 'surgeon',     zonePrefix = 'plasticSurgeon',  targetIcon = 'stethoscope', markerIcon = 'hospital',       markerDesc = 'Cosmetic surgery',            markerColor = LinearColor(0.2, 0.8, 0.8, 1.0) },
+    { configKey = 'AccessoriesShops', shopType = 'accessories', zonePrefix = 'accessoriesShop', targetIcon = 'gem',         markerIcon = 'jewelry-store',  markerDesc = 'Accessories & jewelry',       markerColor = LinearColor(0.9, 0.75, 0.2, 1.0) },
 }
 
 local function RegisterAllShopZones()
@@ -184,6 +184,7 @@ local function RegisterAllShopZones()
                 title       = shop.label or '',
                 description = shop.description or def.markerDesc or '',
                 icon        = def.markerIcon or 'store',
+                color       = shop.color or def.markerColor,
                 markerType  = 'Store',
             })
             if markerId then shopMarkers[#shopMarkers + 1] = markerId end

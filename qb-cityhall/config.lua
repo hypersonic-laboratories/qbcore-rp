@@ -25,6 +25,7 @@ Config = {
                     description = 'City services, licenses & jobs',
                     markerType = 'Objective',
                     icon = 'city',
+                    color = LinearColor(0.2, 0.5, 1.0, 1.0),
                 },
             },
             spots = {

@@ -15,6 +15,7 @@ local function addCityhallMarkers()
                 description = d.description or '',
                 markerType  = d.markerType or 'Store',
                 icon        = d.icon or 'city',
+                color       = d.color,
             })
             if markerId then markerIds[#markerIds + 1] = markerId end
         end
