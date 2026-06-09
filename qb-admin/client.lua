@@ -208,7 +208,7 @@ RegisterClientEvent('qb-admin:client:dashboardAnnounce', function(message)
 end)
 
 RegisterClientEvent('qb-admin:client:openClothing', function()
-    TriggerLocalClientEvent('qb-clothing:client:openMenu')
+    exports['qb-clothing']:OpenClothing()
 end)
 
 RegisterClientEvent('qb-admin:client:openInventory', function(targetPlayerId)
