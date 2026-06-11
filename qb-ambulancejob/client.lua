@@ -3,9 +3,9 @@ local checkedIn = false
 
 -- Functions
 
-local function getAuthorizedVehicles(grade)
+local function getAuthorizedVehicles(grade, authorizedVehicles)
     local accessibleVehicles = {}
-    for availableGrade, vehicles in pairs(Config.AuthorizedVehicles) do
+    for availableGrade, vehicles in pairs(authorizedVehicles) do
         if grade >= availableGrade then
             for vehicleName, vehicleLabel in pairs(vehicles) do
                 accessibleVehicles[vehicleName] = vehicleLabel
@@ -15,7 +15,9 @@ local function getAuthorizedVehicles(grade)
     return accessibleVehicles
 end
 
-local function MenuGarage()
+local function MenuGarage(locId)
+    local loc = Config.Locations[locId]
+    if not loc then return end
     local vehicleMenu = {
         {
             header = Lang.t('menu.amb_vehicles'),
@@ -23,7 +25,7 @@ local function MenuGarage()
         }
     }
 
-    local authorizedVehicles = getAuthorizedVehicles(exports['qb-core']:GetPlayerData().job.grade.level)
+    local authorizedVehicles = getAuthorizedVehicles(exports['qb-core']:GetPlayerData().job.grade.level, loc.authorizedVehicles)
     for veh, label in pairs(authorizedVehicles) do
         vehicleMenu[#vehicleMenu + 1] = {
             header = label,
@@ -32,7 +34,8 @@ local function MenuGarage()
                 isServer = true,
                 event = 'qb-ambulancejob:server:retrieveVehicle',
                 args = {
-                    vehicle = veh
+                    vehicle = veh,
+                    locId = locId
                 }
             }
         }
@@ -48,9 +51,9 @@ local function MenuGarage()
     exports['qb-menu']:openMenu(vehicleMenu)
 end
 
-local function getAuthorizedHelicopters(grade)
+local function getAuthorizedHelicopters(grade, authorizedHelicopters)
     local accessibleHelicopters = {}
-    for availableGrade, helicopters in pairs(Config.AuthorizedHelicopters) do
+    for availableGrade, helicopters in pairs(authorizedHelicopters) do
         if grade >= availableGrade then
             for helicopterName, helicopterLabel in pairs(helicopters) do
                 accessibleHelicopters[helicopterName] = helicopterLabel
@@ -60,7 +63,9 @@ local function getAuthorizedHelicopters(grade)
     return accessibleHelicopters
 end
 
-local function MenuHelicopter()
+local function MenuHelicopter(locId)
+    local loc = Config.Locations[locId]
+    if not loc then return end
     local helicopterMenu = {
         {
             header = Lang.t('menu.amb_helicopters'),
@@ -68,7 +73,7 @@ local function MenuHelicopter()
         }
     }
 
-    local authorizedHelicopters = getAuthorizedHelicopters(exports['qb-core']:GetPlayerData().job.grade.level)
+    local authorizedHelicopters = getAuthorizedHelicopters(exports['qb-core']:GetPlayerData().job.grade.level, loc.authorizedHelicopters)
     for heli, label in pairs(authorizedHelicopters) do
         helicopterMenu[#helicopterMenu + 1] = {
             header = label,
@@ -77,7 +82,8 @@ local function MenuHelicopter()
                 isServer = true,
                 event = 'qb-ambulancejob:server:retrieveHelicopter',
                 args = {
-                    vehicle = heli
+                    vehicle = heli,
+                    locId = locId
                 }
             }
         }
@@ -103,12 +109,12 @@ RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
 
 end)
 
-RegisterClientEvent('qb-ambulancejob:client:vehicleMenu', function()
-    MenuGarage()
+RegisterClientEvent('qb-ambulancejob:client:vehicleMenu', function(data)
+    MenuGarage(data and data.locId)
 end)
 
-RegisterClientEvent('qb-ambulancejob:client:helicopterMenu', function()
-    MenuHelicopter()
+RegisterClientEvent('qb-ambulancejob:client:helicopterMenu', function(data)
+    MenuHelicopter(data and data.locId)
 end)
 
 RegisterClientEvent('qb-ambulancejob:client:checkedIn', function()
@@ -184,102 +190,86 @@ end)
 
 -- Target
 
--- Checking
-for i = 1, #Config.Locations['checking'] do
-    local pos = Config.Locations['checking'][i]
-    exports['qb-target']:AddMeshTarget(
-        'ambchecking_' .. i,
-        pos.coords,
-        pos.rotation or Rotator(0, 0, 0),
-        '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-        {
+for locId, loc in pairs(Config.Locations) do
+    for i, point in ipairs(loc.checking) do
+        exports['qb-target']:AddSphereZone(
+            'ambchecking_' .. locId .. '_' .. i,
+            point, 75, { distance = 1000 },
             {
-                icon = 'clipboard-check',
-                label = 'Check In',
-                type = 'server',
-                event = 'qb-ambulancejob:server:checkIn',
-                -- job = 'ambulance'
+                {
+                    icon = 'clipboard-check',
+                    label = 'Check In',
+                    type = 'server',
+                    event = 'qb-ambulancejob:server:checkIn',
+                    -- job = 'ambulance'
+                }
             }
-        }
-    )
-end
+        )
+    end
 
--- Duty
-for i = 1, #Config.Locations['duty'] do
-    local pos = Config.Locations['duty'][i]
-    exports['qb-target']:AddMeshTarget(
-        'ambduty_' .. i,
-        pos.coords,
-        pos.rotation or Rotator(0, 0, 0),
-        '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-        {
+    for i, point in ipairs(loc.duty) do
+        exports['qb-target']:AddSphereZone(
+            'ambduty_' .. locId .. '_' .. i,
+            point, 75, { distance = 1000 },
             {
-                icon = 'clipboard',
-                label = 'Toggle Duty',
-                type = 'server',
-                event = 'QBCore:ToggleDuty',
-                -- job = 'ambulance'
+                {
+                    icon = 'clipboard',
+                    label = 'Toggle Duty',
+                    type = 'server',
+                    event = 'QBCore:ToggleDuty',
+                    -- job = 'ambulance'
+                }
             }
-        }
-    )
-end
+        )
+    end
 
--- Stash
-for i = 1, #Config.Locations['stash'] do
-    local pos = Config.Locations['stash'][i]
-    exports['qb-target']:AddMeshTarget(
-        'ambstash_' .. i,
-        pos.coords,
-        pos.rotation or Rotator(0, 0, 0),
-        '/QBCoreAssets/Meshes/SM_MedicalBag.SM_MedicalBag', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-        {
+    for i, point in ipairs(loc.stash) do
+        exports['qb-target']:AddSphereZone(
+            'ambstash_' .. locId .. '_' .. i,
+            point, 75, { distance = 1000 },
             {
-                icon = 'box',
-                label = 'Open Stash',
-                type = 'server',
-                event = 'qb-ambulancejob:server:openStash',
-                -- job = 'ambulance'
+                {
+                    icon = 'box',
+                    label = 'Open Stash',
+                    type = 'server',
+                    event = 'qb-ambulancejob:server:openStash',
+                    -- job = 'ambulance'
+                }
             }
-        }
-    )
-end
+        )
+    end
 
---Vehicle
-for i = 1, #Config.Locations['vehicle'] do
-    local pos = Config.Locations['vehicle'][i]
-    exports['qb-target']:AddMeshTarget(
-        'ambvehicle_' .. i,
-        pos.coords,
-        pos.rotation or Rotator(0, 0, 0),
-        '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-        {
+    for i, point in ipairs(loc.vehicle) do
+        exports['qb-target']:AddSphereZone(
+            'ambvehicle_' .. locId .. '_' .. i,
+            point, 75, { distance = 1000 },
             {
-                icon = 'car',
-                label = 'Retrieve Vehicle',
-                event = 'qb-ambulancejob:client:vehicleMenu',
-                -- job = 'ambulance'
+                {
+                    icon = 'car',
+                    label = 'Retrieve Vehicle',
+                    event = 'qb-ambulancejob:client:vehicleMenu',
+                    args = { locId = locId },
+                    -- job = 'ambulance'
+                }
             }
-        }
-    )
-end
+        )
+    end
 
--- Helicopter
-for i = 1, #Config.Locations['helicopter'] do
-    local pos = Config.Locations['helicopter'][i]
-    exports['qb-target']:AddMeshTarget(
-        'ambhelicopter_' .. i,
-        pos.coords,
-        pos.rotation or Rotator(0, 0, 0),
-        '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-        {
+    for i, point in ipairs(loc.helicopter) do
+        exports['qb-target']:AddSphereZone(
+            'ambhelicopter_' .. locId .. '_' .. i,
+            point, 75, { distance = 1000 },
             {
-                icon = 'helicopter',
-                label = 'Retrieve Helicopter',
-                event = 'qb-ambulancejob:client:helicopterMenu',
-                -- job = 'ambulance'
+                {
+                    icon = 'helicopter',
+                    label = 'Retrieve Helicopter',
+                    event = 'qb-ambulancejob:client:helicopterMenu',
+                    args = { locId = locId },
+                    -- job = 'ambulance'
+                }
             }
-        }
-    )
+        )
+    end
 end
 
 -- Global Player

@@ -5,7 +5,7 @@ Config.BossMenus = {
         Vector(563110, 571810, 4640),
     },
     ambulance = {
-        Vector(0, 0, 0), -- TO DO
+        Vector(552809, 438833, 4545),
     },
     cardealer = {
         Vector(567700, 542850, 4550),

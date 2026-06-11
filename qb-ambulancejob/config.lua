@@ -1,68 +1,56 @@
-local Lang = require('locales/en')
-
 Config = {
-    VehicleSpawn = { coords = Vector(0, 0, 0), heading = 0 },
-    HelicopterSpawn = { coords = Vector(0, 0, 0), heading = 0 },
     Locations = {
-        ['checking'] = {
-            { coords = Vector(0, 0, 0) },
-            { coords = Vector(0, 0, 0) }
-        },
-        ['duty'] = {
-            { coords = Vector(0, 0, 0), rotation = Rotator(0, 0, 0) }
-        },
-        ['vehicle'] = {
-            { coords = Vector(0, 0, 0) }
-        },
-        ['helicopter'] = {
-            { coords = Vector(0, 0, 0) }
-        },
-        ['stash'] = {
-            { coords = Vector(0, 0, 0) }
-        },
-        ['jailbeds'] = {
-            { coords = Vector(0, 0, 0), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            { coords = Vector(0, 0, 0), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            { coords = Vector(0, 0, 0), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            { coords = Vector(0, 0, 0), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
-        },
-        ['hospital'] = {
-            {
-                ['name'] = Lang.t('info.pb_hospital'),
-                ['location'] = Vector(0, 0, 0),
-                ['beds'] = {
-                    { coords = Vector(0, 0, 0), heading = 0, taken = false },
-                    { coords = Vector(0, 0, 0), heading = 0, taken = false },
-                    { coords = Vector(0, 0, 0), heading = 0, taken = false },
-                    { coords = Vector(0, 0, 0), heading = 0, taken = false },
-                    { coords = Vector(0, 0, 0), heading = 0, taken = false },
-                },
+        ['palmera_medical'] = {
+            label                 = 'Palmera Medical Center',
+            checking              = { Vector(559879, 432795, 4545) },
+            duty                  = { Vector(559348, 432941, 4545) },
+            stash                 = { Vector(557885, 434102, 4545) },
+            vehicle               = { Vector(564197, 441202, 4537) },
+            helicopter            = { Vector(0, 0, 0) },
+            vehicleSpawn          = { coords = Vector(0, 0, 0), heading = 0 },
+            helicopterSpawn       = { coords = Vector(0, 0, 0), heading = 0 },
+            authorizedVehicles    = {
+                [0] = { ['bp_ambulance'] = 'Ambulance' }
             },
-            -- {
-            --     ['name'] = Lang.t('info.paleto_hospital'),
-            --     ['location'] = Vector(-254.54, 6331.78, 32.43),
-            --     ['beds'] = {
-            --         { coords = Vector(-252.43, 6312.25, 32.34, 313.48), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            --         { coords = Vector(-247.04, 6317.95, 32.34, 134.64), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            --         { coords = Vector(-255.98, 6315.67, 32.34, 313.91), taken = false, model = '/QBCoreAssets/Meshes/LP_HospitalBed.LP_HospitalBed' },
-            --     },
-            -- },
+            authorizedHelicopters = {
+                [0] = { ['bp_aheli'] = 'EMS Heli' }
+            },
+            beds                  = {
+                { coords = Vector(558823, 436869, 4608), heading = 121, taken = false },
+                { coords = Vector(558218, 436507, 4608), heading = 121, taken = false },
+                { coords = Vector(557995, 436288, 4608), heading = 125, taken = false },
+                { coords = Vector(557408, 435953, 4608), heading = 125, taken = false },
+                { coords = Vector(556594, 435381, 4608), heading = 122, taken = false },
+                { coords = Vector(556354, 435215, 4608), heading = 120, taken = false },
+                { coords = Vector(556020, 434951, 4608), heading = 127, taken = false },
+                { coords = Vector(555760, 434804, 4608), heading = 126, taken = false },
+            },
         },
-        ['stations'] = {
-            { label = Lang.t('info.pb_hospital'), coords = Vector(0, 0, 0) }
-        }
-    },
-
-    AuthorizedVehicles = { -- Grade is key, don't add same vehicle in multiple grades. Higher rank can see lower
-        [0] = {
-            ['bp_ambulance'] = 'Ambulance'
-        }
-    },
-
-    AuthorizedHelicopters = { -- Grade is key, don't add same vehicle in multiple grades. Higher rank can see lower
-        [0] = {
-            ['bp_aheli'] = 'EMS Heli'
-        }
+        ['palmera_trauma'] = {
+            label                 = 'Palmera Trauma Center',
+            checking              = { Vector(555776, 438849, 4545) },
+            duty                  = { Vector(555388, 439094, 4545) },
+            stash                 = { Vector(552647, 438625, 4545) },
+            vehicle               = { Vector(560783, 446224, 4537) },
+            helicopter            = { Vector(0, 0, 0) },
+            vehicleSpawn          = { coords = Vector(0, 0, 0), heading = 0 },
+            helicopterSpawn       = { coords = Vector(0, 0, 0), heading = 0 },
+            authorizedVehicles    = {
+                [0] = { ['bp_ambulance'] = 'Ambulance' }
+            },
+            authorizedHelicopters = {
+                [0] = { ['bp_aheli'] = 'EMS Heli' }
+            },
+            beds                  = {
+                { coords = Vector(553985, 440255, 4608), heading = 215, taken = false },
+                { coords = Vector(553789, 440580, 4608), heading = 212, taken = false },
+                { coords = Vector(553570, 440881, 4608), heading = 211, taken = false },
+                { coords = Vector(553342, 441202, 4608), heading = 215, taken = false },
+                { coords = Vector(554402, 441520, 4608), heading = 31,  taken = false },
+                { coords = Vector(554191, 441828, 4608), heading = 33,  taken = false },
+                { coords = Vector(553971, 442140, 4608), heading = 37,  taken = false },
+            },
+        },
     },
 
     Bones = {

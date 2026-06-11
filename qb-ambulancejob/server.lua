@@ -4,11 +4,12 @@ local Vehicles = exports['qb-core']:GetShared('Vehicles')
 -- Functions
 
 local function getAvailableBed()
-    for i = 1, #Config.Locations['hospital'][1].beds do
-        local bedInfo = Config.Locations['hospital'][1].beds[i]
-        if not bedInfo.taken then
-            bedInfo.taken = true
-            return bedInfo
+    for _, loc in pairs(Config.Locations) do
+        for i = 1, #loc.beds do
+            if not loc.beds[i].taken then
+                loc.beds[i].taken = true
+                return loc.beds[i]
+            end
         end
     end
 end
@@ -18,10 +19,13 @@ end
 RegisterServerEvent('qb-ambulancejob:server:retrieveVehicle', function(source, data)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
-    local vehicleName = data.vehicle
-    local vehicleData = Vehicles[vehicleName]
-    local vehicleAsset = vehicleData and vehicleData.asset_name or nil
-    local vehicle = HVehicle(Config.VehicleSpawn.coords, Rotator(0, Config.VehicleSpawn.heading, 0), vehicleAsset)
+    local loc = Config.Locations[data.locId]
+    if not loc then return end
+    local vehicleData = Vehicles[data.vehicle]
+    local vehicleAsset = vehicleData and vehicleData.asset_name
+    if not vehicleAsset then return end
+    local vehicle = HVehicle(loc.vehicleSpawn.coords, Rotator(0, loc.vehicleSpawn.heading, 0), vehicleAsset)
+    if not vehicle then return end
     local plate = Lang.t('info.amb_plate') .. tostring(math.random(1000, 9999))
     vehicle:SetPlate(plate)
 end)
@@ -29,10 +33,13 @@ end)
 RegisterServerEvent('qb-ambulancejob:server:retrieveHelicopter', function(source, data)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then return end
-    local vehicleName = data.vehicle
-    local vehicleData = Vehicles[vehicleName]
-    local vehicleAsset = vehicleData and vehicleData.asset_name or nil
-    local vehicle = HVehicle(Config.HelicopterSpawn.coords, Rotator(0, Config.HelicopterSpawn.heading, 0), vehicleAsset)
+    local loc = Config.Locations[data.locId]
+    if not loc then return end
+    local vehicleData = Vehicles[data.vehicle]
+    local vehicleAsset = vehicleData and vehicleData.asset_name
+    if not vehicleAsset then return end
+    local vehicle = HVehicle(loc.helicopterSpawn.coords, Rotator(0, loc.helicopterSpawn.heading, 0), vehicleAsset)
+    if not vehicle then return end
     local plate = Lang.t('info.heli_plate') .. tostring(math.random(1000, 9999))
     vehicle:SetPlate(plate)
 end)
@@ -70,7 +77,10 @@ RegisterServerEvent('qb-ambulancejob:server:checkOut', function(source)
     local pawn = GetPlayerPawn(source)
     --DetachActor(pawn)
     Animation.Stop(pawn)
-    SetEntityCoords(pawn, Vector(Config.Locations['checking'][1].coords.X, Config.Locations['checking'][1].coords.Y + 300, Config.Locations['checking'][1].coords.Z))
+    local _, loc = next(Config.Locations)
+    if not loc then return end
+    local c = loc.checking[1]
+    SetEntityCoords(pawn, Vector(c.X, c.Y + 300, c.Z))
 end)
 
 RegisterServerEvent('qb-hospitaljob:server:status', function(source, data)
@@ -182,7 +192,8 @@ RegisterServerEvent('qb-hospitaljob:server:escort', function(source, data)
     if distance > 500 then return end
     if not target_pawn:GetAttachParentActor() then
         target_pawn:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_None, nil)
-        AttachActorToComponent(target_pawn, pawn:K2_GetRootComponent(), Vector(100, 50, 0), Rotator(), 'root')
+        -- AttachActorToComponent(target_pawn, pawn:K2_GetRootComponent(), Vector(100, 50, 0), Rotator(), 'root')
+        AttachActorToActor(target_pawn, pawn, Vector(100, 50, 0), Rotator(), 'root')
     else
         DetachActor(target_pawn)
         local player_rotation = GetEntityRotation(pawn)
