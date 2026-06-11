@@ -9,16 +9,14 @@ local States = {
 -- Functions
 
 local function GetClosestFingerprint(coords)
-    local closestFingerprint
-    for i = 1, #Config.Locations.fingerprint do
-        local FingerprintCoords = Config.Locations.fingerprint[i].coords
-        local distance = coords:Dist(FingerprintCoords)
-        if distance <= 500 then
-            closestFingerprint = i
-            break
+    for locId, loc in pairs(Config.Locations) do
+        for i, point in ipairs(loc.fingerprint) do
+            if coords:Dist(point) <= 500 then
+                return locId .. '_' .. i
+            end
         end
     end
-    return closestFingerprint
+    return nil
 end
 
 local function GetEscortedTarget(source)
@@ -113,12 +111,14 @@ RegisterServerEvent('qb-policejob:server:retrieveVehicle', function(source, data
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
 
-    -- Check player grade and vehicle grade
+    local loc = Config.Locations[data.locId]
+    if not loc then return end
+
     local PlayerGrade = Player.PlayerData.job.grade.level
     local VehicleName = data.vehicle
     local authorized = false
     for i = 0, PlayerGrade do
-        if Config.AuthorizedVehicles[i] and Config.AuthorizedVehicles[i][VehicleName] then
+        if loc.authorizedVehicles[i] and loc.authorizedVehicles[i][VehicleName] then
             authorized = true
             break
         end
@@ -128,8 +128,7 @@ RegisterServerEvent('qb-policejob:server:retrieveVehicle', function(source, data
     local VehicleData = Vehicles[VehicleName]
     if not VehicleData then return end
 
-    -- Spawn Vehicle
-    local SpawnLocation = Config.Locations.vehicle[data.locationIndex].spawn
+    local SpawnLocation = loc.vehicleSpawn
     local Vehicle = HVehicle(SpawnLocation.coords, SpawnLocation.rotation, VehicleData.asset_name)
     Vehicle:SetPlate(Lang.t('info.police_plate') .. tostring(math.random(1000, 9999)))
 end)

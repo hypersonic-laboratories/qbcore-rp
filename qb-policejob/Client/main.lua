@@ -2,20 +2,105 @@ local my_webui = WebUI('Fingerprint', 'qb-policejob/html/index.html')
 local Targets = {}
 local IsEscorting = false
 local IsCuffed = false
-require('locales/en')
+local policeMarkers = {}
+local Lang = require('locales/en')
 
 -- Functions
 
-local function getAuthorizedVehicles(grade)
-    local authorizedVehicles = {}
-    for minimumGrade, vehicles in pairs(Config.AuthorizedVehicles) do
-        if grade >= minimumGrade then
+local function getAuthorizedVehicles(grade, authorizedVehicles)
+    local accessibleVehicles = {}
+    for availableGrade, vehicles in pairs(authorizedVehicles) do
+        if grade >= availableGrade then
             for vehicleName, vehicleLabel in pairs(vehicles) do
-                authorizedVehicles[vehicleName] = vehicleLabel
+                accessibleVehicles[vehicleName] = vehicleLabel
             end
         end
     end
-    return authorizedVehicles
+    return accessibleVehicles
+end
+
+local function MenuVehicle(locId)
+    local loc = Config.Locations[locId]
+    if not loc then return end
+    local vehicleMenu = {
+        {
+            header = Lang.t('menu.garage_title'),
+            isMenuHeader = true,
+        }
+    }
+
+    local authorizedVehicles = getAuthorizedVehicles(exports['qb-core']:GetPlayerData().job.grade.level, loc.authorizedVehicles)
+    for vehicleName, label in pairs(authorizedVehicles) do
+        vehicleMenu[#vehicleMenu + 1] = {
+            header = label,
+            txt = '',
+            params = {
+                isServer = true,
+                event = 'qb-policejob:server:retrieveVehicle',
+                args = {
+                    vehicle = vehicleName,
+                    locId = locId,
+                }
+            }
+        }
+    end
+
+    vehicleMenu[#vehicleMenu + 1] = {
+        header = Lang.t('menu.close'),
+        txt = '',
+        params = {
+            event = 'qb-menu:client:closeMenu',
+        }
+    }
+    exports['qb-menu']:openMenu(vehicleMenu)
+end
+
+local function getAuthorizedHelicopters(grade, authorizedHelicopters)
+    local accessibleHelicopters = {}
+    for availableGrade, helicopters in pairs(authorizedHelicopters) do
+        if grade >= availableGrade then
+            for helicopterName, helicopterLabel in pairs(helicopters) do
+                accessibleHelicopters[helicopterName] = helicopterLabel
+            end
+        end
+    end
+    return accessibleHelicopters
+end
+
+local function MenuHelicopter(locId)
+    local loc = Config.Locations[locId]
+    if not loc then return end
+    local helicopterMenu = {
+        {
+            header = Lang.t('menu.pol_helicopters'),
+            isMenuHeader = true,
+        }
+    }
+
+    local authorizedHelicopters = getAuthorizedHelicopters(exports['qb-core']:GetPlayerData().job.grade.level, loc.authorizedHelicopters)
+    for heliName, label in pairs(authorizedHelicopters) do
+        helicopterMenu[#helicopterMenu + 1] = {
+            header = label,
+            txt = '',
+            params = {
+                isServer = true,
+                event = 'qb-policejob:server:retrieveHelicopter',
+                args = {
+                    vehicle = heliName,
+                    locId = locId,
+                }
+            }
+        }
+    end
+
+    helicopterMenu[#helicopterMenu + 1] = {
+        header = Lang.t('menu.close'),
+        txt = '',
+        params = {
+            event = 'qb-menu:client:closeMenu',
+        }
+    }
+    exports['qb-menu']:openMenu(helicopterMenu)
 end
 
 local fingerprint = false
@@ -37,11 +122,6 @@ function onShutdown()
 end
 
 -- Handlers
---[[
---@TODO Add handler for package restart when logged in
-player_data = QBCore.Functions.GetPlayerData()
-setupPeds()
-]]
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     player_data = exports['qb-core']:GetPlayerData()
@@ -52,6 +132,10 @@ end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
     player_data = {}
+    for _, id in ipairs(policeMarkers) do
+        exports['qb-hud']:RemoveMarker(id)
+    end
+    policeMarkers = {}
 end)
 
 RegisterClientEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
@@ -98,46 +182,21 @@ RegisterClientEvent('qb-policejob:client:evidence', function()
     local player_ped = GetPlayerPawn(HPlayer)
     if not player_ped then return end
     local player_coords = GetEntityCoords(player_ped)
-    for i = 1, #Config.Locations.evidence do
-        local coords = Config.Locations.evidence[i].coords
-        local distance = player_coords:Dist(coords)
-        if distance < 500 then
-            TriggerServerEvent('qb-policejob:server:evidence', i)
+    for locId, loc in pairs(Config.Locations) do
+        for i, point in ipairs(loc.evidence) do
+            if player_coords:Dist(point) < 500 then
+                TriggerServerEvent('qb-policejob:server:evidence', locId .. '_' .. i)
+            end
         end
     end
 end)
 
 RegisterClientEvent('qb-policejob:client:vehicleMenu', function(data)
-    local vehicleMenu = {
-        {
-            header = Lang.t('menu.garage_title')
-        }
-    }
+    MenuVehicle(data and data.locId)
+end)
 
-    local AuthorizedVehicles = getAuthorizedVehicles(exports['qb-core']:GetPlayerData().job.grade.level)
-    for vehicleName, label in pairs(AuthorizedVehicles) do
-        vehicleMenu[#vehicleMenu + 1] = {
-            header = label,
-            txt = '',
-            params = {
-                isServer = true,
-                event = 'qb-policejob:server:retrieveVehicle',
-                args = {
-                    vehicle = vehicleName,
-                    locationIndex = data.locationIndex,
-                }
-            }
-        }
-    end
-
-    vehicleMenu[#vehicleMenu + 1] = {
-        header = Lang.t('menu.close'),
-        txt = '',
-        params = {
-            event = 'qb-menu:client:closeMenu',
-        }
-    }
-    exports['qb-menu']:openMenu(vehicleMenu)
+RegisterClientEvent('qb-policejob:client:helicopterMenu', function(data)
+    MenuHelicopter(data and data.locId)
 end)
 
 RegisterClientEvent('qb-policejob:client:escort', function(data)
@@ -163,7 +222,6 @@ RegisterClientEvent('qb-policejob:client:setCuffed', function(NewIsCuffed)
     IsCuffed = NewIsCuffed
 end)
 
-local police_alert = 0
 --[[ Events.SubscribeRemote('qb-policejob:client:policeAlert', function(coords, text)
     police_alert = police_alert + 1
     QBCore.Functions.Notify('Police Alert: ' .. text)
@@ -335,113 +393,118 @@ RegisterClientEvent('qb-policejob:client:viewCriminalRecord', function(args)
     exports['qb-menu']:openMenu(criminalRecordMenu)
 end)
 
---- Target Setup
---@TODO: Locales
-local function AddTargetZone(type, name, ...)
-    if type == 'Mesh' then
-        exports['qb-target']:AddMeshTarget(name, ...)
-    elseif type == 'Box' then
-        exports['qb-target']:AddBoxZone(name, ...)
+-- Target Setup
+
+for locId, loc in pairs(Config.Locations) do
+    for i, point in ipairs(loc.duty) do
+        local name = 'polduty_' .. locId .. '_' .. i
+        exports['qb-target']:AddSphereZone(name, point, 75, { distance = 1000 },
+            {
+                {
+                    type = 'server',
+                    event = 'QBCore:ToggleDuty',
+                    label = 'Toggle Duty',
+                    icon = 'clipboard',
+                    --jobType = 'leo'
+                },
+            }
+        )
+        Targets[name] = true
     end
 
-    Targets[name] = true
+    for i, point in ipairs(loc.vehicle) do
+        local name = 'polveh_' .. locId .. '_' .. i
+        exports['qb-target']:AddSphereZone(name, point, 75, { distance = 1000 },
+            {
+                {
+                    event = 'qb-policejob:client:vehicleMenu',
+                    label = Lang.t('menu.pol_garage'),
+                    icon = 'car',
+                    args = { locId = locId },
+                    --jobType = 'leo'
+                },
+            }
+        )
+        Targets[name] = true
+    end
+
+    for i, point in ipairs(loc.stash) do
+        local name = 'polstash_' .. locId .. '_' .. i
+        exports['qb-target']:AddSphereZone(name, point, 75, { distance = 1000 },
+            {
+                {
+                    type = 'server',
+                    event = 'qb-policejob:server:openStash',
+                    label = Lang.t('target.open_personal_stash'),
+                    icon = 'box',
+                    --jobType = 'leo'
+                },
+            }
+        )
+        Targets[name] = true
+    end
+
+    for i, point in ipairs(loc.fingerprint) do
+        local name = 'polfprint_' .. locId .. '_' .. i
+        exports['qb-target']:AddSphereZone(name, point, 75, { distance = 1000 },
+            {
+                {
+                    type = 'server',
+                    event = 'qb-policejob:server:openFingerprint',
+                    label = Lang.t('target.open_fingerprint'),
+                    icon = 'fingerprint',
+                    --jobType = 'leo'
+                },
+            }
+        )
+        Targets[name] = true
+    end
+
+    for i, point in ipairs(loc.evidence) do
+        local name = 'polevid_' .. locId .. '_' .. i
+        exports['qb-target']:AddSphereZone(name, point, 75, { distance = 1000 },
+            {
+                {
+                    type = 'client',
+                    event = 'qb-policejob:client:evidence',
+                    label = Lang.t('target.open_evidence_stash'),
+                    icon = 'box-open',
+                    --jobType = 'leo'
+                },
+            }
+        )
+        Targets[name] = true
+    end
+
+    for i, point in ipairs(loc.helicopter) do
+        local name = 'polheli_' .. locId .. '_' .. i
+        exports['qb-target']:AddSphereZone(name, point, 75, { distance = 1000 },
+            {
+                {
+                    event = 'qb-policejob:client:helicopterMenu',
+                    label = Lang.t('menu.pol_helicopters'),
+                    icon = 'helicopter',
+                    args = { locId = locId },
+                    --jobType = 'leo'
+                },
+            }
+        )
+        Targets[name] = true
+    end
 end
 
--- Duty
-for i = 1, #Config.Locations['duty'] do
-    local pos = Config.Locations['duty'][i]
-    AddTargetZone('Mesh',
-        'polduty_' .. i,
-        pos.coords,
-        pos.rotation or Rotator(0, 0, 0),
-        '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-        {
-            {
-                type = 'server',
-                event = 'QBCore:ToggleDuty',
-                label = 'Toggle Duty',
-                icon = 'clipboard',
-                --jobType = 'leo'
-            },
-        }
-    )
+-- Markers
+
+for _, loc in pairs(Config.Locations) do
+    local markerId = exports['qb-hud']:AddMarker(loc.duty[1], {
+        title      = loc.label,
+        icon       = 'shield',
+        markerType = 'Police',
+    })
+    if markerId then policeMarkers[#policeMarkers + 1] = markerId end
 end
 
--- Vehicle
-for i = 1, #Config.Locations['vehicle'] do
-    local pos = Config.Locations['vehicle'][i]
-    AddTargetZone('Mesh',
-        'polveh_' .. i,
-        pos.coords,
-        pos.rotation or Rotator(0, 0, 0),
-        '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-        {
-            {
-                event = 'qb-policejob:client:vehicleMenu',
-                label = Lang.t('menu.pol_garage'),
-                icon = 'car',
-                locationIndex = i,
-                --jobType = 'leo'
-            },
-        }
-    )
-end
-
--- Stash
-for i = 1, #Config.Locations['stash'] do
-    local pos = Config.Locations['stash'][i]
-    AddTargetZone('Mesh',
-        'polstash_' .. i,
-        pos.coords,
-        pos.rotation or Rotator(0, 0, 0),
-        '/QBCoreAssets/Meshes/SM_DuffelBag.SM_DuffelBag', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-        {
-            {
-                type = 'server',
-                event = 'qb-policejob:server:openStash',
-                label = Lang.t('target.open_personal_stash'),
-                icon = 'box',
-                --jobType = 'leo'
-            },
-        }
-    )
-end
-
--- Evidence
-for i = 1, #Config.Locations['evidence'] do
-    local pos = Config.Locations['evidence'][i]
-    AddTargetZone('Box', 'polevid_' .. i, pos.coords, 250.0, 100.0, { minZ = pos.coords.Z - 100, maxZ = pos.coords.Z + 100, heading = pos.heading or 0, debug = true },
-        {
-            {
-                type = 'client',
-                event = 'qb-policejob:client:evidence',
-                label = Lang.t('target.open_evidence_stash'),
-                icon = 'box-open',
-                --jobType = 'leo'
-            },
-        }
-    )
-end
-
--- Fingerprint
-for i = 1, #Config.Locations['fingerprint'] do
-    local pos = Config.Locations['fingerprint'][i]
-    AddTargetZone('Mesh',
-        'polfprint_' .. i,
-        pos.coords,
-        pos.rotation or Rotator(0, 0, 0),
-        '/QBCoreAssets/Meshes/SM_Clipboard.SM_Clipboard', { collision = CollisionType.Normal, stationary = true, distance = 1000 },
-        {
-            {
-                type = 'server',
-                event = 'qb-policejob:server:openFingerprint',
-                label = Lang.t('target.open_fingerprint'),
-                icon = 'fingerprint',
-                --jobType = 'leo'
-            },
-        }
-    )
-end
+-- Vehicle Doors
 
 exports['qb-target']:AddTargetModel('SM_Door_RR_PoliceCar', {
     options = {
@@ -470,6 +533,8 @@ exports['qb-target']:AddTargetModel('SM_Door_RL_PoliceCar', {
     },
     distance = 500,
 })
+
+-- Global Player
 
 exports['qb-target']:AddGlobalPlayer({
     options = {

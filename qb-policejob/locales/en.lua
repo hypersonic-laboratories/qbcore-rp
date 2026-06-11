@@ -145,6 +145,7 @@ local Translations = {
         pol_impound = 'Police Impound',
         pol_garage = 'Police Garage',
         pol_armory = 'Police Armory',
+        pol_helicopters = 'Police Helicopters',
     },
     email = {
         sender = 'Central Judicial Collection Agency',

@@ -12,58 +12,33 @@ Config = {
     },
 
     Objects = {
-        cone = { model = '', freeze = true },
-        barrier = { model = '', freeze = true },
+        cone     = { model = '', freeze = true },
+        barrier  = { model = '', freeze = true },
         roadsign = { model = '', freeze = true },
-        tent = { model = '', freeze = true },
-        light = { model = '', freeze = true },
+        tent     = { model = '', freeze = true },
+        light    = { model = '', freeze = true },
     },
 
     Locations = {
-        duty = {
-            { coords = Vector(-340320.0, -147790.0, -2840.0), rotation = Rotator(0, 90, 90) },
-        },
-        vehicle = {
-            {
-                coords = Vector(-339350.0, -145760.0, -2970.0),
-                rotation = Rotator(0, 0, 0),
-                spawn = { coords = Vector(-339358.10, -144656.62, -2980.06), rotation = Rotator(0, 90, 0) },
+        ['south_beach_pd'] = {
+            label                 = 'South Beach Police Department',
+            duty                  = { Vector(562851, 571954, 4653) },
+            stash                 = { Vector(563241, 572137, 4656) },
+            fingerprint           = { Vector(562118, 571225, 4700) },
+            evidence              = { Vector(561937, 571572, 4653) },
+            trash                 = { Vector(0, 0, 0) },
+            vehicle               = { Vector(0, 0, 0) },
+            vehicleSpawn          = { coords = Vector(0, 0, 0), rotation = Rotator(0, 90, 0) },
+            impound               = { Vector(0, 0, 0) },
+            helicopter            = { Vector(0, 0, 0) },
+            helicopterSpawn       = { coords = Vector(0, 0, 0), rotation = Rotator(0, 0, 0) },
+            authorizedVehicles    = {
+                [0] = { ['bp_police'] = 'Police Car' }
+            },
+            authorizedHelicopters = {
+                [0] = { ['bp_pheli'] = 'Police Heli' }
             },
         },
-        stash = {
-            { coords = Vector(-339520.0, -148650.0, -2930.0),  rotation = Rotator(0, 90, 0) },
-        },
-        impound = {
-            Vector(0, 0, 0)
-        },
-        helicopter = {
-            Vector(0, 0, 0)
-        },
-        trash = {
-            Vector(0, 0, 0)
-        },
-        fingerprint = {
-            { coords = Vector(-339884.98, -148380.16, -2889.0),  rotation = Rotator(0, 90, 0) },
-        },
-        evidence = {
-            { coords = Vector(-339641.0, -149006.58, -2912.50),  heading = 0 },
-        },
-        stations = {
-            { label = 'Police Station', coords = Vector(-340540.36, -147839.66, -2884.60) },
-        },
-        
-    },
-
-    AuthorizedVehicles = { -- Grade is key, don't add same vehicle in multiple grades. Higher rank can see lower
-        [0] = {
-            ['bp_police'] = 'Police Car'
-        },
-    },
-
-    AuthorizedHelicopters = { -- Grade is key, don't add same vehicle in multiple grades. Higher rank can see lower
-        [0] = {
-            ['bp_pheli'] = 'Police Heli'
-        }
     },
 
     SpeedCamera = {
