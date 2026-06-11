@@ -1,4 +1,5 @@
 local Lang = require('locales/en')
+local garbageMarkers = {}
 
 exports['qb-target']:AddTargetModel('SM_Dumpster', {
     options = {
@@ -64,6 +65,24 @@ end
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     setupPeds()
 end)
+
+RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+    for _, id in ipairs(garbageMarkers) do
+        exports['qb-hud']:RemoveMarker(id)
+    end
+    garbageMarkers = {}
+end)
+
+-- Markers
+
+for _, depot in ipairs(Config.Locations.Depots) do
+    local markerId = exports['qb-hud']:AddMarker(depot.pedSpawn.coords, {
+        title      = depot.label,
+        icon       = 'waste-basket',
+        markerType = 'Store',
+    })
+    if markerId then garbageMarkers[#garbageMarkers + 1] = markerId end
+end
 
 RegisterClientEvent('qb-garbagejob:client:removeTargets', function(vehicle)
     if vehicle then
