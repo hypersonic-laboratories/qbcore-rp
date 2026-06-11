@@ -62,27 +62,36 @@ local function setupPeds()
     end)
 end
 
-RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
-    setupPeds()
-end)
+local function createGarbageMarkers()
+    for _, depot in ipairs(Config.Locations.Depots) do
+        if depot.showBlip then
+            local markerId = exports['qb-hud']:AddMarker(depot.pedSpawn.coords, {
+                title       = depot.label,
+                description = depot.description or '',
+                icon        = depot.blipIcon or 'waste-basket',
+                color       = depot.blipColor,
+                markerType  = 'Store',
+            })
+            if markerId then garbageMarkers[#garbageMarkers + 1] = markerId end
+        end
+    end
+end
 
-RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+local function clearGarbageMarkers()
     for _, id in ipairs(garbageMarkers) do
         exports['qb-hud']:RemoveMarker(id)
     end
     garbageMarkers = {}
+end
+
+RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
+    setupPeds()
+    createGarbageMarkers()
 end)
 
--- Markers
-
-for _, depot in ipairs(Config.Locations.Depots) do
-    local markerId = exports['qb-hud']:AddMarker(depot.pedSpawn.coords, {
-        title      = depot.label,
-        icon       = 'waste-basket',
-        markerType = 'Store',
-    })
-    if markerId then garbageMarkers[#garbageMarkers + 1] = markerId end
-end
+RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+    clearGarbageMarkers()
+end)
 
 RegisterClientEvent('qb-garbagejob:client:removeTargets', function(vehicle)
     if vehicle then

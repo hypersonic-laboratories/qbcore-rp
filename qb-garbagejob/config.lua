@@ -8,9 +8,13 @@ Config = {
     Locations = {
         Depots = {
             {
-                label = 'West Garbage Depot',
-                pedSpawn = { coords = Vector(-355218, -133170, -2882), heading = 176 },
+                label        = 'West Garbage Depot',
+                pedSpawn     = { coords = Vector(-355218, -133170, -2882), heading = 176 },
                 vehicleSpawn = { coords = Vector(-356090, -133100, -2981), heading = 180 },
+                showBlip     = true,
+                blipIcon     = 'waste-basket',
+                blipColor    = LinearColor(0.2, 0.55, 0.15, 1.0),
+                description  = 'Pick up & return garbage trucks',
             },
         },
 
