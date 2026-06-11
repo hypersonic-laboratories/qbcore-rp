@@ -1,5 +1,6 @@
 local Lang = require('locales/en')
 local checkedIn = false
+local hospitalMarkers = {}
 
 -- Functions
 
@@ -106,7 +107,10 @@ RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
-
+    for _, id in ipairs(hospitalMarkers) do
+        exports['qb-hud']:RemoveMarker(id)
+    end
+    hospitalMarkers = {}
 end)
 
 RegisterClientEvent('qb-ambulancejob:client:vehicleMenu', function(data)
@@ -270,6 +274,17 @@ for locId, loc in pairs(Config.Locations) do
             }
         )
     end
+end
+
+-- Markers
+
+for _, loc in pairs(Config.Locations) do
+    local markerId = exports['qb-hud']:AddMarker(loc.checking[1], {
+        title      = loc.label,
+        icon       = 'hospital',
+        markerType = 'Hospital',
+    })
+    if markerId then hospitalMarkers[#hospitalMarkers + 1] = markerId end
 end
 
 -- Global Player
