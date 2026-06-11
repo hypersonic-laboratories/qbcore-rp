@@ -11,7 +11,7 @@ Config.BossMenus = {
         Vector(567700, 542850, 4550),
     },
     mechanic = {
-        Vector(567730, 563060, 4500),
+        Vector(566690, 559057, 4556),
     },
 }
 
