@@ -48,7 +48,6 @@ RegisterClientEvent('qb-inventory:client:openInventory', function(items, other)
     if my_webui == nil then
         return
     end
-    print('[openInventory client] 3. sending open event to JS, other.name=' .. tostring(other and other.name) .. ' label=' .. tostring(other and other.label))
     my_webui:SetInputMode(1)
     my_webui:SendEvent('open', {
         inventory = items,

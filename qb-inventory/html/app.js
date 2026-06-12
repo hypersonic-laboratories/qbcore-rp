@@ -110,7 +110,6 @@ const InventoryContainer = Vue.createApp({
             };
         },
         openInventory(data) {
-            console.log("[openInventory JS] 3b. called, other.label=" + (data.other && data.other.label));
             if (this.showHotbar) {
                 this.toggleHotbar({ open: false });
             }
@@ -158,7 +157,6 @@ const InventoryContainer = Vue.createApp({
 
                 this.otherInventoryName = data.other.name;
                 this.otherInventoryLabel = data.other.label;
-                console.log("[openInventory JS] set label=" + this.otherInventoryLabel + " name=" + this.otherInventoryName);
                 this.otherInventoryMaxWeight = data.other.maxweight;
                 this.otherInventorySlots = data.other.slots;
 
@@ -393,7 +391,10 @@ const InventoryContainer = Vue.createApp({
             this.handleItemDrop("other", targetSlot);
         },
         handleDropOnInventoryContainer() {
-            if (this.pendingDrop) { this.clearDragData(); return; }
+            if (this.pendingDrop) {
+                this.clearDragData();
+                return;
+            }
             if (this.isOtherInventoryEmpty && this.dragStartInventoryType === "player") {
                 const newItem = {
                     ...this.currentlyDraggingItem,

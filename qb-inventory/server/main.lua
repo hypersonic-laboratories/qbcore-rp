@@ -251,12 +251,20 @@ RegisterServerEvent('qb-inventory:server:updateDrop', function(source, dropId)
     end
     local playerPed = GetPlayerPawn(source)
     local playerCoords = GetEntityCoords(playerPed)
-    DropData.coords = playerCoords
+    local ForwardVec = playerPed:GetActorForwardVector()
+    local SpawnX = playerCoords.X + ForwardVec.X * 200
+    local SpawnY = playerCoords.Y + ForwardVec.Y * 200
+    local hit = Trace:LineSingle(Vector(SpawnX, SpawnY, playerCoords.Z + 200), Vector(SpawnX, SpawnY, playerCoords.Z - 500))
+    local SpawnZ = (hit and hit.ImpactPoint) and hit.ImpactPoint.Z or (playerCoords.Z - 88)
+    local DropPosition = Vector(SpawnX, SpawnY, SpawnZ)
+    DropData.coords = DropPosition
     DropData.isHeld = nil
     DetachActor(DropData.entity.Object, {
         Location = DetachmentRule.KeepWorld,
         Rotation = DetachmentRule.KeepWorld,
     })
+    DropData.entity.Component:SetMobility(UE.EComponentMobility.Movable)
+    SetEntityCoords(DropData.entity.Object, DropPosition)
     DropData.entity.Component:SetCollisionProfileName('BlockAllDynamic', true)
 end)
 
@@ -341,9 +349,7 @@ RegisterCallback('createDrop', function(source, item)
             slots = Config.DropSize.slots,
             inventory = Drops[newDropId].items,
         }
-        print('[createDrop] 1. firing openInventory client event for ' .. newDropId)
         TriggerClientEvent(source, 'qb-inventory:client:openInventory', Player.PlayerData.items, formattedDrop)
-        print('[createDrop] 2. returning newDropId ' .. newDropId)
         return newDropId
     else
         return false
