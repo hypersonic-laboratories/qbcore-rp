@@ -1,51 +1,60 @@
-local Lang = require('Shared/locales/en')
+local Lang = require('locales/en')
 local heldDrop = nil
-CurrentDropActor = nil
 CurrentDrop = nil
-
--- Functions
-
---[[ function GetDrops()
-	exports['qb-core']:TriggerCallback("qb-inventory:server:GetCurrentDrops", function(drops)
-		if drops then
-			for k, v in pairs(drops) do
-				local bag = v.entityId
-				AddTargetEntity(bag, {
-					options = {
-						{
-							icon = "backpack",
-							label = Lang.t("menu.o_bag"),
-							action = function()
-								TriggerServerEvent("qb-inventory:server:openDrop", k)
-								CurrentDrop = dropId
-								CurrentDropActor = bag
-							end,
-						},
-					},
-					distance = 1000,
-				})
-			end
-		end
-	end)
-end ]]
+local activeDropTargets = {}
 
 -- Events
 
 RegisterClientEvent('qb-inventory:client:openDrop', function(data)
-	CurrentDrop = data.dropId
-	TriggerServerEvent('qb-inventory:server:openDrop', data.dropId)
+    CurrentDrop = data.dropId
+    TriggerServerEvent('qb-inventory:server:openDrop', data.dropId)
 end)
 
 RegisterClientEvent('qb-inventory:client:holdDrop', function(dropId)
-	exports['qb-core']:DrawText('Press [G] to drop Bag', 'right')
-	heldDrop = dropId
+    exports['qb-core']:DrawText('Press [K] to drop Bag', 'right')
+    heldDrop = dropId
+end)
+
+RegisterClientEvent('qb-inventory:client:registerDropTarget', function(actor, dropId)
+    if activeDropTargets[dropId] then
+        exports['qb-target']:RemoveTargetEntity(activeDropTargets[dropId])
+    end
+    activeDropTargets[dropId] = actor
+    exports['qb-target']:AddTargetEntity(actor, {
+        distance = 200,
+        options = {
+            {
+                label = Lang.t('menu.o_bag'),
+                icon = 'backpack',
+                event = 'qb-inventory:client:openDrop',
+                type = 'client',
+                dropId = dropId,
+            },
+            {
+                label = 'Pick Up Bag',
+                icon = 'package',
+                event = 'qb-inventory:server:pickupDrop',
+                type = 'server',
+                dropId = dropId,
+            },
+        },
+    })
+end)
+
+RegisterClientEvent('qb-inventory:client:removeDropTarget', function(dropId)
+    if activeDropTargets[dropId] then
+        exports['qb-target']:RemoveTargetEntity(activeDropTargets[dropId])
+        activeDropTargets[dropId] = nil
+    end
 end)
 
 -- KeyPress
 
-Input.BindKey('G', function()
-	if not heldDrop then return end
-	exports['qb-core']:HideText()
-	TriggerServerEvent('qb-inventory:server:updateDrop', heldDrop)
-	heldDrop = nil
+Input.BindKey('K', function()
+    if not heldDrop then
+        return
+    end
+    exports['qb-core']:HideText()
+    TriggerServerEvent('qb-inventory:server:updateDrop', heldDrop)
+    heldDrop = nil
 end)

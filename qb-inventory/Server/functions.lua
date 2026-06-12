@@ -6,7 +6,7 @@ local function InitializeInventory(inventoryId, data)
         isOpen = false,
         label = data and data.label or inventoryId,
         maxweight = data and data.maxweight or Config.StashSize.maxweight,
-        slots = data and data.slots or Config.StashSize.slots
+        slots = data and data.slots or Config.StashSize.slots,
     }
     return Inventories[inventoryId]
 end
@@ -52,7 +52,9 @@ end
 
 function GetSlotsByItem(items, itemName)
     local slotsFound = {}
-    if not items then return slotsFound end
+    if not items then
+        return slotsFound
+    end
     for slot, item in pairs(items) do
         if item.name:lower() == itemName:lower() then
             slotsFound[#slotsFound + 1] = slot
@@ -64,7 +66,9 @@ end
 exports('qb-inventory', 'GetSlotsByItem', GetSlotsByItem)
 
 function GetFirstSlotByItem(items, itemName)
-    if not items then return nil end
+    if not items then
+        return nil
+    end
     for slot, item in pairs(items) do
         if item.name:lower() == itemName:lower() then
             return tonumber(slot)
@@ -107,7 +111,9 @@ exports('qb-inventory', 'GetItemsByName', GetItemsByName)
 
 function GetItemCount(source, items)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local isTable = type(items) == 'table'
     local itemsSet = isTable and {} or nil
     if isTable then
@@ -127,7 +133,9 @@ end
 exports('qb-inventory', 'GetItemCount', GetItemCount)
 
 function GetTotalWeight(items)
-    if not items then return 0 end
+    if not items then
+        return 0
+    end
     local weight = 0
     for _, item in pairs(items) do
         weight = weight + (item.weight * item.amount)
@@ -139,9 +147,13 @@ exports('qb-inventory', 'GetTotalWeight', GetTotalWeight)
 
 function CanAddItem(source, item, amount)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return false end
+    if not Player then
+        return false
+    end
     local itemData = SharedItems[item:lower()]
-    if not itemData then return false end
+    if not itemData then
+        return false
+    end
     local weight = itemData.weight * amount
     local totalWeight = GetTotalWeight(Player.PlayerData.items) + weight
     if totalWeight > Config.MaxWeight then
@@ -163,16 +175,22 @@ exports('qb-inventory', 'CanAddItem', CanAddItem)
 
 function ClearInventory(source, filterItems)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local savedItemData = {}
     if filterItems then
         if type(filterItems) == 'string' then
             local item = GetItemByName(source, filterItems)
-            if item then savedItemData[item.slot] = item end
+            if item then
+                savedItemData[item.slot] = item
+            end
         elseif type(filterItems) == 'table' then
             for _, itemName in ipairs(filterItems) do
                 local item = GetItemByName(source, itemName)
-                if item then savedItemData[item.slot] = item end
+                if item then
+                    savedItemData[item.slot] = item
+                end
             end
         end
     end
@@ -180,7 +198,8 @@ function ClearInventory(source, filterItems)
     Player.SetPlayerData('items', savedItemData)
 
     if not Player.Offline then
-        local logMessage = string.format('**%s (citizenid: %s | id: %s)** inventory cleared', source:GetAccountName(), Player.PlayerData.citizenid, source)
+        local logMessage =
+            string.format('**%s (citizenid: %s | id: %s)** inventory cleared', source:GetAccountName(), Player.PlayerData.citizenid, source)
         --Events.Call('qb-log:server:CreateLog', 'playerinventory', 'ClearInventory', 'red', logMessage)
     end
 end
@@ -189,10 +208,18 @@ exports('qb-inventory', 'ClearInventory', ClearInventory)
 
 function SetInventory(source, items)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     Player.SetPlayerData('items', items)
     if not Player.Offline then
-        local logMessage = string.format('**%s (citizenid: %s | id: %s)** items set: %s', source:GetAccountName(), Player.PlayerData.citizenid, source, json.encode(items))
+        local logMessage = string.format(
+            '**%s (citizenid: %s | id: %s)** items set: %s',
+            source:GetAccountName(),
+            Player.PlayerData.citizenid,
+            source,
+            json.encode(items)
+        )
         --Events.Call('qb-log:server:CreateLog', 'playerinventory', 'SetInventory', 'blue', logMessage)
     end
 end
@@ -200,11 +227,17 @@ end
 exports('qb-inventory', 'SetInventory', SetInventory)
 
 function SetItemData(source, itemName, key, val)
-    if not itemName or not key then return false end
+    if not itemName or not key then
+        return false
+    end
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local item = GetItemByName(source, itemName)
-    if not item then return false end
+    if not item then
+        return false
+    end
     item[key] = val
     Player.PlayerData.items[item.slot] = item
     Player.SetPlayerData('items', Player.PlayerData.items)
@@ -215,20 +248,28 @@ exports('qb-inventory', 'SetItemData', SetItemData)
 
 function HasItem(source, items, amount)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return false end
+    if not Player then
+        return false
+    end
     local isTable = type(items) == 'table'
     local isArray = isTable and table.type(items) == 'array' or false
     local totalItems = isArray and #items or 0
     local count = 0
 
     if isTable and not isArray then
-        for _ in pairs(items) do totalItems = totalItems + 1 end
+        for _ in pairs(items) do
+            totalItems = totalItems + 1
+        end
     end
 
     for _, itemData in pairs(Player.PlayerData.items) do
         if isTable then
             for k, v in pairs(items) do
-                if itemData and itemData.name == (isArray and v or k) and ((amount and itemData.amount >= amount) or (not isArray and itemData.amount >= v) or (not amount and isArray)) then
+                if
+                    itemData
+                    and itemData.name == (isArray and v or k)
+                    and ((amount and itemData.amount >= amount) or (not isArray and itemData.amount >= v) or (not amount and isArray))
+                then
                     count = count + 1
                     if count == totalItems then
                         return true
@@ -247,12 +288,6 @@ end
 
 exports('qb-inventory', 'HasItem', HasItem)
 
-function CreateUsableItem(itemName, data)
-    exports['qb-core']:CreateUseableItem(itemName, data)
-end
-
-exports('qb-inventory', 'CreateUsableItem', CreateUsableItem)
-
 function GetUsableItem(itemName)
     return exports['qb-core']:CanUseItem(itemName)
 end
@@ -261,7 +296,9 @@ exports('qb-inventory', 'GetUsableItem', GetUsableItem)
 
 function UseItem(itemName, source, itemData)
     local item = GetUsableItem(itemName)
-    if not item or not item.event then return end
+    if not item or not item.event then
+        return
+    end
     TriggerLocalServerEvent(item.event, source, itemData)
 end
 
@@ -279,7 +316,9 @@ exports('qb-inventory', 'CloseInventory', CloseInventory)
 function OpenInventoryById(source, targetId)
     local Player = exports['qb-core']:GetPlayer(source)
     local TargetPlayer = exports['qb-core']:GetPlayer(targetId)
-    if not Player or not TargetPlayer then return end
+    if not Player or not TargetPlayer then
+        return
+    end
     local playerItems = Player.PlayerData.items
     local targetItems = TargetPlayer.PlayerData.items
     local formattedInventory = {
@@ -287,7 +326,7 @@ function OpenInventoryById(source, targetId)
         label = TargetPlayer.PlayerData.name,
         maxweight = Config.MaxWeight,
         slots = Config.MaxSlots,
-        inventory = targetItems
+        inventory = targetItems,
     }
     TriggerClientEvent(source, 'qb-inventory:client:openInventory', playerItems, formattedInventory)
 end
@@ -301,7 +340,7 @@ function CreateShop(shopData)
             label = shopData.label,
             coords = shopData.coords,
             slots = #shopData.items,
-            items = SetupShopItems(shopData.items)
+            items = SetupShopItems(shopData.items),
         }
     else
         for key, data in pairs(shopData) do
@@ -313,7 +352,7 @@ function CreateShop(shopData)
                         label = data.label,
                         coords = data.coords,
                         slots = #data.items,
-                        items = SetupShopItems(data.items)
+                        items = SetupShopItems(data.items),
                     }
                 else
                     CreateShop(data)
@@ -326,16 +365,24 @@ end
 exports('qb-inventory', 'CreateShop', CreateShop)
 
 function OpenShop(source, name)
-    if not name then return end
+    if not name then
+        return
+    end
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if not RegisteredShops[name] then return end
+    if not Player then
+        return
+    end
+    if not RegisteredShops[name] then
+        return
+    end
     local player = GetPlayerPawn(source)
     local playerCoords = GetEntityCoords(player)
     if RegisteredShops[name].coords then
         local shopDistance = RegisteredShops[name].coords
         if shopDistance then
-            if GetDistanceBetweenCoords(playerCoords, shopDistance) > 1000.0 then return end
+            if GetDistanceBetweenCoords(playerCoords, shopDistance) > 1000.0 then
+                return
+            end
         end
     end
     local formattedInventory = {
@@ -343,7 +390,7 @@ function OpenShop(source, name)
         label = RegisteredShops[name].label,
         maxweight = 5000000,
         slots = #RegisteredShops[name].items,
-        inventory = RegisteredShops[name].items
+        inventory = RegisteredShops[name].items,
     }
     TriggerClientEvent(source, 'qb-inventory:client:openInventory', Player.PlayerData.items, formattedInventory)
 end
@@ -352,7 +399,9 @@ exports('qb-inventory', 'OpenShop', OpenShop)
 
 function OpenInventory(source, identifier, data)
     local QBPlayer = exports['qb-core']:GetPlayer(source)
-    if not QBPlayer then return end
+    if not QBPlayer then
+        return
+    end
     local player_ped = GetPlayerPawn(source)
 
     if not identifier then
@@ -374,7 +423,9 @@ function OpenInventory(source, identifier, data)
         return
     end
 
-    if not inventory then inventory = InitializeInventory(identifier, data) end
+    if not inventory then
+        inventory = InitializeInventory(identifier, data)
+    end
     inventory.maxweight = (inventory and inventory.maxweight) or (data and data.maxweight) or Config.StashSize.maxweight
     inventory.slots = (inventory and inventory.slots) or (data and data.slots) or Config.StashSize.slots
     inventory.label = (inventory and inventory.label) or (data and data.label) or identifier
@@ -385,7 +436,7 @@ function OpenInventory(source, identifier, data)
         label = inventory.label,
         maxweight = inventory.maxweight,
         slots = inventory.slots,
-        inventory = inventory.items
+        inventory = inventory.items,
     }
     --player_ped:SetInputEnabled(false)
     --source:SetValue('inv_busy', true, true)
@@ -464,7 +515,7 @@ function AddItem(identifier, item, amount, slot, info, reason)
             image = itemInfo.image,
             shouldClose = itemInfo.shouldClose,
             slot = slot,
-            combinable = itemInfo.combinable
+            combinable = itemInfo.combinable,
         }
 
         if itemInfo.type == 'weapon' then
@@ -477,7 +528,9 @@ function AddItem(identifier, item, amount, slot, info, reason)
         end
     end
 
-    if player then player.SetPlayerData('items', inventory) end
+    if player then
+        player.SetPlayerData('items', inventory)
+    end
     -- local invName = player and identifier:GetName() .. ' (' .. identifier:GetID() .. ')' or identifier
     -- local addReason = reason or 'No reason specified'
     -- local resourceName = 'qb-inventory'
@@ -542,7 +595,9 @@ function RemoveItem(identifier, item, amount, slot, reason)
         inventory[slot] = nil
     end
 
-    if player then player.SetPlayerData('items', inventory) end
+    if player then
+        player.SetPlayerData('items', inventory)
+    end
     -- local invName = player and identifier:GetName() .. ' (' .. identifier:GetID() .. ')' or identifier
     -- local removeReason = reason or 'No reason specified'
     -- local resourceName = 'qb-inventory'

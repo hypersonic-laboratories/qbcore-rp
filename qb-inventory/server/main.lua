@@ -1,21 +1,22 @@
 Inventories = {}
 Drops = {}
 RegisteredShops = {}
-require('Shared/locales/en')
---require('Server/commands')
 
 SharedItems = exports['qb-core']:GetShared('Items')
 
 Timer.CreateThread(function()
     local results = exports['qb-core']:DatabaseAction('Select', 'SELECT * FROM inventories')
-    if type(results) ~= 'table' then print('No inventories found') return end
+    if type(results) ~= 'table' then
+        print('No inventories found')
+        return
+    end
 
     for i = 1, #results do
         local inventory = results[i]
         local cacheKey = inventory.identifier
         Inventories[cacheKey] = {
             items = JSON.parse(inventory.items) or {},
-            isOpen = false
+            isOpen = false,
         }
     end
     print(#results .. ' inventories successfully loaded')
@@ -24,6 +25,10 @@ end)
 -- Handlers
 
 RegisterServerEvent('QBCore:Server:PlayerLoaded', function(Player)
+    for dropId, drop in pairs(Drops) do
+        TriggerClientEvent(Player.PlayerData.source, 'qb-inventory:client:registerDropTarget', drop.entity.Object, dropId)
+    end
+
     exports['qb-core']:AddPlayerMethod(Player.PlayerData.source, 'AddItem', function(item, amount, slot, info)
         return AddItem(Player.PlayerData.source, item, amount, slot, info)
     end)
@@ -57,14 +62,14 @@ end)
 
 RegisterServerEvent('qb-inventory:server:openInventory', function(source)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player or Player.PlayerData.metadata['isdead'] or
-        Player.PlayerData.metadata['inlaststand'] or
-        Player.PlayerData.metadata['ishandcuffed'] then
+    if not Player or Player.PlayerData.metadata['isdead'] or Player.PlayerData.metadata['inlaststand'] or Player.PlayerData.metadata['ishandcuffed'] then
         return
     end
 
     local player_ped = GetPlayerPawn(source)
-    if not player_ped then return end
+    if not player_ped then
+        return
+    end
 
     if IsPedInAnyVehicle(player_ped) then
         local in_vehicle = GetVehiclePedIsIn(player_ped)
@@ -107,7 +112,9 @@ end)
 RegisterServerEvent('qb-inventory:server:toggleHotbar', function(source)
     --if source:GetValue('inv_busy', false) then return end
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player or Player.PlayerData.metadata['isdead'] or Player.PlayerData.metadata['inlaststand'] or Player.PlayerData.metadata['ishandcuffed'] then return end
+    if not Player or Player.PlayerData.metadata['isdead'] or Player.PlayerData.metadata['inlaststand'] or Player.PlayerData.metadata['ishandcuffed'] then
+        return
+    end
     local hotbarItems = {
         Player.PlayerData.items[1],
         Player.PlayerData.items[2],
@@ -120,91 +127,139 @@ end)
 
 RegisterServerEvent('qb-inventory:server:openVending', function(source, data)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     CreateShop({
         name = 'vending',
         label = 'Vending Machine',
         coords = data.coords,
         slots = #Config.VendingItems,
-        items = Config.VendingItems
+        items = Config.VendingItems,
     })
     OpenShop(source, 'vending')
 end)
 
 RegisterServerEvent('qb-inventory:server:closeInventory', function(source, inventory)
     local QBPlayer = exports['qb-core']:GetPlayer(source)
-    if not QBPlayer then return end
+    if not QBPlayer then
+        return
+    end
     local player_ped = GetPlayerPawn(source)
     --[[     player_ped:SetInputEnabled(true)
     source:SetValue('inv_busy', false, true) ]]
-    if not inventory then return end
-    if inventory:find('shop-') then return end
+    if not inventory then
+        return
+    end
+    if inventory:find('shop-') then
+        return
+    end
     if inventory:find('otherplayer-') then
         local targetId = inventory:match('otherplayer%-(.+)')
         --targetId:SetValue('inv_busy', false, true)
         return
     end
     if Drops[inventory] then
-        if #Drops[inventory].items == 0 then
-            if Drops[inventory].entity then DeleteEntity(Drops[inventory].entity) end
-            if Drops[inventory].interactable then DeleteEntity(Drops[inventory].interactable) end
+        if next(Drops[inventory].items) == nil then
+            BroadcastEvent('qb-inventory:client:removeDropTarget', inventory)
+            DestroyActor(Drops[inventory].entity.Object)
+            Drops[inventory] = nil
+            return
         end
         Drops[inventory].isOpen = false
         return
     end
-    if not Inventories[inventory] then return end
+    if not Inventories[inventory] then
+        return
+    end
     Inventories[inventory].isOpen = false
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO inventories (identifier, items) VALUES (?, ?) ON CONFLICT(identifier) DO UPDATE SET items = ?', { inventory, JSON.stringify(Inventories[inventory].items), JSON.stringify(Inventories[inventory].items) })
 end)
 
 RegisterServerEvent('qb-inventory:server:useItem', function(source, item)
     local itemData = GetItemBySlot(source, item.slot)
-    if not itemData then return end
+    if not itemData then
+        return
+    end
     local itemInfo = SharedItems[itemData.name]
     if itemInfo.type == 'weapon' then
-        --Events.Call('qb-weapons:server:equipWeapon', source, itemData)
         TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'use')
-        --TriggerClientEvent('qb-inventory:client:useItem', source, true, itemData)
     else
         UseItem(itemData.name, source, itemData)
         TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'use')
-        --TriggerClientEvent('qb-inventory:client:useItem', source, true, itemData)
     end
 end)
 
 RegisterServerEvent('qb-inventory:server:openDrop', function(source, dropId)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local playerPed = GetPlayerPawn(source)
     local playerCoords = GetEntityCoords(playerPed)
     local drop = Drops[dropId]
-    if not drop or drop.isOpen then return end
-    if GetDistanceBetweenCoords(playerCoords, drop.coords) > 250 then return end
+    if not drop or drop.isOpen then
+        return
+    end
+    if GetDistanceBetweenCoords(playerCoords, drop.coords) > 250 then
+        return
+    end
 
     local formattedInventory = {
         name = dropId,
         label = dropId,
         maxweight = drop.maxweight,
         slots = drop.slots,
-        inventory = drop.items
+        inventory = drop.items,
     }
     drop.isOpen = true
     TriggerClientEvent(source, 'qb-inventory:client:openInventory', Player.PlayerData.items, formattedInventory)
 end)
 
 RegisterServerEvent('qb-inventory:server:updateDrop', function(source, dropId)
+    local DropData = Drops[dropId]
+    if not DropData then
+        return
+    end
     local playerPed = GetPlayerPawn(source)
     local playerCoords = GetEntityCoords(playerPed)
-    local DropData = Drops[dropId]
     DropData.coords = playerCoords
     DropData.isHeld = nil
-    if DropData.entity:IsValid() then
-        DropData.entity:K2_DetachFromActor(UE.EDetachmentRule.KeepWorld, UE.EDetachmentRule.KeepWorld, UE.EDetachmentRule.KeepWorld)
-        local Mesh = DropData.entity:GetComponentByClass(UE.UStaticMeshComponent)
-        local Box = DropData.interactable.BoxCollision
-        if Mesh then Mesh:SetCollisionProfileName('BlockAllDynamic', true) end
-        if Box then Box:SetCollisionProfileName('BlockAllDynamic', true) end
+    DetachActor(DropData.entity.Object, {
+        Location = DetachmentRule.KeepWorld,
+        Rotation = DetachmentRule.KeepWorld,
+    })
+    DropData.entity.Component:SetCollisionProfileName('BlockAllDynamic', true)
+end)
+
+RegisterServerEvent('qb-inventory:server:pickupDrop', function(source, data)
+    local dropId = data and data.dropId
+    if not dropId then
+        return
     end
+    local DropData = Drops[dropId]
+    if not DropData or DropData.isOpen or DropData.isHeld then
+        return
+    end
+    local playerPed = GetPlayerPawn(source)
+    if not playerPed then
+        return
+    end
+    local playerCoords = GetEntityCoords(playerPed)
+    if GetDistanceBetweenCoords(playerCoords, DropData.coords) > 250 then
+        return
+    end
+    local mesh = playerPed:GetCharacterBaseMesh()
+    if not mesh then
+        return
+    end
+    AttachActorToComponent(DropData.entity.Object, mesh, Vector(-35, 0, 10), Rotator(-95, 0, 0), 'hand_r', {
+        Location = AttachmentRule.SnapToTarget,
+        Rotation = AttachmentRule.SnapToTarget,
+        Scale = AttachmentRule.SnapToTarget,
+    })
+    DropData.isHeld = true
+    TriggerClientEvent(source, 'qb-inventory:client:holdDrop', dropId)
 end)
 
 -- Callbacks
@@ -225,64 +280,44 @@ RegisterCallback('server.createDrop', function(source, item)
         --TaskPlayAnim(playerPed, 'pickup_object', 'pickup_low', 8.0, -8.0, 2000, 0, 0, false, false, false)
         local PawnRotation = GetEntityRotation(playerPed)
         local ForwardVec = playerPed:GetActorForwardVector()
-        local SpawnPosition = playerCoords + (ForwardVec * 200)
-        PawnRotation.Yaw = PawnRotation.Yaw
+        local SpawnX = playerCoords.X + ForwardVec.X * 200
+        local SpawnY = playerCoords.Y + ForwardVec.Y * 200
 
-        local bag = StaticMesh(SpawnPosition, PawnRotation, Config.ItemDropObject, CollisionType.StaticOnly)
-        bag:SetActorScale3D(Vector(0.8, 0.8, 0.8))
-        local newDropId = string.format('drop-%d', math.random(111111, 9999999))
-        local bagInteractable = Interactable({
-            {
-                Text = 'Open Drop',
-                Input = '/Game/Helix/Input/Actions/IA_Interact.IA_Interact',
-                Action = function(Drop, Instigator)
-                    local Controller = Instigator and Instigator:GetController()
-                    if Controller then
-                        TriggerClientEvent(Controller, 'qb-inventory:client:openDrop', { dropId = newDropId })
-                    end
-                end,
-            },
-            {
-                Text = 'Pick Up Bag',
-                Input = '/Game/Helix/Input/Actions/IA_Weapon_Reload.IA_Weapon_Reload',
-                Action = function(Drop, Instigator)
-                    local DropData = Drops[newDropId]
-                    if DropData.isOpen then return end
-                    if DropData.isHeld then return end
-                    local mesh = Instigator:GetCharacterBaseMesh()
-                    TriggerClientEvent(source, 'qb-inventory:client:holdDrop', newDropId)
-                    AttachActorToComponent(Drop.InteractableProp, mesh, Vector(-35, 0, 10), Rotator(-95, 0, 0), 'hand_r', nil, true)
-                    Drop.InteractableProp:SetActorScale3D(Vector(0.8, 0.8, 0.8))
-                    AttachActorToActor(Drop, Drop.InteractableProp, nil, nil, nil, {
-                        Location = AttachmentRule.SnapToTarget,
-                        Rotation = AttachmentRule.SnapToTarget,
-                        Scale = AttachmentRule.SnapToTarget
-                    })
-                    DropData.isHeld = Instigator
-                    if Drop.BoxCollision then Drop.BoxCollision:SetCollisionProfileName('HandAttachedMesh', true) end
-                end
-            }
-        })
-        bagInteractable:SetInteractableProp(bag)
-        bagInteractable.BoxCollision:SetCollisionResponseToChannel(UE.ECollisionChannel.ECC_Pawn, UE.ECollisionResponse.ECR_Overlap)
+        local hit = Trace:LineSingle(Vector(SpawnX, SpawnY, playerCoords.Z + 200), Vector(SpawnX, SpawnY, playerCoords.Z - 500))
+        local SpawnZ = (hit and hit.ImpactPoint) and hit.ImpactPoint.Z or (playerCoords.Z - 88)
+
+        local SpawnPosition = Vector(SpawnX, SpawnY, SpawnZ)
+
+        local bag = StaticMesh(SpawnPosition, PawnRotation, Config.ItemDropObject, CollisionType.StaticOnly, false)
+        bag.Object:SetActorScale3D(Vector(0.8, 0.8, 0.8))
+        local newDropId = 'drop-' .. GenerateId(8, 'mixed')
         if not Drops[newDropId] then
             Drops[newDropId] = {
                 name = newDropId,
                 label = 'Drop',
                 items = { item },
                 entity = bag,
-                interactable = bagInteractable,
                 creator = source,
                 createdTime = os.time(),
                 coords = playerCoords,
                 maxweight = Config.DropSize.maxweight,
                 slots = Config.DropSize.slots,
-                isOpen = true
+                isOpen = false,
             }
-            --BroadcastRemote('qb-inventory:client:setupDropTarget', bag.Object)
         else
             table.insert(Drops[newDropId].items, item)
         end
+        BroadcastEvent('qb-inventory:client:registerDropTarget', bag.Object, newDropId)
+
+        Drops[newDropId].isOpen = true
+        local formattedDrop = {
+            name = newDropId,
+            label = 'Drop',
+            maxweight = Config.DropSize.maxweight,
+            slots = Config.DropSize.slots,
+            inventory = Drops[newDropId].items,
+        }
+        TriggerClientEvent(source, 'qb-inventory:client:openInventory', Player.PlayerData.items, formattedDrop)
         return newDropId
     else
         return false
@@ -302,21 +337,31 @@ RegisterCallback('server.attemptPurchase', function(source, data)
     local amount = data.amount
     local shop = string.gsub(data.shop, 'shop%-', '')
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return false end
+    if not Player then
+        return false
+    end
 
     local shopInfo = RegisteredShops[shop]
-    if not shopInfo then return false end
+    if not shopInfo then
+        return false
+    end
 
     local playerPed = GetPlayerPawn(source)
     local playerCoords = GetEntityCoords(playerPed)
     if shopInfo.coords then
         local shopCoords = Vector(shopInfo.coords.X, shopInfo.coords.Y, shopInfo.coords.Z)
-        if GetDistanceBetweenCoords(playerCoords, shopCoords) > 650 then return false end
+        if GetDistanceBetweenCoords(playerCoords, shopCoords) > 650 then
+            return false
+        end
     end
 
-    if shopInfo.items[itemInfo.slot].name ~= itemInfo.name then return false end
+    if shopInfo.items[itemInfo.slot].name ~= itemInfo.name then
+        return false
+    end
 
-    if amount > shopInfo.items[itemInfo.slot].amount then return false end
+    if amount > shopInfo.items[itemInfo.slot].amount then
+        return false
+    end
 
     if not CanAddItem(source, itemInfo.name, amount) then
         TriggerClientEvent(source, 'QBCore:Notify', 'Cannot hold item', 'error')
@@ -333,6 +378,9 @@ RegisterCallback('server.attemptPurchase', function(source, data)
         Player.RemoveMoney('cash', price, 'shop-purchase')
         AddItem(source, itemInfo.name, amount, canAddToSlot and data.slot, itemInfo.info)
         exports['qb-shops']:UpdateShopItems(shop, itemInfo, amount)
+        shopInfo.items[itemInfo.slot].amount = shopInfo.items[itemInfo.slot].amount - amount
+        TriggerClientEvent(source, 'qb-inventory:client:updateInventory', Player.PlayerData.items)
+        TriggerClientEvent(source, 'qb-inventory:client:updateShopInventory', shopInfo.items)
         return true
     else
         TriggerClientEvent(source, 'QBCore:Notify', 'You do not have enough money', 'error')
@@ -379,22 +427,19 @@ RegisterCallback('server.giveItem', function(source, target, item, amount)
         return false
     end
 
-    local giveItem = AddItem(target, item, giveAmount)
-    if not giveItem then
-        return false
-    end
-
     local removeItem = RemoveItem(source, item, giveAmount)
     if not removeItem then
         return false
     end
 
-    --if itemInfo.type == 'weapon' then SetCurrentPedWeapon(playerPed, `WEAPON_UNARMED`, true) end
-    --TriggerClientEvent('qb-inventory:client:giveAnim', source)
-    --TriggerClientEvent('qb-inventory:client:ItemBox', source, itemInfo, 'remove', giveAmount)
-    --TriggerClientEvent('qb-inventory:client:giveAnim', target)
-    --TriggerClientEvent('qb-inventory:client:ItemBox', target, itemInfo, 'add', giveAmount)
-    --if Player(target).state.inv_busy then TriggerClientEvent('qb-inventory:client:updateInventory', target) end
+    local giveItem = AddItem(target, item, giveAmount)
+    if not giveItem then
+        AddItem(source, item, giveAmount)
+        return false
+    end
+
+    TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'remove', giveAmount)
+    TriggerClientEvent(target, 'qb-inventory:client:ItemBox', itemInfo, 'add', giveAmount)
     return true
 end)
 
@@ -430,15 +475,21 @@ local function getIdentifier(inventoryId, src)
 end
 
 RegisterServerEvent('qb-inventory:server:SetInventoryData', function(source, fromInventory, toInventory, fromSlot, toSlot, fromAmount, toAmount)
-    if not fromInventory or not toInventory or not fromSlot or not toSlot or not fromAmount or not toAmount then return end
+    if not fromInventory or not toInventory or not fromSlot or not toSlot or not fromAmount or not toAmount then
+        return
+    end
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     fromSlot, toSlot, fromAmount, toAmount = tonumber(fromSlot), tonumber(toSlot), tonumber(fromAmount), tonumber(toAmount)
     local fromItem = getItem(fromInventory, source, fromSlot)
     local toItem = getItem(toInventory, source, toSlot)
 
     if fromItem then
-        if not toItem and toAmount > fromItem.amount then return end
+        if not toItem and toAmount > fromItem.amount then
+            return
+        end
 
         local fromId = getIdentifier(fromInventory, source)
         local toId = getIdentifier(toInventory, source)

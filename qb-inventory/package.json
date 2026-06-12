@@ -1,12 +1,14 @@
 {
     "shared": [
-        "Shared/Index.lua"
+        "config.lua"
     ],
     "client": [
-        "Client/Index.lua"
+        "client/main.lua",
+        "client/drops.lua",
+        "client/vehicles.lua"
     ],
     "server": [
-        "Server/Index.lua",
-        "Server/functions.lua"
+        "server/main.lua",
+        "server/functions.lua"
     ]
 }
