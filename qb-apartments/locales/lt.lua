@@ -4,7 +4,7 @@ local Translations = {
     error = {
         to_far_from_door = 'Esate per toli nuo durų skambučio',
         nobody_home = 'Niekam neatsiliepia...',
-        nobody_at_door = 'Prie durų nieko nėra..'
+        nobody_at_door = 'Prie durų nieko nėra..',
     },
     success = {
         receive_apart = 'Jūs gavote butą',
@@ -28,9 +28,10 @@ local Translations = {
     },
 }
 
+---@type { t: fun(key: string, subs?: table<string, any>): string, has: fun(key: string): boolean }
 Lang = Lang or Locale.new({
     phrases = Translations,
-    warnOnMissing = true
+    warnOnMissing = true,
 })
 
 return Lang

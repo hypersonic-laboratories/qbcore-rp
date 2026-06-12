@@ -28,7 +28,7 @@ local Translations = {
         no_driver_license = 'No drivers license',
         not_cuffed_dead = 'Civilian isn\'t cuffed or dead',
         fine_yourself = 'You Cannot Fine Yourself',
-        not_online = 'This person is not online'
+        not_online = 'This person is not online',
     },
     success = {
         uncuffed = 'You have been uncuffed',
@@ -183,7 +183,7 @@ local Translations = {
         message_sent = 'Message to be sent',
         civilian_call = 'Civilian Call',
         emergency_call = 'New 911 Call',
-        fine = 'Fine A Person'
+        fine = 'Fine A Person',
     },
     progressbar = {
         blood_clear = 'Clearing Blood...',
@@ -200,12 +200,13 @@ local Translations = {
         open_fingerprint = 'Open Fingerprint',
         open_armory = 'Open Armory',
         open_evidence_stash = 'Open Evidence Stash',
-    }
+    },
 }
 
+---@type { t: fun(key: string, subs?: table<string, any>): string, has: fun(key: string): boolean }
 Lang = Lang or Locale.new({
     phrases = Translations,
-    warnOnMissing = true
+    warnOnMissing = true,
 })
 
 return Lang

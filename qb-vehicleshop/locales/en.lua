@@ -19,7 +19,7 @@ local Translations = {
         vehinfo = 'Couldn\'t get vehicle info',
         notown = 'You don\'t own this vehicle',
         buyertoopoor = 'The buyer doesn\'t have enough money',
-        nofinanced = "You don't have any financed vehicles at this location",
+        nofinanced = 'You don\'t have any financed vehicles at this location',
         financed = 'This vehicle is financed',
     },
     success = {
@@ -75,12 +75,13 @@ local Translations = {
         command_transfervehicle = 'Gift or sell your vehicle',
         command_transfervehicle_help = 'ID of buyer',
         command_transfervehicle_amount = 'Sell amount (optionnal)',
-    }
+    },
 }
 
+---@type { t: fun(key: string, subs?: table<string, any>): string, has: fun(key: string): boolean }
 Lang = Lang or Locale.new({
     phrases = Translations,
-    warnOnMissing = true
+    warnOnMissing = true,
 })
 
 return Lang

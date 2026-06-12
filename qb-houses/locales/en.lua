@@ -46,9 +46,10 @@ local Translations = {
     },
 }
 
+---@type { t: fun(key: string, subs?: table<string, any>): string, has: fun(key: string): boolean }
 Lang = Lang or Locale.new({
     phrases = Translations,
-    warnOnMissing = true
+    warnOnMissing = true,
 })
 
 return Lang

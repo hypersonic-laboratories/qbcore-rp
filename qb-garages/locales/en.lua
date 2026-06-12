@@ -10,7 +10,7 @@ local Translations = {
         no_garage = 'None',
         vehicle_occupied = 'You can\'t store this vehicle as it is not empty',
         vehicle_not_tracked = 'Could not track vehicle',
-        no_spawn = 'Area too crowded'
+        no_spawn = 'Area too crowded',
     },
     success = {
         vehicle_parked = 'Vehicle Stored',
@@ -29,12 +29,13 @@ local Translations = {
         rig_e = 'E - Rig Lot',
         depot_e = 'E - Depot',
         house_garage = 'E - House Garage',
-    }
+    },
 }
 
+---@type { t: fun(key: string, subs?: table<string, any>): string, has: fun(key: string): boolean }
 Lang = Lang or Locale.new({
     phrases = Translations,
-    warnOnMissing = true
+    warnOnMissing = true,
 })
 
 return Lang

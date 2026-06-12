@@ -19,11 +19,11 @@ local Translations = {
         -- /closeNUI
         ['closeNUI_description'] = 'Close Multi NUI',
 
-        ['droppedplayer'] = 'You have disconnected from QBCore'
+        ['droppedplayer'] = 'You have disconnected from QBCore',
     },
 
     misc = {
-        ['droppedplayer'] = 'You have disconnected from QBCore'
+        ['droppedplayer'] = 'You have disconnected from QBCore',
     },
 
     ui = {
@@ -71,13 +71,14 @@ local Translations = {
         -- Notifications
         ran_into_issue = 'We ran into an issue',
         profanity = 'It seems like you are trying to use some type of profanity / bad words in your name or nationality!',
-        forgotten_field = 'It seems like you have forgotten to input one or multiple of the fields!'
-    }
+        forgotten_field = 'It seems like you have forgotten to input one or multiple of the fields!',
+    },
 }
 
+---@type { t: fun(key: string, subs?: table<string, any>): string, has: fun(key: string): boolean }
 Lang = Lang or Locale.new({
     phrases = Translations,
-    warnOnMissing = true
+    warnOnMissing = true,
 })
 
 return Lang

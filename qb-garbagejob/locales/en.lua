@@ -26,12 +26,13 @@ local Translations = {
         ['start_job'] = 'Start Job',
         ['complete_route'] = 'Complete Route & Return Truck',
         ['deposit_garbage'] = 'Deposit Garbage',
-    }
+    },
 }
 
+---@type { t: fun(key: string, subs?: table<string, any>): string, has: fun(key: string): boolean }
 Lang = Lang or Locale.new({
     phrases = Translations,
-    warnOnMissing = true
+    warnOnMissing = true,
 })
 
 return Lang

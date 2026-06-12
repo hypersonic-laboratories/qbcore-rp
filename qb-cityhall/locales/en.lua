@@ -2,10 +2,10 @@ local Locale = exports['qb-core']:GetLocale()
 
 local Translations = {
     error = {
-        not_in_range = 'Too far from the city hall'
+        not_in_range = 'Too far from the city hall',
     },
     success = {
-        recived_license = 'You have recived your %{value} for $50'
+        recived_license = 'You have recived your %{value} for $50',
     },
     info = {
         new_job_app = 'Your application was sent to the boss of (%{job})',
@@ -24,13 +24,14 @@ local Translations = {
         mrs = 'Mrs',
         sender = 'Township',
         subject = 'Driving lessons request',
-        message = 'Hello %{gender} %{lastname}<br /><br />We have just received a message that someone wants to take driving lessons<br />If you are willing to teach, please contact us:<br />Name: <strong>%{firstname} %{lastname}</strong><br />Phone Number: <strong>%{phone}</strong><br/><br/>Kind regards,<br />Township Los Santos'
-    }
+        message = 'Hello %{gender} %{lastname}<br /><br />We have just received a message that someone wants to take driving lessons<br />If you are willing to teach, please contact us:<br />Name: <strong>%{firstname} %{lastname}</strong><br />Phone Number: <strong>%{phone}</strong><br/><br/>Kind regards,<br />Township Los Santos',
+    },
 }
 
+---@type { t: fun(key: string, subs?: table<string, any>): string, has: fun(key: string): boolean }
 Lang = Lang or Locale.new({
     phrases = Translations,
-    warnOnMissing = true
+    warnOnMissing = true,
 })
 
 return Lang

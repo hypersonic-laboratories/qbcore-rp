@@ -13,14 +13,14 @@ local Translations = {
         not_enough_money = 'You don\'t have enough money on you...',
         cant_help = 'You can\'t help this person...',
         not_ems = 'You are not EMS or not signed in',
-        not_online = 'Player Not Online'
+        not_online = 'Player Not Online',
     },
     success = {
         revived = 'You revived a person',
         healthy_player = 'Player is Healthy',
         helped_player = 'You helped the person',
         wounds_healed = 'Your wounds have been healed!',
-        being_helped = 'You are being helped...'
+        being_helped = 'You are being helped...',
     },
     info = {
         civ_died = 'Civilian Died',
@@ -34,7 +34,7 @@ local Translations = {
         bleed_out_help = 'YOU WILL BLEED OUT IN: ~r~%{time}~s~ SECONDS, YOU CAN BE HELPED',
         request_help = 'PRESS [~r~G~s~] TO REQUEST HELP',
         help_requested = 'EMS PERSONNEL HAVE BEEN NOTIFIED',
-        amb_plate = 'AMBU',  -- Should only be 4 characters long due to the last 4 being a random 4 digits
+        amb_plate = 'AMBU', -- Should only be 4 characters long due to the last 4 being a random 4 digits
         heli_plate = 'LIFE', -- Should only be 4 characters long due to the last 4 being a random 4 digits
         status = 'Status Check',
         is_status = 'Is %{status}',
@@ -62,7 +62,7 @@ local Translations = {
     },
     mail = {
         subject = 'Hospital Costs',
-        message = 'Dear %{gender} %{lastname}, <br /><br />Hereby you received an email with the costs of the last hospital visit.<br />The final costs have become: <strong>$%{costs}</strong><br /><br />We wish you a quick recovery!'
+        message = 'Dear %{gender} %{lastname}, <br /><br />Hereby you received an email with the costs of the last hospital visit.<br />The final costs have become: <strong>$%{costs}</strong><br /><br />We wish you a quick recovery!',
     },
     states = {
         irritated = 'irritated',
@@ -97,7 +97,7 @@ local Translations = {
         call = 'Call',
         check_in = '[E] Check in',
         check = 'Check In',
-        lie_bed = '[E] - To lie in bed'
+        lie_bed = '[E] - To lie in bed',
     },
     body = {
         head = 'Head',
@@ -127,12 +127,13 @@ local Translations = {
     logs = {
         death_log_title = '%{playername} (%{playerid}) is dead',
         death_log_message = '%{killername} has killed %{playername} with a **%{weaponlabel}** (%{weaponname})',
-    }
+    },
 }
 
+---@type { t: fun(key: string, subs?: table<string, any>): string, has: fun(key: string): boolean }
 Lang = Lang or Locale.new({
     phrases = Translations,
-    warnOnMissing = true
+    warnOnMissing = true,
 })
 
 return Lang
