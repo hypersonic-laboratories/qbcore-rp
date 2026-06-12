@@ -46,7 +46,7 @@ local Translations = {
         ['p_bag'] = 'Pick Up Bag',
     },
     interaction = {
-        ['d_bag'] = 'Press [%value] to Drop Bag',
+        ['d_bag'] = 'Press [%{value}] to Drop Bag',
     },
 }
 
