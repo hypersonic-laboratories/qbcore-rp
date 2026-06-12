@@ -11,11 +11,11 @@ local garageInstance
 local garageInstanceLight
 local garageCenter
 local propertyVolumeCluster
-local Entrances = {}         -- [entranceId] = { entranceId, label, entranceType, coords={x,y,z}, price, polyzoneBoxData={...} }
+local Entrances = {} -- [entranceId] = { entranceId, label, entranceType, coords={x,y,z}, price, polyzoneBoxData={...} }
 local ClosestEntranceId = nil
-local CurrentProperty = nil  -- propertyKey (unit) when inside
-local EntranceTargets = {}   -- [entranceId] = { created=true, interactionName=... }
-local OwnedEntrances = {}    -- [entranceId] = true/false
+local CurrentProperty = nil -- propertyKey (unit) when inside
+local EntranceTargets = {} -- [entranceId] = { created=true, interactionName=... }
+local OwnedEntrances = {} -- [entranceId] = true/false
 local InPropertyTargets = {} -- [targetKey] = { created=true, name=interactionName }
 local sceneSpawner
 local oldSceneData = nil
@@ -26,14 +26,18 @@ local distanceInterval
 -- Functions
 
 local function RegisterInPropertyTarget(targetKey, coords, options, markerConfig)
-    if not InProperty then return end
-    if InPropertyTargets[targetKey] and InPropertyTargets[targetKey].created then return end
+    if not InProperty then
+        return
+    end
+    if InPropertyTargets[targetKey] and InPropertyTargets[targetKey].created then
+        return
+    end
     local boxName = 'inPropertyTarget_' .. targetKey
     exports['qb-target']:AddBoxZone(boxName, coords, 100, 100, {
         name = boxName,
         heading = 0.0,
         distance = 500,
-        debug = true
+        debug = true,
     }, options)
     InPropertyTargets[targetKey] = InPropertyTargets[targetKey] or {}
     InPropertyTargets[targetKey].created = true
@@ -82,7 +86,7 @@ local function RefreshEntrances()
                 price = e.price or 0,
                 polyzoneBoxData = {
                     distance = 100,
-                    created = false
+                    created = false,
                 },
                 garageCoords = e.garageCoords,
             }
@@ -92,10 +96,16 @@ local function RefreshEntrances()
 end
 
 local function SetClosestEntrance()
-    if not isLoggedIn then return end
-    if InProperty then return end
+    if not isLoggedIn then
+        return
+    end
+    if InProperty then
+        return
+    end
     local ped = GetPlayerPawn()
-    if not ped then return end
+    if not ped then
+        return
+    end
     local pos = GetEntityCoords(ped)
     local current = nil
     local bestDist = 1000000
@@ -123,9 +133,13 @@ local function SetClosestEntrance()
 end
 
 local function RegisterEntranceTarget(entranceId, entranceData)
-    if not entranceData or not entranceData.coords then return end
+    if not entranceData or not entranceData.coords then
+        return
+    end
     local boxData = entranceData.polyzoneBoxData
-    if boxData.created then return end
+    if boxData.created then
+        return
+    end
     local coords = Vector(entranceData.coords.x, entranceData.coords.y, entranceData.coords.z)
     local boxName = 'entrance_' .. entranceId
     local options = {}
@@ -163,7 +177,7 @@ local function RegisterEntranceTarget(entranceId, entranceData)
         name = boxName,
         heading = 0.0,
         distance = boxData.distance,
-        debug = true
+        debug = true,
     }, options)
 
     boxData.created = true
@@ -180,15 +194,15 @@ local function RegisterEntranceTarget(entranceId, entranceData)
                     icon = 'warehouse',
                     type = 'server',
                     event = 'qb-houses:server:StoreVehicle',
-                    entranceId = entranceId
-                }
+                    entranceId = entranceId,
+                },
             }
 
             exports['qb-target']:AddBoxZone(garageBoxName, garageCoords, 100, 100, {
                 name = garageBoxName,
                 heading = entranceData.garageCoords.heading or 0.0,
                 distance = 100,
-                debug = true
+                debug = true,
             }, garageOptions)
 
             EntranceTargets[entranceId].garage = true
@@ -197,7 +211,9 @@ local function RegisterEntranceTarget(entranceId, entranceData)
 end
 
 local function SetEntranceTargets()
-    if not Entrances or next(Entrances) == nil then return end
+    if not Entrances or next(Entrances) == nil then
+        return
+    end
     for entranceId, entranceData in pairs(Entrances) do
         RegisterEntranceTarget(entranceId, entranceData)
     end
@@ -241,14 +257,12 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
     RegisterInPropertyTarget('entrancePos', entrancePos, options, Config.DoorMarker)
 
     local shellData = Config.Shells[interiorRef]
-    if not shellData then return end
+    if not shellData then
+        return
+    end
 
     if shellData.stashOffset then
-        local stashPos = Vector(
-            entrancePos.X - shellData.stashOffset.x,
-            entrancePos.Y - shellData.stashOffset.y,
-            entrancePos.Z + shellData.stashOffset.z
-        )
+        local stashPos = Vector(entrancePos.X - shellData.stashOffset.x, entrancePos.Y - shellData.stashOffset.y, entrancePos.Z + shellData.stashOffset.z)
         RegisterInPropertyTarget('stashPos', stashPos, {
             {
                 icon = 'box-open',
@@ -261,11 +275,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
     end
 
     if shellData.furnitureOffset then
-        local furniturePos = Vector(
-            entrancePos.X - shellData.furnitureOffset.x,
-            entrancePos.Y - shellData.furnitureOffset.y,
-            entrancePos.Z + shellData.furnitureOffset.z
-        )
+        local furniturePos = Vector(entrancePos.X - shellData.furnitureOffset.x, entrancePos.Y - shellData.furnitureOffset.y, entrancePos.Z + shellData.furnitureOffset.z)
         RegisterInPropertyTarget('furniturePos', furniturePos, {
             {
                 icon = 'box-open',
@@ -278,11 +288,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
     end
 
     if shellData.outfitOffset then
-        local outfitsPos = Vector(
-            entrancePos.X - shellData.outfitOffset.x,
-            entrancePos.Y - shellData.outfitOffset.y,
-            entrancePos.Z + shellData.outfitOffset.z
-        )
+        local outfitsPos = Vector(entrancePos.X - shellData.outfitOffset.x, entrancePos.Y - shellData.outfitOffset.y, entrancePos.Z + shellData.outfitOffset.z)
         RegisterInPropertyTarget('outfitsPos', outfitsPos, {
             {
                 icon = 'tshirt',
@@ -294,11 +300,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
     end
 
     if shellData.logoutOffset then
-        local logoutPos = Vector(
-            entrancePos.X - shellData.logoutOffset.x,
-            entrancePos.Y - shellData.logoutOffset.y,
-            entrancePos.Z + shellData.logoutOffset.z
-        )
+        local logoutPos = Vector(entrancePos.X - shellData.logoutOffset.x, entrancePos.Y - shellData.logoutOffset.y, entrancePos.Z + shellData.logoutOffset.z)
         RegisterInPropertyTarget('logoutPos', logoutPos, {
             {
                 icon = 'sign-out-alt',
@@ -311,11 +313,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
     end
 
     if shellData.kitchenOffset then
-        local kitchenPos = Vector(
-            entrancePos.X - shellData.kitchenOffset.x,
-            entrancePos.Y - shellData.kitchenOffset.y,
-            entrancePos.Z + shellData.kitchenOffset.z
-        )
+        local kitchenPos = Vector(entrancePos.X - shellData.kitchenOffset.x, entrancePos.Y - shellData.kitchenOffset.y, entrancePos.Z + shellData.kitchenOffset.z)
         RegisterInPropertyTarget('kitchenPos', kitchenPos, {
             {
                 icon = 'utensils',
@@ -327,11 +325,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
     end
 
     if shellData.fridgeOffset then
-        local fridgePos = Vector(
-            entrancePos.X - shellData.fridgeOffset.x,
-            entrancePos.Y - shellData.fridgeOffset.y,
-            entrancePos.Z + shellData.fridgeOffset.z
-        )
+        local fridgePos = Vector(entrancePos.X - shellData.fridgeOffset.x, entrancePos.Y - shellData.fridgeOffset.y, entrancePos.Z + shellData.fridgeOffset.z)
         RegisterInPropertyTarget('fridgePos', fridgePos, {
             {
                 icon = 'ice-cream',
@@ -344,11 +338,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
     end
 
     if shellData.totemOffset then
-        local totemPos = Vector(
-            entrancePos.X - shellData.totemOffset.x,
-            entrancePos.Y - shellData.totemOffset.y,
-            entrancePos.Z + shellData.totemOffset.z
-        )
+        local totemPos = Vector(entrancePos.X - shellData.totemOffset.x, entrancePos.Y - shellData.totemOffset.y, entrancePos.Z + shellData.totemOffset.z)
         RegisterInPropertyTarget('totemPos', totemPos, {
             {
                 icon = 'spa',
@@ -362,9 +352,13 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
 end
 
 local function CheckDistance()
-    if not InProperty or not propertyEntrance then return end
+    if not InProperty or not propertyEntrance then
+        return
+    end
     local ped = GetPlayerPawn()
-    if not ped then return end
+    if not ped then
+        return
+    end
     local pos = GetEntityCoords(ped)
     local entrancePos = Vector(propertyEntrance.X, propertyEntrance.Y, propertyEntrance.Z)
     local d = GetDistanceBetweenCoords(pos, entrancePos)
@@ -374,7 +368,9 @@ local function CheckDistance()
 end
 
 local function GetPropertyEntrance()
-    if not InProperty or not propertyEntrance then return nil end
+    if not InProperty or not propertyEntrance then
+        return nil
+    end
     return propertyEntrance
 end
 exports('qb-houses', 'GetPropertyEntrance', GetPropertyEntrance)
@@ -399,11 +395,17 @@ local function CreateMemoryDataSource(itemsWrapper)
 end
 
 local function CleanAssetPath(path)
-    if not path or path == '' then return path end
+    if not path or path == '' then
+        return path
+    end
     local dir, filename = path:match('^(.*/)(.*)')
-    if not dir then return path end
+    if not dir then
+        return path
+    end
     local base, ext = filename:match('^(.-)%.(.+)$')
-    if not base then return path end
+    if not base then
+        return path
+    end
     if ext == base or ext == base .. '_C' then
         return dir .. base
     end
@@ -411,7 +413,9 @@ local function CleanAssetPath(path)
 end
 
 local function BuildLibraryFromScene(parsedScene)
-    if not parsedScene or not parsedScene.actors then return nil end
+    if not parsedScene or not parsedScene.actors then
+        return nil
+    end
     local libraryItems = {}
     local addedIds = {}
     for _, actorData in pairs(parsedScene.actors) do
@@ -425,14 +429,16 @@ local function BuildLibraryFromScene(parsedScene)
                     asset = CleanAssetPath(itemData.furniturePath),
                     type = itemData.furnitureType == 'blueprint' and 'Blueprint' or 'Mesh',
                     tags = {},
-                    preview = 'http://localhost:12890/qb-inventory/Client/web/dist/images/icons/' .. itemData.image,
-                    quantity = 0
+                    preview = 'http://localhost:12890/qb-inventory/html/images/' .. itemData.image,
+                    quantity = 0,
                 }
                 addedIds[sourceId] = true
             end
         end
     end
-    if #libraryItems == 0 then return nil end
+    if #libraryItems == 0 then
+        return nil
+    end
     local BP_JsonObjectWrapper = LoadClass('/HelixRemoteResourceModel/Utility/BP_JsonObjectWrapper.BP_JsonObjectWrapper_C')
     local libraryWrapper = NewObject(BP_JsonObjectWrapper)
     libraryWrapper:LoadFromString(JSON.stringify({ items = libraryItems }))
@@ -445,22 +451,36 @@ local function BuildLibraryFromScene(parsedScene)
 end
 
 local function LoadFurniture(propertyId)
-    if not propertyId then return end
-    if sceneSpawner then return end
+    if not propertyId then
+        return
+    end
+    if sceneSpawner then
+        return
+    end
     TriggerCallback('getSceneData', function(sceneJson)
-        if not sceneJson or sceneJson == '' then return end
+        if not sceneJson or sceneJson == '' then
+            return
+        end
         local parsedScene = JSON.parse(sceneJson)
-        if not parsedScene or not parsedScene.actors then return end
+        if not parsedScene or not parsedScene.actors then
+            return
+        end
         local dynamicLibrary = BuildLibraryFromScene(parsedScene)
-        if not dynamicLibrary then return end
+        if not dynamicLibrary then
+            return
+        end
         local BP_JsonObjectWrapper = LoadClass('/HelixRemoteResourceModel/Utility/BP_JsonObjectWrapper.BP_JsonObjectWrapper_C')
         local sceneWrapper = NewObject(BP_JsonObjectWrapper)
         local loadSuccess = sceneWrapper:LoadFromString(sceneJson)
-        if not loadSuccess then return end
+        if not loadSuccess then
+            return
+        end
         local Transform = Transform()
         Transform.Translation = Vector(propertyEntrance.X, propertyEntrance.Y, propertyEntrance.Z)
         sceneSpawner = SpawnActor('/QuietRuntimeEditor/Blueprints/BP_SceneSpawner.BP_SceneSpawner_C', Transform)
-        if not sceneSpawner then return end
+        if not sceneSpawner then
+            return
+        end
         sceneSpawner.OnSceneLoaded:Add(sceneSpawner, function(sceneSpawner)
             local dataComponentClass = LoadClass('/QuietRuntimeEditor/Outliner/Blueprints/BP_QuietOutlinerComponent.BP_QuietOutlinerComponent_C')
             for _, actor in pairs(sceneSpawner.Roots:ToTable()) do
@@ -476,7 +496,7 @@ local function LoadFurniture(propertyId)
                         supply = itemInfo.supply,
                         type = itemInfo.type,
                         weight = itemInfo.weight or 0,
-                        canPickup = false
+                        canPickup = false,
                     }
                     exports['hl-xray']:RegisterEntity(actor, actorDataComponent.Guid, 'furniture', metadata)
                 else
@@ -499,7 +519,9 @@ end
 local BM = GetActorByTag('HBuildMode')
 
 BM.OnSceneSaved:Add(BM, function(_, scene)
-    if not CurrentProperty then return end
+    if not CurrentProperty then
+        return
+    end
     local sceneJson = scene:SaveToString()
     if sceneJson and sceneJson ~= '' then
         local parsedScene = JSON.parse(sceneJson)
@@ -510,7 +532,7 @@ BM.OnSceneSaved:Add(BM, function(_, scene)
         TriggerServerEvent('qb-houses:server:SaveSceneData', {
             CurrentProperty = CurrentProperty,
             sceneData = sceneJson,
-            oldSceneData = oldSceneData
+            oldSceneData = oldSceneData,
         })
         oldSceneData = nil
     end
@@ -523,7 +545,9 @@ BM.OnSceneDiscarded:Add(BM, function()
 end)
 
 local function OpenFurnitureEditor()
-    if not CurrentProperty then return end
+    if not CurrentProperty then
+        return
+    end
     UnloadFurniture()
     if not BM then
         print('Failed to spawn BM actor')
@@ -551,7 +575,7 @@ local function OpenFurnitureEditor()
                                 asset = CleanAssetPath(def.furniturePath),
                                 type = (def.furnitureType == 'blueprint') and 'Blueprint' or 'Mesh',
                                 tags = { 'Primitive' },
-                                preview = 'http://localhost:12890/qb-inventory/Client/web/dist/images/icons/' .. def.image,
+                                preview = 'http://localhost:12890/qb-inventory/html/images/' .. def.image,
                                 quantity = 0,
                             }
                         end
@@ -573,7 +597,7 @@ local function OpenFurnitureEditor()
                                 asset = CleanAssetPath(def.furniturePath),
                                 type = (def.furnitureType == 'blueprint') and 'Blueprint' or 'Mesh',
                                 tags = { 'Primitive' },
-                                preview = 'http://localhost:12890/qb-inventory/Client/web/dist/images/icons/' .. def.image,
+                                preview = 'http://localhost:12890/qb-inventory/html/images/' .. def.image,
                                 quantity = invItem.amount or 1,
                             }
                             furnitureItemsByName[invItem.name] = entry
@@ -602,7 +626,7 @@ local function OpenFurnitureEditor()
             else
                 sceneToLoad = JSON.stringify({
                     entranceZ = propertyEntrance.Z,
-                    actors = {}
+                    actors = {},
                 })
             end
             local existingScene = NewObject(BP_JsonObjectWrapper)
@@ -650,22 +674,28 @@ RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
 end)
 
 local function CreateVehicleTimer()
-    if vehicleTimer then Timer.ClearInterval(vehicleTimer) end
+    if vehicleTimer then
+        Timer.ClearInterval(vehicleTimer)
+    end
     local playerPawn = GetPlayerPawn(HPlayer)
     local playerCameraManager = HPlayer.PlayerCameraManager
     vehicleTimer = Timer.SetInterval(function()
         local vehicle = GetVehiclePedIsIn(playerPawn)
-        if not vehicle then return end
+        if not vehicle then
+            return
+        end
         local ratio = vehicle:GetRPMRatio() * 1000
         if ratio > 1 then
-            playerCameraManager:StartCameraFade(0.0, 1.0, 0.5, LinearColor(0.0, 0.0, 0.0, 1.0), true, true)               -- start Fade
+            playerCameraManager:StartCameraFade(0.0, 1.0, 0.5, LinearColor(0.0, 0.0, 0.0, 1.0), true, true) -- start Fade
             Timer.SetTimeout(function()
-                TriggerCallback('WithdrawVehicle', function(success)                                                      -- request withdraw after 1s
+                TriggerCallback('WithdrawVehicle', function(success) -- request withdraw after 1s
                     Timer.SetTimeout(function()
                         playerCameraManager:StartCameraFade(1.0, 0.0, 0.5, LinearColor(0.0, 0.0, 0.0, 0.0), false, false) -- unfade 1s after return
                         playerCameraManager:StopCameraFade()
                     end, 1000)
-                    if not success then CreateVehicleTimer() end -- if failed, restart timer
+                    if not success then
+                        CreateVehicleTimer()
+                    end -- if failed, restart timer
                 end, CurrentProperty)
             end, 1000)
             Timer.ClearInterval(vehicleTimer)
@@ -750,17 +780,17 @@ function CreatePropertyBounds()
     AttachActorToActor(Volume, propertyVolumeCluster, nil, nil, '', {
         Location = AttachmentRule.SnapToTarget,
         Rotation = AttachmentRule.SnapToTarget,
-        Scale    = AttachmentRule.KeepWorld,
+        Scale = AttachmentRule.KeepWorld,
     }, false)
 
     print('Shell volume created for property:', CurrentProperty)
 end
 
 RegisterClientEvent('qb-houses:client:EnterProperty', function(propertyKey, interiorRef, shellSpawn, garageCoords, teleportCoords)
-    local shellData            = Config.Shells[interiorRef]
-    local spawnTransform       = Transform()
+    local shellData = Config.Shells[interiorRef]
+    local spawnTransform = Transform()
     spawnTransform.Translation = Vector(shellSpawn.X, shellSpawn.Y, shellSpawn.Z)
-    propertyInstance           = SpawnActor(shellData.shell, spawnTransform)
+    propertyInstance = SpawnActor(shellData.shell, spawnTransform)
 
     if shellData.exterior then
         for _, exterior in pairs(shellData.exterior) do
@@ -784,8 +814,8 @@ RegisterClientEvent('qb-houses:client:EnterProperty', function(propertyKey, inte
         garageLightTransform.Translation = Vector(garageCoords.X, garageCoords.Y, garageCoords.Z)
         garageInstanceLight = SpawnActor(shellData.garageLight, garageLightTransform)
     end
-    InProperty       = true
-    CurrentProperty  = propertyKey
+    InProperty = true
+    CurrentProperty = propertyKey
     propertyEntrance = teleportCoords
     DeleteEntranceTargets()
     DeleteInPropertyTargets()
@@ -845,7 +875,9 @@ RegisterClientEvent('qb-houses:client:LeaveProperty', function()
     InProperty = false
     DeleteInPropertyTargets()
     RefreshEntrances()
-    if vehicleTimer then Timer.ClearInterval(vehicleTimer) end
+    if vehicleTimer then
+        Timer.ClearInterval(vehicleTimer)
+    end
 end)
 
 RegisterClientEvent('qb-houses:client:ReloadFurniture', function(propertyKey)
@@ -859,14 +891,16 @@ end)
 
 RegisterClientEvent('qb-houses:client:PurchaseMenu', function(data)
     local entranceId = (data and data.entranceId) or ClosestEntranceId
-    if not entranceId or not Entrances[entranceId] then return end
+    if not entranceId or not Entrances[entranceId] then
+        return
+    end
     local entrance = Entrances[entranceId]
     local price = tonumber(entrance.price) or 0
     local menu = {
         {
             header = entrance.label or entranceId,
             txt = ('Price: $%s'):format(price),
-            isMenuHeader = true
+            isMenuHeader = true,
         },
         {
             header = 'Buy property',
@@ -874,19 +908,21 @@ RegisterClientEvent('qb-houses:client:PurchaseMenu', function(data)
             params = {
                 isServer = true,
                 event = 'qb-houses:server:PurchaseProperty',
-                args = { entranceId = entranceId }
-            }
+                args = { entranceId = entranceId },
+            },
         },
         {
             header = 'Close',
-            params = { event = 'qb-menu:client:closeMenu' }
-        }
+            params = { event = 'qb-menu:client:closeMenu' },
+        },
     }
     exports['qb-menu']:openMenu(menu)
 end)
 
 RegisterClientEvent('qb-houses:client:PurchaseProperty', function()
-    if ClosestEntranceId then OwnedEntrances[ClosestEntranceId] = true end
+    if ClosestEntranceId then
+        OwnedEntrances[ClosestEntranceId] = true
+    end
     RefreshEntrances()
 end)
 
@@ -895,7 +931,9 @@ RegisterClientEvent('qb-houses:client:ChangeOutfit', function()
 end)
 
 RegisterClientEvent('qb-houses:client:editFurniture', function(_)
-    if not IsCurrentPropertyOwner then return end
+    if not IsCurrentPropertyOwner then
+        return
+    end
     OpenFurnitureEditor()
 end)
 
@@ -969,31 +1007,43 @@ end, 500)
 -- Commands
 
 local HConsole = GetActorByTag('HConsole')
-HConsole:RegisterCommand('getoffset', 'Property Offset', nil, { HWorld, function()
-    if not InProperty then return end
-    if not CurrentProperty then return end
-    if not propertyEntrance then return end
-    local playerPawn = GetPlayerPawn()
-    if not playerPawn then return end
-    local pos = GetEntityCoords(playerPawn)
-    local offset = ('{ x = %.2f, y = %.2f, z = %.2f }'):format(
-        pos.X - propertyEntrance.X,
-        pos.Y - propertyEntrance.Y,
-        pos.Z - propertyEntrance.Z
-    )
-    CopyToClipboard(offset)
-end })
+HConsole:RegisterCommand('getoffset', 'Property Offset', nil, {
+    HWorld,
+    function()
+        if not InProperty then
+            return
+        end
+        if not CurrentProperty then
+            return
+        end
+        if not propertyEntrance then
+            return
+        end
+        local playerPawn = GetPlayerPawn()
+        if not playerPawn then
+            return
+        end
+        local pos = GetEntityCoords(playerPawn)
+        local offset = ('{ x = %.2f, y = %.2f, z = %.2f }'):format(pos.X - propertyEntrance.X, pos.Y - propertyEntrance.Y, pos.Z - propertyEntrance.Z)
+        CopyToClipboard(offset)
+    end,
+})
 
-HConsole:RegisterCommand('getgarageoffset', 'Garage Offset', nil, { HWorld, function()
-    if not InProperty then return end
-    if not garageCenter then return end
-    local playerPawn = GetPlayerPawn()
-    if not playerPawn then return end
-    local pos = GetEntityCoords(playerPawn)
-    local offset = ('{ x = %.2f, y = %.2f, z = %.2f }'):format(
-        garageCenter.X - pos.X,
-        garageCenter.Y - pos.Y,
-        pos.Z - garageCenter.Z
-    )
-    CopyToClipboard(offset)
-end })
+HConsole:RegisterCommand('getgarageoffset', 'Garage Offset', nil, {
+    HWorld,
+    function()
+        if not InProperty then
+            return
+        end
+        if not garageCenter then
+            return
+        end
+        local playerPawn = GetPlayerPawn()
+        if not playerPawn then
+            return
+        end
+        local pos = GetEntityCoords(playerPawn)
+        local offset = ('{ x = %.2f, y = %.2f, z = %.2f }'):format(garageCenter.X - pos.X, garageCenter.Y - pos.Y, pos.Z - garageCenter.Z)
+        CopyToClipboard(offset)
+    end,
+})

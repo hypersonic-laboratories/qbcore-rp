@@ -23,7 +23,9 @@ end)
 -- Events
 
 RegisterClientEvent('qb-management:client:openBossMenu', function()
-    if not PlayerJob.name or not PlayerJob.isboss then return end
+    if not PlayerJob.name or not PlayerJob.isboss then
+        return
+    end
 
     local bossMenu = {
         {
@@ -37,24 +39,24 @@ RegisterClientEvent('qb-management:client:openBossMenu', function()
             icon = 'list',
             params = {
                 event = 'qb-management:client:employeelist',
-            }
+            },
         },
         {
             header = Lang.t('body.hire'),
             txt = Lang.t('body.hired'),
-            icon = 'hand-holding',
+            icon = 'hand',
             params = {
                 event = 'qb-management:client:HireMenu',
-            }
+            },
         },
         {
             header = Lang.t('body.storage'),
             txt = Lang.t('body.storaged'),
-            icon = 'box-open',
+            icon = 'package-open',
             params = {
                 isServer = true,
                 event = 'qb-management:server:jobStash',
-            }
+            },
         },
         {
             header = Lang.t('body.outfits'),
@@ -62,8 +64,8 @@ RegisterClientEvent('qb-management:client:openBossMenu', function()
             icon = 'shirt',
             params = {
                 event = 'qb-management:client:Wardrobe',
-            }
-        }
+            },
+        },
     }
 
     bossMenu[#bossMenu + 1] = {
@@ -71,14 +73,16 @@ RegisterClientEvent('qb-management:client:openBossMenu', function()
         icon = 'angle-left',
         params = {
             event = 'qb-menu:client:closeMenu',
-        }
+        },
     }
 
     exports['qb-menu']:openMenu(bossMenu)
 end)
 
 RegisterClientEvent('qb-management:client:OpenGangMenu', function()
-    if not PlayerGang.name then return end
+    if not PlayerGang.name then
+        return
+    end
     local gangMenu = {
         {
             header = Lang.t('headersgang.bsm') .. string.upper(PlayerGang.label),
@@ -91,24 +95,24 @@ RegisterClientEvent('qb-management:client:OpenGangMenu', function()
             icon = 'list',
             params = {
                 event = 'qb-management:client:ManageGang',
-            }
+            },
         },
         {
             header = Lang.t('bodygang.hire'),
             txt = Lang.t('bodygang.hired'),
-            icon = 'hand-holding',
+            icon = 'hand',
             params = {
                 event = 'qb-management:client:HireMembers',
-            }
+            },
         },
         {
             header = Lang.t('bodygang.storage'),
             txt = Lang.t('bodygang.storaged'),
-            icon = 'box-open',
+            icon = 'package-open',
             params = {
                 isServer = true,
                 event = 'qb-management:server:gangStash',
-            }
+            },
         },
         {
             header = Lang.t('bodygang.outfits'),
@@ -116,8 +120,8 @@ RegisterClientEvent('qb-management:client:OpenGangMenu', function()
             icon = 'shirt',
             params = {
                 event = 'qb-management:client:Warbobe',
-            }
-        }
+            },
+        },
     }
 
     gangMenu[#gangMenu + 1] = {
@@ -125,7 +129,7 @@ RegisterClientEvent('qb-management:client:OpenGangMenu', function()
         icon = 'angle-left',
         params = {
             event = 'qb-menu:client:closeMenu',
-        }
+        },
     }
 
     exports['qb-menu']:openMenu(gangMenu)
@@ -149,17 +153,17 @@ RegisterClientEvent('qb-management:client:employeelist', function()
                     event = 'qb-management:client:ManageEmployee',
                     args = {
                         player = v,
-                        work = PlayerJob
-                    }
-                }
+                        work = PlayerJob,
+                    },
+                },
             }
         end
         EmployeesMenu[#EmployeesMenu + 1] = {
             header = Lang.t('body.return'),
-            icon = 'angle-left',
+            icon = 'chevron-left',
             params = {
                 event = 'qb-management:client:openBossMenu',
-            }
+            },
         }
         exports['qb-menu']:openMenu(EmployeesMenu)
     end, PlayerJob.name)
@@ -170,7 +174,7 @@ RegisterClientEvent('qb-management:client:ManageEmployee', function(data)
         {
             header = Lang.t('body.mngpl') .. data.player.name .. ' - ' .. string.upper(PlayerJob.label),
             isMenuHeader = true,
-            icon = 'circle-info'
+            icon = 'circle-info',
         },
     }
     for k, v in pairs(sharedJobs[data.work.name].grades) do
@@ -184,26 +188,26 @@ RegisterClientEvent('qb-management:client:ManageEmployee', function(data)
                 args = {
                     cid = data.player.empSource,
                     grade = tonumber(k),
-                    gradename = v.name
-                }
-            }
+                    gradename = v.name,
+                },
+            },
         }
     end
     EmployeeMenu[#EmployeeMenu + 1] = {
         header = Lang.t('body.fireemp'),
-        icon = 'user-large-slash',
+        icon = 'user-x',
         params = {
             isServer = true,
             event = 'qb-management:server:FireEmployee',
-            args = data.player.empSource
-        }
+            args = data.player.empSource,
+        },
     }
     EmployeeMenu[#EmployeeMenu + 1] = {
         header = Lang.t('body.return'),
         icon = 'angle-left',
         params = {
             event = 'qb-management:client:openBossMenu',
-        }
+        },
     }
     exports['qb-menu']:openMenu(EmployeeMenu)
 end)
@@ -226,17 +230,17 @@ RegisterClientEvent('qb-management:client:ManageGang', function()
                     event = 'qb-management:client:ManageMember',
                     args = {
                         player = v,
-                        work = PlayerGang
-                    }
-                }
+                        work = PlayerGang,
+                    },
+                },
             }
         end
         GangMembersMenu[#GangMembersMenu + 1] = {
             header = Lang.t('bodygang.return'),
-            icon = 'angle-left',
+            icon = 'chevron-left',
             params = {
                 event = 'qb-management:client:OpenGangMenu',
-            }
+            },
         }
         exports['qb-menu']:openMenu(GangMembersMenu)
     end, PlayerGang.name)
@@ -261,26 +265,26 @@ RegisterClientEvent('qb-management:client:ManageMember', function(data)
                 args = {
                     cid = data.player.empSource,
                     grade = tonumber(k),
-                    gradename = v.name
-                }
-            }
+                    gradename = v.name,
+                },
+            },
         }
     end
     MemberMenu[#MemberMenu + 1] = {
         header = Lang.t('bodygang.fireemp'),
-        icon = 'user-large-slash',
+        icon = 'user-x',
         params = {
             isServer = true,
             event = 'qb-management:server:FireMember',
-            args = data.player.empSource
-        }
+            args = data.player.empSource,
+        },
     }
     MemberMenu[#MemberMenu + 1] = {
         header = Lang.t('bodygang.return'),
         icon = 'angle-left',
         params = {
             event = 'qb-management:client:ManageGang',
-        }
+        },
     }
     exports['qb-menu']:openMenu(MemberMenu)
 end)
@@ -302,16 +306,16 @@ RegisterClientEvent('qb-management:client:HireMenu', function()
                 params = {
                     isServer = true,
                     event = 'qb-management:server:HireEmployee',
-                    args = v.citizenid
-                }
+                    args = v.citizenid,
+                },
             }
         end
         HireMenu[#HireMenu + 1] = {
             header = Lang.t('body.return'),
-            icon = 'angle-left',
+            icon = 'chevron-left',
             params = {
                 event = 'qb-management:client:openBossMenu',
-            }
+            },
         }
         exports['qb-menu']:openMenu(HireMenu)
     end)
@@ -334,16 +338,16 @@ RegisterClientEvent('qb-management:client:HireMembers', function()
                 params = {
                     isServer = true,
                     event = 'qb-management:server:HireMember',
-                    args = v.source
-                }
+                    args = v.source,
+                },
             }
         end
         HireMembersMenu[#HireMembersMenu + 1] = {
             header = Lang.t('bodygang.return'),
-            icon = 'angle-left',
+            icon = 'chevron-left',
             params = {
                 event = 'qb-management:client:OpenGangMenu',
-            }
+            },
         }
         exports['qb-menu']:openMenu(HireMembersMenu)
     end)
@@ -357,10 +361,10 @@ Timer.SetTimeout(function()
             local zoneName = job .. '_bossmenu_' .. index
             exports['qb-target']:AddSphereZone(zoneName, coords, 100, {
                 debug = true,
-                distance = 1000
+                distance = 1000,
             }, {
                 {
-                    icon = 'sign-in-alt',
+                    icon = 'log-in',
                     event = 'qb-management:client:openBossMenu',
                     label = Lang.t('target.label'),
                 },
@@ -373,10 +377,10 @@ Timer.SetTimeout(function()
             local zoneName = gang .. '_gangmenu_' .. index
             exports['qb-target']:AddSphereZone(zoneName, coords, 100, {
                 debug = true,
-                distance = 1000
+                distance = 1000,
             }, {
                 {
-                    icon = 'sign-in-alt',
+                    icon = 'log-in',
                     event = 'qb-management:client:OpenGangMenu',
                     label = Lang.t('targetgang.label'),
                 },

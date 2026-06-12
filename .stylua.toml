@@ -1,0 +1,9 @@
+column_width = 500
+quote_style = "ForceSingle"
+line_endings = "Unix"
+indent_type = "Spaces"
+indent_width = 4
+call_parentheses = "Always"
+
+[sort_requires]
+enabled = false

@@ -463,8 +463,12 @@ local function cleanupNearbyEntities(player, cleanType, radius)
         for i = 1, hits:Length() do
             local actor = hits:Get(i)
             if actor and actor:IsValid() and actor ~= pawn then
-                local isVehicle = pcall(function() return actor:IsA(UE.AHVehicleCar) end) and actor:IsA(UE.AHVehicleCar)
-                local isCharacter = pcall(function() return actor:IsA(UE.ACharacter) end) and actor:IsA(UE.ACharacter)
+                local isVehicle = pcall(function()
+                    return actor:IsA(UE.AHVehicleCar)
+                end) and actor:IsA(UE.AHVehicleCar)
+                local isCharacter = pcall(function()
+                    return actor:IsA(UE.ACharacter)
+                end) and actor:IsA(UE.ACharacter)
                 local isPlayer = isCharacter and actor:IsPlayerControlled()
                 if not isPlayer then
                     if targetType == 'vehicles' and isVehicle then
@@ -567,10 +571,18 @@ local function buildOpenAdminContext(src)
     local gangsCatalog = buildGangsCatalog(gangsShared)
     local itemsCatalog = buildItemsCatalog(itemsShared)
     local vehiclesCatalog = buildVehiclesCatalog(vehiclesShared)
-    local jobOptions = mapList(jobsCatalog, nil, function(job) return { name = job.label } end)
-    local gangOptions = mapList(gangsCatalog, nil, function(gang) return { name = gang.label } end)
-    local itemOptions = mapList(itemsCatalog, 200, function(item) return { name = item.label } end)
-    local spawnVehicleOptions = mapList(vehiclesCatalog, 200, function(vehicle) return { name = vehicle.label, model = vehicle.key } end)
+    local jobOptions = mapList(jobsCatalog, nil, function(job)
+        return { name = job.label }
+    end)
+    local gangOptions = mapList(gangsCatalog, nil, function(gang)
+        return { name = gang.label }
+    end)
+    local itemOptions = mapList(itemsCatalog, 200, function(item)
+        return { name = item.label }
+    end)
+    local spawnVehicleOptions = mapList(vehiclesCatalog, 200, function(vehicle)
+        return { name = vehicle.label, model = vehicle.key }
+    end)
     local leaderboardPlayers = mapList(players, nil, function(player)
         return { name = player.character, cash = player.financials.cash, bank = player.financials.bank, crypto = player.financials.crypto }
     end)
@@ -579,8 +591,8 @@ local function buildOpenAdminContext(src)
         currentAdminName = adminName,
         stats = {
             { label = 'Players Online', value = tostring(playersOnline) },
-            { label = 'Server Uptime',  value = serverUptime },
-            { label = 'Server Ping',    value = tostring(ping) .. 'ms' },
+            { label = 'Server Uptime', value = serverUptime },
+            { label = 'Server Ping', value = tostring(ping) .. 'ms' },
         },
         disciplinaryFeed = disciplinaryFeedState,
         reports = reportsState,
@@ -620,7 +632,9 @@ end
 
 local function getSourceByPlayerId(targetId)
     local targetNum = tonumber(targetId)
-    if not targetNum then return nil end
+    if not targetNum then
+        return nil
+    end
     local qbPlayers = getQBPlayers()
     for _, src in ipairs(qbPlayers) do
         local player = exports['qb-core']:GetPlayer(src)
@@ -633,7 +647,9 @@ end
 
 local function findSharedKey(shared, nameOrKey)
     local lower = tostring(nameOrKey or ''):lower()
-    if lower == '' then return nil end
+    if lower == '' then
+        return nil
+    end
     for key, entry in pairs(shared or {}) do
         if key:lower() == lower or (entry.label and entry.label:lower() == lower) then
             return key
@@ -642,53 +658,77 @@ local function findSharedKey(shared, nameOrKey)
     return nil
 end
 
-local function findJobKey(nameOrKey) return findSharedKey(jobsShared, nameOrKey) end
-local function findGangKey(nameOrKey) return findSharedKey(gangsShared, nameOrKey) end
+local function findJobKey(nameOrKey)
+    return findSharedKey(jobsShared, nameOrKey)
+end
+local function findGangKey(nameOrKey)
+    return findSharedKey(gangsShared, nameOrKey)
+end
 
 local function getActionAndTarget(data)
     local action = tostring(data and data.action or '')
     local targetPlayerId = tonumber(data and data.playerId)
-    if action == '' or not targetPlayerId then return nil, nil end
+    if action == '' or not targetPlayerId then
+        return nil, nil
+    end
     return action, targetPlayerId
 end
 
 local function getTargetContext(targetPlayerId, playerMode)
     local targetSrc = getSourceByPlayerId(targetPlayerId)
-    if not targetSrc then return nil, nil, nil end
+    if not targetSrc then
+        return nil, nil, nil
+    end
     local targetPlayer = playerMode and exports['qb-core']:GetPlayer(targetSrc) or nil
-    if playerMode == true and not targetPlayer then return nil, nil, nil end
+    if playerMode == true and not targetPlayer then
+        return nil, nil, nil
+    end
     return targetSrc, targetPlayer, GetPlayerName(targetSrc)
 end
 
 local function teleportAdminToTarget(source, targetSrc)
     local targetPawn = GetPlayerPawn(targetSrc)
-    if not targetPawn then return false end
+    if not targetPawn then
+        return false
+    end
     local targetCoords = GetEntityCoords(targetPawn)
-    if not targetCoords then return false end
+    if not targetCoords then
+        return false
+    end
     TeleportToInterior(source, targetCoords.X + 200, targetCoords.Y, targetCoords.Z)
     return true
 end
 
 local function bringTargetToAdmin(source, targetSrc)
     local adminPawn = GetPlayerPawn(source)
-    if not adminPawn then return false end
+    if not adminPawn then
+        return false
+    end
     local adminCoords = GetEntityCoords(adminPawn)
-    if not adminCoords then return false end
+    if not adminCoords then
+        return false
+    end
     local targetPawn = GetPlayerPawn(targetSrc)
-    if not targetPawn then return false end
+    if not targetPawn then
+        return false
+    end
     SetEntityCoords(targetPawn, Vector(adminCoords.X + 200, adminCoords.Y, adminCoords.Z))
     return true
 end
 
 local function setPlayerMetadata(player, metadata)
-    if not player then return end
+    if not player then
+        return
+    end
     for key, value in pairs(metadata or {}) do
         player.SetMetaData(key, value)
     end
 end
 
 local function healWithMetadata(targetSrc, metadata)
-    if not healPlayerToFull(targetSrc) then return false end
+    if not healPlayerToFull(targetSrc) then
+        return false
+    end
     setPlayerMetadata(exports['qb-core']:GetPlayer(targetSrc), metadata)
     return true
 end
@@ -764,19 +804,27 @@ end)
 
 RegisterServerEvent('qb-admin:server:developer:teleportToLocation', function(source, data)
     local location = resolveTeleportLocationByKey(data.key)
-    if type(location) ~= 'table' then return end
+    if type(location) ~= 'table' then
+        return
+    end
     local x, y, z = getLocationCoordinates(location)
-    if x and y and z then TeleportToInterior(source, x, y, z) end
+    if x and y and z then
+        TeleportToInterior(source, x, y, z)
+    end
 end)
 
 RegisterServerEvent('qb-admin:server:developer:teleportToCoordinates', function(source, data)
     local x, y, z = tonumber(data.x), tonumber(data.y), tonumber(data.z)
-    if x and y and z then TeleportToInterior(source, x, y, z) end
+    if x and y and z then
+        TeleportToInterior(source, x, y, z)
+    end
 end)
 
 RegisterServerEvent('qb-admin:server:chat:send', function(source, data)
     local message = tostring(data.message or '')
-    if message == '' then return end
+    if message == '' then
+        return
+    end
     local entry = { id = nextChatMessageId, author = GetPlayerName(source), message = message, time = formatClockTime() }
     nextChatMessageId = nextChatMessageId + 1
     pushChatMessage(entry)
@@ -812,26 +860,34 @@ local contextActions = {
     end,
     ['quick-kick'] = function(_, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc then return end
+        if not targetSrc then
+            return
+        end
         targetSrc:Kick('Kicked by admin')
         pushLogEntry('Quick Kick', targetName, 'Kicked by ' .. adminName)
         pushFeedEntry(adminName .. ' kicked ' .. targetName)
     end,
     bring = function(source, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc or not bringTargetToAdmin(source, targetSrc) then return end
+        if not targetSrc or not bringTargetToAdmin(source, targetSrc) then
+            return
+        end
         pushLogEntry('Bring', targetName, 'Brought by ' .. adminName)
         pushFeedEntry(adminName .. ' brought player #' .. targetPlayerId)
     end,
     freeze = function(_, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc or not setPlayerFrozenOnServer(targetSrc, true) then return end
+        if not targetSrc or not setPlayerFrozenOnServer(targetSrc, true) then
+            return
+        end
         pushLogEntry('Freeze', targetName, 'Frozen by ' .. adminName)
         pushFeedEntry(adminName .. ' froze player #' .. targetPlayerId)
     end,
     heal = function(_, targetPlayerId, adminName)
         local targetSrc, targetPlayer, targetName = getTargetContext(targetPlayerId, true)
-        if not targetSrc or not healPlayerToFull(targetSrc) then return end
+        if not targetSrc or not healPlayerToFull(targetSrc) then
+            return
+        end
         setPlayerMetadata(targetPlayer, { hunger = 100, thirst = 100, stress = 0, isdead = false })
         pushLogEntry('Heal', targetName, 'Healed by ' .. adminName)
         pushFeedEntry(adminName .. ' healed player #' .. targetPlayerId)
@@ -841,15 +897,21 @@ local contextActions = {
 RegisterServerEvent('qb-admin:server:players:context-action', function(source, data)
     local action, targetPlayerId = getActionAndTarget(data)
     local handler = action and contextActions[action]
-    if handler then handler(source, targetPlayerId, GetPlayerName(source)) end
+    if handler then
+        handler(source, targetPlayerId, GetPlayerName(source))
+    end
 end)
 
 local vehicleActions = {
     repair = function(_, targetSrc, targetName, adminName)
-        if repairOccupiedVehicle(targetSrc) then pushLogEntry('Vehicle Repair', targetName, 'Repaired by ' .. adminName) end
+        if repairOccupiedVehicle(targetSrc) then
+            pushLogEntry('Vehicle Repair', targetName, 'Repaired by ' .. adminName)
+        end
     end,
     refuel = function(_, targetSrc, targetName, adminName)
-        if refuelOccupiedVehicle(targetSrc) then pushLogEntry('Vehicle Refuel', targetName, 'Refueled by ' .. adminName) end
+        if refuelOccupiedVehicle(targetSrc) then
+            pushLogEntry('Vehicle Refuel', targetName, 'Refueled by ' .. adminName)
+        end
     end,
     ownership = function(source, _, targetName, adminName, targetPlayerId)
         -- TO DO: Implement the client-side vehicle ownership viewer.
@@ -867,7 +929,9 @@ local vehicleActions = {
         pushLogEntry('Vehicle Trunk', targetName, 'Opened by ' .. adminName)
     end,
     delete = function(_, targetSrc, targetName, adminName)
-        if not deleteOccupiedVehicle(targetSrc) then return end
+        if not deleteOccupiedVehicle(targetSrc) then
+            return
+        end
         pushLogEntry('Vehicle Delete', targetName, 'Vehicle deleted by ' .. adminName)
         pushFeedEntry(adminName .. ' deleted vehicle of ' .. targetName)
     end,
@@ -876,9 +940,13 @@ local vehicleActions = {
 RegisterServerEvent('qb-admin:server:players:vehicleAction', function(source, data)
     local action, targetPlayerId = getActionAndTarget(data)
     local handler = action and vehicleActions[action]
-    if not handler then return end
+    if not handler then
+        return
+    end
     local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-    if targetSrc then handler(source, targetSrc, targetName, GetPlayerName(source), targetPlayerId) end
+    if targetSrc then
+        handler(source, targetSrc, targetName, GetPlayerName(source), targetPlayerId)
+    end
 end)
 local gangActions = {
     remove = function(targetPlayer, targetName, adminName)
@@ -889,7 +957,9 @@ local gangActions = {
     change = function(targetPlayer, targetName, adminName, data)
         local gangName, gradeLevel = tostring(data.gang or ''), tonumber(data.grade) or 0
         local gangKey = gangName ~= '' and findGangKey(gangName) or nil
-        if not gangKey then return end
+        if not gangKey then
+            return
+        end
         targetPlayer.SetGang(gangKey, gradeLevel)
         pushLogEntry('Gang Change', targetName, 'Set to ' .. gangKey .. ' grade ' .. gradeLevel .. ' by ' .. adminName)
         pushFeedEntry(adminName .. ' set ' .. targetName .. ' gang to ' .. gangName)
@@ -899,9 +969,13 @@ local gangActions = {
 RegisterServerEvent('qb-admin:server:players:gangAction', function(source, data)
     local action, targetPlayerId = getActionAndTarget(data)
     local handler = action and gangActions[action]
-    if not handler then return end
+    if not handler then
+        return
+    end
     local _, targetPlayer, targetName = getTargetContext(targetPlayerId, true)
-    if targetPlayer then handler(targetPlayer, targetName, GetPlayerName(source), data) end
+    if targetPlayer then
+        handler(targetPlayer, targetName, GetPlayerName(source), data)
+    end
 end)
 local jobActions = {
     fire = function(targetPlayer, targetName, adminName)
@@ -912,7 +986,9 @@ local jobActions = {
     change = function(targetPlayer, targetName, adminName, data)
         local jobName, gradeLevel = tostring(data.job or ''), tonumber(data.grade) or 0
         local jobKey = jobName ~= '' and findJobKey(jobName) or nil
-        if not jobKey then return end
+        if not jobKey then
+            return
+        end
         targetPlayer.SetJob(jobKey, gradeLevel)
         pushLogEntry('Job Change', targetName, 'Set to ' .. jobKey .. ' grade ' .. gradeLevel .. ' by ' .. adminName)
         pushFeedEntry(adminName .. ' set ' .. targetName .. ' job to ' .. jobName)
@@ -921,21 +997,29 @@ local jobActions = {
 RegisterServerEvent('qb-admin:server:players:jobAction', function(source, data)
     local action, targetPlayerId = getActionAndTarget(data)
     local handler = action and jobActions[action]
-    if not handler then return end
+    if not handler then
+        return
+    end
     local _, targetPlayer, targetName = getTargetContext(targetPlayerId, true)
-    if targetPlayer then handler(targetPlayer, targetName, GetPlayerName(source), data) end
+    if targetPlayer then
+        handler(targetPlayer, targetName, GetPlayerName(source), data)
+    end
 end)
 
 local quickControlActions = {
     ['teleport-to'] = function(source, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc or not teleportAdminToTarget(source, targetSrc) then return end
+        if not targetSrc or not teleportAdminToTarget(source, targetSrc) then
+            return
+        end
         pushLogEntry('Teleport To', targetName, adminName .. ' teleported to target')
         pushFeedEntry(adminName .. ' teleported to player #' .. targetPlayerId)
     end,
     ['bring-to-you'] = function(source, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc or not bringTargetToAdmin(source, targetSrc) then return end
+        if not targetSrc or not bringTargetToAdmin(source, targetSrc) then
+            return
+        end
         pushLogEntry('Bring To You', targetName, 'Brought by ' .. adminName)
         pushFeedEntry(adminName .. ' brought player #' .. targetPlayerId)
     end,
@@ -946,49 +1030,62 @@ local quickControlActions = {
     end,
     kick = function(_, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc then return end
+        if not targetSrc then
+            return
+        end
         targetSrc:Kick('Kicked by admin')
         pushLogEntry('Kick', targetName, 'Kicked by ' .. adminName)
         pushFeedEntry(adminName .. ' kicked ' .. targetName)
     end,
     ban = function(_, targetPlayerId, adminName)
         local targetSrc, targetPlayer, targetName = getTargetContext(targetPlayerId, 'optional')
-        if not targetSrc then return end
+        if not targetSrc then
+            return
+        end
         local citizenId = targetPlayer and targetPlayer.PlayerData and targetPlayer.PlayerData.citizenid or 'unknown'
         -- TO DO: Persist bans in the bans table and honor ban duration/reason.
-        TriggerLocalServerEvent('qb-log:server:CreateLog', 'admin', 'Player Banned', 'red',
-            adminName .. ' banned ' .. targetName .. ' (citizenid: ' .. citizenId .. ')')
+        TriggerLocalServerEvent('qb-log:server:CreateLog', 'admin', 'Player Banned', 'red', adminName .. ' banned ' .. targetName .. ' (citizenid: ' .. citizenId .. ')')
         targetSrc:Kick('Banned by admin')
         pushLogEntry('Ban', targetName, 'Banned by ' .. adminName)
         pushFeedEntry(adminName .. ' banned ' .. targetName)
     end,
     freeze = function(_, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc or not setPlayerFrozenOnServer(targetSrc, true) then return end
+        if not targetSrc or not setPlayerFrozenOnServer(targetSrc, true) then
+            return
+        end
         pushLogEntry('Freeze', targetName, 'Frozen by ' .. adminName)
         pushFeedEntry(adminName .. ' froze player #' .. targetPlayerId)
     end,
     clothing = function(_, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc then return end
+        if not targetSrc then
+            return
+        end
         TriggerClientEvent(targetSrc, 'qb-admin:client:openClothing')
         pushLogEntry('Clothing', targetName, 'Opened by ' .. adminName)
     end,
     inventory = function(source, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc then return end
+        if not targetSrc then
+            return
+        end
         TriggerClientEvent(source, 'qb-admin:client:openInventory', targetPlayerId)
         pushLogEntry('Inventory', targetName, 'Viewed by ' .. adminName)
     end,
     revive = function(_, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc or not healWithMetadata(targetSrc, { isdead = false }) then return end
+        if not targetSrc or not healWithMetadata(targetSrc, { isdead = false }) then
+            return
+        end
         pushLogEntry('Revive', targetName, 'Revived by ' .. adminName)
         pushFeedEntry(adminName .. ' revived player #' .. targetPlayerId)
     end,
     kill = function(_, targetPlayerId, adminName)
         local targetSrc, targetPlayer, targetName = getTargetContext(targetPlayerId, 'optional')
-        if not targetSrc or not killPlayerOnServer(targetSrc) then return end
+        if not targetSrc or not killPlayerOnServer(targetSrc) then
+            return
+        end
         setPlayerMetadata(targetPlayer, { isdead = true })
         pushLogEntry('Kill', targetName, 'Killed by ' .. adminName)
         pushFeedEntry(adminName .. ' killed player #' .. targetPlayerId)
@@ -998,12 +1095,16 @@ local quickControlActions = {
 RegisterServerEvent('qb-admin:server:players:quickControl', function(source, data)
     local action, targetPlayerId = getActionAndTarget(data)
     local handler = action and quickControlActions[action]
-    if handler then handler(source, targetPlayerId, GetPlayerName(source), data) end
+    if handler then
+        handler(source, targetPlayerId, GetPlayerName(source), data)
+    end
 end)
 
 local vitalActions = {
     health = function(targetSrc, targetPlayer, targetName, adminName)
-        if not healPlayerToFull(targetSrc) then return end
+        if not healPlayerToFull(targetSrc) then
+            return
+        end
         targetPlayer.SetMetaData('isdead', false)
         pushLogEntry('Replenish Health', targetName, 'By ' .. adminName)
         pushFeedEntry(adminName .. ' replenished health of ' .. targetName)
@@ -1026,9 +1127,13 @@ local vitalActions = {
 RegisterServerEvent('qb-admin:server:players:replenishVital', function(source, data)
     local targetPlayerId, vitalKey = tonumber(data and data.playerId), tostring(data and data.vital or '')
     local handler = vitalActions[vitalKey]
-    if not targetPlayerId or not handler then return end
+    if not targetPlayerId or not handler then
+        return
+    end
     local targetSrc, targetPlayer, targetName = getTargetContext(targetPlayerId, true)
-    if targetSrc then handler(targetSrc, targetPlayer, targetName, GetPlayerName(source)) end
+    if targetSrc then
+        handler(targetSrc, targetPlayer, targetName, GetPlayerName(source))
+    end
 end)
 
 local moneyTypes = { cash = 'cash', bank = 'bank', crypto = 'crypto' }
@@ -1036,9 +1141,13 @@ local moneyTypes = { cash = 'cash', bank = 'bank', crypto = 'crypto' }
 RegisterServerEvent('qb-admin:server:players:currencyAdjust', function(source, data)
     local targetPlayerId, moneyType = tonumber(data and data.playerId), moneyTypes[tostring(data and data.currency or '')]
     local delta, nextValue = tonumber(data and data.delta), tonumber(data and data.value)
-    if not targetPlayerId or not moneyType or not delta or not nextValue then return end
+    if not targetPlayerId or not moneyType or not delta or not nextValue then
+        return
+    end
     local _, targetPlayer, targetName = getTargetContext(targetPlayerId, true)
-    if not targetPlayer then return end
+    if not targetPlayer then
+        return
+    end
     local adminName = GetPlayerName(source)
     if delta > 0 then
         targetPlayer.AddMoney(moneyType, delta, 'admin-adjustment by ' .. adminName)
@@ -1066,11 +1175,15 @@ local dashboardActions = {
     end,
     ['god-mode'] = function(source, adminName)
         local enabled = toggleAdminQuickActionState(source, 'godMode')
-        if setPlayerGodModeOnServer(source, enabled) then pushLogEntry('God Mode', adminName, enabled and 'Enabled god mode' or 'Disabled god mode') end
+        if setPlayerGodModeOnServer(source, enabled) then
+            pushLogEntry('God Mode', adminName, enabled and 'Enabled god mode' or 'Disabled god mode')
+        end
     end,
     invisibility = function(source, adminName)
         local enabled = toggleAdminQuickActionState(source, 'invisibility')
-        if setPlayerInvisibilityOnServer(source, enabled) then pushLogEntry('Invisibility', adminName, enabled and 'Enabled invisibility' or 'Disabled invisibility') end
+        if setPlayerInvisibilityOnServer(source, enabled) then
+            pushLogEntry('Invisibility', adminName, enabled and 'Enabled invisibility' or 'Disabled invisibility')
+        end
     end,
     ['admin-duty'] = function(source, adminName)
         local enabled = toggleAdminQuickActionState(source, 'adminDuty')
@@ -1088,13 +1201,17 @@ local dashboardActions = {
         end
     end,
     ['self-revive'] = function(source, adminName)
-        if healWithMetadata(source, { isdead = false }) then pushLogEntry('Self Revive', adminName, 'Revived self') end
+        if healWithMetadata(source, { isdead = false }) then
+            pushLogEntry('Self Revive', adminName, 'Revived self')
+        end
     end,
 }
 
 RegisterServerEvent('qb-admin:server:dashboard:quickAction', function(source, data)
     local handler = dashboardActions[tostring(data and data.action or '')]
-    if handler then handler(source, GetPlayerName(source), data) end
+    if handler then
+        handler(source, GetPlayerName(source), data)
+    end
 end)
 
 local cleanupActions = {
@@ -1106,7 +1223,9 @@ local cleanupActions = {
 
 RegisterServerEvent('qb-admin:server:environment:cleanup', function(source, data)
     local cleanup = cleanupActions[tostring(data and data.action or '')]
-    if not cleanup then return end
+    if not cleanup then
+        return
+    end
     local adminName = GetPlayerName(source)
     cleanupNearbyEntities(source, cleanup[1], cleanup[2])
     pushLogEntry('Cleanup', adminName, cleanup[3])
@@ -1125,22 +1244,30 @@ end)
 
 local investigationActions = {
     ['goto'] = function(source, targetSrc, targetName, adminName)
-        if not teleportAdminToTarget(source, targetSrc) then return end
+        if not teleportAdminToTarget(source, targetSrc) then
+            return
+        end
         pushLogEntry('Goto Reporter', targetName, adminName .. ' teleported to reporter')
         pushFeedEntry(adminName .. ' went to report player ' .. targetName)
     end,
     bring = function(source, targetSrc, targetName, adminName)
-        if not bringTargetToAdmin(source, targetSrc) then return end
+        if not bringTargetToAdmin(source, targetSrc) then
+            return
+        end
         pushLogEntry('Bring Reporter', targetName, 'Brought by ' .. adminName)
         pushFeedEntry(adminName .. ' brought report player ' .. targetName)
     end,
     heal = function(_, targetSrc, targetName, adminName)
-        if not healWithMetadata(targetSrc, { hunger = 100, thirst = 100, isdead = false }) then return end
+        if not healWithMetadata(targetSrc, { hunger = 100, thirst = 100, isdead = false }) then
+            return
+        end
         pushLogEntry('Heal Reporter', targetName, 'Healed by ' .. adminName)
         pushFeedEntry(adminName .. ' healed report player ' .. targetName)
     end,
     freeze = function(_, targetSrc, targetName, adminName)
-        if not setPlayerFrozenOnServer(targetSrc, true) then return end
+        if not setPlayerFrozenOnServer(targetSrc, true) then
+            return
+        end
         pushLogEntry('Freeze Reporter', targetName, 'Frozen by ' .. adminName)
         pushFeedEntry(adminName .. ' froze report player ' .. targetName)
     end,
@@ -1150,9 +1277,13 @@ RegisterServerEvent('qb-admin:server:reports:investigationAction', function(sour
     local action = tostring(data and data.action or '')
     local _, targetPlayerId = getTicketTarget(data)
     local handler = investigationActions[action]
-    if not targetPlayerId or not handler then return end
+    if not targetPlayerId or not handler then
+        return
+    end
     local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-    if targetSrc then handler(source, targetSrc, targetName, GetPlayerName(source), data) end
+    if targetSrc then
+        handler(source, targetSrc, targetName, GetPlayerName(source), data)
+    end
 end)
 
 RegisterServerEvent('qb-admin:server:reports:updateState', function(_, data)
@@ -1192,7 +1323,9 @@ RegisterServerEvent('qb-admin:server:reports:resolved', function(_, data)
         return
     end
     local resolution = tostring(data.resolution or '')
-    if resolution == '' then resolution = 'Resolved by admin.' end
+    if resolution == '' then
+        resolution = 'Resolved by admin.'
+    end
     ticket.column = 'resolved'
     ticket.resolution = resolution
     updateReportForTicket(ticket, false, true)
