@@ -137,9 +137,8 @@ html::-webkit-scrollbar {
     font-size: 13px;
     font-weight: var(--font-weight-medium);
     color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
     line-height: 1.4;
 }
 
