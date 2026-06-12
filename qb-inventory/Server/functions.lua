@@ -712,7 +712,11 @@ function AddItem(identifier, item, amount, slot, info, reason)
     end
 
     if not updated then
-        slot = slot or GetFirstFreeSlot(inventory, inventorySlots)
+        if itemInfo.unique then
+            slot = GetFirstFreeSlot(inventory, inventorySlots)
+        else
+            slot = slot or GetFirstFreeSlot(inventory, inventorySlots)
+        end
         if not slot then
             print('AddItem: No free slot available')
             return false

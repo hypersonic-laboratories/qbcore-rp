@@ -123,7 +123,9 @@ RegisterServerEvent('qb-crafting:server:useBench', function(source, itemData)
     if not Player then
         return
     end
-    Player.RemoveItem(benchType, itemData.slot)
+    if not Player.RemoveItem(benchType, 1, itemData.slot) then
+        return
+    end
     TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[benchType], 'remove')
     TriggerClientEvent(source, 'QBCore:Notify', Lang.t('notifications.tablePlace'), 'success')
     SpawnBench(source, benchType)

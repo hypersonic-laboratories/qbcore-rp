@@ -525,7 +525,7 @@ function QBCore.Player.GetOfflinePlayer(citizenid)
         return nil
     end
     local result = Database.Select('SELECT * FROM players WHERE citizenid = ? LIMIT 1', { citizenid })
-    if not result or #result == 0 then
+    if not result or not result[1] then
         return nil
     end
     local PlayerData = result[1].Columns:ToTable()
@@ -555,7 +555,7 @@ function QBCore.Player.GetOfflinePlayerByLicense(license)
         return nil
     end
     local result = Database.Select('SELECT * FROM players WHERE license = ? LIMIT 1', { license })
-    if not result or #result == 0 then
+    if not result or not result[1] then
         return nil
     end
     local PlayerData = result[1].Columns:ToTable()
@@ -751,7 +751,7 @@ function QBCore.Player.DeleteCharacter(source, citizenid)
     local PlayerState = source:GetLyraPlayerState()
     local license = PlayerState:GetHelixUserId()
     local result = Database.Select('SELECT license FROM players WHERE citizenid = ? LIMIT 1', { citizenid })
-    if not result or #result == 0 or license ~= result[1].Columns:ToTable().license then
+    if not result or not result[1] or license ~= result[1].Columns:ToTable().license then
         source:Kick(Lang:t('info.exploit_dropped'))
         TriggerLocalServerEvent('qb-log:server:CreateLog', 'anticheat', 'Anti-Cheat', 'white', tostring(source) .. ' Has Been Dropped For Character Deletion Exploit', true)
         return false
@@ -779,7 +779,7 @@ end
 
 function QBCore.Player.ForceDeleteCharacter(citizenid)
     local result = Database.Select('SELECT license FROM players WHERE citizenid = ? LIMIT 1', { citizenid })
-    if not result or #result == 0 then
+    if not result or not result[1] then
         return
     end
     local existing = QBCore.Functions.GetPlayerByCitizenId(citizenid)

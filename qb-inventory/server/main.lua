@@ -190,6 +190,9 @@ RegisterServerEvent('qb-inventory:server:useItem', function(source, item)
         UseItem(itemData.name, source, itemData)
         TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'use')
     end
+    if itemInfo.shouldClose then
+        TriggerClientEvent(source, 'qb-inventory:client:closeInv')
+    end
 end)
 
 RegisterServerEvent('qb-inventory:server:openDrop', function(source, dropId)
@@ -510,7 +513,8 @@ RegisterServerEvent('qb-inventory:server:SetInventoryData', function(source, fro
         local fromId = getIdentifier(fromInventory, source)
         local toId = getIdentifier(toInventory, source)
 
-        if toItem and fromItem.name == toItem.name then
+        local fromItemInfo = sharedItems[fromItem.name:lower()]
+        if toItem and fromItem.name == toItem.name and not (fromItemInfo and fromItemInfo.unique) then
             if RemoveItem(fromId, fromItem.name, toAmount, fromSlot, 'stacked item') then
                 AddItem(toId, toItem.name, toAmount, toSlot, toItem.info, 'stacked item')
             end

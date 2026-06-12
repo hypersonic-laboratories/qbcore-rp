@@ -1096,7 +1096,7 @@ RegisterServerEvent('qb-admin:server:players:quickControl', function(source, dat
     local action, targetPlayerId = getActionAndTarget(data)
     local handler = action and quickControlActions[action]
     if handler then
-        handler(source, targetPlayerId, GetPlayerName(source), data)
+        handler(source, targetPlayerId, GetPlayerName(source))
     end
 end)
 
@@ -1210,7 +1210,7 @@ local dashboardActions = {
 RegisterServerEvent('qb-admin:server:dashboard:quickAction', function(source, data)
     local handler = dashboardActions[tostring(data and data.action or '')]
     if handler then
-        handler(source, GetPlayerName(source), data)
+        handler(source, GetPlayerName(source))
     end
 end)
 
@@ -1282,7 +1282,7 @@ RegisterServerEvent('qb-admin:server:reports:investigationAction', function(sour
     end
     local targetSrc, _, targetName = getTargetContext(targetPlayerId)
     if targetSrc then
-        handler(source, targetSrc, targetName, GetPlayerName(source), data)
+        handler(source, targetSrc, targetName, GetPlayerName(source))
     end
 end)
 

@@ -80,15 +80,14 @@ RegisterClientEvent('qb-inventory:client:closeInv', function()
     my_webui:SendEvent('close')
 end)
 
-RegisterClientEvent('qb-inventory:client:updateInventory', function()
+RegisterClientEvent('qb-inventory:client:updateInventory', function(items)
     if my_webui == nil then
         return
     end
-    local items = {}
-    if player_data and type(player_data.items) == 'table' then
+    if not items and player_data and type(player_data.items) == 'table' then
         items = player_data.items
     end
-    my_webui:SendEvent('updateInventory', { inventory = items })
+    my_webui:SendEvent('updateInventory', { inventory = items or {} })
 end)
 
 RegisterClientEvent('qb-inventory:client:ItemBox', function(itemData, type, amount)
