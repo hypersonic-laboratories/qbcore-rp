@@ -188,9 +188,17 @@ Input.BindKey(Config.Keybinds.Hotbar, function()
     TriggerServerEvent('qb-inventory:server:toggleHotbar')
 end)
 
+local keyTable = {
+    [1] = 'One',
+    [2] = 'Two',
+    [3] = 'Three',
+    [4] = 'Four',
+    [5] = 'Five',
+}
+
 for i = 1, 5 do
-    Input.BindKey(i, function()
-        if Input.IsMouseEnabled() then
+    Input.BindKey(keyTable[i], function()
+        if inv_open then
             return
         end
         local itemData = player_data.items[i]
