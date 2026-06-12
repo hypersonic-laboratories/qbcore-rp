@@ -3,6 +3,17 @@ local sharedJobs = exports['qb-core']:GetShared('Jobs')
 
 -- Functions
 
+local function isNearCityhall(pedCoords)
+    for _, hall in ipairs(Config.Cityhalls) do
+        for _, spot in ipairs(hall.spots) do
+            if GetDistanceBetweenCoords(pedCoords, spot.coords) <= 500 then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 local function getHighestRank(jobName)
     local highestRank = 0
     local job = sharedJobs[jobName]
@@ -31,8 +42,7 @@ RegisterServerEvent('qb-cityhall:server:ApplyJob', function(source, job)
         return
     end
     local pedCoords = GetEntityCoords(ped)
-    local coords = Config.Cityhalls[1].coords
-    if GetDistanceBetweenCoords(pedCoords, coords) > 1500 then
+    if not isNearCityhall(pedCoords) then
         return
     end
 
@@ -51,8 +61,7 @@ RegisterServerEvent('qb-cityhall:server:requestId', function(source, item)
         return
     end
     local pedCoords = GetEntityCoords(ped)
-    local coords = Config.Cityhalls[1].coords
-    if GetDistanceBetweenCoords(pedCoords, coords) > 1500 then
+    if not isNearCityhall(pedCoords) then
         return
     end
 
