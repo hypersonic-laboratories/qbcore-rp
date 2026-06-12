@@ -6,7 +6,9 @@ local sharedJobs = exports['qb-core']:GetShared('Jobs')
 local function getHighestRank(jobName)
     local highestRank = 0
     local job = sharedJobs[jobName]
-    if not job then return nil end
+    if not job then
+        return nil
+    end
     local jobGrades = job.grades
     for i = 1, #jobGrades do
         if jobGrades[i].isboss then
@@ -21,12 +23,18 @@ end
 
 RegisterServerEvent('qb-cityhall:server:ApplyJob', function(source, job)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local ped = GetPlayerPawn(source)
-    if not ped then return end
+    if not ped then
+        return
+    end
     local pedCoords = GetEntityCoords(ped)
     local coords = Config.Cityhalls[1].coords
-    if GetDistanceBetweenCoords(pedCoords, coords) > 1500 then return end
+    if GetDistanceBetweenCoords(pedCoords, coords) > 1500 then
+        return
+    end
 
     local JobInfo = sharedJobs[job]
     Player.SetJob(job, getHighestRank(job))
@@ -35,12 +43,18 @@ end)
 
 RegisterServerEvent('qb-cityhall:server:requestId', function(source, item)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local ped = GetPlayerPawn(source)
-    if not ped then return end
+    if not ped then
+        return
+    end
     local pedCoords = GetEntityCoords(ped)
     local coords = Config.Cityhalls[1].coords
-    if GetDistanceBetweenCoords(pedCoords, coords) > 1500 then return end
+    if GetDistanceBetweenCoords(pedCoords, coords) > 1500 then
+        return
+    end
 
     local itemInfo = Config.Cityhalls[1].licenses[item]
     if not Player.RemoveMoney('cash', itemInfo.cost) then
@@ -66,14 +80,18 @@ RegisterServerEvent('qb-cityhall:server:requestId', function(source, item)
         info.birthdate = Player.PlayerData.charinfo.birthdate
     end
 
-    if not exports['qb-inventory']:AddItem(source, item, 1, false, info, 'qb-cityhall:server:requestId') then return end
+    if not Player.AddItem(item, 1, false, info) then
+        return
+    end
 end)
 
 -- Callbacks
 
 RegisterCallback('getIdentityData', function(source)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return {} end
+    if not Player then
+        return {}
+    end
 
     local licensesMeta = Player.PlayerData.metadata['licences']
     local availableLicenses = {}

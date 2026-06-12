@@ -3,7 +3,9 @@ local activeMiners = {}
 local TOOL_ID = 'ID_Misc_Jackhammer'
 
 local function SpawnNetRocks()
-    if not Config.NetworkedRocks then return end
+    if not Config.NetworkedRocks then
+        return
+    end
 
     for i = 1, #Config.miningZones do
         local zone = Config.miningZones[i]
@@ -17,11 +19,7 @@ local function SpawnNetRocks()
             while not isValid and tries < 50 do
                 local angle = math.random() * math.pi * 2
                 local rDist = math.random() * zone.radius
-                pos = Vector(
-                    zone.center.X + math.cos(angle) * rDist,
-                    zone.center.Y + math.sin(angle) * rDist,
-                    zone.center.Z
-                )
+                pos = Vector(zone.center.X + math.cos(angle) * rDist, zone.center.Y + math.sin(angle) * rDist, zone.center.Z)
 
                 isValid = true
                 for _, pt in ipairs(spawnedPts) do
@@ -105,17 +103,23 @@ end)
 
 RegisterServerEvent('qb-mining:server:completeMine', function(source, data)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     if activeMiners[source] then
         HInventory.RemoveItemByName(source, TOOL_ID, 1)
         activeMiners[source] = nil
     end
-    if not data then return end
+    if not data then
+        return
+    end
     if Config.NetworkedRocks then
-        if not data.entity then return end
+        if not data.entity then
+            return
+        end
         local rData = netRocks[data.entity]
         if rData then
-            exports['qb-inventory']:AddItem(source, rData.item, 1)
+            Player.AddItem(rData.item, 1)
             TriggerClientEvent(source, 'QBCore:Notify', 'You successfully mined ' .. rData.item .. '!', 'success')
 
             if data.entity:IsValid() then
@@ -125,8 +129,10 @@ RegisterServerEvent('qb-mining:server:completeMine', function(source, data)
         end
     else
         -- Local rocks event
-        if not data.item then return end
-        exports['qb-inventory']:AddItem(source, data.item, 1)
+        if not data.item then
+            return
+        end
+        Player.AddItem(data.item, 1)
         TriggerClientEvent(source, 'QBCore:Notify', 'You successfully mined ' .. data.item .. '!', 'success')
     end
 end)

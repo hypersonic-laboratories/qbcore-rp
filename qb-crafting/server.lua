@@ -25,7 +25,7 @@ local function PickupBench(source)
     if not Player then
         return
     end
-    if not exports['qb-inventory']:AddItem(source, bench.benchType, 1, false, false) then
+    if not Player.AddItem(bench.benchType, 1, false, false) then
         return
     end
     TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[bench.benchType], 'add')
@@ -82,7 +82,7 @@ end)
 RegisterServerEvent('qb-crafting:server:removeMaterials', function(source, itemName, amount)
     local Player = exports['qb-core']:GetPlayer(source)
     if Player then
-        exports['qb-inventory']:RemoveItem(source, itemName, amount, false)
+        Player.RemoveItem(itemName, amount, false)
         TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[itemName], 'remove')
     end
 end)
@@ -93,12 +93,12 @@ RegisterServerEvent('qb-crafting:server:receiveItem', function(source, craftedIt
         return
     end
     for _, requiredItem in ipairs(requiredItems) do
-        if not exports['qb-inventory']:RemoveItem(source, requiredItem.item, requiredItem.amount, false) then
+        if not Player.RemoveItem(requiredItem.item, requiredItem.amount, false) then
             return
         end
         TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[requiredItem.item], 'remove')
     end
-    if not exports['qb-inventory']:AddItem(source, craftedItem, amountToCraft, false, false) then
+    if not Player.AddItem(craftedItem, amountToCraft, false, false) then
         return
     end
     TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[craftedItem], 'add')
@@ -123,7 +123,7 @@ RegisterServerEvent('qb-crafting:server:useBench', function(source, itemData)
     if not Player then
         return
     end
-    exports['qb-inventory']:RemoveItem(source, benchType, itemData.slot)
+    Player.RemoveItem(benchType, itemData.slot)
     TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[benchType], 'remove')
     TriggerClientEvent(source, 'QBCore:Notify', Lang.t('notifications.tablePlace'), 'success')
     SpawnBench(source, benchType)

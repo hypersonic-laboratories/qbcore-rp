@@ -1,12 +1,13 @@
 local Lang = require('locales/en')
 local pendingCharCreation = {}
-local dir = debug.getinfo(1, 'S').source .. '/../' -- append trailing slash, exit file dir
-local Countries = {}
+local starterItems = exports['qb-core']:GetShared('StarterItems')
 
 -- Handling Player Load
 
 RegisterServerEvent('qb-multicharacter:server:chooseChar', function(source)
-    if exports['qb-core']:GetPlayer(source) then return end
+    if exports['qb-core']:GetPlayer(source) then
+        return
+    end
     TriggerClientEvent(source, 'qb-multicharacter:client:chooseChar')
 end)
 
@@ -14,8 +15,10 @@ end)
 
 local function GiveStarterItems(source)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    for item, amount in pairs(exports['qb-core']:GetShared('StarterItems')) do
+    if not Player then
+        return
+    end
+    for item, amount in pairs(starterItems) do
         local info = {}
         if item == 'id_card' then
             info.citizenid = Player.PlayerData.citizenid
@@ -30,7 +33,7 @@ local function GiveStarterItems(source)
             info.birthdate = Player.PlayerData.charinfo.birthdate
             info.type = 'Class C Driver License'
         end
-        exports['qb-inventory']:AddItem(source, item, amount, false, info)
+        Player.AddItem(item, amount, false, info)
     end
 end
 
@@ -69,7 +72,9 @@ RegisterServerEvent('qb-multicharacter:server:disconnect', function(source)
 end)
 
 RegisterServerEvent('qb-multicharacter:server:loadUserData', function(source, cData) -- TO DO ADD APARTMENTS SUPPORT
-    if exports['qb-core']:GetPlayer(source) then return end
+    if exports['qb-core']:GetPlayer(source) then
+        return
+    end
     if exports['qb-core']:Login(source, cData.citizenid) then
         local PlayerState = source:GetLyraPlayerState()
         print('[qb-core] ' .. PlayerState:GetPlayerName() .. ' (Citizen ID: ' .. cData.citizenid .. ') has successfully loaded!')
@@ -89,7 +94,9 @@ RegisterServerEvent('qb-multicharacter:server:loadUserData', function(source, cD
             else
                 local coords = JSON.parse(cData.position)
                 local pawn = GetPlayerPawn(source)
-                if pawn then SetEntityCoords(pawn, Vector(coords.x, coords.y, coords.z)) end
+                if pawn then
+                    SetEntityCoords(pawn, Vector(coords.x, coords.y, coords.z))
+                end
             end
         else
             local Apartments = exports['qb-apartments']:Apartments()
@@ -103,8 +110,12 @@ RegisterServerEvent('qb-multicharacter:server:loadUserData', function(source, cD
 end)
 
 RegisterServerEvent('qb-multicharacter:server:createCharacter', function(source, data)
-    if exports['qb-core']:GetPlayer(source) then return end
-    if pendingCharCreation[source] then return end
+    if exports['qb-core']:GetPlayer(source) then
+        return
+    end
+    if pendingCharCreation[source] then
+        return
+    end
     pendingCharCreation[source] = true
 
     local newData = {}
@@ -129,7 +140,9 @@ end)
 
 RegisterServerEvent('qb-multicharacter:server:deleteCharacter', function(source, citizenid)
     local Success = exports['qb-core']:DeleteCharacter(source, citizenid)
-    if not Success then return end
+    if not Success then
+        return
+    end
     TriggerClientEvent(source, 'QBCore:Notify', Lang.t('notifications.char_deleted'), 'success')
     TriggerClientEvent(source, 'qb-multicharacter:client:chooseChar')
 end)
@@ -161,7 +174,9 @@ RegisterCallback('setupCharacters', function(source)
     local license = playerState:GetHelixUserId()
     local plyChars = {}
     local result = exports['qb-core']:DatabaseAction('Select', 'SELECT * FROM players WHERE license = ?', { license })
-    if not result then return end
+    if not result then
+        return
+    end
     for i = 1, #result do
         local rowData = result[i]
         if type(rowData) == 'table' then
@@ -169,9 +184,9 @@ RegisterCallback('setupCharacters', function(source)
             for CName, CValue in pairs(rowData) do
                 row[CName] = CValue
             end
-            row.charinfo            = JSON.parse(row.charinfo)
-            row.money               = JSON.parse(row.money)
-            row.job                 = JSON.parse(row.job)
+            row.charinfo = JSON.parse(row.charinfo)
+            row.money = JSON.parse(row.money)
+            row.job = JSON.parse(row.job)
             plyChars[#plyChars + 1] = row
         end
     end

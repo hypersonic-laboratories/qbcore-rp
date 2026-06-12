@@ -20,11 +20,15 @@ end
 
 ---@param EvidenceType string The key of the evidence type to create a unique id for
 local function CreateEvidenceId(EvidenceType)
-    if not EvidenceTypes[EvidenceType] then return end
-    
+    if not EvidenceTypes[EvidenceType] then
+        return
+    end
+
     local UniqueId = GenerateId(8, 'number')
-    if EvidenceTypes[EvidenceType][UniqueId] then return CreateEvidenceId(EvidenceType) end -- if id already exists, try again
-    
+    if EvidenceTypes[EvidenceType][UniqueId] then
+        return CreateEvidenceId(EvidenceType)
+    end -- if id already exists, try again
+
     return UniqueId
 end
 
@@ -32,11 +36,13 @@ end
 
 RegisterServerEvent('qb-policejob:server:CreateCasing', function(source, weapon, coords)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
 
-    local WeaponItem = exports['qb-inventory']:GetItemByName(source, weapon)
+    local WeaponItem = Player.GetItemByName(weapon)
     local SerialNumber
-    if WeaponItem and type(WeaponItem.info) == 'table'then
+    if WeaponItem and type(WeaponItem.info) == 'table' then
         SerialNumber = WeaponItem.info.serie
     end
 
@@ -45,7 +51,7 @@ RegisterServerEvent('qb-policejob:server:CreateCasing', function(source, weapon,
         weapon = weapon,
         serialNumber = SerialNumber,
         coords = coords,
-        time = os.time()
+        time = os.time(),
     }
     EvidenceTypes.Casings[casing.id] = casing
     TriggerCLPoliceEvent('qb-policejob:client:SyncNewCasing', casing)
@@ -54,7 +60,9 @@ end)
 --@TODO: Sync with ambulance job damage system
 RegisterServerEvent('qb-policejob:server:CreateBlooddrop', function(source, coords)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
 
     local CitizenId = Player.PlayerData.citizenid
     local BloodType = Player.PlayerData.metadata.bloodtype
@@ -72,7 +80,9 @@ end)
 -- Triggered by packages to create a player fingerprint
 RegisterServerEvent('qb-policejob:server:CreateFingerprint', function(source, coords)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
 
     local Fingerprint = {
         id = CreateEvidenceId('Fingerprints'),
@@ -91,18 +101,30 @@ end)
 
 RegisterCallback('GetPlayerStatus', function(source)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
+    if not Player then
+        return
+    end
+    if Player.PlayerData.job.type ~= 'leo' then
+        return
+    end
 
     local PlayerPawn = GetPlayerPawn(source)
-    if not PlayerPawn then return end
+    if not PlayerPawn then
+        return
+    end
 
     local PlayerCoords = GetEntityCoords(PlayerPawn)
     local ClosestPawn = GetClosestPawn(PlayerCoords, 500)
-    if not ClosestPawn or not ClosestPawn:IsPlayerControlled() then exports['qb-core']:NotifyPlayer(source, 'You\'re not close enough to check status', 'error') return end
+    if not ClosestPawn or not ClosestPawn:IsPlayerControlled() then
+        exports['qb-core']:NotifyPlayer(source, 'You\'re not close enough to check status', 'error')
+        return
+    end
 
     local ClosestPlayerStatus = PlayerStatus[ClosestPawn:GetController()]
-    if not ClosestPlayerStatus then exports['qb-core']:NotifyPlayer(source, 'Player status is normal') return end
+    if not ClosestPlayerStatus then
+        exports['qb-core']:NotifyPlayer(source, 'Player status is normal')
+        return
+    end
 
     local FormattedStatuses = {}
     for k, v in pairs(ClosestPlayerStatus) do

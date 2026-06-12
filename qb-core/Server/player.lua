@@ -165,8 +165,62 @@ function Player:GetName()
     return charinfo.firstname .. ' ' .. charinfo.lastname
 end
 
+-- inventory
+
 function Player:HasItem(items, amount)
     return exports['qb-inventory']:HasItem(self.PlayerData.source, items, amount)
+end
+
+function Player:AddItem(item, amount, slot, info)
+    return exports['qb-inventory']:AddItem(self.PlayerData.source, item, amount, slot, info)
+end
+
+function Player:RemoveItem(item, amount, slot)
+    return exports['qb-inventory']:RemoveItem(self.PlayerData.source, item, amount, slot)
+end
+
+function Player:GetItemBySlot(slot)
+    return exports['qb-inventory']:GetItemBySlot(self.PlayerData.source, slot)
+end
+
+function Player:GetItemByName(item)
+    return exports['qb-inventory']:GetItemByName(self.PlayerData.source, item)
+end
+
+function Player:GetItemsByName(item)
+    return exports['qb-inventory']:GetItemsByName(self.PlayerData.source, item)
+end
+
+function Player:GetItemCount(item)
+    return exports['qb-inventory']:GetItemCount(self.PlayerData.source, item)
+end
+
+function Player:CanAddItem(item, amount)
+    return exports['qb-inventory']:CanAddItem(self.PlayerData.source, item, amount)
+end
+
+function Player:GetTotalWeight()
+    return exports['qb-inventory']:GetTotalWeight(self.PlayerData.items)
+end
+
+function Player:GetFreeWeight()
+    return exports['qb-inventory']:GetFreeWeight(self.PlayerData.source)
+end
+
+function Player:ClearInventory(filterItems)
+    return exports['qb-inventory']:ClearInventory(self.PlayerData.source, filterItems)
+end
+
+function Player:SetInventory(items)
+    return exports['qb-inventory']:SetInventory(self.PlayerData.source, items)
+end
+
+function Player:GetSlotsByItem(item)
+    return exports['qb-inventory']:GetSlotsByItem(self.PlayerData.items, item)
+end
+
+function Player:GetFirstSlotByItem(item)
+    return exports['qb-inventory']:GetFirstSlotByItem(self.PlayerData.items, item)
 end
 
 function Player:GetJob()

@@ -32,5 +32,5 @@ RegisterServerEvent('qb-consumables:server:useItem', function(source, itemData)
     if effects.thirst then
         Player.SetMetaData('thirst', Player.PlayerData.metadata['thirst'] + effects.thirst)
     end
-    exports['qb-inventory']:RemoveItem(source, itemData.name, 1, itemData.slot)
+    Player.RemoveItem(itemData.name, 1, itemData.slot)
 end)

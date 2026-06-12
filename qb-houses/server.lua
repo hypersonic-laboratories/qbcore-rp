@@ -1,12 +1,12 @@
 local Lang = require('locales/en')
 
 -- Runtime state
-local Entrances = {}         -- [entranceId] = { entranceId, label, entranceType, coords={x,y,z}, interiorRef, price }
-local PropertyUnits = {}     -- [propertyKey] = { entranceId, ownerCitizenId, interiorType, interiorRef }
-local OwnedByEntrance = {}   -- [entranceId] = { [citizenId] = propertyKey }
-local EntranceUnits = {}     -- [entranceId] = { [propertyKey] = true }
+local Entrances = {} -- [entranceId] = { entranceId, label, entranceType, coords={x,y,z}, interiorRef, price }
+local PropertyUnits = {} -- [propertyKey] = { entranceId, ownerCitizenId, interiorType, interiorRef }
+local OwnedByEntrance = {} -- [entranceId] = { [citizenId] = propertyKey }
+local EntranceUnits = {} -- [entranceId] = { [propertyKey] = true }
 local PropertyInstances = {} -- [propertyKey] = { interiorRef, offset, object, poiOffsets, location, garage, players, requests }
-local PropertyOffsets = {}   -- [propertyKey] = offset
+local PropertyOffsets = {} -- [propertyKey] = offset
 
 -- Startup
 
@@ -20,7 +20,7 @@ local function registerUnit(propertyKey, entranceId, ownerCitizenId, interiorTyp
         entranceId = entranceId,
         ownerCitizenId = ownerCitizenId,
         interiorType = interiorType,
-        interiorRef = interiorRef
+        interiorRef = interiorRef,
     }
     ensureEntranceMaps(entranceId)
     OwnedByEntrance[entranceId][ownerCitizenId] = propertyKey
@@ -28,16 +28,12 @@ local function registerUnit(propertyKey, entranceId, ownerCitizenId, interiorTyp
 end
 
 local dbproperties = exports['qb-core']:DatabaseAction('Select', 'SELECT * FROM properties WHERE owned = 1', {})
-if not dbproperties then return end
+if not dbproperties then
+    return
+end
 for _, row in ipairs(dbproperties) do
     if row.property_key and row.entrance_id and row.owner_citizenid and row.interior_type then
-        registerUnit(
-            row.property_key,
-            row.entrance_id,
-            row.owner_citizenid,
-            row.interior_type,
-            row.interior_ref
-        )
+        registerUnit(row.property_key, row.entrance_id, row.owner_citizenid, row.interior_type, row.interior_ref)
     end
 end
 
@@ -50,7 +46,7 @@ for entranceId, apt in pairs(Config.Apartments) do
         garageCoords = apt.storeVehicle,
         interiorRef = entranceId,
         price = apt.price or 0,
-        isHardcoded = true
+        isHardcoded = true,
     }
     ensureEntranceMaps(entranceId)
 end
@@ -185,7 +181,9 @@ local function PopulateGarage(playerData, entranceId, shellConfig, garageCoords)
         playerData.citizenid,
         entranceId,
     })
-    if type(results) ~= 'table' or #results <= 0 then return end
+    if type(results) ~= 'table' or #results <= 0 then
+        return
+    end
 
     local vehicles = {}
     for index, vehicleData in pairs(results) do
@@ -245,25 +243,13 @@ local function EnterInstancedUnit(source, propertyKey)
         inst.creating = true
 
         local poiOffsets = inst.poiOffsets
-        local coords = Vector(
-            inst.location.X - poiOffsets.exit.x,
-            inst.location.Y - poiOffsets.exit.y,
-            inst.location.Z + poiOffsets.exit.z
-        )
+        local coords = Vector(inst.location.X - poiOffsets.exit.x, inst.location.Y - poiOffsets.exit.y, inst.location.Z + poiOffsets.exit.z)
 
         AddPlayerToProperty(source, propertyKey)
 
         local garageLoc = inst.garage and inst.garage.location or nil
 
-        TriggerClientEvent(
-            source,
-            'qb-houses:client:EnterProperty',
-            propertyKey,
-            interiorRef,
-            inst.location,
-            garageLoc,
-            coords
-        )
+        TriggerClientEvent(source, 'qb-houses:client:EnterProperty', propertyKey, interiorRef, inst.location, garageLoc, coords)
 
         inst.creating = false
         return
@@ -278,7 +264,7 @@ local function EnterInstancedUnit(source, propertyKey)
         creating = true,
         players = {},
         playersSet = {},
-        requests = {}
+        requests = {},
     }
     inst = PropertyInstances[propertyKey]
 
@@ -295,11 +281,7 @@ local function EnterInstancedUnit(source, propertyKey)
         return
     end
 
-    local shellSpawn = Vector(
-        entrance.coords.x,
-        entrance.coords.y,
-        entrance.coords.z + offset
-    )
+    local shellSpawn = Vector(entrance.coords.x, entrance.coords.y, entrance.coords.z + offset)
     local spawnTransform = Transform()
     spawnTransform.Translation = shellSpawn
     local propertyInstance = SpawnActor(shellConfig.shell, spawnTransform)
@@ -334,7 +316,7 @@ local function EnterInstancedUnit(source, propertyKey)
             offset = garageOffset,
             object = garageInstance,
             shell = shellConfig.garage,
-            poiOffsets = { exit = shellConfig.garageExitOffset }
+            poiOffsets = { exit = shellConfig.garageExitOffset },
         }
 
         if shellConfig.garageVehicleOffsets then
@@ -353,21 +335,9 @@ local function EnterInstancedUnit(source, propertyKey)
 
     AddPlayerToProperty(source, propertyKey)
 
-    local exitCoords = Vector(
-        shellSpawn.X - poiOffsets.exit.x,
-        shellSpawn.Y - poiOffsets.exit.y,
-        shellSpawn.Z + poiOffsets.exit.z
-    )
+    local exitCoords = Vector(shellSpawn.X - poiOffsets.exit.x, shellSpawn.Y - poiOffsets.exit.y, shellSpawn.Z + poiOffsets.exit.z)
 
-    TriggerClientEvent(
-        source,
-        'qb-houses:client:EnterProperty',
-        propertyKey,
-        interiorRef,
-        shellSpawn,
-        garageCoords,
-        exitCoords
-    )
+    TriggerClientEvent(source, 'qb-houses:client:EnterProperty', propertyKey, interiorRef, shellSpawn, garageCoords, exitCoords)
 
     inst.creating = false
 end
@@ -400,7 +370,9 @@ local function LeaveInstancedUnit(source, propertyKey, isInVehicle)
     end
     if inst and (not inst.players or not next(inst.players)) then
         local eid = inst.entranceId or unit.entranceId
-        if inst.object then inst.object:K2_DestroyActor() end
+        if inst.object then
+            inst.object:K2_DestroyActor()
+        end
         if inst.exterior then
             for _, exteriorObject in pairs(inst.exterior) do
                 if exteriorObject then
@@ -408,7 +380,9 @@ local function LeaveInstancedUnit(source, propertyKey, isInVehicle)
                 end
             end
         end
-        if inst.garage and inst.garage.object then inst.garage.object:K2_DestroyActor() end
+        if inst.garage and inst.garage.object then
+            inst.garage.object:K2_DestroyActor()
+        end
         if inst.garage and type(inst.garage.vehicles) == 'table' and #inst.garage.vehicles > 0 then
             local VehicleManager = UE.USubsystemBlueprintLibrary.GetWorldSubsystem(HWorld, UE.UHVehicleManager)
             if VehicleManager then
@@ -436,7 +410,9 @@ local function IsPropertyOwner(source, propertyKey)
         return false
     end
     local unit = PropertyUnits[propertyKey]
-    if not unit then return false end
+    if not unit then
+        return false
+    end
     return unit.ownerCitizenId == Player.PlayerData.citizenid
 end
 exports('qb-houses', 'IsPropertyOwner', IsPropertyOwner)
@@ -561,7 +537,7 @@ RegisterServerEvent('qb-houses:server:PurchaseProperty', function(source, data)
     exports['qb-inventory']:CreateStash(propertyKey .. '_furniture', {
         maxweight = 50000000000,
         slots = 500,
-        label = ('%s Furniture Stash'):format(propertyKey)
+        label = ('%s Furniture Stash'):format(propertyKey),
     })
     registerUnit(propertyKey, entranceId, cid, 'instanced', entrance.interiorRef)
     TriggerClientEvent(source, 'QBCore:Notify', Lang.t('success.purchased_apart') .. (entrance.label or entranceId))
@@ -599,11 +575,7 @@ RegisterServerEvent('qb-houses:server:GoToGarage', function(source, data)
     end
     local garageOffset = inst.garage.offset
     local garagePOI = inst.garage.poiOffsets
-    local garageCoords = Vector(
-        inst.location.X - garagePOI.exit.x,
-        inst.location.Y - garagePOI.exit.y,
-        inst.location.Z + garageOffset + garagePOI.exit.z
-    )
+    local garageCoords = Vector(inst.location.X - garagePOI.exit.x, inst.location.Y - garagePOI.exit.y, inst.location.Z + garageOffset + garagePOI.exit.z)
     local playerPawn = GetPlayerPawn(source)
     SetEntityCoords(playerPawn, garageCoords)
     TriggerClientEvent(source, 'qb-houses:client:GarageInteractions', garageCoords)
@@ -619,10 +591,14 @@ RegisterServerEvent('qb-houses:server:StoreVehicle', function(source, data)
     local entranceId = data.entranceId
     -- check player and distance data
     local Player = exports['qb-core']:GetPlayer(source)
-    if not (Player and entranceId) then return end
+    if not (Player and entranceId) then
+        return
+    end
 
     local entrance = Entrances[entranceId]
-    if not entrance or not entrance.garageCoords then return end
+    if not entrance or not entrance.garageCoords then
+        return
+    end
     if GetDistanceBetweenCoords(GetEntityCoords(pawn), entrance.garageCoords.coords) > 500 then
         TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.too_far_from_garage'), 'danger')
         return
@@ -630,7 +606,9 @@ RegisterServerEvent('qb-houses:server:StoreVehicle', function(source, data)
 
     -- check for vehicle slots
     local shellData = Config.Shells[entranceId]
-    if not shellData.garageVehicleOffsets then return end
+    if not shellData.garageVehicleOffsets then
+        return
+    end
 
     -- check ownership
     local propertyKey = getOwnedUnitKey(entranceId, Player.PlayerData.citizenid)
@@ -670,11 +648,7 @@ RegisterServerEvent('qb-houses:server:ReturnToProperty', function(source, data)
         return
     end
     local poiOffsets = inst.poiOffsets
-    local coords = Vector(
-        inst.location.X - poiOffsets.exit.x,
-        inst.location.Y - poiOffsets.exit.y,
-        inst.location.Z + poiOffsets.exit.z
-    )
+    local coords = Vector(inst.location.X - poiOffsets.exit.x, inst.location.Y - poiOffsets.exit.y, inst.location.Z + poiOffsets.exit.z)
     SetEntityCoords(GetPlayerPawn(source), coords)
 end)
 
@@ -803,7 +777,7 @@ RegisterServerEvent('qb-houses:server:SaveSceneData', function(source, data)
         return
     end
 
-    exports['qb-core']:DatabaseAction('Execute', "UPDATE properties SET scene_data = ?, updated_at = strftime('%s','now') WHERE property_key = ? AND owner_citizenid = ?", { sceneData, propertyKey, citizenId })
+    exports['qb-core']:DatabaseAction('Execute', 'UPDATE properties SET scene_data = ?, updated_at = strftime(\'%s\',\'now\') WHERE property_key = ? AND owner_citizenid = ?', { sceneData, propertyKey, citizenId })
     TriggerClientEvent(source, 'QBCore:Notify', 'Furniture saved!', 'check')
     pcall(function()
         exports['hl-onboarding']:CompleteStep(source, 'place_furniture')
@@ -836,7 +810,9 @@ RegisterServerEvent('qb-houses:server:getProperties', function(source)
                 owner = unit.ownerCitizenId or nil,
                 property_tag = entranceId,
             }
-            if not property.owner or property.owner == '' then property.owner = nil end
+            if not property.owner or property.owner == '' then
+                property.owner = nil
+            end
             if unit.ownerCitizenId then
                 local ownerPlayer = exports['qb-core']:GetPlayerByCitizenId(unit.ownerCitizenId)
                 if ownerPlayer then
@@ -845,7 +821,7 @@ RegisterServerEvent('qb-houses:server:getProperties', function(source)
                         name = ownerPlayer.PlayerData.charinfo and (ownerPlayer.PlayerData.charinfo.firstname .. ' ' .. ownerPlayer.PlayerData.charinfo.lastname) or 'Unknown',
                         charinfo = ownerPlayer.PlayerData.charinfo,
                         money = ownerPlayer.PlayerData.money,
-                        online = ownerPlayer.PlayerData.source ~= nil
+                        online = ownerPlayer.PlayerData.source ~= nil,
                     }
                 end
             end
@@ -866,7 +842,7 @@ RegisterCallback('GetEntrances', function(_)
             entranceType = e.entranceType,
             coords = e.coords,
             garageCoords = e.garageCoords,
-            price = e.price
+            price = e.price,
         }
     end
     return out
@@ -878,14 +854,18 @@ end)
 
 RegisterCallback('IsOwnerAtEntrance', function(source, entranceId)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return false end
+    if not Player then
+        return false
+    end
     return getOwnedUnitKey(entranceId, Player.PlayerData.citizenid) ~= nil
 end)
 
 RegisterCallback('GetOccupiedUnitsAtEntrance', function(_, entranceId)
     local out = {}
     local units = EntranceUnits[entranceId]
-    if not units then return out end
+    if not units then
+        return out
+    end
     for propertyKey in pairs(units) do
         local inst = PropertyInstances[propertyKey]
         if inst and inst.players and next(inst.players) ~= nil then
@@ -897,20 +877,28 @@ end)
 
 RegisterCallback('GetDoorRequests', function(_, propertyKey)
     local inst = PropertyInstances[propertyKey]
-    if not inst then return nil end
+    if not inst then
+        return nil
+    end
     return inst.requests
 end)
 
 RegisterCallback('getSceneData', function(source, propertyKey)
-    if not propertyKey then return nil end
+    if not propertyKey then
+        return nil
+    end
     local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT scene_data FROM properties WHERE property_key = ? LIMIT 1', { propertyKey })
-    if rows and rows[1] then return rows[1].scene_data end
+    if rows and rows[1] then
+        return rows[1].scene_data
+    end
     return nil
 end)
 
 RegisterCallback('getProperties', function(source)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return {} end
+    if not Player then
+        return {}
+    end
     local citizenId = Player.PlayerData.citizenid
     local ownedProperties = {}
     for propertyKey, unit in pairs(PropertyUnits) do
@@ -932,34 +920,48 @@ end)
 
 RegisterCallback('getInventory', function(source)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return nil end
+    if not Player then
+        return nil
+    end
     return Player.PlayerData.items
 end)
 
 RegisterCallback('WithdrawVehicle', function(source, propertyKey)
     local unit = PropertyUnits[propertyKey]
-    if not unit then return false end
+    if not unit then
+        return false
+    end
 
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return false end
+    if not Player then
+        return false
+    end
 
     local withdrawLocation = Config.Apartments[unit.entranceId].storeVehicle
-    if not withdrawLocation then return false end
+    if not withdrawLocation then
+        return false
+    end
 
     local playerPawn = GetPlayerPawn(source)
     local vehicle = GetVehiclePedIsIn(playerPawn)
-    if not vehicle then return false end
+    if not vehicle then
+        return false
+    end
 
     -- update vehicle garage state
     local vehiclePlate = vehicle:GetPlate()
     local success = exports['hl-garages']:WithdrawVehicle(source, vehiclePlate, unit.entranceId, nil, vehicle)
-    if not success then return false end
+    if not success then
+        return false
+    end
     print(string.format('[qb-houses] WithdrawVehicle - Withdrawing Vehicle with plate: %s, citizenid: %s, propertyKey: %s', vehiclePlate, Player.PlayerData.citizenid, propertyKey))
 
     -- remove from cached vehicle entries to prevent being cleaned
     local garageData = PropertyInstances[propertyKey].garage
     local vehicles = garageData and garageData.vehicles
-    if type(vehicles) ~= 'table' then return false end
+    if type(vehicles) ~= 'table' then
+        return false
+    end
     for index, vehicleData in pairs(vehicles) do
         print(string.format('[qb-houses] WithdrawVehicle - Checking cached vehicle with plate: %s against withdrawn plate: %s', vehicleData.plate, vehiclePlate), vehicleData.plate == vehiclePlate)
         if vehicleData.plate == vehiclePlate then
