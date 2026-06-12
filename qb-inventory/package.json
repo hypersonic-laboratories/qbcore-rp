@@ -3,8 +3,8 @@
         "config.lua"
     ],
     "client": [
-        "client/main.lua",
         "client/drops.lua",
+        "client/main.lua",
         "client/vehicles.lua"
     ],
     "server": [

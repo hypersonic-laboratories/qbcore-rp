@@ -11,7 +11,7 @@ RegisterClientEvent('qb-inventory:client:openDrop', function(data)
 end)
 
 RegisterClientEvent('qb-inventory:client:holdDrop', function(dropId)
-    exports['qb-core']:DrawText('Press [K] to drop Bag', 'right')
+    exports['qb-core']:DrawText(Lang.t('interaction.d_bag', { value = Config.Keybinds.BagDrop }), 'right')
     heldDrop = dropId
 end)
 
@@ -31,7 +31,7 @@ RegisterClientEvent('qb-inventory:client:registerDropTarget', function(actor, dr
                 dropId = dropId,
             },
             {
-                label = 'Pick Up Bag',
+                label = Lang.t('menu.p_bag'),
                 icon = 'package',
                 event = 'qb-inventory:server:pickupDrop',
                 type = 'server',
@@ -50,7 +50,7 @@ end)
 
 -- KeyPress
 
-Input.BindKey('K', function()
+Input.BindKey(Config.Keybinds.BagDrop, function()
     if not heldDrop then
         return
     end

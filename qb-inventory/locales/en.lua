@@ -43,9 +43,10 @@ local Translations = {
         ['vending'] = 'Vending Machine',
         ['craft'] = 'Craft',
         ['o_bag'] = 'Open Bag',
+        ['p_bag'] = 'Pick Up Bag',
     },
     interaction = {
-        ['craft'] = '~g~E~w~ - Craft',
+        ['d_bag'] = 'Press [%value] to Drop Bag',
     },
 }
 

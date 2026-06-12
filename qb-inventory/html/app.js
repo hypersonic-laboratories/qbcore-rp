@@ -71,6 +71,9 @@ const InventoryContainer = Vue.createApp({
                 otherInventoryName: "",
                 otherInventoryLabel: "Drop",
                 otherInventoryMaxWeight: 1000000,
+                pendingPurchase: null,
+                pendingDrop: null,
+                pendingGive: null,
                 otherInventorySlots: 100,
                 isShopInventory: false,
                 // Where item is coming from
@@ -107,8 +110,9 @@ const InventoryContainer = Vue.createApp({
             };
         },
         openInventory(data) {
+            console.log("[openInventory JS] 3b. called, other.label=" + (data.other && data.other.label));
             if (this.showHotbar) {
-                this.toggleHotbar(false);
+                this.toggleHotbar({ open: false });
             }
 
             this.isInventoryOpen = true;
@@ -154,6 +158,7 @@ const InventoryContainer = Vue.createApp({
 
                 this.otherInventoryName = data.other.name;
                 this.otherInventoryLabel = data.other.label;
+                console.log("[openInventory JS] set label=" + this.otherInventoryLabel + " name=" + this.otherInventoryName);
                 this.otherInventoryMaxWeight = data.other.maxweight;
                 this.otherInventorySlots = data.other.slots;
 
@@ -186,35 +191,11 @@ const InventoryContainer = Vue.createApp({
                 }
             }
         },
-        updateOtherInventory(data) {
-            this.otherInventory = {};
-
-            if (data.inventory) {
-                if (Array.isArray(data.inventory)) {
-                    data.inventory.forEach((item) => {
-                        if (item && item.slot) {
-                            this.otherInventory[item.slot] = item;
-                        }
-                    });
-                } else if (typeof data.inventory === "object") {
-                    for (const key in data.inventory) {
-                        const item = data.inventory[key];
-                        if (item && item.slot) {
-                            this.otherInventory[item.slot] = item;
-                        }
-                    }
-                }
-            }
-        },
-        async closeInventory() {
+        closeInventory() {
             this.clearDragData();
             let inventoryName = this.otherInventoryName;
             Object.assign(this, this.getInitialState());
-            try {
-                hEvent("CloseInventory", { name: inventoryName });
-            } catch (error) {
-                console.error("Error closing inventory:", error);
-            }
+            hEvent("CloseInventory", { name: inventoryName });
         },
         clearTransferAmount() {
             this.transferAmount = null;
@@ -236,7 +217,7 @@ const InventoryContainer = Vue.createApp({
             }
         },
         handleMouseDown(event, slot, inventory) {
-            if (event.button === 1) return;
+            if (event.button === 1) return; // skip middle mouse
             event.preventDefault();
             const itemInSlot = this.getItemInSlot(slot, inventory);
             if (event.button === 0) {
@@ -411,7 +392,8 @@ const InventoryContainer = Vue.createApp({
         handleDropOnOtherSlot(targetSlot) {
             this.handleItemDrop("other", targetSlot);
         },
-        async handleDropOnInventoryContainer() {
+        handleDropOnInventoryContainer() {
+            if (this.pendingDrop) { this.clearDragData(); return; }
             if (this.isOtherInventoryEmpty && this.dragStartInventoryType === "player") {
                 const newItem = {
                     ...this.currentlyDraggingItem,
@@ -419,31 +401,10 @@ const InventoryContainer = Vue.createApp({
                     slot: 1,
                     inventory: "other",
                 };
-                const draggingItem = this.currentlyDraggingItem;
-                try {
-                    hEvent(
-                        "DropItem",
-                        {
-                            ...newItem,
-                            fromSlot: this.currentlyDraggingSlot,
-                        },
-                        (newItemId) => {
-                            if (newItemId) {
-                                this.otherInventory[1] = newItem;
-                                const draggingItemKey = Object.keys(this.playerInventory).find((key) => this.playerInventory[key] === draggingItem);
-                                if (draggingItemKey) {
-                                    delete this.playerInventory[draggingItemKey];
-                                }
-                                this.otherInventoryName = newItemId;
-                                this.otherInventoryLabel = newItemId;
-                                this.isOtherInventoryEmpty = false;
-                                this.clearDragData();
-                            }
-                        },
-                    );
-                } catch (error) {
-                    this.inventoryError(this.currentlyDraggingSlot);
-                }
+                const fromSlot = this.currentlyDraggingSlot;
+                const playerKeyToDelete = Object.keys(this.playerInventory).find((key) => this.playerInventory[key] === this.currentlyDraggingItem);
+                this.pendingDrop = { newItem, playerKeyToDelete, fromSlot };
+                hEvent("DropItem", { ...newItem, fromSlot });
             }
             this.clearDragData();
         },
@@ -533,57 +494,86 @@ const InventoryContainer = Vue.createApp({
                 this.clearDragData();
             }
         },
-        async handlePurchase(targetSlot, sourceSlot, sourceItem, transferAmount) {
-            try {
-                hEvent(
-                    "AttemptPurchase",
-                    {
-                        item: sourceItem,
-                        amount: transferAmount || sourceItem.amount,
-                        shop: this.otherInventoryName,
-                        slot: targetSlot,
-                    },
-                    (canPurchase) => {
-                        if (canPurchase) {
-                            const sourceInventory = this.getInventoryByType("other");
-                            const targetInventory = this.getInventoryByType("player");
-                            const amountToTransfer = transferAmount !== null ? transferAmount : sourceItem.amount;
-
-                            if (sourceItem.amount < amountToTransfer) {
-                                this.inventoryError(sourceSlot);
-                                return;
-                            }
-
-                            let targetItem = targetInventory[targetSlot];
-                            if (!targetItem || targetItem.name !== sourceItem.name) {
-                                const foundSlot = Object.keys(targetInventory).find((slot) => targetInventory[slot] && targetInventory[slot].name === sourceItem.name);
-                                if (foundSlot) {
-                                    targetInventory[foundSlot].amount += amountToTransfer;
-                                } else if (Object.keys(targetInventory).length < this.totalSlots) {
-                                    const freeSlot = Array.from({ length: this.totalSlots }, (_, i) => i + 1).find((i) => !(i in targetInventory));
-                                    targetInventory[freeSlot] = { ...sourceItem, amount: amountToTransfer };
-                                } else {
-                                    this.inventoryError(sourceSlot);
-                                    return;
-                                }
-                            } else {
-                                targetItem.amount += amountToTransfer;
-                            }
-
-                            sourceItem.amount -= amountToTransfer;
-                            if (sourceItem.amount <= 0) {
-                                delete sourceInventory[sourceSlot];
-                            }
+        handlePurchase(targetSlot, sourceSlot, sourceItem, transferAmount) {
+            if (this.pendingPurchase) return;
+            this.pendingPurchase = { targetSlot, sourceSlot, sourceItem, transferAmount };
+            hEvent("AttemptPurchase", {
+                item: sourceItem,
+                amount: transferAmount || sourceItem.amount,
+                shop: this.otherInventoryName,
+            });
+        },
+        processPurchaseResult(success) {
+            if (!this.pendingPurchase) return;
+            const { targetSlot, sourceSlot, sourceItem, transferAmount } = this.pendingPurchase;
+            this.pendingPurchase = null;
+            if (success) {
+                const sourceInventory = this.getInventoryByType("other");
+                const targetInventory = this.getInventoryByType("player");
+                const amountToTransfer = transferAmount !== null ? transferAmount : sourceItem.amount;
+                if (sourceItem.amount < amountToTransfer) {
+                    this.inventoryError(sourceSlot);
+                    return;
+                }
+                let targetItem = targetInventory[targetSlot];
+                if (!targetItem || targetItem.name !== sourceItem.name) {
+                    let foundSlot = Object.keys(targetInventory).find((slot) => targetInventory[slot] && targetInventory[slot].name === sourceItem.name);
+                    if (foundSlot) {
+                        targetInventory[foundSlot].amount += amountToTransfer;
+                    } else {
+                        const targetInventoryKeys = Object.keys(targetInventory);
+                        if (targetInventoryKeys.length < this.totalSlots) {
+                            let freeSlot = Array.from({ length: this.totalSlots }, (_, i) => i + 1).find((i) => !(i in targetInventory));
+                            targetInventory[freeSlot] = {
+                                ...sourceItem,
+                                amount: amountToTransfer,
+                            };
                         } else {
                             this.inventoryError(sourceSlot);
+                            return;
                         }
-                    },
-                );
-            } catch (error) {
+                    }
+                } else {
+                    targetItem.amount += amountToTransfer;
+                }
+                sourceItem.amount -= amountToTransfer;
+                if (sourceItem.amount <= 0) {
+                    delete sourceInventory[sourceSlot];
+                }
+            } else {
                 this.inventoryError(sourceSlot);
             }
         },
-        async dropItem(item, quantity) {
+        processGiveResult(success) {
+            if (!this.pendingGive) return;
+            const { slot, amountToGive } = this.pendingGive;
+            this.pendingGive = null;
+            if (!success) return;
+            if (this.playerInventory[slot]) {
+                this.playerInventory[slot].amount -= amountToGive;
+                if (this.playerInventory[slot].amount <= 0) {
+                    delete this.playerInventory[slot];
+                }
+            }
+        },
+        processDropResult(dropId) {
+            if (!this.pendingDrop) return;
+            const { newItem, playerKeyToDelete, fromSlot } = this.pendingDrop;
+            this.pendingDrop = null;
+            if (dropId) {
+                this.otherInventory[1] = newItem;
+                if (playerKeyToDelete) {
+                    delete this.playerInventory[playerKeyToDelete];
+                }
+                this.otherInventoryName = dropId;
+                this.otherInventoryLabel = dropId;
+                this.isOtherInventoryEmpty = false;
+            } else {
+                this.inventoryError(fromSlot);
+            }
+        },
+        dropItem(item, quantity) {
+            if (this.pendingDrop) return;
             if (item && item.name) {
                 const playerItemKey = Object.keys(this.playerInventory).find((key) => this.playerInventory[key] && this.playerInventory[key].slot === item.slot);
                 if (playerItemKey) {
@@ -619,49 +609,23 @@ const InventoryContainer = Vue.createApp({
                         inventory: "other",
                     };
 
-                    try {
-                        hEvent(
-                            "DropItem",
-                            {
-                                ...newItem,
-                                fromSlot: item.slot,
-                            },
-                            (newDropId) => {
-                                if (newDropId) {
-                                    if (item.amount - amountToGive <= 0) delete this.playerInventory[playerItemKey];
-                                    else this.playerInventory[playerItemKey].amount -= amountToGive;
-
-                                    this.otherInventory[1] = newItem;
-                                    this.otherInventoryName = newDropId;
-                                    this.otherInventoryLabel = newDropId;
-                                    this.isOtherInventoryEmpty = false;
-                                }
-                            },
-                        );
-                    } catch (error) {
-                        this.inventoryError(item.slot);
-                    }
+                    this.pendingDrop = { newItem, playerKeyToDelete: playerItemKey, fromSlot: item.slot };
+                    hEvent("DropItem", { ...newItem, fromSlot: item.slot });
                 }
             }
             this.showContextMenu = false;
         },
-        async useItem(item) {
+        useItem(item) {
             if (!item || item.useable === false) {
                 return;
             }
             const playerItemKey = Object.keys(this.playerInventory).find((key) => this.playerInventory[key] && this.playerInventory[key].slot === item.slot);
             if (playerItemKey) {
-                try {
-                    hEvent("UseItem", {
-                        inventory: "player",
-                        item: item,
-                    });
+                hEvent("UseItem", { inventory: "player", item: item }, () => {
                     if (item.shouldClose) {
                         this.closeInventory();
                     }
-                } catch (error) {
-                    console.error("Error using the item: ", error);
-                }
+                });
             }
             this.showContextMenu = false;
         },
@@ -713,7 +677,7 @@ const InventoryContainer = Vue.createApp({
                 this.contextMenuItem = item;
             }
         },
-        async giveItem(item, quantity) {
+        giveItem(item, quantity) {
             if (item && item.name) {
                 const selectedItem = item;
                 const playerHasItem = Object.values(this.playerInventory).some((invItem) => invItem && invItem.name === selectedItem.name);
@@ -741,27 +705,14 @@ const InventoryContainer = Vue.createApp({
                         return;
                     }
 
-                    try {
-                        hEvent(
-                            "GiveItem",
-                            {
-                                item: selectedItem,
-                                amount: amountToGive,
-                                slot: selectedItem.slot,
-                                info: selectedItem.info,
-                            },
-                            (success) => {
-                                if (!success) return;
-
-                                this.playerInventory[selectedItem.slot].amount -= amountToGive;
-                                if (this.playerInventory[selectedItem.slot].amount === 0) {
-                                    delete this.playerInventory[selectedItem.slot];
-                                }
-                            },
-                        );
-                    } catch (error) {
-                        console.error("An error occurred while giving the item:", error);
-                    }
+                    if (this.pendingGive) return;
+                    this.pendingGive = { slot: selectedItem.slot, amountToGive };
+                    hEvent("GiveItem", {
+                        item: selectedItem,
+                        amount: amountToGive,
+                        slot: selectedItem.slot,
+                        info: selectedItem.info,
+                    });
                 } else {
                     console.error("Player does not have the item in their inventory. Item cannot be given.");
                 }
@@ -823,15 +774,10 @@ const InventoryContainer = Vue.createApp({
             }
         },
         inventoryError(slot) {
-            const slotElement = document.getElementById(`slot-${slot}`);
-            if (slotElement) {
-                slotElement.style.backgroundColor = "red";
-            }
+            this.errorSlot = slot;
             hEvent("PlayDropFail", {});
             setTimeout(() => {
-                if (slotElement) {
-                    slotElement.style.backgroundColor = "";
-                }
+                this.errorSlot = null;
             }, 1000);
         },
         copySerial() {
@@ -855,8 +801,8 @@ const InventoryContainer = Vue.createApp({
             if (!this.showWeaponAttachments) {
                 this.selectedWeapon = this.contextMenuItem;
                 this.showWeaponAttachments = true;
-                hEvent("GetWeaponData", JSON.stringify({ weapon: this.selectedWeapon.name, ItemData: this.selectedWeapon }), (data) => {
-                    if (data.AttachmentData !== null && data.AttachmentData !== undefined) {
+                hEvent("GetWeaponData", { weapon: this.selectedWeapon.name, ItemData: this.selectedWeapon }, (data) => {
+                    if (data && data.AttachmentData !== null && data.AttachmentData !== undefined) {
                         if (data.AttachmentData.length > 0) {
                             this.selectedWeaponAttachments = data.AttachmentData;
                         }
@@ -872,22 +818,23 @@ const InventoryContainer = Vue.createApp({
             if (!this.selectedWeapon) {
                 return;
             }
-            hEvent("RemoveAttachment", JSON.stringify({ AttachmentData: attachment, WeaponData: this.selectedWeapon }), (data) => {
-                this.selectedWeapon = data.WeaponData;
-                if (data.Attachments) {
-                    this.selectedWeaponAttachments = data.Attachments;
-                } else {
-                    const index = this.selectedWeaponAttachments.indexOf(attachment);
-                    if (index !== -1) {
-                        this.selectedWeaponAttachments.splice(index, 1);
-                    }
+            const index = this.selectedWeaponAttachments.indexOf(attachment);
+            if (index !== -1) {
+                this.selectedWeaponAttachments.splice(index, 1);
+            }
+            hEvent("RemoveAttachment", { AttachmentData: attachment, WeaponData: this.selectedWeapon }, (response) => {
+                if (!response) {
+                    this.selectedWeaponAttachments.splice(index, 0, attachment);
+                    return;
                 }
-                if (data.itemInfo) {
-                    const nextSlot = this.findNextAvailableSlot(this.playerInventory);
-                    if (nextSlot !== null) {
-                        data.itemInfo.amount = 1;
-                        this.playerInventory[nextSlot] = data.itemInfo;
-                    }
+                this.selectedWeapon = response.WeaponData;
+                if (response.Attachments) {
+                    this.selectedWeaponAttachments = response.Attachments;
+                }
+                const nextSlot = this.findNextAvailableSlot(this.playerInventory);
+                if (nextSlot !== null) {
+                    response.itemInfo.amount = 1;
+                    this.playerInventory[nextSlot] = response.itemInfo;
                 }
             });
         },
@@ -909,7 +856,7 @@ const InventoryContainer = Vue.createApp({
                 }
             }
             content += `<div class="tooltip-description">${description}</div>`;
-            content += `<div class="tooltip-weight"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="14" height="14" fill="currentColor" style="vertical-align: middle; margin-right: 4px;"><path d="M224 96a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm122.5 32c3.5-10 5.5-20.8 5.5-32c0-53-43-96-96-96s-96 43-96 96c0 11.2 1.9 22 5.5 32H120c-22 0-41.2 15-46.6 36.4l-72 288c-3.6 14.3-.4 29.5 8.7 41.2S33.2 512 48 512H464c14.8 0 28.7-6.8 37.8-18.5s12.3-26.8 8.7-41.2l-72-288C433.2 143 414 128 392 128H346.5z"/></svg> ${item.weight !== undefined && item.weight !== null ? (item.weight / 1000).toFixed(1) : "N/A"}kg</div>`;
+            content += `<div class="tooltip-weight"><i class="fas fa-weight-hanging"></i> ${item.weight !== undefined && item.weight !== null ? (item.weight / 1000).toFixed(1) : "N/A"}kg</div>`;
             content += `</div>`;
             return content;
         },
@@ -935,103 +882,44 @@ const InventoryContainer = Vue.createApp({
                 },
             );
         },
+        handleMessage(event) {
+            const action = event.data.name;
+            const data = event.data.args ? event.data.args[0] : null;
+            if (action === "open") {
+                this.openInventory(data);
+            } else if (action === "close") {
+                this.closeInventory();
+            } else if (action === "update") {
+                this.updateInventory(data);
+            } else if (action === "toggleHotbar") {
+                this.toggleHotbar(data);
+            } else if (action === "itemBox") {
+                this.showItemNotification(data);
+            } else if (action === "requiredItem") {
+                this.showRequiredItem(data);
+            } else if (action === "purchaseResult") {
+                this.processPurchaseResult(data.success);
+            } else if (action === "dropCreated") {
+                this.processDropResult(data.dropId);
+            } else if (action === "giveItemResult") {
+                this.processGiveResult(data.success);
+            }
+        },
     },
     mounted() {
         window.addEventListener("keydown", (event) => {
             const key = event.key;
-
-            if (key === "Escape" && this.isInventoryOpen) {
-                if (event.cancelable) {
-                    //
-                    event.preventDefault(); // added to prevent default ESC from opening Helix menu.
-                } //
-                this.closeInventory();
-            }
-
-            if (key === "Tab" && this.isInventoryOpen) {
-                this.closeInventory();
-            }
-        });
-
-        openInventory = (data) => {
-            if (this.isInventoryOpen) {
-                this.closeInventory();
-            } else {
-                this.openInventory(data);
-            }
-        };
-
-        closeInventory = () => {
-            this.closeInventory();
-        };
-
-        updateInventory = (data) => {
-            this.updateInventory(data);
-        };
-
-        updateOtherInventory = (data) => {
-            this.updateOtherInventory(data);
-        };
-
-        toggleHotbar = (data) => {
-            this.toggleHotbar(data);
-        };
-
-        itemBox = (data) => {
-            this.showItemNotification(data);
-        };
-
-        requiredItem = (data) => {
-            this.showRequiredItem(data);
-        };
-
-        window.addEventListener("message", (event) => {
-            if (!event.data || !event.data.name) return;
-
-            switch (event.data.name) {
-                case "openInventory":
-                    if (event.data.args && event.data.args[0]) {
-                        if (this.isInventoryOpen) {
-                            this.closeInventory();
-                        } else {
-                            this.openInventory(event.data.args[0]);
-                        }
-                    }
-                    break;
-                case "closeInventory":
+            if (key === "Escape" || key === "Tab") {
+                if (this.isInventoryOpen) {
                     this.closeInventory();
-                    break;
-                case "updateInventory":
-                    if (event.data.args && event.data.args[0]) {
-                        this.updateInventory(event.data.args[0]);
-                    }
-                    break;
-                case "updateOtherInventory":
-                    if (event.data.args && event.data.args[0]) {
-                        this.updateOtherInventory(event.data.args[0]);
-                    }
-                    break;
-                case "toggleHotbar":
-                    if (event.data.args && event.data.args[0]) {
-                        this.toggleHotbar(event.data.args[0]);
-                    }
-                    break;
-                case "itemBox":
-                    if (event.data.args && event.data.args[0]) {
-                        this.showItemNotification(event.data.args[0]);
-                    }
-                    break;
-                case "requiredItem":
-                    if (event.data.args && event.data.args[0]) {
-                        this.showRequiredItem(event.data.args[0]);
-                    }
-                    break;
+                }
             }
         });
+
+        window.addEventListener("message", this.handleMessage);
     },
     beforeUnmount() {
-        window.removeEventListener("mousemove", () => {});
-        window.removeEventListener("keydown", () => {});
+        window.removeEventListener("message", this.handleMessage);
     },
 });
 

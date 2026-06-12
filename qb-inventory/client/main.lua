@@ -2,62 +2,62 @@ local Lang = require('locales/en')
 local player_data = {}
 local hotbarShown = false
 local inv_open = false
-local my_webui = WebUI('Inventory', 'qb-inventory/html/index.html', 0)
+local my_webui = WebUI('Inventory', 'qb-inventory/html/index.html')
+
+-- Drops
+
+local function GetDrops()
+    TriggerCallback('GetCurrentDrops', function(drops)
+        for k in pairs(drops) do
+            TriggerLocalClientEvent('qb-inventory:client:registerDropTarget', drops[k].entity.Object, drops[k].dropId)
+        end
+    end)
+end
 
 -- Handlers
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     player_data = exports['qb-core']:GetPlayerData()
+    GetDrops()
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
-    player_data = {}
-end)
-
-RegisterClientEvent('QBCore:Player:SetPlayerData', function(val)
-    player_data = val
+    player_data = nil
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUpdated', function(key, value)
-    if key ~= 'items' then
+    if key == 'items' then
+        player_data.items = value
         return
     end
-    player_data.items = value
-    if inv_open and my_webui then
-        my_webui:SendEvent('updateInventory', { inventory = value })
+    if key ~= 'all' then
+        return
     end
+    player_data = value
 end)
 
 -- Functions
 
 local function FormatWeaponAttachments(itemdata)
-    if not itemdata.info or not itemdata.info.attachments or #itemdata.info.attachments == 0 then
-        return {}
-    end
-    local attachments = {}
-    local weaponName = itemdata.name
-    local WeaponAttachments = getConfigWeaponAttachments()
-    if not WeaponAttachments then
-        return {}
-    end
-    for attachmentType, weapons in pairs(WeaponAttachments) do
-        local componentHash = weapons[weaponName]
-        if componentHash then
-            for _, attachmentData in pairs(itemdata.info.attachments) do
-                if attachmentData.component == componentHash then
-                    local label = QBShared.Items[attachmentType] and QBShared.Items[attachmentType].label or 'Unknown'
-                    attachments[#attachments + 1] = {
-                        attachment = attachmentType,
-                        label = label,
-                    }
-                end
-            end
-        end
-    end
-    return attachments
+    -- TODO
 end
 
 -- Events
+
+RegisterClientEvent('qb-inventory:client:openInventory', function(items, other)
+    if my_webui == nil then
+        return
+    end
+    print('[openInventory client] 3. sending open event to JS, other.name=' .. tostring(other and other.name) .. ' label=' .. tostring(other and other.label))
+    my_webui:SetInputMode(1)
+    my_webui:SendEvent('open', {
+        inventory = items,
+        slots = Config.MaxSlots,
+        maxweight = Config.MaxWeight,
+        other = other,
+    })
+    inv_open = true
+end)
 
 RegisterClientEvent('qb-inventory:client:requiredItems', function(items, bool)
     local itemTable = {}
@@ -88,21 +88,19 @@ RegisterClientEvent('qb-inventory:client:closeInv', function()
     if my_webui == nil then
         return
     end
-    my_webui:SendEvent('closeInventory')
+    my_webui:SetInputMode(0)
+    my_webui:SendEvent('close')
 end)
 
-RegisterClientEvent('qb-inventory:client:updateInventory', function(items)
+RegisterClientEvent('qb-inventory:client:updateInventory', function()
     if my_webui == nil then
         return
+    end
+    local items = {}
+    if player_data and type(player_data.items) == 'table' then
+        items = player_data.items
     end
     my_webui:SendEvent('updateInventory', { inventory = items })
-end)
-
-RegisterClientEvent('qb-inventory:client:updateShopInventory', function(items)
-    if my_webui == nil then
-        return
-    end
-    my_webui:SendEvent('updateOtherInventory', { inventory = items })
 end)
 
 RegisterClientEvent('qb-inventory:client:ItemBox', function(itemData, type, amount)
@@ -121,7 +119,6 @@ end)
 my_webui:RegisterEventHandler('CloseInventory', function(data)
     local name = data.name
     inv_open = false
-    my_webui:SetStackOrder(0)
     my_webui:SetInputMode(0)
     if name then
         TriggerServerEvent('qb-inventory:server:closeInventory', name)
@@ -133,90 +130,45 @@ my_webui:RegisterEventHandler('CloseInventory', function(data)
     end
 end)
 
-my_webui:RegisterEventHandler('PlayDropFail', function()
-    --PlaySound(-1, 'Place_Prop_Fail', 'DLC_Dmod_Prop_Editor_Sounds', 0, 0, 1)
-end)
-
-my_webui:RegisterEventHandler('Notify', function(data)
-    exports['qb-core']:Notify(data.message, data.type)
-end)
-
 my_webui:RegisterEventHandler('UseItem', function(data)
     TriggerServerEvent('qb-inventory:server:useItem', data.item)
 end)
 
-my_webui:RegisterEventHandler('DropItem', function(item, cb)
-    TriggerCallback('server.createDrop', function(dropId)
-        if dropId then
-            cb(dropId)
-        end
+my_webui:RegisterEventHandler('DropItem', function(item)
+    TriggerCallback('createDrop', function(dropId)
+        my_webui:SendEvent('dropCreated', { dropId = dropId or false })
     end, item)
 end)
 
-my_webui:RegisterEventHandler('AttemptPurchase', function(data, cb)
-    TriggerCallback('server.attemptPurchase', function(canPurchase)
-        cb(canPurchase)
+my_webui:RegisterEventHandler('AttemptPurchase', function(data)
+    TriggerCallback('attemptPurchase', function(canPurchase)
+        my_webui:SendEvent('purchaseResult', { success = canPurchase })
     end, data)
 end)
 
-my_webui:RegisterEventHandler('GiveItem', function(data, cb)
+my_webui:RegisterEventHandler('GiveItem', function(data)
     local player, distance = exports['qb-core']:GetClosestPlayer()
     if player and distance < 500 then
-        local playerId = player:GetID()
-        TriggerCallback('server.giveItem', function(success)
-            cb(success)
+        local playerId = GetPlayerId(player)
+        TriggerCallback('giveItem', function(success)
+            my_webui:SendEvent('giveItemResult', { success = success or false })
         end, playerId, data.item.name, data.amount)
     else
         exports['qb-core']:Notify(Lang.t('notify.nonb'), 'error')
+        my_webui:SendEvent('giveItemResult', { success = false })
     end
 end)
 
--- qb-weapons
-
-my_webui:RegisterEventHandler('GetWeaponData', function(cData, cb)
-    local data = {
-        WeaponData = QBShared.Items[cData.weapon],
-        AttachmentData = FormatWeaponAttachments(cData.ItemData),
-    }
-    cb(data)
+my_webui:RegisterEventHandler('PlayDropFail', function()
+    -- TODO
 end)
 
-my_webui:RegisterEventHandler('RemoveAttachment', function(data, cb)
-    local ped = PlayerPedId()
-    local WeaponData = data.WeaponData
-    local allAttachments = getConfigWeaponAttachments()
-    local Attachment = allAttachments[data.AttachmentData.attachment][WeaponData.name]
-    exports['qb-core']:TriggerCallback('weapons:server:RemoveAttachment', function(NewAttachments)
-        if NewAttachments ~= false then
-            local Attachies = {}
-            RemoveWeaponComponentFromPed(ped, joaat(WeaponData.name), joaat(Attachment))
-            for _, v in pairs(NewAttachments) do
-                for attachmentType, weapons in pairs(allAttachments) do
-                    local componentHash = weapons[WeaponData.name]
-                    if componentHash and v.component == componentHash then
-                        local label = QBShared.Items[attachmentType] and QBShared.Items[attachmentType].label or 'Unknown'
-                        Attachies[#Attachies + 1] = {
-                            attachment = attachmentType,
-                            label = label,
-                        }
-                    end
-                end
-            end
-            local DJATA = {
-                Attachments = Attachies,
-                WeaponData = WeaponData,
-            }
-            cb(DJATA)
-        else
-            RemoveWeaponComponentFromPed(ped, joaat(WeaponData.name), joaat(Attachment))
-        end
-    end, data.AttachmentData, WeaponData)
+my_webui:RegisterEventHandler('GetWeaponData', function()
+    -- TODO
 end)
 
-RegisterClientEvent('qb-inventory:client:openInventory', function(items, other)
-    inv_open = true
-    my_webui:SetInputMode(1)
-    my_webui:SendEvent('openInventory', { inventory = items, slots = Config.MaxSlots, maxweight = Config.MaxWeight, other = other })
+my_webui:RegisterEventHandler('RemoveAttachment', function()
+    -- TODO
 end)
 
 -- Vending
@@ -235,7 +187,8 @@ for _, model in pairs(Config.VendingObjects) do
     })
 end
 
--- Open UI
+-- Controls
+
 Input.BindKey(Config.Keybinds.Open, function()
     if inv_open then
         my_webui:SendEvent('closeInventory')
@@ -248,43 +201,15 @@ Input.BindKey(Config.Keybinds.Hotbar, function()
     TriggerServerEvent('qb-inventory:server:toggleHotbar')
 end)
 
--- Commands
---[[
-Input.Register('Inventory', Config.Keybinds.Open)
-Input.Register('Hotbar', Config.Keybinds.Hotbar)
-
-Input.Bind('Inventory', InputEvent.Pressed, function()
-	TriggerServerEvent('qb-inventory:server:openInventory')
-	Input.SetInputEnabled(false)
-end)
-
-Input.Bind('Hotbar', InputEvent.Pressed, function()
-	if Input.IsMouseEnabled() then return end
-	TriggerServerEvent('qb-inventory:server:toggleHotbar')
-end)
-
-Input.Subscribe('KeyPress', function(key_name)
-	if Input.IsMouseEnabled() then return end
-	local index
-	if key_name == 'One' then
-		index = 1
-	elseif key_name == 'Two' then
-		index = 2
-	elseif key_name == 'Three' then
-		index = 3
-	elseif key_name == 'Four' then
-		index = 4
-	elseif key_name == 'Five' then
-		index = 5
-	end
-
-	if index then
-		local itemData = player_data.items[index]
-		if not itemData then
-			return false
-		end
-		Events.Call('qb-inventory:client:closeInv')
-		TriggerServerEvent('qb-inventory:server:useItem', itemData)
-	end
-end)
- ]]
+for i = 1, 5 do
+    Input.BindKey(i, function()
+        if Input.IsMouseEnabled() then
+            return
+        end
+        local itemData = player_data.items[i]
+        if not itemData then
+            return
+        end
+        TriggerServerEvent('qb-inventory:server:useItem', itemData)
+    end)
+end

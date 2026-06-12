@@ -1,8 +1,8 @@
 Inventories = {}
 Drops = {}
 RegisteredShops = {}
-
-SharedItems = exports['qb-core']:GetShared('Items')
+local sharedItems = exports['qb-core']:GetShared('Items')
+local sharedWeapons = exports['qb-core']:GetShared('Weapons')
 
 Timer.CreateThread(function()
     local results = exports['qb-core']:DatabaseAction('Select', 'SELECT * FROM inventories')
@@ -21,6 +21,37 @@ Timer.CreateThread(function()
     end
     print(#results .. ' inventories successfully loaded')
 end)
+
+Timer.SetInterval(function()
+    for k, v in pairs(Drops) do
+        if v and (v.createdTime + (Config.CleanupDropTime * 60) < os.time()) and not Drops[k].isOpen then
+            if v.entity:IsValid() then
+                DestroyActor(v.entity.Object)
+            end
+            Drops[k] = nil
+        end
+    end
+end, Config.CleanupDropInterval * 60000)
+
+-- Functions
+
+local function checkWeapon(source, item)
+    local currentWeapon = item
+    local ped = GetPlayerPed(source)
+    local weapon = GetSelectedPedWeapon(ped)
+    local weaponInfo = sharedWeapons[weapon]
+    local info = {}
+
+    if type(item) == 'table' then
+        currentWeapon = item.name
+        info = item.info or {}
+    end
+
+    if weaponInfo and weaponInfo.name == currentWeapon then
+        RemoveWeaponFromPed(ped, weapon)
+        TriggerClientEvent('qb-weapons:client:UseWeapon', source, { name = currentWeapon, info = info }, false)
+    end
+end
 
 -- Handlers
 
@@ -141,32 +172,29 @@ RegisterServerEvent('qb-inventory:server:openVending', function(source, data)
 end)
 
 RegisterServerEvent('qb-inventory:server:closeInventory', function(source, inventory)
-    local QBPlayer = exports['qb-core']:GetPlayer(source)
-    if not QBPlayer then
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player then
         return
     end
-    local player_ped = GetPlayerPawn(source)
-    --[[     player_ped:SetInputEnabled(true)
-    source:SetValue('inv_busy', false, true) ]]
+    -- Player(source).state.inv_busy = false
     if not inventory then
         return
     end
-    if inventory:find('shop-') then
+    if inventory:find('shop%-') then
         return
     end
-    if inventory:find('otherplayer-') then
-        local targetId = inventory:match('otherplayer%-(.+)')
-        --targetId:SetValue('inv_busy', false, true)
+    if inventory:find('otherplayer%-') then
+        local targetId = tonumber(inventory:match('otherplayer%-(.+)'))
+        -- Player(targetId).state.inv_busy = false
         return
     end
     if Drops[inventory] then
-        if next(Drops[inventory].items) == nil then
+        Drops[inventory].isOpen = false
+        if #Drops[inventory].items == 0 and not Drops[inventory].isOpen then
             BroadcastEvent('qb-inventory:client:removeDropTarget', inventory)
             DestroyActor(Drops[inventory].entity.Object)
             Drops[inventory] = nil
-            return
         end
-        Drops[inventory].isOpen = false
         return
     end
     if not Inventories[inventory] then
@@ -181,8 +209,9 @@ RegisterServerEvent('qb-inventory:server:useItem', function(source, item)
     if not itemData then
         return
     end
-    local itemInfo = SharedItems[itemData.name]
+    local itemInfo = sharedItems[itemData.name]
     if itemInfo.type == 'weapon' then
+        -- TriggerClientEvent(source, 'qb-weapons:client:UseWeapon', itemData, itemData.info.quality and itemData.info.quality > 0)
         TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'use')
     else
         UseItem(itemData.name, source, itemData)
@@ -204,7 +233,6 @@ RegisterServerEvent('qb-inventory:server:openDrop', function(source, dropId)
     if GetDistanceBetweenCoords(playerCoords, drop.coords) > 250 then
         return
     end
-
     local formattedInventory = {
         name = dropId,
         label = dropId,
@@ -264,11 +292,11 @@ end)
 
 -- Callbacks
 
-RegisterCallback('server.GetCurrentDrops', function(_)
+RegisterCallback('GetCurrentDrops', function()
     return Drops
 end)
 
-RegisterCallback('server.createDrop', function(source, item)
+RegisterCallback('createDrop', function(source, item)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then
         return false
@@ -282,12 +310,9 @@ RegisterCallback('server.createDrop', function(source, item)
         local ForwardVec = playerPed:GetActorForwardVector()
         local SpawnX = playerCoords.X + ForwardVec.X * 200
         local SpawnY = playerCoords.Y + ForwardVec.Y * 200
-
         local hit = Trace:LineSingle(Vector(SpawnX, SpawnY, playerCoords.Z + 200), Vector(SpawnX, SpawnY, playerCoords.Z - 500))
         local SpawnZ = (hit and hit.ImpactPoint) and hit.ImpactPoint.Z or (playerCoords.Z - 88)
-
         local SpawnPosition = Vector(SpawnX, SpawnY, SpawnZ)
-
         local bag = StaticMesh(SpawnPosition, PawnRotation, Config.ItemDropObject, CollisionType.StaticOnly, false)
         bag.Object:SetActorScale3D(Vector(0.8, 0.8, 0.8))
         local newDropId = 'drop-' .. GenerateId(8, 'mixed')
@@ -308,7 +333,6 @@ RegisterCallback('server.createDrop', function(source, item)
             table.insert(Drops[newDropId].items, item)
         end
         BroadcastEvent('qb-inventory:client:registerDropTarget', bag.Object, newDropId)
-
         Drops[newDropId].isOpen = true
         local formattedDrop = {
             name = newDropId,
@@ -317,7 +341,9 @@ RegisterCallback('server.createDrop', function(source, item)
             slots = Config.DropSize.slots,
             inventory = Drops[newDropId].items,
         }
+        print('[createDrop] 1. firing openInventory client event for ' .. newDropId)
         TriggerClientEvent(source, 'qb-inventory:client:openInventory', Player.PlayerData.items, formattedDrop)
+        print('[createDrop] 2. returning newDropId ' .. newDropId)
         return newDropId
     else
         return false
@@ -326,7 +352,7 @@ end)
 
 local recentPurchases = {}
 
-RegisterCallback('server.attemptPurchase', function(source, data)
+RegisterCallback('attemptPurchase', function(source, data)
     local dedupKey = tostring(source) .. '_' .. tostring(data.item and data.item.slot) .. '_' .. tostring(data.shop)
     local now = os.time()
     if recentPurchases[dedupKey] and (now - recentPurchases[dedupKey]) < 2 then
@@ -388,50 +414,42 @@ RegisterCallback('server.attemptPurchase', function(source, data)
     end
 end)
 
-RegisterCallback('server.giveItem', function(source, target, item, amount)
+RegisterCallback('giveItem', function(source, target, item, amount)
     local player = exports['qb-core']:GetPlayer(source)
     if not player or player.PlayerData.metadata['isdead'] or player.PlayerData.metadata['inlaststand'] or player.PlayerData.metadata['ishandcuffed'] then
         return false
     end
     local playerPed = GetPlayerPawn(source)
-
     local Target = exports['qb-core']:GetPlayer(target)
     if not Target or Target.PlayerData.metadata['isdead'] or Target.PlayerData.metadata['inlaststand'] or Target.PlayerData.metadata['ishandcuffed'] then
         return false
     end
     local targetPed = GetPlayerPawn(target)
-
     local pCoords = GetEntityCoords(playerPed)
     local tCoords = GetEntityCoords(targetPed)
     if GetDistanceBetweenCoords(pCoords, tCoords) > 1000 then
         return false
     end
-
-    local itemInfo = SharedItems[item:lower()]
+    local itemInfo = sharedItems[item:lower()]
     if not itemInfo then
         return false
     end
-
     local hasItem = HasItem(source, item)
     if not hasItem then
         return false
     end
-
     local itemAmount = GetItemByName(source, item).amount
     if itemAmount <= 0 then
         return false
     end
-
     local giveAmount = tonumber(amount)
     if giveAmount > itemAmount then
         return false
     end
-
     local removeItem = RemoveItem(source, item, giveAmount)
     if not removeItem then
         return false
     end
-
     local giveItem = AddItem(target, item, giveAmount)
     if not giveItem then
         AddItem(source, item, giveAmount)
@@ -446,49 +464,69 @@ end)
 -- Item move logic
 
 local function getItem(inventoryId, src, slot)
-    local item
+    local items = {}
     if inventoryId == 'player' then
         local Player = exports['qb-core']:GetPlayer(src)
-        item = Player.PlayerData.items[slot]
-    elseif inventoryId:find('otherplayer-') then
-        local targetCitizenId = inventoryId:match('otherplayer%-(.+)')
-        local targetPlayer = exports['qb-core']:GetPlayerByCitizenId(targetCitizenId)
-        if targetPlayer then
-            item = targetPlayer.PlayerData.items[slot]
+        if Player and Player.PlayerData.items then
+            items = Player.PlayerData.items
         end
-    elseif inventoryId:find('drop-') then
-        item = Drops[inventoryId]['items'][slot]
+    elseif inventoryId:find('otherplayer-') then
+        local targetId = tonumber(inventoryId:match('otherplayer%-(.+)'))
+        local targetPlayer = exports['qb-core']:GetPlayer(targetId)
+        if targetPlayer and targetPlayer.PlayerData.items then
+            items = targetPlayer.PlayerData.items
+        end
+    elseif inventoryId:find('drop-') == 1 then
+        if Drops[inventoryId] and Drops[inventoryId]['items'] then
+            items = Drops[inventoryId]['items']
+        end
     else
-        item = Inventories[inventoryId]['items'][slot]
+        if Inventories[inventoryId] and Inventories[inventoryId]['items'] then
+            items = Inventories[inventoryId]['items']
+        end
     end
-    return item
+
+    for _, item in pairs(items) do
+        if item.slot == slot then
+            return item
+        end
+    end
+    return nil
 end
 
 local function getIdentifier(inventoryId, src)
     if inventoryId == 'player' then
         return src
     elseif inventoryId:find('otherplayer-') then
-        return exports['qb-core']:GetPlayerByCitizenId(inventoryId:match('otherplayer%-(.+)')).PlayerData.source
+        return tonumber(inventoryId:match('otherplayer%-(.+)'))
     else
         return inventoryId
     end
 end
 
 RegisterServerEvent('qb-inventory:server:SetInventoryData', function(source, fromInventory, toInventory, fromSlot, toSlot, fromAmount, toAmount)
-    if not fromInventory or not toInventory or not fromSlot or not toSlot or not fromAmount or not toAmount then
+    if toInventory:find('shop%-') then
+        return
+    end
+    if not fromInventory or not toInventory or not fromSlot or not toSlot or not fromAmount or not toAmount or fromAmount < 0 or toAmount < 0 then
         return
     end
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then
         return
     end
+
     fromSlot, toSlot, fromAmount, toAmount = tonumber(fromSlot), tonumber(toSlot), tonumber(fromAmount), tonumber(toAmount)
+
     local fromItem = getItem(fromInventory, source, fromSlot)
     local toItem = getItem(toInventory, source, toSlot)
 
     if fromItem then
         if not toItem and toAmount > fromItem.amount then
             return
+        end
+        if fromInventory == 'player' and toInventory ~= 'player' then
+            --checkWeapon(source, fromItem)
         end
 
         local fromId = getIdentifier(fromInventory, source)
@@ -504,9 +542,12 @@ RegisterServerEvent('qb-inventory:server:SetInventoryData', function(source, fro
             end
         else
             if toItem then
-                if RemoveItem(fromId, fromItem.name, fromAmount, fromSlot, 'swapped item') and RemoveItem(toId, toItem.name, toAmount, toSlot, 'swapped item') then
-                    AddItem(toId, fromItem.name, fromAmount, toSlot, fromItem.info, 'swapped item')
-                    AddItem(fromId, toItem.name, toAmount, fromSlot, toItem.info, 'swapped item')
+                local fromItemAmount = fromItem.amount
+                local toItemAmount = toItem.amount
+
+                if RemoveItem(fromId, fromItem.name, fromItemAmount, fromSlot, 'swapped item') and RemoveItem(toId, toItem.name, toItemAmount, toSlot, 'swapped item') then
+                    AddItem(toId, fromItem.name, fromItemAmount, toSlot, fromItem.info, 'swapped item')
+                    AddItem(fromId, toItem.name, toItemAmount, fromSlot, toItem.info, 'swapped item')
                 end
             else
                 if RemoveItem(fromId, fromItem.name, toAmount, fromSlot, 'moved item') then
