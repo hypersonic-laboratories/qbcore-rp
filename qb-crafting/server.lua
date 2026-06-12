@@ -12,7 +12,7 @@ local function IncreasePlayerXP(source, xpGain, xpType)
         local currentXP = Player.GetRep(xpType)
         local newXP = currentXP + xpGain
         Player.AddRep(xpType, newXP)
-        TriggerClientEvent(source, 'QBCore:Notify', string.format(Lang:t('notifications.xpGain'), xpGain, xpType), 'success')
+        TriggerClientEvent(source, 'QBCore:Notify', string.format(Lang.t('notifications.xpGain'), xpGain, xpType), 'success')
     end
 end
 
@@ -25,11 +25,11 @@ local function PickupBench(source)
     if not Player then
         return
     end
-    if not exports['qb-inventory']:AddItem(source, bench.benchType, 1, false, false, 'qb-crafting:pickup') then
+    if not exports['qb-inventory']:AddItem(source, bench.benchType, 1, false, false) then
         return
     end
     TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[bench.benchType], 'add')
-    TriggerClientEvent(source, 'QBCore:Notify', Lang:t('notifications.pickupBench'), 'success')
+    TriggerClientEvent(source, 'QBCore:Notify', Lang.t('notifications.pickupBench'), 'success')
     DestroyActor(bench.mesh.Object)
     TriggerClientEvent(source, 'qb-crafting:client:removeBench')
     ActiveBenches[source] = nil
@@ -82,7 +82,7 @@ end)
 RegisterServerEvent('qb-crafting:server:removeMaterials', function(source, itemName, amount)
     local Player = exports['qb-core']:GetPlayer(source)
     if Player then
-        exports['qb-inventory']:RemoveItem(source, itemName, amount, false, 'qb-crafting:server:removeMaterials')
+        exports['qb-inventory']:RemoveItem(source, itemName, amount, false)
         TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[itemName], 'remove')
     end
 end)
@@ -93,16 +93,16 @@ RegisterServerEvent('qb-crafting:server:receiveItem', function(source, craftedIt
         return
     end
     for _, requiredItem in ipairs(requiredItems) do
-        if not exports['qb-inventory']:RemoveItem(source, requiredItem.item, requiredItem.amount, false, 'qb-crafting:server:receiveItem') then
+        if not exports['qb-inventory']:RemoveItem(source, requiredItem.item, requiredItem.amount, false) then
             return
         end
         TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[requiredItem.item], 'remove')
     end
-    if not exports['qb-inventory']:AddItem(source, craftedItem, amountToCraft, false, false, 'qb-crafting:server:receiveItem') then
+    if not exports['qb-inventory']:AddItem(source, craftedItem, amountToCraft, false, false) then
         return
     end
     TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[craftedItem], 'add')
-    TriggerClientEvent(source, 'QBCore:Notify', string.format(Lang:t('notifications.craftMessage'), sharedItems[craftedItem].label), 'success')
+    TriggerClientEvent(source, 'QBCore:Notify', string.format(Lang.t('notifications.craftMessage'), sharedItems[craftedItem].label), 'success')
     IncreasePlayerXP(source, xpGain, xpType)
 end)
 
@@ -125,6 +125,6 @@ RegisterServerEvent('qb-crafting:server:useBench', function(source, itemData)
     end
     exports['qb-inventory']:RemoveItem(source, benchType, itemData.slot)
     TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[benchType], 'remove')
-    TriggerClientEvent(source, 'QBCore:Notify', Lang:t('notifications.tablePlace'), 'success')
+    TriggerClientEvent(source, 'QBCore:Notify', Lang.t('notifications.tablePlace'), 'success')
     SpawnBench(source, benchType)
 end)

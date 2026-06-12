@@ -4,21 +4,10 @@ local hotbarShown = false
 local inv_open = false
 local my_webui = WebUI('Inventory', 'qb-inventory/html/index.html')
 
--- Drops
-
-local function GetDrops()
-    TriggerCallback('GetCurrentDrops', function(drops)
-        for k in pairs(drops) do
-            TriggerLocalClientEvent('qb-inventory:client:registerDropTarget', drops[k].entity.Object, drops[k].dropId)
-        end
-    end)
-end
-
 -- Handlers
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     player_data = exports['qb-core']:GetPlayerData()
-    GetDrops()
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()

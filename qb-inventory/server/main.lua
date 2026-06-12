@@ -56,37 +56,10 @@ end
 -- Handlers
 
 RegisterServerEvent('QBCore:Server:PlayerLoaded', function(Player)
+    local src = Player.PlayerData.source
     for dropId, drop in pairs(Drops) do
-        TriggerClientEvent(Player.PlayerData.source, 'qb-inventory:client:registerDropTarget', drop.entity.Object, dropId)
+        TriggerClientEvent(src, 'qb-inventory:client:registerDropTarget', drop.entity.Object, dropId)
     end
-
-    exports['qb-core']:AddPlayerMethod(Player.PlayerData.source, 'AddItem', function(item, amount, slot, info)
-        return AddItem(Player.PlayerData.source, item, amount, slot, info)
-    end)
-
-    exports['qb-core']:AddPlayerMethod(Player.PlayerData.source, 'RemoveItem', function(item, amount, slot)
-        return RemoveItem(Player.PlayerData.source, item, amount, slot)
-    end)
-
-    exports['qb-core']:AddPlayerMethod(Player.PlayerData.source, 'GetItemBySlot', function(slot)
-        return GetItemBySlot(Player.PlayerData.source, slot)
-    end)
-
-    exports['qb-core']:AddPlayerMethod(Player.PlayerData.source, 'GetItemByName', function(item)
-        return GetItemByName(Player.PlayerData.source, item)
-    end)
-
-    exports['qb-core']:AddPlayerMethod(Player.PlayerData.source, 'GetItemsByName', function(item)
-        return GetItemsByName(Player.PlayerData.source, item)
-    end)
-
-    exports['qb-core']:AddPlayerMethod(Player.PlayerData.source, 'ClearInventory', function(filterItems)
-        ClearInventory(Player.PlayerData.source, filterItems)
-    end)
-
-    exports['qb-core']:AddPlayerMethod(Player.PlayerData.source, 'SetInventory', function(items)
-        SetInventory(Player.PlayerData.source, items)
-    end)
 end)
 
 -- Events
@@ -263,7 +236,6 @@ RegisterServerEvent('qb-inventory:server:updateDrop', function(source, dropId)
         Location = DetachmentRule.KeepWorld,
         Rotation = DetachmentRule.KeepWorld,
     })
-    DropData.entity.Component:SetMobility(UE.EComponentMobility.Movable)
     SetEntityCoords(DropData.entity.Object, DropPosition)
     DropData.entity.Component:SetCollisionProfileName('BlockAllDynamic', true)
 end)
