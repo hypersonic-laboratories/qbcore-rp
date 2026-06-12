@@ -1,36 +1,62 @@
-@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap");
-
 :root {
-    /* Colors */
-    --md-primary: #f44336;
-    --md-on-primary: #ffffff;
-    --md-primary-container: #ffdad6;
-    --md-on-primary-container: #410002;
-    --md-secondary: #d32f2f;
-    --md-on-secondary: #ffffff;
-    --md-secondary-container: #ffdad5;
-    --md-on-secondary-container: #410001;
-    --md-tertiary: #ff8a65;
-    --md-on-tertiary: #ffffff;
-    --md-tertiary-container: #ffdacc;
-    --md-on-tertiary-container: #410002;
-    --md-surface: #1c1b1f;
-    --md-on-surface: #e6e1e5;
-    --md-surface-container-lowest: #0f0d13;
-    --md-surface-container-low: #1d1b20;
-    --md-surface-container: #211f26;
-    --md-surface-container-high: #2b2930;
-    --md-surface-container-highest: #36343b;
-    --md-error: #b3261e;
+    /* HELIX Secondary Palette */
+    --helix-yellow: #f5d90a;
+    --helix-green: #00fa7b;
+    --helix-red: #e5484d;
+    --helix-purple: #b048e5;
+    --helix-pink: #e548ca;
+    --helix-orange: #fa9600;
+
+    /* Surface scale — true black base */
+    --md-surface: #000000;
+    --md-on-surface: #ffffff;
+    --md-surface-variant: #1a1a1a;
+    --md-on-surface-variant: #888888;
+    --md-surface-container-lowest: #000000;
+    --md-surface-container-low: #0d0d0d;
+    --md-surface-container: #111111;
+    --md-surface-container-high: #1a1a1a;
+    --md-surface-container-highest: #242424;
+
+    /* Primary — white */
+    --md-primary: #ffffff;
+    --md-on-primary: #000000;
+    --md-primary-container: #1a1a1a;
+    --md-on-primary-container: #ffffff;
+
+    /* Secondary — HELIX Green */
+    --md-secondary: var(--helix-green);
+    --md-on-secondary: #000000;
+    --md-secondary-container: rgba(0, 250, 123, 0.12);
+    --md-on-secondary-container: var(--helix-green);
+
+    /* Tertiary — HELIX Orange */
+    --md-tertiary: var(--helix-orange);
+    --md-on-tertiary: #000000;
+    --md-tertiary-container: rgba(250, 150, 0, 0.12);
+    --md-on-tertiary-container: var(--helix-orange);
+
+    /* Error — HELIX Red */
+    --md-error: var(--helix-red);
     --md-on-error: #ffffff;
-    --md-error-container: #93000a;
-    --md-on-error-container: #ffdad5;
-    --md-outline: #79747e;
-    --md-outline-variant: #49454f;
-    --md-inverse-surface: #e6e1e5;
-    --md-inverse-on-surface: #1c1b1f;
-    --md-scrim: rgba(0, 0, 0, 0.6);
-    --md-shadow: rgba(0, 0, 0, 0.15);
+    --md-error-container: rgba(229, 72, 77, 0.12);
+    --md-on-error-container: var(--helix-red);
+
+    /* Outlines */
+    --md-outline: #3a3a3a;
+    --md-outline-variant: #222222;
+    --md-inverse-surface: #ffffff;
+    --md-inverse-on-surface: #000000;
+    --md-scrim: rgba(0, 0, 0, 0.8);
+    --md-shadow: rgba(0, 0, 0, 0.5);
+
+    /* Elevation */
+    --md-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.4);
+    --md-elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.4);
+
+    /* Shapes */
+    --md-radius-small: 2px;
+    --md-radius-medium: 4px;
 
     /* Typography */
     --md-typescale-body-large-size: 16px;
@@ -39,18 +65,12 @@
     --md-typescale-label-large-size: 14px;
     --md-typescale-label-medium-size: 12px;
 
-    /* Shapes */
-    --md-radius-small: 8px;
-    --md-radius-medium: 12px;
-
-    /* Elevation */
-    --md-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
-    --md-elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
-
     /* Font */
-    --font-primary: "Exo 2", sans-serif;
+    --font-primary: "Tomorrow", sans-serif;
+    --font-secondary: "Barlow", sans-serif;
     --font-weight-regular: 400;
     --font-weight-medium: 500;
+    --font-weight-bold: 700;
 }
 
 * {
@@ -100,19 +120,8 @@
     }
 }
 
-/* width */
 ::-webkit-scrollbar {
-    width: 10px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-    background: var(--md-surface-container-low);
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-    background: var(--md-surface-container-high);
+    display: none;
 }
 
 #container {
@@ -153,17 +162,17 @@ body {
 .button {
     width: auto;
     height: auto;
-    min-height: 48px;
+    min-height: 32px;
     background: var(--md-surface-container);
     color: var(--md-on-surface);
-    margin: 0.5rem 10px;
+    margin: 0.25rem 10px;
     position: relative;
     overflow: hidden;
-    padding: 0.5rem 0.75rem;
+    padding: 0.35rem 0.6rem;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     box-shadow: var(--md-elevation-1);
     border-radius: var(--md-radius-small);
     cursor: pointer;
@@ -193,23 +202,22 @@ body {
 }
 
 .button:hover {
-    background-color: var(--md-primary);
+    background-color: var(--md-surface-container-highest);
 }
 
 .title {
     width: auto;
-    height: 10%;
+    height: auto;
     background: var(--md-surface-container-high);
     color: var(--md-on-surface);
-    margin: auto;
+    margin: 0.25rem 10px;
     position: relative;
-    top: 10%;
-    margin-top: 0.5rem;
     overflow: hidden;
-    padding: 0.45rem;
+    padding: 0.35rem 0.6rem;
     display: flex;
     flex-direction: column;
     box-shadow: var(--md-elevation-1);
+    border-radius: var(--md-radius-small);
 }
 
 .title > div.column > div.header {
