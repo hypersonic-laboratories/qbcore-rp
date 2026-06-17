@@ -355,7 +355,7 @@ Config.Locations = {
     },
     ['mechanic'] = {
         ['label'] = 'Mechanic Shop',
-        ['coords'] = Vector(567465, 562061, 4548),
+        ['coords'] = Vector(566415, 558009, 4556),
         ['heading'] = 0,
         ['ped'] = '/CharacterCreator/CharacterAssets/Avatar_FBX/Body/Male/Mesh/Male_Full_Body',
         ['animation'] = 'WORLD_HUMAN_STAND_MOBILE',
