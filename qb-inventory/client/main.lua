@@ -182,7 +182,7 @@ Input.BindKey(Config.Keybinds.Open, function()
     else
         TriggerServerEvent('qb-inventory:server:openInventory')
     end
-end)
+end, 'Released')
 
 Input.BindKey(Config.Keybinds.Hotbar, function()
     TriggerServerEvent('qb-inventory:server:toggleHotbar')

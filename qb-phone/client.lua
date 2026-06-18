@@ -531,7 +531,7 @@ Input.BindKey(Config.OpenKey, function()
     else
         openPhone()
     end
-end, 'Pressed')
+end, 'Released')
 
 my_webui:RegisterEventHandler('rightMouseDown', function()
     if not phoneOpen then return end
