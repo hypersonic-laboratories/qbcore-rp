@@ -240,15 +240,12 @@ end)
 
 Input.BindKey(Config.Keybind, function()
     if not isLoggedIn then return end
-    if HPlayer:GetInputMode() == 1 and inRadialMenu then
+
+    if HPlayer:GetInputMode() == 1 and not inRadialMenu then return end
+
+    if inRadialMenu then
         closeRadial()
     else
         openRadial()
     end
-end, 'Pressed')
-
--- Input.BindKey(Config.Keybind, function()
---     if not isLoggedIn then return end
---     if not inRadialMenu then return end
---     closeRadial()
--- end, 'Released')
+end, 'Released')
