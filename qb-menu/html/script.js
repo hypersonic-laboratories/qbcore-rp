@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     let buttonParams = [];
     let images = [];
+    let isMenuOpen = false;
 
     // ── Lucide icon helper ────────────────────────────────
     // Same pattern as qb-hud: converts kebab-case icon name
@@ -44,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function openMenu(buttons) {
+        isMenuOpen = true;
         let html = "";
         buttons.forEach((item, index) => {
             if (!item.hidden) {
@@ -83,6 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
         $("#imageHover").css("display", "none");
         buttonParams = [];
         images = [];
+        isMenuOpen = false;
     }
 
     function postData(id) {
@@ -107,24 +110,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    function handleMouseDown(event) {
-        if (event.button === 2) {
-            cancelMenu();
+    function handleKeydown(event) {
+        if (event.key === "Escape") {
+            if (isMenuOpen) {
+                event.preventDefault();
+                cancelMenu();
+            }
         }
     }
 
-    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("keydown", handleKeydown);
 
     window.addEventListener("unload", function () {
-        window.removeEventListener("mousedown", handleMouseDown);
-    });
-
-    window.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-            if (event.cancelable) {
-                event.preventDefault();
-            }
-            cancelMenu();
-        }
+        window.removeEventListener("keydown", handleKeydown);
     });
 });

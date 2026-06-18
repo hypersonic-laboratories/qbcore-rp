@@ -118,9 +118,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         }
+    }
 
-        // Right click
-        if (event.button === 2) {
+    function handleKeydown(event) {
+        if (event.key === "Escape") {
+            event.preventDefault();
             hEvent("closeTarget");
         }
     }
@@ -143,8 +145,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("keydown", handleKeydown);
 
     window.addEventListener("unload", function () {
         window.removeEventListener("mousedown", handleMouseDown);
+        window.removeEventListener("keydown", handleKeydown);
     });
 });

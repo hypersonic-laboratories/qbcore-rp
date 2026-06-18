@@ -1,55 +1,79 @@
-/* Import Exo 2 font as defined in style guide */
-@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Tomorrow:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600;700&display=swap");
 
 :root {
-    /* Colors */
-    --md-primary: #f44336;
-    --md-on-primary: #ffffff;
-    --md-primary-container: #ffdad6;
-    --md-on-primary-container: #410002;
-    --md-secondary: #d32f2f;
-    --md-on-secondary: #ffffff;
-    --md-surface: #fffbff;
-    --md-on-surface: #1c1b1f;
-    --md-surface-container: #f3edf7;
-    --md-surface-container-high: #ece8f0;
+    --helix-yellow: #f5d90a;
+    --helix-green: #00fa7b;
+    --helix-red: #e5484d;
+    --helix-purple: #b048e5;
+    --helix-orange: #fa9600;
 
-    /* Typography from style guide */
-    --md-typescale-display-large-size: 57px;
-    --md-typescale-display-medium-size: 45px;
-    --md-typescale-display-small-size: 36px;
-    --md-typescale-headline-large-size: 32px;
-    --md-typescale-headline-medium-size: 28px;
-    --md-typescale-headline-small-size: 24px;
-    --md-typescale-title-large-size: 22px;
-    --md-typescale-title-medium-size: 16px;
-    --md-typescale-title-small-size: 14px;
-    --md-typescale-body-large-size: 16px;
-    --md-typescale-body-medium-size: 14px;
-    --md-typescale-body-small-size: 12px;
-    --md-typescale-label-large-size: 14px;
-    --md-typescale-label-medium-size: 12px;
-    --md-typescale-label-small-size: 11px;
+    --md-surface: #000000;
+    --md-on-surface: #ffffff;
+    --md-surface-variant: #1a1a1a;
+    --md-on-surface-variant: #888888;
+    --md-surface-container-lowest: #000000;
+    --md-surface-container-low: #0d0d0d;
+    --md-surface-container: #111111;
+    --md-surface-container-high: #1a1a1a;
+    --md-surface-container-highest: #242424;
 
-    /* Custom SVG menu font sizes */
-    --menu-sector-font-size: 2.8px;
+    --md-primary: #ffffff;
+    --md-on-primary: #000000;
+    --md-secondary: var(--helix-green);
+    --md-on-secondary: #000000;
+    --md-secondary-container: rgba(0, 250, 123, 0.14);
+    --md-error: var(--helix-red);
+    --md-error-container: rgba(229, 72, 77, 0.14);
+    --md-outline: #3a3a3a;
+    --md-outline-variant: #222222;
+    --surface-stroke: rgba(255, 255, 255, 0.12);
+    --surface-highlight: rgba(255, 255, 255, 0.04);
+
+    --radius-sm: 4px;
+    --duration-fast: 120ms;
+    --duration-base: 180ms;
+    --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
+    --menu-sector-font-size: 2.75px;
     --menu-center-font-size: 2.5px;
-
-    /* Font properties */
-    --font-primary: "Exo 2", sans-serif;
+    --font-primary: "Tomorrow", sans-serif;
+    --font-secondary: "Barlow", sans-serif;
     --font-weight-regular: 400;
     --font-weight-medium: 500;
     --font-weight-bold: 700;
-
-    /* Spacing */
     --md-spacing-small: 8px;
-    --md-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+    --md-elevation-3: 0 4px 8px 3px rgba(0, 0, 0, 0.4);
+    --md-elevation-5: 0 8px 12px 6px rgba(0, 0, 0, 0.4);
+}
+
+:root,
+html,
+body {
+    background: transparent !important;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    color: var(--md-on-surface);
+    font-family: var(--font-primary);
+    font-weight: var(--font-weight-medium);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
 }
 
 h1 {
+    color: var(--md-on-surface);
+    font-size: 32px;
     font-weight: var(--font-weight-regular);
-    font-size: var(--md-typescale-headline-large-size);
-    color: var(--md-on-primary);
 }
 
 div.info {
@@ -57,8 +81,8 @@ div.info {
 }
 
 div.info * {
-    font-size: var(--md-typescale-body-medium-size);
-    color: var(--md-on-primary);
+    color: var(--md-on-surface);
+    font-size: 14px;
 }
 
 #icons {
@@ -74,18 +98,19 @@ div.info * {
 }
 
 #vehicle {
-    fill: var(--md-on-primary);
+    fill: var(--md-on-surface);
 }
 
 div.menuHolder {
-    user-select: none;
-    -moz-user-select: none;
     position: absolute;
+    top: 30%;
     left: 0;
     right: 0;
-    margin-left: auto;
     margin-right: auto;
-    top: 30%;
+    margin-left: auto;
+    user-select: none;
+    -moz-user-select: none;
+    filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.55));
 }
 
 svg.icons {
@@ -95,8 +120,13 @@ svg.icons {
 svg.menu {
     position: absolute;
     overflow: visible;
-    transition: 0.1s;
-    transition-timing-function: ease-out;
+    opacity: 1;
+    visibility: visible;
+    transform-origin: center;
+    transition:
+        transform var(--duration-base) var(--easing-standard),
+        opacity var(--duration-base) var(--easing-standard),
+        visibility var(--duration-base) var(--easing-standard);
 }
 
 svg.menu.inner {
@@ -106,13 +136,26 @@ svg.menu.inner {
 }
 
 svg.menu.outer {
+    transform: scale(0.92) rotate(8deg);
     opacity: 0;
     visibility: hidden;
 }
 
 svg.menu > g > path {
-    fill: rgb(23 23 23 / 80%);
-    box-shadow: var(--md-elevation-1);
+    fill: rgba(17, 17, 17, 0.92);
+    stroke: var(--surface-stroke);
+    stroke-width: 0.38;
+    stroke-linejoin: round;
+    transition:
+        fill var(--duration-base) var(--easing-standard),
+        stroke var(--duration-base) var(--easing-standard),
+        stroke-width var(--duration-fast) var(--easing-standard),
+        filter var(--duration-base) var(--easing-standard);
+}
+
+svg.menu > g.dummy > path {
+    fill: rgba(13, 13, 13, 0.64);
+    stroke: rgba(255, 255, 255, 0.06);
 }
 
 svg.menu > g.sector > path {
@@ -120,33 +163,86 @@ svg.menu > g.sector > path {
 }
 
 svg.menu > g.sector > text,
-svg.menu > g.sector > use {
-    font-family: var(--font-primary);
-    margin-top: 5px;
-    font-size: var(--menu-sector-font-size);
-    letter-spacing: 0.2px;
-    text-transform: uppercase;
+svg.menu > g.sector > svg {
+    color: var(--md-on-surface);
+    fill: var(--md-on-surface);
     cursor: pointer;
-    fill: var(--md-on-primary);
+    font-family: var(--font-primary);
+    font-size: var(--menu-sector-font-size);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.08px;
+    text-transform: uppercase;
+    transition:
+        fill var(--duration-base) var(--easing-standard),
+        color var(--duration-base) var(--easing-standard),
+        opacity var(--duration-base) var(--easing-standard);
 }
 
-svg.menu > g.sector:hover > path {
-    fill: var(--md-primary);
+svg.menu > g.sector > svg path,
+svg.menu > g.center > svg path {
+    fill: currentColor;
 }
 
-svg.menu > g.center:hover > circle {
-    fill: var(--md-primary);
+svg.menu > g.sector:hover > path,
+svg.menu > g.sector.selected > path {
+    fill: var(--md-secondary-container);
+    stroke: rgba(0, 250, 123, 0.68);
+    stroke-width: 0.48;
+    filter: drop-shadow(0 0 5px rgba(0, 250, 123, 0.35));
+}
+
+svg.menu > g.sector:hover > text,
+svg.menu > g.sector:hover > svg,
+svg.menu > g.sector.selected > text,
+svg.menu > g.sector.selected > svg {
+    color: var(--helix-green);
+    fill: var(--helix-green);
 }
 
 svg.menu > g.center > circle {
     cursor: pointer;
-    fill: rgb(23 23 23 / 80%);
+    fill: rgba(0, 0, 0, 0.94);
+    stroke: rgba(245, 217, 10, 0.62);
+    stroke-width: 0.42;
+    transition:
+        fill var(--duration-base) var(--easing-standard),
+        stroke var(--duration-base) var(--easing-standard),
+        stroke-width var(--duration-fast) var(--easing-standard),
+        filter var(--duration-base) var(--easing-standard);
+}
+
+svg.menu > g.center:hover > circle {
+    fill: var(--md-error-container);
+    stroke: rgba(229, 72, 77, 0.78);
+    stroke-width: 0.54;
+    filter: drop-shadow(0 0 5px rgba(229, 72, 77, 0.35));
 }
 
 svg.menu > g.center > text,
-svg.menu > g.center > use {
-    margin-top: 5px;
-    font-size: var(--menu-center-font-size);
+svg.menu > g.center > svg {
+    color: var(--helix-yellow);
+    fill: var(--helix-yellow);
     cursor: pointer;
-    fill: var(--md-on-primary);
+    font-family: var(--font-primary);
+    font-size: var(--menu-center-font-size);
+    font-weight: var(--font-weight-bold);
+    transition:
+        fill var(--duration-base) var(--easing-standard),
+        color var(--duration-base) var(--easing-standard);
+}
+
+svg.menu > g.center:hover > text,
+svg.menu > g.center:hover > svg {
+    color: var(--helix-red);
+    fill: var(--helix-red);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 1ms !important;
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+    }
 }

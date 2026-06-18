@@ -130,6 +130,7 @@ const app = createApp({
             resolutionMeta: "",
             resolutionNote: "",
             onWindowMessage: null,
+            onWindowKeydown: null,
             onDocumentClick: null,
             onWindowResize: null,
 
@@ -1111,6 +1112,13 @@ const app = createApp({
             }
         },
 
+        handleKeydown(event) {
+            if (event.key === "Escape" && this.isVisible) {
+                event.preventDefault();
+                this.closePanel("escape");
+            }
+        },
+
         handleMessage(event) {
             const payload = event && event.data ? event.data : {};
             const action = payload.name || payload.action;
@@ -1156,7 +1164,9 @@ const app = createApp({
 
     mounted() {
         this.onWindowMessage = this.handleMessage.bind(this);
+        this.onWindowKeydown = this.handleKeydown.bind(this);
         window.addEventListener("message", this.onWindowMessage);
+        window.addEventListener("keydown", this.onWindowKeydown);
 
         // Initialize reports board
         this.initializeReportsBoard();
@@ -1178,6 +1188,9 @@ const app = createApp({
     beforeUnmount() {
         if (this.onWindowMessage) {
             window.removeEventListener("message", this.onWindowMessage);
+        }
+        if (this.onWindowKeydown) {
+            window.removeEventListener("keydown", this.onWindowKeydown);
         }
         if (this.onDocumentClick) {
             document.removeEventListener("click", this.onDocumentClick);

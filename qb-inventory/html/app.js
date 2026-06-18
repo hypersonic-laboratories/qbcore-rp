@@ -915,8 +915,13 @@ const InventoryContainer = Vue.createApp({
     mounted() {
         window.addEventListener("keydown", (event) => {
             const key = event.key;
+            if (key === "Tab" && this.isInventoryOpen) {
+                event.preventDefault();
+                return;
+            }
             if (key === "Escape") {
                 if (this.isInventoryOpen) {
+                    event.preventDefault();
                     this.closeInventory();
                 }
             }

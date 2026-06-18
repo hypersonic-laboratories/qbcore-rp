@@ -32,7 +32,7 @@ createApp({
     },
 
     setup() {
-        const { ref, computed, watch } = Vue;
+        const { ref, computed, watch, onMounted, onBeforeUnmount } = Vue;
 
         const phoneVisible = ref(false);
         const locked = ref(true);
@@ -372,6 +372,21 @@ createApp({
             hidePhone();
             hEvent("ClosePhone", {});
         }
+
+        function handleKeydown(event) {
+            if (event.key === "Escape" && phoneVisible.value) {
+                event.preventDefault();
+                closePhone();
+            }
+        }
+
+        onMounted(() => {
+            window.addEventListener("keydown", handleKeydown);
+        });
+
+        onBeforeUnmount(() => {
+            window.removeEventListener("keydown", handleKeydown);
+        });
 
         return {
             HOME_APPS,

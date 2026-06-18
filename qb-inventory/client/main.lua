@@ -178,7 +178,7 @@ end
 
 Input.BindKey(Config.Keybinds.Open, function()
     if inv_open then
-        my_webui:SendEvent('closeInventory')
+        my_webui:SendEvent('close')
     else
         TriggerServerEvent('qb-inventory:server:openInventory')
     end

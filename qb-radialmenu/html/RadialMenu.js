@@ -435,9 +435,6 @@ RadialMenu.prototype.appendSectorPath = function (startAngleDeg, endAngleDeg, sv
 
     if (item) {
         g.setAttribute("class", "sector");
-        if (index == 0) {
-            g.setAttribute("class", "sector selected");
-        }
         g.setAttribute("data-id", item.id);
         g.setAttribute("data-index", index);
 

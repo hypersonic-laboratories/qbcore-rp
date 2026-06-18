@@ -1,37 +1,81 @@
-@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Tomorrow:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600;700&display=swap");
 
 :root {
-    /* Colors */
-    --md-primary: #f44336;
-    --md-on-primary: #ffffff;
-    --md-error: #b3261e;
-    --md-on-error: #ffffff;
-    --md-success: #386a20;
-    --md-on-success: #ffffff;
-    --md-success-container: #b6f397;
-    --md-on-success-container: #0c2000;
-    --md-surface: #1c1b1f;
-    --md-on-surface: #e6e1e5;
-    --md-surface-container: #211f26;
-    --md-surface-container-high: #2b2930;
-    --md-surface-container-highest: #36343b;
-    --md-shadow: rgba(0, 0, 0, 0.15);
-    --md-radius-small: 8px;
+    --helix-yellow: #f5d90a;
+    --helix-green: #00fa7b;
+    --helix-red: #e5484d;
+    --helix-purple: #b048e5;
+    --helix-orange: #fa9600;
 
-    /* Typography */
+    --md-surface: #000000;
+    --md-on-surface: #ffffff;
+    --md-surface-variant: #1a1a1a;
+    --md-on-surface-variant: #888888;
+    --md-surface-container-lowest: #000000;
+    --md-surface-container-low: #0d0d0d;
+    --md-surface-container: #111111;
+    --md-surface-container-high: #1a1a1a;
+    --md-surface-container-highest: #242424;
+
+    --md-primary: #ffffff;
+    --md-on-primary: #000000;
+    --md-secondary: var(--helix-green);
+    --md-on-secondary: #000000;
+    --md-secondary-container: rgba(0, 250, 123, 0.12);
+    --md-error: var(--helix-red);
+    --md-on-error: #ffffff;
+    --md-success: var(--helix-green);
+    --md-on-success: #000000;
+    --md-success-container: rgba(0, 250, 123, 0.12);
+    --md-on-success-container: var(--helix-green);
+    --md-outline: #3a3a3a;
+    --md-outline-variant: #222222;
+    --md-shadow: rgba(0, 0, 0, 0.5);
+    --surface-stroke: rgba(255, 255, 255, 0.12);
+    --surface-highlight: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0));
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --duration-fast: 120ms;
+    --duration-base: 180ms;
+    --easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
     --md-typescale-label-medium-size: 12px;
-    --font-primary: "Exo 2", Arial, sans-serif;
+    --font-primary: "Tomorrow", Arial, sans-serif;
+    --font-secondary: "Barlow", Arial, sans-serif;
     --font-weight-regular: 400;
     --font-weight-medium: 500;
     --font-weight-bold: 700;
+    --md-elevation-2: 0 2px 6px 2px rgba(0, 0, 0, 0.4);
+    --md-elevation-4: 0 6px 10px 4px rgba(0, 0, 0, 0.4);
+}
 
-    /* Elevation */
-    --md-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+:root,
+html,
+body {
+    background: transparent !important;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
 body {
+    margin: 0;
     overflow: hidden;
+    color: var(--md-on-surface);
     font-family: var(--font-primary);
+    font-weight: var(--font-weight-medium);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+#target-wrapper {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
 }
 
 #target-eye {
@@ -39,88 +83,166 @@ body {
     top: 50%;
     left: 50%;
     display: none;
-    transform: translateY(-50%) translateX(-50%);
-    width: 2vh;
-    height: 2vh;
+    width: 2.35vh;
+    height: 2.35vh;
+    padding: 0.36vh;
     color: var(--md-on-surface);
-    filter: drop-shadow(0 2px 4px var(--md-shadow));
-    transition: color 0.3s ease;
+    background: linear-gradient(180deg, rgba(245, 217, 10, 0.08), transparent 68%), rgba(0, 0, 0, 0.82);
+    border: 1px solid rgba(245, 217, 10, 0.48);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--md-elevation-2);
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.55));
+    transform: translate(-50%, -50%);
+    transition:
+        color var(--duration-base) var(--easing-standard),
+        border-color var(--duration-base) var(--easing-standard),
+        background-color var(--duration-base) var(--easing-standard),
+        box-shadow var(--duration-base) var(--easing-standard);
 }
 
 #target-eye svg {
+    display: block;
     width: 100%;
     height: 100%;
     stroke: currentColor;
 }
 
+#target-eye.target-success {
+    color: var(--md-success);
+    border-color: rgba(0, 250, 123, 0.68);
+    background: linear-gradient(180deg, rgba(0, 250, 123, 0.12), transparent 68%), rgba(0, 0, 0, 0.86);
+    box-shadow:
+        var(--md-elevation-2),
+        0 0 18px rgba(0, 250, 123, 0.18);
+}
+
 .target-option-icon {
     display: flex;
     align-items: center;
-    flex-shrink: 0;
-    width: 14px;
-    height: 14px;
+    justify-content: center;
+    flex: 0 0 18px;
+    width: 18px;
+    height: 18px;
+    color: inherit;
 }
 
 .target-option-icon svg {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     stroke: currentColor;
 }
 
 #target-label-wrapper {
     position: absolute;
+    top: 50%;
+    left: calc(50% + 2.4vh);
     display: flex;
     align-content: center;
     justify-content: center;
-    flex-direction: row;
-    left: 51.5%;
     width: fit-content;
-    height: 100%;
-    top: 49.25%;
+    height: auto;
+    transform: translateY(-50%);
+    pointer-events: auto;
 }
 
 #target-label {
-    list-style: none;
-    font-size: var(--md-typescale-label-medium-size, 1vh);
-    font-weight: var(--font-weight-medium, bold);
-    font-family: var(--font-primary, Arial, sans-serif);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.42vh;
+    min-width: 168px;
+    margin: 0;
+    padding: 0;
     color: var(--md-on-surface);
+    font-family: var(--font-primary);
+    font-size: var(--md-typescale-label-medium-size);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.2;
+    list-style: none;
+    text-shadow: none;
     user-select: none;
     white-space: nowrap;
-    text-shadow: 0 2px 4px var(--md-shadow);
 }
 
 [id^="target-option-"] {
-    margin-bottom: 0.2vh;
-    padding: 0.45rem;
-    background: var(--md-surface-container-high);
-    color: var(--md-on-surface);
-    box-shadow: var(--md-elevation-1);
-    transition:
-        transform 0.3s ease,
-        background-color 0.2s ease;
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.55rem;
+    min-width: 168px;
+    min-height: 38px;
+    margin: 0;
+    padding: 8px 11px;
+    overflow: hidden;
+    color: var(--md-on-surface);
+    background: var(--md-surface-container-lowest);
+    background-image: var(--surface-highlight);
+    border: 1px solid var(--surface-stroke);
+    border-radius: var(--radius-md);
+    box-shadow: var(--md-elevation-2);
+    cursor: pointer;
+    transition:
+        transform var(--duration-fast) var(--easing-standard),
+        color var(--duration-base) var(--easing-standard),
+        background-color var(--duration-base) var(--easing-standard),
+        border-color var(--duration-base) var(--easing-standard),
+        box-shadow var(--duration-base) var(--easing-standard);
+}
+
+[id^="target-option-"]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--easing-standard);
 }
 
 .target-label-container {
     display: flex;
     flex-direction: column;
+    gap: 2px;
+    min-width: 0;
 }
 
 .target-sublabel {
+    margin-top: 0;
+    color: var(--md-on-surface-variant);
+    font-family: var(--font-secondary);
     font-size: 0.85em;
-    opacity: 0.7;
-    margin-top: 0.1rem;
-    font-weight: var(--font-weight-regular, 400);
+    font-weight: var(--font-weight-regular);
 }
 
 [id^="target-option-"]:hover {
-    background: var(--md-surface-container-highest);
-    transform: translateX(10px);
+    color: var(--md-on-success-container);
+    background: var(--md-secondary-container);
+    border-color: rgba(0, 250, 123, 0.62);
+    box-shadow:
+        var(--md-elevation-4),
+        0 0 16px rgba(0, 250, 123, 0.18);
+    transform: translateX(8px);
+}
+
+[id^="target-option-"]:hover::after {
+    opacity: 0.06;
+}
+
+[id^="target-option-"]:hover .target-option-icon,
+[id^="target-option-"]:hover .target-sublabel {
+    color: var(--helix-green);
 }
 
 .target-success {
-    color: var(--md-success, #386a20) !important;
+    color: var(--md-success) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 1ms !important;
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+    }
 }
