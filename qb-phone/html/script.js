@@ -52,6 +52,7 @@ createApp({
         let callTimer = null;
         const notification = ref(null);
         let notifTimer = null;
+        let captureWasVisible = false;
 
         function navigateTo(screen) {
             activeScreen.value = screen;
@@ -77,6 +78,20 @@ createApp({
                 notification.value = null;
                 notifTimer = null;
             }, 5000);
+        }
+
+        function clearNotification() {
+            notification.value = null;
+            if (notifTimer) {
+                clearTimeout(notifTimer);
+                notifTimer = null;
+            }
+        }
+
+        function hidePhone() {
+            phoneVisible.value = false;
+            captureWasVisible = false;
+            clearNotification();
         }
 
         function acceptCall() {
@@ -126,8 +141,6 @@ createApp({
             });
         }
 
-        let captureWasVisible = false;
-
         window.addEventListener("message", (event) => {
             const { name, args = [] } = event.data;
             if (name === "open") {
@@ -135,11 +148,10 @@ createApp({
                 if (activeScreen.value === "calendar") hEvent("loadCalendar", {});
                 return;
             }
-            if (name === "close") {
-                phoneVisible.value = false;
+            if (name === "closePhone") {
+                closePhone();
                 return;
             }
-
             // ── Camera capture lifecycle ──────────────────────────────────────
             if (name === "hideForCapture") {
                 captureWasVisible = phoneVisible.value;
@@ -357,7 +369,8 @@ createApp({
         }
 
         function closePhone() {
-            hEvent("close", {});
+            hidePhone();
+            hEvent("ClosePhone", {});
         }
 
         return {

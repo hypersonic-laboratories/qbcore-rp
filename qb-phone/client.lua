@@ -185,10 +185,9 @@ local function closePhone()
     TriggerServerEvent('qb-phone:server:takePhone')
     if cameraMode then closeCamera() end
     my_webui:SetInputMode(0)
-    my_webui:SendEvent('close')
 end
 
-my_webui:RegisterEventHandler('close', function()
+my_webui:RegisterEventHandler('ClosePhone', function()
     closePhone()
 end)
 
@@ -527,7 +526,11 @@ end
 
 Input.BindKey(Config.OpenKey, function()
     if HPlayer:GetInputMode() == 1 and not phoneOpen then return end
-    if phoneOpen then closePhone() else openPhone() end
+    if phoneOpen then
+        my_webui:SendEvent('closePhone')
+    else
+        openPhone()
+    end
 end, 'Pressed')
 
 my_webui:RegisterEventHandler('rightMouseDown', function()
