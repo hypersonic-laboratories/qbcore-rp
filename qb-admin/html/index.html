@@ -337,7 +337,7 @@
                                         </button>
                                     </div>
                                     <label for="time-slider">Time: <span id="time-value">{{ formatHourLabel(timeValue) }}</span></label>
-                                    <input v-model.number="timeValue" id="time-slider" type="range" min="0" max="24" step="1" />
+                                    <input v-model.number="timeValue" id="time-slider" type="range" min="0" max="24" step="0.0166666667" />
                                     <div class="button-row">
                                         <button class="action-button" @click="changeWeather">Change Weather</button>
                                         <button class="action-button" @click="changeTime">Change Time</button>

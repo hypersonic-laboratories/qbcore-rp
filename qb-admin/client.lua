@@ -8,7 +8,7 @@ RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     TriggerCallback('syncRequest', function(skyInfo)
         sky = Sky()
         sky:SetTimeOfDay(skyInfo.time)
-        sky:SetAnimateTimeOfDay(Config.AnimateTime)
+        sky:SetAnimateTimeOfDay(Config.Weather.AnimateTime)
         sky:ChangeWeather(Config.Weather.WeatherTypes[skyInfo.weather])
     end)
 end)
@@ -16,12 +16,16 @@ end)
 -- Events
 
 RegisterClientEvent('qb-admin:client:changeTime', function(hour)
-    if not sky then return end
+    if not sky then
+        return
+    end
     sky:SetTimeOfDay(hour)
 end)
 
 RegisterClientEvent('qb-admin:client:changeWeather', function(weatherType)
-    if not sky then return end
+    if not sky then
+        return
+    end
     local enumWeather = Config.Weather.WeatherTypes[weatherType] or WeatherType.ClearSkies
     sky:ChangeWeather(enumWeather, Config.Weather.TransitionDelay)
 end)
@@ -64,21 +68,27 @@ end)
 
 my_webui:RegisterEventHandler('developer:copyCoords', function()
     local pawn = GetPlayerPawn()
-    if not pawn then return end
+    if not pawn then
+        return
+    end
     local coords = GetEntityCoords(pawn)
     CopyToClipboard(('%s, %s, %s'):format(math.modf(coords.X), math.modf(coords.Y), math.modf(coords.Z)))
 end)
 
 my_webui:RegisterEventHandler('developer:copyRotation', function()
     local pawn = GetPlayerPawn()
-    if not pawn then return end
+    if not pawn then
+        return
+    end
     local rot = GetEntityRotation(pawn)
     CopyToClipboard(('%s, %s, %s'):format(math.modf(rot.Yaw), math.modf(rot.Roll), math.modf(rot.Pitch)))
 end)
 
 my_webui:RegisterEventHandler('developer:copyHeading', function()
     local pawn = GetPlayerPawn()
-    if not pawn then return end
+    if not pawn then
+        return
+    end
     local heading = GetEntityHeading(pawn)
     CopyToClipboard(('%s'):format(math.modf(heading)))
 end)
@@ -218,7 +228,9 @@ end)
 local noclipActive = false
 RegisterClientEvent('qb-admin:client:toggleNoclip', function()
     local pawn = GetPlayerPawn()
-    if not pawn then return end
+    if not pawn then
+        return
+    end
     noclipActive = not noclipActive
     pcall(function()
         local movComp = pawn:GetMovementComponent()
@@ -253,7 +265,10 @@ end)
 local HConsole = GetActorByTag('HConsole')
 
 if HConsole then
-    HConsole:RegisterCommand('report', 'Make a report', nil, { HWorld, function()
-        TriggerServerEvent('qb-admin:server:fileReport', { message = 'Test' })
-    end })
+    HConsole:RegisterCommand('report', 'Make a report', nil, {
+        HWorld,
+        function()
+            TriggerServerEvent('qb-admin:server:fileReport', { message = 'Test' })
+        end,
+    })
 end

@@ -20,6 +20,165 @@ local function formatClockTime(ts)
     return os.date('%H:%M', ts or os.time())
 end
 
+local serverSky
+
+local function getServerSky()
+    if not Sky then
+        return nil
+    end
+
+    if serverSky then
+        return serverSky
+    end
+
+    local ok, skyInstance = pcall(function()
+        return Sky()
+    end)
+
+    if ok then
+        serverSky = skyInstance
+        return serverSky
+    end
+
+    return nil
+end
+
+local function getWeatherTypeKey(weatherValue)
+    if weatherValue == nil then
+        return CurrentWeather
+    end
+
+    local weatherTypes = (Config and Config.Weather and Config.Weather.WeatherTypes) or {}
+    for weatherKey, enumWeather in pairs(weatherTypes) do
+        if weatherValue == enumWeather or tostring(weatherValue) == tostring(enumWeather) then
+            return weatherKey
+        end
+    end
+
+    local weatherText = tostring(weatherValue):lower()
+    for weatherKey in pairs(weatherTypes) do
+        if weatherText == weatherKey:lower() or weatherText:find(weatherKey:lower(), 1, true) then
+            return weatherKey
+        end
+    end
+
+    return CurrentWeather
+end
+
+local function getUiTimeFromSkyTime(skyTime)
+    local timeValue = tonumber(skyTime) or 0
+    if timeValue <= 24 then
+        return timeValue
+    end
+
+    local hour = math.floor(timeValue / 100)
+    local minute = timeValue - (hour * 100)
+    return hour + (minute / 60)
+end
+
+local function getSkyTimeFromUiTime(uiTime)
+    local timeValue = tonumber(uiTime)
+    if not timeValue then
+        return nil
+    end
+
+    if timeValue > 24 then
+        return timeValue
+    end
+
+    local hour = math.floor(timeValue)
+    local minute = math.floor(((timeValue - hour) * 60) + 0.5)
+    if minute >= 60 then
+        hour = hour + 1
+        minute = 0
+    end
+
+    return (hour * 100) + minute
+end
+
+local function getCurrentSkyInfo()
+    local timeValue = CurrentTime
+    local weatherType = CurrentWeather
+    local skyInstance = getServerSky()
+
+    if skyInstance then
+        local timeOk, actualTime = pcall(function()
+            return skyInstance:GetTimeOfDay()
+        end)
+
+        if not timeOk then
+            serverSky = nil
+        elseif tonumber(actualTime) then
+            timeValue = tonumber(actualTime)
+        end
+
+        local weatherOk, actualWeather = pcall(function()
+            return skyInstance:GetWeather()
+        end)
+
+        if not weatherOk then
+            serverSky = nil
+        else
+            weatherType = getWeatherTypeKey(actualWeather)
+        end
+    end
+
+    CurrentTime = timeValue
+    CurrentWeather = weatherType
+
+    return {
+        time = timeValue,
+        uiTime = getUiTimeFromSkyTime(timeValue),
+        weather = weatherType,
+    }
+end
+
+local function setCurrentSkyTime(hour)
+    local nextTime = getSkyTimeFromUiTime(hour)
+    if not nextTime then
+        return nil
+    end
+
+    CurrentTime = nextTime
+
+    local skyInstance = getServerSky()
+    if skyInstance then
+        local ok = pcall(function()
+            skyInstance:SetTimeOfDay(nextTime)
+        end)
+        if not ok then
+            serverSky = nil
+        end
+    end
+
+    return CurrentTime
+end
+
+local function setCurrentSkyWeather(weatherType)
+    local weatherKey = tostring(weatherType or '')
+    local weatherTypes = (Config and Config.Weather and Config.Weather.WeatherTypes) or {}
+    local enumWeather = weatherTypes[weatherKey]
+
+    if not enumWeather then
+        weatherKey = Config.Weather.StartingWeather
+        enumWeather = weatherTypes[weatherKey]
+    end
+
+    CurrentWeather = weatherKey
+
+    local skyInstance = getServerSky()
+    if skyInstance and enumWeather then
+        local ok = pcall(function()
+            skyInstance:ChangeWeather(enumWeather, Config.Weather.TransitionDelay)
+        end)
+        if not ok then
+            serverSky = nil
+        end
+    end
+
+    return CurrentWeather
+end
+
 local function pushFeedEntry(message)
     if type(message) ~= 'string' or message == '' then
         return
@@ -586,6 +745,7 @@ local function buildOpenAdminContext(src)
     local leaderboardPlayers = mapList(players, nil, function(player)
         return { name = player.character, cash = player.financials.cash, bank = player.financials.bank, crypto = player.financials.crypto }
     end)
+    local skyInfo = getCurrentSkyInfo()
     return {
         page = 'dashboard',
         currentAdminName = adminName,
@@ -604,8 +764,8 @@ local function buildOpenAdminContext(src)
         leaderboardPlayers = leaderboardPlayers,
         leaderboardMetric = 'wealth',
         nextChatMessageId = nextChatMessageId,
-        currentWeather = 'ClearSkies',
-        timeValue = 12,
+        currentWeather = skyInfo.weather,
+        timeValue = skyInfo.uiTime,
         environmentToggles = {
             freezeWeather = false,
             freezeTime = false,
@@ -1233,13 +1393,16 @@ RegisterServerEvent('qb-admin:server:environment:cleanup', function(source, data
 end)
 
 RegisterServerEvent('qb-admin:server:changeTime', function(_, hour)
-    CurrentTime = hour
-    BroadcastEvent('qb-admin:client:changeTime', hour)
+    local nextTime = setCurrentSkyTime(hour)
+    if nextTime == nil then
+        return
+    end
+    BroadcastEvent('qb-admin:client:changeTime', nextTime)
 end)
 
 RegisterServerEvent('qb-admin:server:changeWeather', function(_, weatherType)
-    CurrentWeather = weatherType
-    BroadcastEvent('qb-admin:client:changeWeather', weatherType)
+    local nextWeather = setCurrentSkyWeather(weatherType)
+    BroadcastEvent('qb-admin:client:changeWeather', nextWeather)
 end)
 
 local investigationActions = {
@@ -1367,7 +1530,7 @@ RegisterServerEvent('qb-admin:server:reports:clearResolved', function(_, data)
 end)
 
 RegisterCallback('syncRequest', function(_)
-    return { time = CurrentTime, weather = CurrentWeather }
+    return getCurrentSkyInfo()
 end)
 
 RegisterCallback('getOpenContext', function(source, _)

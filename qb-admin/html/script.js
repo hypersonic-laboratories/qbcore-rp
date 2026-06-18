@@ -845,9 +845,29 @@ const app = createApp({
         },
 
         formatHourLabel(hour) {
-            const normalizedHour = Number(hour);
-            const paddedHour = String(normalizedHour).padStart(2, "0");
-            return `${paddedHour}:00`;
+            const timeValue = Number(hour);
+            if (!Number.isFinite(timeValue)) {
+                return "00:00";
+            }
+
+            let displayHour = 0;
+            let displayMinute = 0;
+
+            if (timeValue > 24) {
+                displayHour = Math.floor(timeValue / 100);
+                displayMinute = Math.round(timeValue - displayHour * 100);
+            } else {
+                displayHour = Math.floor(timeValue);
+                displayMinute = Math.round((timeValue - displayHour) * 60);
+            }
+
+            if (displayMinute >= 60) {
+                displayHour += Math.floor(displayMinute / 60);
+                displayMinute %= 60;
+            }
+
+            displayHour = ((displayHour % 24) + 24) % 24;
+            return `${String(displayHour).padStart(2, "0")}:${String(displayMinute).padStart(2, "0")}`;
         },
 
         changeWeather() {
