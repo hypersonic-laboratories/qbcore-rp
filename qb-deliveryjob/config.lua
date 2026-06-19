@@ -16,7 +16,7 @@ Config = {
             vehicleSpawn = Vector(522224, 608081, 4841),
             vehicleHeading = -81,
             showBlip = true,
-            blipIcon = 'boxes-stacked',
+            blipIcon = 'post',
             blipColor = LinearColor(0.55, 0.35, 0.95, 1.0),
             description = 'Pick up & return delivery trucks',
         },
@@ -35,10 +35,12 @@ Config = {
     Payout = { Minimum = 500, Maximum = 1000 },
 
     Locations = {
-        Vector(-316430.68, -130243.49, -3391.50),
-        Vector(-314462.63, -120730.97, -3358.08),
-        Vector(-314610.22, -119405.93, -3356.28),
-        Vector(-315755.85, -112270.68, -3346.73),
-        Vector(-343143.34, -145299.86, -2882.38),
+        Vector(553314, 526791, 4552),
+        Vector(553062, 524788, 4566),
+        Vector(553202, 521543, 4643),
+        Vector(553032, 519548, 4597),
+        Vector(549602, 520456, 4592),
+        Vector(549095, 522051, 4605),
+        Vector(549524, 523766, 4552),
     },
 }
