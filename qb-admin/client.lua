@@ -251,14 +251,75 @@ RegisterClientEvent('qb-admin:client:toggleOverheadNames', function()
 end)
 
 local spectateTargetId = nil
-RegisterClientEvent('qb-admin:client:spectatePlayer', function(targetPlayerId)
-    if spectateTargetId == targetPlayerId then
-        spectateTargetId = nil
+
+local function getPawnByPlayerId(playerId)
+    local targetId = tonumber(playerId)
+    if not targetId then
+        return nil
+    end
+
+    for _, pawn in pairs(GetAllPawns() or {}) do
+        if pawn.PlayerState and tonumber(pawn.PlayerState:GetPlayerId()) == targetId then
+            return pawn
+        end
+    end
+
+    return nil
+end
+
+local function restoreSpectateView()
+    local controller = HPlayer
+    if not controller then
         return
     end
-    spectateTargetId = targetPlayerId
-    -- TO DO: Attach camera/view to the target player while spectating is active.
+
+    local pawn = GetPlayerPawn()
+    if pawn then
+        controller:SetViewTargetWithBlend(pawn, 0.0, 0, 0.0, false)
+    end
+end
+
+local function stopSpectating()
+    restoreSpectateView()
+    spectateTargetId = nil
+end
+
+local function startSpectating(targetPlayerId)
+    local targetPawn = getPawnByPlayerId(targetPlayerId)
+    if not targetPawn then
+        exports['qb-core']:Notify('Spectate target is not available.', 'error')
+        return
+    end
+
+    stopSpectating()
+    spectateTargetId = tonumber(targetPlayerId)
+    if not HPlayer then
+        spectateTargetId = nil
+        exports['qb-core']:Notify('Unable to start spectate view.', 'error')
+        return
+    end
+
+    ui_open = false
+    my_webui:SetInputMode(0)
+    my_webui:SendEvent('closeAdmin')
+
+    HPlayer:SetViewTargetWithBlend(targetPawn, 0.0, 0, 0.0, false)
+end
+
+RegisterClientEvent('qb-admin:client:spectatePlayer', function(targetPlayerId)
+    if spectateTargetId == tonumber(targetPlayerId) then
+        stopSpectating()
+        return
+    end
+
+    startSpectating(targetPlayerId)
 end)
+
+Input.BindKey('Backspace', function()
+    if spectateTargetId then
+        stopSpectating()
+    end
+end, 'Released')
 
 -- Commands
 
