@@ -1,7 +1,12 @@
 SharedVehicles = exports['qb-core']:GetShared('Vehicles')
+local DeliveryJobs = DeliveryJobs
 local Peds = {}
 local Initialised = false
 local Lang = require('locales/en')
+
+if not DeliveryJobs then
+    error('qb-deliveryjob: DeliveryJobs module was not loaded')
+end
 
 local function getDepots()
     return (Config.Locations and Config.Locations.Depots) or Config.Depots or {}
@@ -23,19 +28,6 @@ local function spawnJobPed(depot, depotIndex)
     end, { CharacterName = pedName, bShowNameplate = true })
 end
 
-local function isValidCourier(courier)
-    return courier and (not courier.IsValid or courier:IsValid())
-end
-
-local function cleanupInvalidJobs()
-    for k, v in pairs(Jobs) do
-        if not isValidCourier(v.Courier) then
-            v:Cleanup()
-            Jobs[k] = nil
-        end
-    end
-end
-
 local function startDeliveryRoute(source, targetData)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player or Player.PlayerData.job.name ~= Config.Job then
@@ -49,11 +41,16 @@ local function startDeliveryRoute(source, targetData)
         return
     end
 
-    cleanupInvalidJobs()
+    DeliveryJobs.CleanupInvalid()
 
-    local newJob = Job.new(source, depotInfo)
+    if DeliveryJobs.GetByCourier(source) then
+        exports['qb-core']:NotifyPlayer(source, Lang.t('error.route_active'), 'error')
+        return
+    end
+
+    local newJob = DeliveryJobs.Create(source, depotInfo)
     if not newJob.Vehicle then
-        Jobs[newJob.DeliveryId] = nil
+        DeliveryJobs.Remove(newJob)
         exports['qb-core']:NotifyPlayer(source, Lang.t('error.no_vehicle'), 'error')
         return
     end
@@ -70,9 +67,7 @@ function onShutdown()
         end
     end
 
-    for _, job in pairs(Jobs) do
-        job:Cleanup()
-    end
+    DeliveryJobs.CleanupAll()
 end
 
 -- Workaround for late joins seeing invisible mesh
@@ -87,14 +82,7 @@ RegisterServerEvent('HEvent:PlayerPossessed', function()
 end)
 
 RegisterServerEvent('HEvent:PlayerUnloaded', function(Player)
-    -- Clear invalid jobs
-    for k, v in pairs(Jobs) do
-        if v.Courier == Player then
-            v:Cleanup()
-            Jobs[k] = nil
-            break
-        end
-    end
+    DeliveryJobs.CleanupCourier(Player)
 end)
 
 RegisterServerEvent('qb-deliveryjob:server:takeVehicle', function(source, targetData)
@@ -114,7 +102,7 @@ RegisterCallback('getJobPeds', function()
 end)
 
 RegisterCallback('server.pickupBox', function(source, jobId)
-    local CurrentJob = Jobs[jobId]
+    local CurrentJob = DeliveryJobs.Get(jobId)
     if not CurrentJob or CurrentJob.Courier ~= source then
         return
     end
@@ -129,7 +117,7 @@ RegisterCallback('server.pickupBox', function(source, jobId)
 end)
 
 RegisterCallback('deliverPackage', function(source, jobId)
-    local CurrentJob = Jobs[jobId]
+    local CurrentJob = DeliveryJobs.Get(jobId)
     if not CurrentJob or CurrentJob.Courier ~= source then
         return
     end
@@ -154,7 +142,7 @@ RegisterCallback('deliverPackage', function(source, jobId)
 end)
 
 RegisterCallback('finishDelivering', function(source, jobId)
-    local CurrentJob = Jobs[jobId]
+    local CurrentJob = DeliveryJobs.Get(jobId)
     if not CurrentJob or CurrentJob.Courier ~= source then
         return
     end
@@ -165,7 +153,7 @@ RegisterCallback('finishDelivering', function(source, jobId)
     end
 
     CurrentJob:Cleanup()
-    Jobs[CurrentJob.DeliveryId] = nil
+    DeliveryJobs.Remove(CurrentJob)
     TriggerClientEvent(source, 'qb-deliveryjob:client:setCurrentLocation', nil)
 
     return true

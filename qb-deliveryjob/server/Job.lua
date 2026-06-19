@@ -1,7 +1,14 @@
-Jobs = {}
+DeliveryJobs = DeliveryJobs or {}
 
-Job = {}
-Job.__index = Job
+local activeJobs = DeliveryJobs.Active or {}
+DeliveryJobs.Active = activeJobs
+
+local DeliveryJob = {}
+DeliveryJob.__index = DeliveryJob
+
+local function isValidCourier(courier)
+    return courier and (not courier.IsValid or courier:IsValid())
+end
 
 local function getVehicleAsset(vehicleName)
     local vehicleInfo = SharedVehicles[vehicleName]
@@ -29,23 +36,25 @@ local function spawnJobVehicle(depot, vehicleAsset, plate)
     return vehicle
 end
 
-function Job.new(Courier, DepotInfo)
-    local self = setmetatable({}, Job)
+function DeliveryJob.new(Courier, DepotInfo)
+    local self = setmetatable({}, DeliveryJob)
 
-    -- Setup Job instance
     self.DeliveryId = GenerateId(6, 'mixed')
     self.Courier = Courier
     self.Depot = DepotInfo
     self.CurrentStop = 1
     self.MaxStops = math.random(Config.Stops.Minimum, Config.Stops.Maximum)
-    self:CreateDeliveryVehicle()
+
+    if not self:CreateDeliveryVehicle() then
+        return self
+    end
     self:CreateRoute()
 
-    Jobs[self.DeliveryId] = self
+    activeJobs[self.DeliveryId] = self
     return self
 end
 
-function Job:CreateDeliveryVehicle()
+function DeliveryJob:CreateDeliveryVehicle()
     local vehicleName = Config.Vehicles[math.random(1, #Config.Vehicles)] or 'bp_deliverytruck'
     local vehicleAsset = getVehicleAsset(vehicleName)
     local plate = (Config.VehiclePlatePrefix or 'D-') .. self.DeliveryId
@@ -62,7 +71,7 @@ function Job:CreateDeliveryVehicle()
     return self.Vehicle
 end
 
-function Job:CreateDeliveryProp()
+function DeliveryJob:CreateDeliveryProp()
     local Pawn = GetPlayerPawn(self.Courier)
     if not Pawn then
         return
@@ -87,7 +96,7 @@ function Job:CreateDeliveryProp()
     return self.Prop
 end
 
-function Job:CreateRoute()
+function DeliveryJob:CreateRoute()
     local Route = {}
     local PlayerPawn = GetPlayerPawn(self.Courier)
     local PawnLocation = GetEntityCoords(PlayerPawn)
@@ -124,7 +133,7 @@ function Job:CreateRoute()
     return self.Route
 end
 
-function Job:DeliverPackage()
+function DeliveryJob:DeliverPackage()
     local Pawn = GetPlayerPawn(self.Courier)
     local PawnCoords = GetEntityCoords(Pawn)
     if self.CurrentStop > self.MaxStops then
@@ -140,7 +149,7 @@ function Job:DeliverPackage()
     return true
 end
 
-function Job:Payout()
+function DeliveryJob:Payout()
     local amount = math.random(Config.Payout.Minimum, Config.Payout.Maximum)
     local completedRoute = self.CurrentStop > self.MaxStops
     -- Decrease amount if route is incomplete
@@ -164,11 +173,62 @@ function Job:Payout()
     return true
 end
 
-function Job:Cleanup()
+function DeliveryJob:Cleanup()
     if self.Prop and self.Prop:IsValid() then
         DeleteEntity(self.Prop)
     end
     if self.Vehicle and self.Vehicle:IsValid() then
         DeleteVehicle(self.Vehicle)
+    end
+end
+
+function DeliveryJobs.Create(courier, depotInfo)
+    return DeliveryJob.new(courier, depotInfo)
+end
+
+function DeliveryJobs.Get(deliveryId)
+    return activeJobs[deliveryId]
+end
+
+function DeliveryJobs.GetByCourier(courier)
+    for _, job in pairs(activeJobs) do
+        if job.Courier == courier then
+            return job
+        end
+    end
+end
+
+function DeliveryJobs.Remove(deliveryId)
+    if type(deliveryId) == 'table' then
+        deliveryId = deliveryId.DeliveryId
+    end
+    if deliveryId then
+        activeJobs[deliveryId] = nil
+    end
+end
+
+function DeliveryJobs.CleanupCourier(courier)
+    local job = DeliveryJobs.GetByCourier(courier)
+    if not job then
+        return
+    end
+
+    job:Cleanup()
+    DeliveryJobs.Remove(job)
+end
+
+function DeliveryJobs.CleanupInvalid()
+    for deliveryId, job in pairs(activeJobs) do
+        if not isValidCourier(job.Courier) then
+            job:Cleanup()
+            activeJobs[deliveryId] = nil
+        end
+    end
+end
+
+function DeliveryJobs.CleanupAll()
+    for deliveryId, job in pairs(activeJobs) do
+        job:Cleanup()
+        activeJobs[deliveryId] = nil
     end
 end

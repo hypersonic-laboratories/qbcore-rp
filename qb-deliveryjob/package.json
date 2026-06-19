@@ -6,7 +6,7 @@
         "client/main.lua"
     ],
     "server": [
-        "server/main.lua",
-        "server/Job.lua"
+        "server/Job.lua",
+        "server/main.lua"
     ]
 }

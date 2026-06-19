@@ -6,6 +6,7 @@ local Translations = {
         inside_vehicle = 'You cannot deliver packages when in a vehicle.',
         no_packages = 'You don\'t have any more packages.',
         no_vehicle = 'Unable to retrieve a delivery vehicle.',
+        route_active = 'You already have an active delivery route.',
     },
     success = {
         paid = 'Route Completed! You were paid: %{Amount}',
