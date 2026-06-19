@@ -1,0 +1,64 @@
+.pinpad-container {
+    display: none;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    background: #f6f7f8;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+    padding: 20px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    width: 12vw;
+    text-align: center;
+    color: #333;
+    font-family: "Arial", sans-serif;
+}
+
+#PINbox {
+    background: #fff;
+    border: 1px solid #d5d5d5;
+    color: #333;
+    text-align: center;
+    font-size: 1em;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.PINbutton {
+    background: #fff;
+    border: 1px solid #d5d5d5;
+    border-radius: 5px;
+    color: #333;
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.PINbutton:hover {
+    background: #e4e4e4;
+}
+
+.PINbutton:active {
+    transform: scale(0.95);
+}
+
+.clear-button {
+    background-color: #ff4d4d;
+    color: #fff;
+    font-size: 1em;
+    width: calc(100% - 40px);
+    height: 50px;
+    margin: 5px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.clear-button:hover {
+    background-color: #ff3333;
+}

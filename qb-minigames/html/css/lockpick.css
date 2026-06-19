@@ -1,0 +1,74 @@
+#lockpick-container {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 11vw;
+    height: 19vh;
+}
+
+#collar {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/95637/collar.png");
+    background-size: cover;
+    position: relative;
+}
+
+#cylinder {
+    display: block;
+    background: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/95637/cylinder.png");
+    background-size: cover;
+    width: 8vw;
+    height: 13vh;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#driver {
+    display: block;
+    width: 18vw;
+    height: 14vh;
+    background: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/95637/driver.png");
+    background-size: cover;
+    position: absolute;
+    top: 57%;
+    left: 46%;
+    transform-origin: 3% -3%;
+}
+
+#pin {
+    display: block;
+    background-size: cover;
+    width: 1vw;
+    height: 18vh;
+    position: absolute;
+    left: 47.4%;
+    top: -53%;
+    transform-origin: 50% 99%;
+}
+
+#pin .top {
+    display: block;
+    width: 100%;
+    height: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/95637/pinTop.png");
+    background-size: cover;
+}
+#pin .bott {
+    display: block;
+    width: 100%;
+    height: 50%;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    background: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/95637/pinBott.png");
+    background-size: cover;
+}

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>QB-MINIGAMES</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: "Poppins", sans-serif;
+            }
+        </style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap" />
+        <link href="https://fonts.googleapis.com/css?family=Source Code Pro" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="css/hacking.css" />
+        <link rel="stylesheet" href="css/keyminigame.css" />
+        <link rel="stylesheet" href="css/lockpick.css" />
+        <link rel="stylesheet" href="css/pinpad.css" />
+        <!-- <link rel="stylesheet" href="css/memorygame.css" /> -->
+        <link rel="stylesheet" href="css/quiz.css" />
+        <!-- <link rel="stylesheet" href="css/rockpaperscissor.css" /> -->
+        <link rel="stylesheet" href="css/skillbar.css" />
+        <!-- <link rel="stylesheet" href="css/tictactoe.css" /> -->
+        <link rel="stylesheet" href="css/wordguess.css" />
+        <link rel="stylesheet" href="css/wordscramble.css" />
+        <script src="js/hacking.js" defer></script>
+        <script src="js/keyminigame.js" defer></script>
+        <script src="js/lockpick.js" defer></script>
+        <script src="js/pinpad.js" defer></script>
+        <!-- <script src="js/memorygame.js" defer></script> -->
+        <script src="js/quiz.js" defer></script>
+        <!-- <script src="js/rockpaperscissor.js" defer></script> -->
+        <script src="js/skillbar.js" defer></script>
+        <!-- <script src="js/tictactoe.js" defer></script> -->
+        <script src="js/wordguess.js" defer></script>
+        <script src="js/wordscramble.js" defer></script>
+    </head>
+    <body>
+        <!-- Word Scramble Game HTML -->
+        <div class="scramble-container">
+            <h2>Word Scramble</h2>
+            <div class="scramble-content">
+                <p class="word"></p>
+                <div class="details">
+                    <p class="hint">Hint: <span></span></p>
+                    <p class="time">
+                        Time Left: <span><b>30</b>s</span>
+                    </p>
+                </div>
+                <input type="text" spellcheck="false" placeholder="Enter a valid word" />
+                <div class="buttons">
+                    <button class="check-word">Check Word</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guess the Word Game HTML -->
+        <div class="guess-container">
+            <h1>Guess the Word</h1>
+            <div class="guess-content">
+                <input type="text" class="typing-input" maxlength="1" />
+                <div class="inputs"></div>
+                <div class="details">
+                    <p class="guess-hint">Hint: <span></span></p>
+                    <p class="guess-left">Remaining guesses: <span></span></p>
+                    <p class="wrong-letter">Wrong letters: <span></span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Game HTML -->
+        <div class="quiz-container">
+            <div class="start_btn"><button>Start Quiz</button></div>
+            <div class="info_box">
+                <div class="info-title"><span>Quiz Rules:</span></div>
+                <div class="info-list">
+                    <div class="info">1. You will have only <span>15 seconds</span> per each question.</div>
+                    <div class="info">2. Once you select your answer, it can't be undone.</div>
+                    <div class="info">3. You can't select any option once time goes off.</div>
+                    <div class="info">4. You'll get points on the basis of your correct answers.</div>
+                </div>
+                <div class="buttons">
+                    <button class="quit">Exit Quiz</button>
+                    <button class="restart">Continue</button>
+                </div>
+            </div>
+            <div class="quiz_box">
+                <header>
+                    <div class="title">Quiz Application</div>
+                    <div class="timer">
+                        <div class="time_left_txt">Time Left</div>
+                        <div class="timer_sec">15</div>
+                    </div>
+                    <div class="time_line"></div>
+                </header>
+                <section>
+                    <div class="que_text"></div>
+                    <div class="option_list"></div>
+                </section>
+                <footer>
+                    <div class="total_que"></div>
+                    <button class="next_btn">Next Que</button>
+                </footer>
+            </div>
+            <div class="result_box">
+                <div class="icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="complete_text">You've completed the Quiz!</div>
+                <div class="score_text"></div>
+                <div class="buttons">
+                    <button class="quit">Quit Quiz</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Keys minigame HTML -->
+        <div class="keys-container">
+            <div class="key" data-key="arrowup">&uarr;</div>
+            <div class="key-row">
+                <div class="key" data-key="arrowleft">&larr;</div>
+                <div class="key" data-key="arrowdown">&darr;</div>
+                <div class="key" data-key="arrowright">&rarr;</div>
+            </div>
+        </div>
+
+        <!-- Lockpick HTML -->
+        <div id="lockpick-container">
+            <img id="collar" />
+            <div id="cylinder"></div>
+            <div id="driver"></div>
+            <div id="pin">
+                <div class="top"></div>
+                <div class="bott"></div>
+            </div>
+        </div>
+
+        <!-- Hacking HTML -->
+        <div class="hacking-container">
+            <audio id="audiocorrect" src="sounds/correct.ogg"></audio>
+            <audio id="audiowrong" src="sounds/wrong.ogg"></audio>
+            <audio id="audiobeep" src="sounds/beep.ogg"></audio>
+            <audio id="audiostart" src="sounds/start.ogg"></audio>
+            <audio id="audiofail" src="sounds/fail.ogg"></audio>
+            <audio id="audiofinish" src="sounds/finish.ogg"></audio>
+            <div id="game">
+                <div id="infobox"></div>
+            </div>
+        </div>
+
+        <!-- Skillbar HTML -->
+        <canvas id="skillbar" height="300" width="300"></canvas>
+
+        <!-- pinpad HTML -->
+        <div class="pinpad-container">
+            <input type="text" id="PINbox" readonly />
+            <div id="PINcode">
+                <button class="PINbutton" value="1">1</button>
+                <button class="PINbutton" value="2">2</button>
+                <button class="PINbutton" value="3">3</button>
+                <button class="PINbutton" value="4">4</button>
+                <button class="PINbutton" value="5">5</button>
+                <button class="PINbutton" value="6">6</button>
+                <button class="PINbutton" value="7">7</button>
+                <button class="PINbutton" value="8">8</button>
+                <button class="PINbutton" value="9">9</button>
+                <button class="PINbutton clear-button" id="clearButton">Clear</button>
+            </div>
+        </div>
+    </body>
+</html>
