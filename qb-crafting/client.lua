@@ -27,9 +27,9 @@ local function CraftItem(craftedItem, requiredItems, amountToCraft, xpEarned, xp
 
         local function doCraft()
             local duration = math.random(2000, 5000) * amountToCraft
-            Timer.SetTimeout(duration, function()
+            Timer.SetTimeout(function()
                 TriggerServerEvent('qb-crafting:server:receiveItem', craftedItem, requiredItems, amountToCraft, xpEarned, xpType)
-            end)
+            end, duration)
         end
 
         if Config.EnableSkillCheck then
@@ -62,6 +62,7 @@ local function CraftAmount(craftedItem, requiredItems, xpGain, xpType)
             },
         },
     })
+
     if dialog and tonumber(dialog.amount) then
         local amount = tonumber(dialog.amount)
         if amount > 0 then
@@ -114,11 +115,13 @@ local function OpenCraftingMenu(benchType)
                     txt = itemsText,
                     icon = Config.ImageBasePath .. sharedItems[recipe.item].image,
                     params = {
-                        isAction = true,
-                        event = function()
-                            CraftAmount(recipe.item, recipe.requiredItems, recipe.xpGain, xpType)
-                        end,
-                        args = {},
+                        event = 'qb-crafting:client:craftAmount',
+                        args = {
+                            craftedItem = recipe.item,
+                            requiredItems = recipe.requiredItems,
+                            xpGain = recipe.xpGain,
+                            xpType = xpType,
+                        },
                     },
                     disabled = not canCraft,
                 }
@@ -157,6 +160,10 @@ local activeBenchActor = nil
 
 RegisterClientEvent('qb-crafting:client:openMenuFromTarget', function(data)
     OpenCraftingMenu(data.benchType)
+end)
+
+RegisterClientEvent('qb-crafting:client:craftAmount', function(data)
+    CraftAmount(data.craftedItem, data.requiredItems, data.xpGain, data.xpType)
 end)
 
 RegisterClientEvent('qb-crafting:client:registerBench', function(actor, benchType)
