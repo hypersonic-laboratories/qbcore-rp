@@ -11,7 +11,6 @@ local winetimer = Config.wineTimer
 local loadIngredients = false
 local wineStarted = false
 local finishedWine = false
-local progressActive = false
 local wineIntervalId = nil
 local random = 0
 
@@ -19,20 +18,6 @@ local random = 0
 
 local function Notify(text, ntype)
     exports['qb-core']:Notify(text, ntype or 'primary')
-end
-
-local function Progressbar(label, duration, onDone)
-    if progressActive then
-        return
-    end
-    progressActive = true
-    Notify(label .. '...', 'primary')
-    Timer.SetTimeout(function()
-        progressActive = false
-        if onDone then
-            onDone()
-        end
-    end, duration)
 end
 
 -- Marker
@@ -83,9 +68,7 @@ local function onTaskComplete()
 end
 
 local function pickProcess()
-    Progressbar(Lang.t('progress.pick_grapes'), math.random(6000, 8000), function()
-        onTaskComplete()
-    end)
+    onTaskComplete()
 end
 
 local function AddActiveGrapeZone()
@@ -157,9 +140,7 @@ end
 -- Grape juice
 
 local function grapeJuiceProcess()
-    Progressbar(Lang.t('progress.process_grapes'), math.random(15000, 20000), function()
-        TriggerServerEvent('qb-vineyard:server:receiveGrapeJuice')
-    end)
+    TriggerServerEvent('qb-vineyard:server:receiveGrapeJuice')
 end
 
 -- Player data

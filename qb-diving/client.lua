@@ -3,7 +3,6 @@ local Lang = require('locales/en')
 -- State
 local isWearingSuit = false
 local OxygenLevel = 0
-local progressActive = false
 local oxygenTimer = nil
 local oxygenDisplayTimer = nil
 
@@ -16,20 +15,6 @@ local CurrentDivingLocation = {
 
 local function Notify(text, ntype)
     exports['qb-core']:Notify(text, ntype or 'primary')
-end
-
-local function Progressbar(label, duration, onDone)
-    if progressActive then
-        return
-    end
-    progressActive = true
-    Notify(label .. '...', 'primary')
-    Timer.SetTimeout(function()
-        progressActive = false
-        if onDone then
-            onDone()
-        end
-    end, duration)
 end
 
 -- Oxygen display
@@ -113,18 +98,14 @@ local function takeCoral(coral)
         return
     end
     callCops()
-    Progressbar(Lang.t('info.collecting_coral'), math.random(2, 5) * 1000, function()
-        coralData.coords.Coral[coral].PickedUp = true
-        TriggerServerEvent('qb-diving:server:TakeCoral', CurrentDivingLocation.area, coral, true)
-    end)
+    coralData.coords.Coral[coral].PickedUp = true
+    TriggerServerEvent('qb-diving:server:TakeCoral', CurrentDivingLocation.area, coral, true)
 end
 
 -- Selling
 
 local function sellCoral()
-    Progressbar(Lang.t('info.checking_pockets'), math.random(2000, 4000), function()
-        TriggerServerEvent('qb-diving:server:SellCorals')
-    end)
+    TriggerServerEvent('qb-diving:server:SellCorals')
 end
 
 -- Map markers
@@ -150,9 +131,9 @@ local function setDivingLocation(divingLocation)
 
     local areaCoords = Config.CoralLocations[divingLocation].coords.Area
     local id = exports['qb-hud']:AddMarker(areaCoords, {
-        title      = Lang.t('info.diving_area'),
+        title = Lang.t('info.diving_area'),
         markerType = 'Dive',
-        size       = 1.5,
+        size = 1.5,
     })
     CurrentDivingLocation.markers[#CurrentDivingLocation.markers + 1] = id
 
@@ -243,7 +224,7 @@ end)
 RegisterClientEvent('qb-diving:client:CallCops', function(coords, msg)
     Notify(Lang.t('error.911_chatmessage') .. ': ' .. msg, 'error')
     local id = exports['qb-hud']:AddMarker(Vector(coords.X, coords.Y, coords.Z), {
-        title      = Lang.t('info.blip_text'),
+        title = Lang.t('info.blip_text'),
         markerType = 'Alert',
     })
     Timer.SetTimeout(function()
@@ -267,32 +248,16 @@ RegisterClientEvent('qb-diving:client:UseGear', function()
             Notify(Lang.t('error.need_otube'), 'error')
             return
         end
-        Progressbar(Lang.t('info.put_suit'), 5000, function()
-            isWearingSuit = true
-            startOxygenDrain()
-            startOxygenDisplay()
-        end)
+        isWearingSuit = true
+        startOxygenDrain()
+        startOxygenDisplay()
     else
-        Progressbar(Lang.t('info.pullout_suit'), 5000, function()
-            isWearingSuit = false
-            stopOxygenDrain()
-            stopOxygenDisplay()
-            Notify(Lang.t('success.took_out'), 'success')
-        end)
+        isWearingSuit = false
+        stopOxygenDrain()
+        stopOxygenDisplay()
+        Notify(Lang.t('success.took_out'), 'success')
     end
 end)
-
--- Init for already-logged-in players
-Timer.SetTimeout(function()
-    TriggerCallback('qb-diving:server:GetDivingConfig', function(result)
-        if not result then
-            return
-        end
-        Config.CoralLocations = result.locations
-        setDivingLocation(result.area)
-        createSeller()
-    end)
-end, 1000)
 
 function onShutdown()
     clearDivingMarkers()
