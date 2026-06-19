@@ -18,7 +18,7 @@ Config = {
             ['Snow'] = WeatherType.Snow,
             ['SnowBlizzard'] = WeatherType.SnowBlizzard,
             ['SnowLight'] = WeatherType.SnowLight,
-        }
+        },
     },
     Locations = {
         apartment_lvl_1 = {
@@ -45,9 +45,13 @@ Config = {
             name = 'Clothing Shop',
             coords = Vector(567648, 494029, 4572),
         },
-        gas_station = {
-            name = 'Gas Station',
-            coords = Vector(563566, 561573, 4563),
+        nine_five = {
+            name = '9five Convenie',
+            coords = Vector(563550, 561761, 4570),
+        },
+        jetstop = {
+            name = 'Jet Stop',
+            coords = Vector(571221, 459692, 4571),
         },
         vehicle_shop = {
             name = 'Vehicle Shop',
@@ -105,5 +109,5 @@ Config = {
             name = 'Residential Area',
             coords = Vector(518340, 552608, 4610),
         },
-    }
+    },
 }

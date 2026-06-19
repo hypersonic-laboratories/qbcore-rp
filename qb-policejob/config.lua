@@ -49,8 +49,8 @@ Config.Locations = {
 Config.SecurityCameras = {
     hideradar = false,
     cameras = {
-        { label = 'Jet Stop East', coords = Vector(564045, 562060, 4741), rotation = Rotator(-25, -136, 0), canRotate = false, isOnline = true },
-        { label = 'Jet Stop West', coords = Vector(570907, 459284, 4687), rotation = Rotator(-25, 51, 0), canRotate = false, isOnline = true },
+        { label = '9five Convenie', coords = Vector(564045, 562060, 4741), rotation = Rotator(-25, -136, 0), canRotate = false, isOnline = true },
+        { label = 'Jet Stop', coords = Vector(570907, 459284, 4687), rotation = Rotator(-25, 51, 0), canRotate = false, isOnline = true },
     },
 }
 

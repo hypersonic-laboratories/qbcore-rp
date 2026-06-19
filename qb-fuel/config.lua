@@ -6,8 +6,8 @@ Config = {
     defaultMarkerType = 'Store',
     defaultBlipIcon = 'fuel',
     Locations = {
-        ['jetstop'] = {
-            label = 'Jet Stop',
+        ['nine_five'] = {
+            label = '9five Convenie',
             coords = Vector(560952, 561972, 4570),
             showBlip = true,
             blipIcon = 'fuel',
@@ -27,6 +27,21 @@ Config = {
                 Vector(559859, 561390, 4570),
                 Vector(559660, 561387, 4570),
                 Vector(559699, 562629, 4570),
+            },
+        },
+        ['jetstop'] = {
+            label = 'Jet Stop',
+            coords = Vector(572905, 460300, 4557),
+            showBlip = true,
+            blipIcon = 'fuel',
+            blipColor = LinearColor(0.95, 0.72, 0.18, 1.0),
+            markerType = 'Store',
+            description = 'Fuel station',
+            pumps = {
+                Vector(572095, 460205, 4557),
+                Vector(572299, 460227, 4557),
+                Vector(572727, 460277, 4557),
+                Vector(572905, 460300, 4557),
             },
         },
     },

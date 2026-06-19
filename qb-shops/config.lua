@@ -168,8 +168,8 @@ Config.Products = {
 }
 
 Config.Locations = {
-    ['jetstop'] = {
-        ['label'] = 'Jet Stop',
+    ['nine_five'] = {
+        ['label'] = '9five Convenie',
         ['coords'] = Vector(563550, 561761, 4570),
         ['heading'] = 0,
         ['ped'] = '/CharacterCreator/CharacterAssets/Avatar_FBX/Body/Male/Mesh/Male_Full_Body',
@@ -184,7 +184,7 @@ Config.Locations = {
         ['delivery'] = Vector(26.45, -1315.51, 29.62),
         ['useStock'] = false,
     },
-    ['jetstop2'] = {
+    ['jetstop'] = {
         ['label'] = 'Jet Stop',
         ['coords'] = Vector(571221, 459692, 4571),
         ['heading'] = 0,
