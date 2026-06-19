@@ -116,6 +116,5 @@ function onShutdown()
         fishing_ui:Destroy()
         fishing_ui = nil
     end
-
     ClearFishingMarkers()
 end

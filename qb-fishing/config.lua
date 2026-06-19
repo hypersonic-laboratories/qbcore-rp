@@ -2,7 +2,7 @@ Config = {
     fishingTime = 10000,
     mapMarker = {
         description = 'Fishing spot',
-        icon = 'fish',
+        icon = 'beach',
         color = LinearColor(0.15, 0.55, 0.95, 1.0),
         markerType = 'Store',
     },
