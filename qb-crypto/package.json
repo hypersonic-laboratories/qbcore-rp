@@ -1,0 +1,11 @@
+{
+    "shared": [
+        "config.lua"
+    ],
+    "client": [
+        "client.lua"
+    ],
+    "server": [
+        "server.lua"
+    ]
+}

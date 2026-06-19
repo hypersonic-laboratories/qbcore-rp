@@ -11,6 +11,7 @@
     "qb-hud",
     "qb-menu",
     "qb-input",
+    "qb-minigames",
     "qb-banking",
     "qb-cityhall",
     "qb-shops",
@@ -28,6 +29,7 @@
     "qb-fishing",
     "qb-mining",
     "qb-phone",
+    "qb-crypto",
     "qb-consumables",
     "qb-clothing",
     "qb-crafting"
