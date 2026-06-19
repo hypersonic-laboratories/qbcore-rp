@@ -1,175 +1,238 @@
-const CameraApp = new Vue({
-    el: "#camcontainer",
+(function () {
+    "use strict";
 
-    data: {
-        camerasOpen: false,
-        cameraLabel: ":)",
-        connectLabel: "CONNECTED",
-        ipLabel: "192.168.0.1",
-        dateLabel: "04/09/1999",
-        timeLabel: "16:27:49",
-    },
+    var fingerprintFadeMs = 150;
+    var fingerprintFadeTimer = null;
 
-    methods: {
-        OpenCameras(label, connected, cameraId, time) {
-            var today = new Date();
-            var date = today.getDate() + "/" + (today.getMonth() + 1) + "/" + today.getFullYear();
-            var formatTime = "00:" + time;
+    var dom = {
+        camContainer: document.getElementById("camcontainer"),
+        cameraLabel: document.getElementById("camlabel"),
+        dateLabel: document.getElementById("camdatelabel"),
+        timeLabel: document.getElementById("camtimelabel"),
+        ipLabel: document.getElementById("iplabel"),
+        connectedLabel: document.getElementById("connectedlabel"),
+        blockScreen: document.getElementById("blockscreen"),
+        heliContainer: document.getElementById("helicontainer"),
+        vehicleInfo: document.querySelector(".vehicleinfo"),
+        scanBar: document.querySelector(".scanBar"),
+        heliModel: document.querySelector(".heli-model p"),
+        heliPlate: document.querySelector(".heli-plate p"),
+        heliStreet: document.querySelector(".heli-street p"),
+        heliSpeed: document.querySelector(".heli-speed p"),
+        fingerprintContainer: document.querySelector(".fingerprint-container"),
+        fingerprintId: document.querySelector(".fingerprint-id p"),
+        takeFingerprint: document.querySelector(".take-fingerprint"),
+    };
 
-            this.camerasOpen = true;
-            this.ipLabel = "145.101.0." + cameraId;
+    function fallback(value, fallbackValue) {
+        return value === undefined || value === null ? fallbackValue : value;
+    }
+
+    function setDisplay(element, visible, display) {
+        if (!element) return;
+        element.style.display = visible ? display || "block" : "none";
+    }
+
+    function setText(element, value) {
+        if (!element) return;
+        element.textContent = fallback(value, "");
+    }
+
+    function formatCameraDate() {
+        var today = new Date();
+        return today.getDate() + "/" + (today.getMonth() + 1) + "/" + today.getFullYear();
+    }
+
+    function formatCameraTime(time) {
+        return "00:" + fallback(time, "00");
+    }
+
+    function emitNuiEvent(eventName) {
+        if (typeof window.hEvent === "function") {
+            window.hEvent(eventName);
+        }
+    }
+
+    function getMessagePayload(message) {
+        if (!message) {
+            return {};
+        }
+
+        if (Array.isArray(message.args)) {
+            return message.args[0] || {};
+        }
+
+        return message.args || message;
+    }
+
+    var CameraApp = {
+        OpenCameras: function (label, connected, cameraId, time) {
+            setDisplay(dom.camContainer, true);
+            setText(dom.ipLabel, "145.101.0." + cameraId);
+
             if (connected) {
-                $("#blockscreen").css("display", "none");
-                this.cameraLabel = label;
-                this.connectLabel = "CONNECTED";
-                this.dateLabel = date;
-                this.timeLabel = formatTime;
-
-                $("#connectedlabel").removeClass("disconnect");
-                $("#connectedlabel").addClass("connect");
+                setDisplay(dom.blockScreen, false);
+                setText(dom.cameraLabel, label);
+                setText(dom.connectedLabel, "CONNECTED");
+                setText(dom.dateLabel, formatCameraDate());
+                setText(dom.timeLabel, formatCameraTime(time));
             } else {
-                $("#blockscreen").css("display", "block");
-                this.cameraLabel = "ERROR #400: BAD REQUEST";
-                this.connectLabel = "CONNECTION FAILED";
-                this.dateLabel = "ERROR";
-                this.timeLabel = "ERROR";
+                setDisplay(dom.blockScreen, true);
+                setText(dom.cameraLabel, "ERROR #400: BAD REQUEST");
+                setText(dom.connectedLabel, "CONNECTION FAILED");
+                setText(dom.dateLabel, "ERROR");
+                setText(dom.timeLabel, "ERROR");
+            }
 
-                $("#connectedlabel").removeClass("connect");
-                $("#connectedlabel").addClass("disconnect");
+            dom.connectedLabel.classList.toggle("connected", Boolean(connected));
+            dom.connectedLabel.classList.toggle("disconnect", !connected);
+        },
+
+        CloseCameras: function () {
+            setDisplay(dom.camContainer, false);
+            setDisplay(dom.blockScreen, false);
+        },
+
+        UpdateCameraLabel: function (label) {
+            setText(dom.cameraLabel, label);
+        },
+
+        UpdateCameraTime: function (time) {
+            setText(dom.timeLabel, formatCameraTime(time));
+        },
+    };
+
+    var HeliCam = {
+        Open: function () {
+            setDisplay(dom.heliContainer, true);
+            dom.scanBar.style.height = "0%";
+        },
+
+        UpdateScan: function (data) {
+            data = data || {};
+            dom.scanBar.style.height = fallback(data.scanvalue, 0) + "%";
+        },
+
+        UpdateVehicleInfo: function (data) {
+            data = data || {};
+            setDisplay(dom.vehicleInfo, true);
+            dom.scanBar.style.height = "100%";
+            setText(dom.heliModel, "MODEL: " + fallback(data.model, ""));
+            setText(dom.heliPlate, "PLATE: " + fallback(data.plate, ""));
+            setText(dom.heliStreet, fallback(data.street, ""));
+            setText(dom.heliSpeed, fallback(data.speed, "") + " KM/U");
+        },
+
+        DisableVehicleInfo: function () {
+            setDisplay(dom.vehicleInfo, false);
+        },
+
+        Close: function () {
+            setDisplay(dom.heliContainer, false);
+            setDisplay(dom.vehicleInfo, false);
+            dom.scanBar.style.height = "0%";
+        },
+    };
+
+    var Fingerprint = {
+        Open: function () {
+            clearTimeout(fingerprintFadeTimer);
+            setText(dom.fingerprintId, "No result");
+            setDisplay(dom.fingerprintContainer, true);
+            requestAnimationFrame(function () {
+                dom.fingerprintContainer.classList.add("is-visible");
+            });
+        },
+
+        Close: function (shouldNotify) {
+            if (shouldNotify === undefined) {
+                shouldNotify = true;
+            }
+
+            clearTimeout(fingerprintFadeTimer);
+            dom.fingerprintContainer.classList.remove("is-visible");
+            fingerprintFadeTimer = setTimeout(function () {
+                setDisplay(dom.fingerprintContainer, false);
+            }, fingerprintFadeMs);
+            if (shouldNotify) {
+                emitNuiEvent("closeFingerprint");
             }
         },
 
-        CloseCameras() {
-            this.camerasOpen = false;
-            $("#blockscreen").css("display", "none");
+        Update: function (data) {
+            data = data || {};
+            setText(dom.fingerprintId, fallback(data.fingerprintId, ""));
         },
+    };
 
-        UpdateCameraLabel(label) {
-            this.cameraLabel = label;
-        },
+    function handleMessage(event) {
+        var eventData = event.data || {};
+        var eventType = eventData.name || eventData.type;
+        var payload = getMessagePayload(eventData);
 
-        UpdateCameraTime(time) {
-            var formatTime = "00:" + time;
-            this.timeLabel = formatTime;
-        },
-    },
-});
-
-HeliCam = {};
-Databank = {};
-Fingerprint = {};
-
-HeliCam.Open = function (data) {
-    $("#helicontainer").css("display", "block");
-    $(".scanBar").css("height", "0%");
-};
-
-HeliCam.UpdateScan = function (data) {
-    $(".scanBar").css("height", data.scanvalue + "%");
-};
-
-HeliCam.UpdateVehicleInfo = function (data) {
-    $(".vehicleinfo").css("display", "block");
-    $(".scanBar").css("height", "100%");
-    $(".heli-model")
-        .find("p")
-        .html("MODEL: " + data.model);
-    $(".heli-plate")
-        .find("p")
-        .html("PLATE: " + data.plate);
-    $(".heli-street").find("p").html(data.street);
-    $(".heli-speed")
-        .find("p")
-        .html(data.speed + " KM/U");
-};
-
-HeliCam.DisableVehicleInfo = function () {
-    $(".vehicleinfo").css("display", "none");
-};
-
-HeliCam.Close = function () {
-    $("#helicontainer").css("display", "none");
-    $(".vehicleinfo").css("display", "none");
-    $(".scanBar").css("height", "0%");
-};
-
-Databank.Open = function () {
-    $(".databank-container").css("display", "block").css("user-select", "none");
-    $(".databank-container iframe").css("display", "block");
-    $(".tablet-frame").css("display", "block").css("user-select", "none");
-    $(".databank-bg").css("display", "block");
-};
-
-Databank.Close = function () {
-    $(".databank-container iframe").css("display", "none");
-    $(".databank-container").css("display", "none");
-    $(".tablet-frame").css("display", "none");
-    $(".databank-bg").css("display", "none");
-    hEvent("closeDatabank");
-};
-
-Fingerprint.Open = function () {
-    $(".fingerprint-container").fadeIn(150);
-    $(".fingerprint-id").html("Fingerprint ID<p>No result</p>");
-};
-
-Fingerprint.Close = function () {
-    $(".fingerprint-container").fadeOut(150);
-    hEvent("closeFingerprint");
-};
-
-Fingerprint.Update = function (data) {
-    $(".fingerprint-id").html("Fingerprint ID<p>" + data.fingerprintId + "</p>");
-};
-
-$(document).on("click", ".take-fingerprint", function () {
-    hEvent("doFingerScan");
-});
-
-document.onreadystatechange = () => {
-    if (document.readyState === "complete") {
-        window.addEventListener("message", function (event) {
-            const eventType = event.data.type || event.data.name;
-            const payload = event.data.args && event.data.args.length ? event.data.args[0] : event.data;
-
-            if (eventType == "enablecam") {
+        switch (eventType) {
+            case "enablecam":
                 CameraApp.OpenCameras(payload.label, payload.connected, payload.id, payload.time);
-            } else if (eventType == "disablecam") {
+                break;
+            case "disablecam":
                 CameraApp.CloseCameras();
-            } else if (eventType == "updatecam") {
+                break;
+            case "updatecam":
                 CameraApp.UpdateCameraLabel(payload.label);
-            } else if (eventType == "updatecamtime") {
+                break;
+            case "updatecamtime":
                 CameraApp.UpdateCameraTime(payload.time);
-            } else if (eventType == "heliopen") {
-                HeliCam.Open(payload);
-            } else if (eventType == "heliclose") {
+                break;
+            case "heliopen":
+                HeliCam.Open();
+                break;
+            case "heliclose":
                 HeliCam.Close();
-            } else if (eventType == "heliscan") {
+                break;
+            case "heliscan":
                 HeliCam.UpdateScan(payload);
-            } else if (eventType == "heliupdateinfo") {
+                break;
+            case "heliupdateinfo":
                 HeliCam.UpdateVehicleInfo(payload);
-            } else if (eventType == "disablescan") {
+                break;
+            case "disablescan":
                 HeliCam.DisableVehicleInfo();
-            } else if (eventType == "databank") {
-                Databank.Open();
-            } else if (eventType == "closedatabank") {
-                Databank.Close();
-            } else if (eventType == "fingerprintOpen") {
+                break;
+            case "fingerprintOpen":
                 Fingerprint.Open();
-            } else if (eventType == "fingerprintClose") {
-                Fingerprint.Close();
-            } else if (eventType == "updateFingerprintId") {
+                break;
+            case "fingerprintClose":
+                Fingerprint.Close(false);
+                break;
+            case "updateFingerprintId":
                 Fingerprint.Update(payload);
-            }
+                break;
+        }
+    }
+
+    function handleKeydown(event) {
+        if (event.key === "Escape") {
+            event.preventDefault();
+            Fingerprint.Close();
+        }
+    }
+
+    function handleUnload() {
+        window.removeEventListener("message", handleMessage);
+        window.removeEventListener("keydown", handleKeydown);
+    }
+
+    if (dom.takeFingerprint) {
+        dom.takeFingerprint.addEventListener("click", function () {
+            emitNuiEvent("doFingerScan");
         });
     }
-};
 
-$(document).on("keydown", function (event) {
-    switch (event.keyCode) {
-        case 27: // ESC
-            Databank.Close();
-            Fingerprint.Close();
-            break;
-    }
-});
+    window.addEventListener("message", handleMessage);
+    window.addEventListener("keydown", handleKeydown);
+    window.addEventListener("unload", handleUnload);
+
+    window.CameraApp = CameraApp;
+    window.HeliCam = HeliCam;
+    window.Fingerprint = Fingerprint;
+})();

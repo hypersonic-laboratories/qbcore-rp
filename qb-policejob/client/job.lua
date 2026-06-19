@@ -1,12 +1,8 @@
 local Lang = require('locales/en')
 local sharedVehicles = exports['qb-core']:GetShared('Vehicles') or {}
-
 local currentStation = nil
 local FingerPrintSessionId = nil
 local jobTargetsRegistered = false
-
-PoliceJobUI = nil
-local ensurePoliceJobUI
 
 local function getPlayerIdFromEntity(entity)
     if not entity or not entity.PlayerState then
@@ -37,22 +33,20 @@ local function getClosestPlayerId(maxDistance)
 end
 
 local function openFingerprintUI()
-    local ui = ensurePoliceJobUI()
-    if not ui then
+    if not PoliceJobUI then
         return
     end
-    ui:BringToFront()
-    ui:SetInputMode(1)
-    ui:SendEvent('fingerprintOpen')
+    PoliceJobUI:BringToFront()
+    PoliceJobUI:SetInputMode(1)
+    PoliceJobUI:SendEvent('fingerprintOpen')
 end
 
 local function closeFingerprintUI()
-    local ui = ensurePoliceJobUI()
-    if not ui then
+    if not PoliceJobUI then
         return
     end
-    ui:SetInputMode(0)
-    ui:SendEvent('fingerprintClose')
+    PoliceJobUI:SetInputMode(0)
+    PoliceJobUI:SendEvent('fingerprintClose')
 end
 
 local function notifyVehicleTodo()
@@ -60,7 +54,7 @@ local function notifyVehicleTodo()
 end
 
 local function addTargetSphere(name, coords, radius, option)
-    exports['qb-target']:AddSphereZone(name, coords, radius, { distance = 250 }, { option })
+    exports['qb-target']:AddSphereZone(name, coords, radius, { distance = 250, debug = true }, { option })
 end
 
 local function getStationKey(stationKey)
@@ -205,16 +199,7 @@ function closeMenuFull()
     exports['qb-menu']:closeMenu()
 end
 
-ensurePoliceJobUI = function()
-    if PoliceJobUI then
-        return PoliceJobUI
-    end
-
-    PoliceJobUI = WebUI('qb-policejob', 'qb-policejob/html/index.html')
-    if not PoliceJobUI then
-        return nil
-    end
-
+if PoliceJobUI then
     PoliceJobUI:RegisterEventHandler('closeFingerprint', function(_, cb)
         closeFingerprintUI()
         if cb then
@@ -228,14 +213,6 @@ ensurePoliceJobUI = function()
             cb('ok')
         end
     end)
-
-    PoliceJobUI:RegisterEventHandler('closeDatabank', function(_, cb)
-        if cb then
-            cb('ok')
-        end
-    end)
-
-    return PoliceJobUI
 end
 
 RegisterClientEvent('qb-policejob:client:showFingerprint', function(playerId)
@@ -244,9 +221,8 @@ RegisterClientEvent('qb-policejob:client:showFingerprint', function(playerId)
 end)
 
 RegisterClientEvent('qb-policejob:client:showFingerprintId', function(fid)
-    local ui = ensurePoliceJobUI()
-    if ui then
-        ui:SendEvent('updateFingerprintId', {
+    if PoliceJobUI then
+        PoliceJobUI:SendEvent('updateFingerprintId', {
             fingerprintId = fid,
         })
     end
@@ -350,6 +326,10 @@ RegisterClientEvent('qb-policejob:client:spawnHelicopter', function(data)
     end
 end)
 
+RegisterClientEvent('qb-policejob:client:OpenClothing', function()
+    exports['qb-clothing']:OpenClothing('clothing')
+end)
+
 local function registerPoliceTargets()
     if jobTargetsRegistered then
         return
@@ -357,8 +337,8 @@ local function registerPoliceTargets()
     jobTargetsRegistered = true
 
     for stationKey, station in pairs(Config.Locations) do
-        for i = 1, #(station.duty or {}) do
-            addTargetSphere('PoliceDuty_' .. stationKey .. '_' .. i, station.duty[i], 50, {
+        for i, coords in ipairs(station.duty or {}) do
+            addTargetSphere('PoliceDuty_' .. stationKey .. '_' .. i, coords, 50, {
                 type = 'client',
                 event = 'qb-policejob:client:ToggleDuty',
                 icon = 'log-in',
@@ -368,8 +348,8 @@ local function registerPoliceTargets()
             })
         end
 
-        for i = 1, #(station.stash or {}) do
-            addTargetSphere('PoliceStash_' .. stationKey .. '_' .. i, station.stash[i], 75, {
+        for i, coords in ipairs(station.stash or {}) do
+            addTargetSphere('PoliceStash_' .. stationKey .. '_' .. i, coords, 75, {
                 type = 'server',
                 event = 'qb-policejob:server:stash',
                 icon = 'archive',
@@ -379,8 +359,19 @@ local function registerPoliceTargets()
             })
         end
 
-        for i = 1, #(station.trash or {}) do
-            addTargetSphere('PoliceTrash_' .. stationKey .. '_' .. i, station.trash[i], 50, {
+        for i, coords in ipairs(station.clothing or {}) do
+            addTargetSphere('PoliceClothing_' .. stationKey .. '_' .. i, coords, 50, {
+                type = 'client',
+                event = 'qb-policejob:client:OpenClothing',
+                icon = 'shirt',
+                label = Lang.t('target.open_clothing'),
+                stationKey = stationKey,
+                jobType = 'leo',
+            })
+        end
+
+        for i, coords in ipairs(station.trash or {}) do
+            addTargetSphere('PoliceTrash_' .. stationKey .. '_' .. i, coords, 50, {
                 type = 'server',
                 event = 'qb-policejob:server:trash',
                 icon = 'trash',
@@ -390,8 +381,8 @@ local function registerPoliceTargets()
             })
         end
 
-        for i = 1, #(station.fingerprint or {}) do
-            addTargetSphere('PoliceFingerprint_' .. stationKey .. '_' .. i, station.fingerprint[i], 50, {
+        for i, coords in ipairs(station.fingerprint or {}) do
+            addTargetSphere('PoliceFingerprint_' .. stationKey .. '_' .. i, coords, 50, {
                 type = 'client',
                 event = 'qb-policejob:client:scanFingerPrint',
                 icon = 'fingerprint',
@@ -401,8 +392,19 @@ local function registerPoliceTargets()
             })
         end
 
-        for i = 1, #(station.evidence or {}) do
-            addTargetSphere('PoliceEvidence_' .. stationKey .. '_' .. i, station.evidence[i], 50, {
+        for i, coords in ipairs(station.camera or {}) do
+            addTargetSphere('PoliceCamera_' .. stationKey .. '_' .. i, coords, 50, {
+                type = 'client',
+                event = 'qb-policejob:client:CameraMenu',
+                icon = 'camera',
+                label = Lang.t('target.open_security_cameras'),
+                stationKey = stationKey,
+                jobType = 'leo',
+            })
+        end
+
+        for i, coords in ipairs(station.evidence or {}) do
+            addTargetSphere('PoliceEvidence_' .. stationKey .. '_' .. i, coords, 50, {
                 type = 'client',
                 event = 'qb-policejob:client:EvidenceStashDrawer',
                 icon = 'archive',
@@ -413,8 +415,8 @@ local function registerPoliceTargets()
             })
         end
 
-        for i = 1, #(station.vehicle or {}) do
-            addTargetSphere('PoliceGarage_' .. stationKey .. '_' .. i, station.vehicle[i], 150, {
+        for i, coords in ipairs(station.vehicle or {}) do
+            addTargetSphere('PoliceGarage_' .. stationKey .. '_' .. i, coords, 150, {
                 type = 'client',
                 event = 'qb-policejob:client:VehicleMenuHeader',
                 icon = 'car',
@@ -424,8 +426,8 @@ local function registerPoliceTargets()
             })
         end
 
-        for i = 1, #(station.impound or {}) do
-            addTargetSphere('PoliceImpound_' .. stationKey .. '_' .. i, station.impound[i], 100, {
+        for i, coords in ipairs(station.impound or {}) do
+            addTargetSphere('PoliceImpound_' .. stationKey .. '_' .. i, coords, 100, {
                 type = 'client',
                 event = 'qb-policejob:client:ImpoundMenuHeader',
                 icon = 'warehouse',
@@ -435,8 +437,8 @@ local function registerPoliceTargets()
             })
         end
 
-        for i = 1, #(station.helicopter or {}) do
-            addTargetSphere('PoliceHelicopter_' .. stationKey .. '_' .. i, station.helicopter[i], 250, {
+        for i, coords in ipairs(station.helicopter or {}) do
+            addTargetSphere('PoliceHelicopter_' .. stationKey .. '_' .. i, coords, 250, {
                 type = 'client',
                 event = 'qb-policejob:client:spawnHelicopter',
                 icon = 'helicopter',
@@ -449,6 +451,5 @@ local function registerPoliceTargets()
 end
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
-    ensurePoliceJobUI()
     registerPoliceTargets()
 end)

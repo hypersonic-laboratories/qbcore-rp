@@ -139,6 +139,7 @@ local Translations = {
     },
     menu = {
         garage_title = 'Police Vehicles',
+        security_cameras = 'Security Cameras',
         close = '⬅ Close Menu',
         impound = 'Impounded Vehicles',
         pol_impound = 'Police Impound',
@@ -195,9 +196,11 @@ local Translations = {
         sign_in = 'Sign In/Out service',
         open_personal_stash = 'Open Personal Stash',
         open_trash = 'Open Trash',
+        open_clothing = 'Open Clothing',
         open_fingerprint = 'Open Fingerprint',
         open_armory = 'Open Armory',
         open_evidence_stash = 'Open Evidence Stash',
+        open_security_cameras = 'Open Security Cameras',
     },
 }
 

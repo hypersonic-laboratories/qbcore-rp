@@ -47,7 +47,7 @@ local function Hacking(solutionsize, timeout)
     webui:SetInputMode(1)
     return hacking:await()
 end
-exports('Hacking', Hacking)
+exports('qb-minigames', 'Hacking', Hacking)
 
 -- KEY MINIGAME
 
@@ -84,7 +84,7 @@ local function KeyMinigame(amount)
     webui:SetInputMode(1)
     return keyminigame:await()
 end
-exports('KeyMinigame', KeyMinigame)
+exports('qb-minigames', 'KeyMinigame', KeyMinigame)
 
 -- LOCKPICK
 
@@ -121,7 +121,7 @@ local function Lockpick(pins)
     webui:SetInputMode(1)
     return lockpick:await()
 end
-exports('Lockpick', Lockpick)
+exports('qb-minigames', 'Lockpick', Lockpick)
 
 -- PINPAD
 
@@ -158,7 +158,7 @@ local function StartPinpad(numbers)
     webui:SetInputMode(1)
     return pinpadPromise:await()
 end
-exports('StartPinpad', StartPinpad)
+exports('qb-minigames', 'StartPinpad', StartPinpad)
 
 -- QUIZ
 
@@ -219,7 +219,7 @@ local function Quiz(questions, correctRequired, timer)
     webui:SetInputMode(1)
     return quiz:await()
 end
-exports('Quiz', Quiz)
+exports('qb-minigames', 'Quiz', Quiz)
 
 -- SKILLBAR
 
@@ -244,7 +244,7 @@ local function Skillbar(difficulty, validKeys)
     webui:SetInputMode(1)
     return skillbar:await()
 end
-exports('Skillbar', Skillbar)
+exports('qb-minigames', 'Skillbar', Skillbar)
 
 -- WORD GUESS
 
@@ -295,7 +295,7 @@ local function WordGuess(word, hint, guesses)
     webui:SetInputMode(1)
     return wordGuess:await()
 end
-exports('WordGuess', WordGuess)
+exports('qb-minigames', 'WordGuess', WordGuess)
 
 -- WORD SCRAMBLE
 
@@ -305,7 +305,7 @@ webui:RegisterEventHandler('scrambleIncorrect', function(_, cb)
     if cb then
         cb('ok')
     end
-    exports['qb-core'].Notify('Incorrect word', 'error', 2500)
+    exports['qb-core']:Notify('Incorrect word', 'error', 2500)
 end)
 
 webui:RegisterEventHandler('scrambleCorrect', function(_, cb)
@@ -315,7 +315,7 @@ webui:RegisterEventHandler('scrambleCorrect', function(_, cb)
     if not wordScramble then
         return
     end
-    exports['qb-core'].Notify('Guessed correctly!', 'success', 2500)
+    exports['qb-core']:Notify('Guessed correctly!', 'success', 2500)
     webui:SetInputMode(0)
     wordScramble:resolve(true)
     wordScramble = nil
@@ -355,4 +355,4 @@ local function WordScramble(word, hint, timer)
     webui:SetInputMode(1)
     return wordScramble:await()
 end
-exports('WordScramble', WordScramble)
+exports('qb-minigames', 'WordScramble', WordScramble)

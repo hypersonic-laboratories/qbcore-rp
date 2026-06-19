@@ -27,7 +27,9 @@ Config.Locations = {
         label = 'South Beach Police Department',
         duty = { Vector(562851, 571954, 4653) },
         stash = { Vector(563241, 572137, 4656) },
+        clothing = { Vector(562797, 572536, 4654) },
         fingerprint = { Vector(562118, 571225, 4700) },
+        camera = { Vector(562164, 571455, 4653) },
         evidence = { Vector(561937, 571572, 4653) },
         trash = { Vector(0, 0, 0) },
         vehicle = { Vector(0, 0, 0) },
@@ -47,8 +49,8 @@ Config.Locations = {
 Config.SecurityCameras = {
     hideradar = false,
     cameras = {
-        { label = 'Hansons', coords = Vector(16386.9, -46857.0, 400), rotation = Rotator(0.0, 48.991352081299, 0.0), canRotate = false, isOnline = true },
-        { label = 'Eastside Market', coords = Vector(-54437.3, -41350.1, 400), rotation = Rotator(0.0, -139.79696655273, 0.0), canRotate = false, isOnline = true },
+        { label = 'Jet Stop East', coords = Vector(564045, 562060, 4741), rotation = Rotator(-25, -136, 0), canRotate = false, isOnline = true },
+        { label = 'Jet Stop West', coords = Vector(570907, 459284, 4687), rotation = Rotator(-25, 51, 0), canRotate = false, isOnline = true },
     },
 }
 
@@ -56,7 +58,6 @@ Config.EnableRadars = true -- alerts for flagged plates
 Config.SpeedCamera = {
     Vector(13438.7, -46440.2, 209.7),
 }
-Config.Radars = Config.SpeedCamera
 
 Config.CarItems = {
     [1] = { name = 'heavyarmor', amount = 2, info = {}, type = 'item', slot = 1 },

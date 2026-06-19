@@ -56,7 +56,7 @@ local function addEvidenceZone(kind, id, coords, label, eventName, icon)
     removeEvidenceZone(kind, id)
     local zoneName = ('police_evidence_%s_%s'):format(kind, id)
     EvidenceZones[kind][id] = zoneName
-    exports['qb-target']:AddSphereZone(zoneName, coordsToVector(coords), 35, { distance = 250 }, {
+    exports['qb-target']:AddSphereZone(zoneName, coordsToVector(coords), 35, { distance = 250, debug = true }, {
         {
             type = 'client',
             event = eventName,
@@ -358,6 +358,7 @@ RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
 end)
 
 function onShutdown()
+    TriggerLocalClientEvent('qb-policejob:client:CloseCamera')
     unregisterWeaponFireListener()
     for kind, zones in pairs(EvidenceZones) do
         for id in pairs(zones) do
