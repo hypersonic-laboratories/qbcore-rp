@@ -18,6 +18,33 @@ local luckyItemChance = 20
 local uhohs = {}
 local Sales = {}
 local Stock = {}
+local jobPeds = {}
+local Initialised = false
+
+local function DeleteActor(actor)
+    if actor and actor:IsValid() then
+        DeleteEntity(actor)
+    end
+end
+
+local function SpawnJobPed(location, depotIndex, pedName)
+    HPawn(location.coords, Rotator(0, location.heading or 0, 0), function(npc)
+        if not npc then
+            return
+        end
+
+        jobPeds[#jobPeds + 1] = { npc = npc, depot = depotIndex }
+        npc:SetCharacterName(pedName)
+        SetEntityInvincible(npc, true)
+    end, { CharacterName = pedName, bShowNameplate = true })
+end
+
+function onShutdown()
+    for i = 1, #jobPeds do
+        DeleteActor(jobPeds[i].npc)
+    end
+    jobPeds = {}
+end
 
 if Config.SellMaterials then
     Sales = {
@@ -44,6 +71,22 @@ if Config.LimitedMaterials then
         glass = 3000,
     }
 end
+
+RegisterServerEvent('HEvent:PlayerPossessed', function()
+    if Initialised then
+        return
+    end
+
+    if Config.SellMaterials and Config.SellPed then
+        SpawnJobPed(Config.SellPed, 1, Config.SellPed.label or 'Recycling Buyer')
+    end
+
+    Initialised = true
+end)
+
+RegisterCallback('getPeds', function()
+    return jobPeds
+end)
 
 local function ItemLabel(itemName)
     local item = sharedItems[itemName]

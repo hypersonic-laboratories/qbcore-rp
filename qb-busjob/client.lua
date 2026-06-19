@@ -1,5 +1,9 @@
 local Lang = require('locales/en')
+local TARGET_DISTANCE = Config.TargetDistance or 1000
 local depotMarkers = {}
+local registeredTargets = {}
+local pickupMarker = nil
+local dropoffMarker = nil
 local routeZone = nil
 local currentPickupStopIndex = nil
 local currentDropoffStopIndex = nil
@@ -18,19 +22,43 @@ local function clearRouteZone()
     exports['qb-core']:HideText()
 end
 
+local function addMapMarker(coords, marker)
+    local markerId = exports['qb-hud']:AddMarker(coords, {
+        title = marker.label,
+        description = marker.description or '',
+        icon = marker.blipIcon or 'bus',
+        color = marker.blipColor,
+        markerType = marker.markerType or 'Store',
+    })
+
+    if markerId then
+        depotMarkers[#depotMarkers + 1] = markerId
+    end
+end
+
+local function addTargetEntity(entity, options, distance)
+    if not entity then
+        return
+    end
+
+    exports['qb-target']:AddTargetEntity(entity, {
+        options = options,
+        distance = distance or TARGET_DISTANCE,
+    })
+    registeredTargets[#registeredTargets + 1] = entity
+end
+
+local function clearRegisteredTargets()
+    for _, entity in ipairs(registeredTargets) do
+        exports['qb-target']:RemoveTargetEntity(entity)
+    end
+    registeredTargets = {}
+end
+
 local function createDepotMarkers()
     for _, depot in ipairs(Config.Locations.Depots) do
         if depot.showBlip then
-            local markerId = exports['qb-hud']:AddMarker(depot.pedSpawn.coords, {
-                title = depot.label,
-                description = depot.description or '',
-                icon = depot.blipIcon or 'bus',
-                color = depot.blipColor,
-                markerType = 'Store',
-            })
-            if markerId then
-                depotMarkers[#depotMarkers + 1] = markerId
-            end
+            addMapMarker(depot.pedSpawn, depot)
         end
     end
 end
@@ -40,6 +68,29 @@ local function clearDepotMarkers()
         exports['qb-hud']:RemoveMarker(id)
     end
     depotMarkers = {}
+end
+
+local function removeMarker(markerId)
+    if markerId then
+        exports['qb-hud']:RemoveMarker(markerId)
+    end
+end
+
+local function createRouteMarker(coords, marker)
+    return exports['qb-hud']:AddMarker(coords, {
+        title = marker.label,
+        description = marker.description or '',
+        icon = marker.blipIcon or 'bus',
+        color = marker.blipColor,
+        markerType = marker.markerType or 'Store',
+    })
+end
+
+local function clearRouteMarkers()
+    removeMarker(pickupMarker)
+    removeMarker(dropoffMarker)
+    pickupMarker = nil
+    dropoffMarker = nil
 end
 
 local function setupPeds()
@@ -70,7 +121,7 @@ local function setupPeds()
                     job = Config.Job,
                 },
             }
-            exports['qb-target']:AddTargetEntity(ped, { options = options, distance = 1000 })
+            addTargetEntity(ped, options)
         end
     end)
 end
@@ -105,6 +156,8 @@ end
 
 function onShutdown()
     clearRouteZone()
+    clearRegisteredTargets()
+    clearRouteMarkers()
     clearDepotMarkers()
 end
 
@@ -115,24 +168,46 @@ end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
     clearRouteZone()
+    clearRegisteredTargets()
+    clearRouteMarkers()
     clearDepotMarkers()
 end)
 
 RegisterClientEvent('qb-busjob:client:pickupSpot', function(coords, stopIndex)
+    clearRouteMarkers()
+    pickupMarker = createRouteMarker(Vector(coords.X, coords.Y, coords.Z), {
+        label = Lang.t('marker.pickup'),
+        description = Lang.t('marker.pickup_description'),
+        blipIcon = 'user-round',
+        blipColor = Config.PickupMarkerColor,
+    })
+
     createRouteZone(coords, stopIndex, 'pickup')
 end)
 
 RegisterClientEvent('qb-busjob:client:dropoffSpot', function(coords, stopIndex)
+    removeMarker(pickupMarker)
+    removeMarker(dropoffMarker)
+    pickupMarker = nil
+    dropoffMarker = createRouteMarker(Vector(coords.X, coords.Y, coords.Z), {
+        label = Lang.t('marker.dropoff'),
+        description = Lang.t('marker.dropoff_description'),
+        blipIcon = 'map-pin-check',
+        blipColor = Config.DropoffMarkerColor,
+    })
+
     createRouteZone(coords, stopIndex, 'dropoff')
 end)
 
 RegisterClientEvent('qb-busjob:client:jobComplete', function(payout)
     clearRouteZone()
+    clearRouteMarkers()
     exports['qb-core']:Notify(Lang.t('success.dropped_off', { amount = payout }), 'success')
 end)
 
 RegisterClientEvent('qb-busjob:client:routeEnded', function()
     clearRouteZone()
+    clearRouteMarkers()
 end)
 
 Input.BindKey('E', function()

@@ -5,6 +5,7 @@ local Translations = {
         too_far = 'You are too far away from the location.',
         inside_vehicle = 'You cannot deliver packages when in a vehicle.',
         no_packages = 'You don\'t have any more packages.',
+        no_vehicle = 'Unable to retrieve a delivery vehicle.',
     },
     success = {
         paid = 'Route Completed! You were paid: %{Amount}',
@@ -18,6 +19,10 @@ local Translations = {
         pickup_box = 'Pickup Box',
         deliver_package = '[E] Deliver Package',
         finish_delivering = 'Finish Route',
+    },
+    marker = {
+        delivery_stop = 'Delivery Stop %{Current}/%{Max}',
+        delivery_stop_description = 'Deliver the package here',
     },
 }
 

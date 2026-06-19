@@ -4,49 +4,64 @@ local benches = {}
 local jobPeds = {}
 local pickupNPCs = {}
 local activeJobs = {}
+local Initialised = false
 local CM_PER_MILE = 160934
+
+local function deleteActor(actor)
+    if actor and actor:IsValid() then
+        DeleteEntity(actor)
+    end
+end
+
+local function spawnJobPed(depot, depotIndex)
+    local pedName = depot.pedName or depot.label or 'Taxi Depot'
+    HPawn(depot.pedSpawn, Rotator(0, depot.pedHeading or 0, 0), function(npc)
+        if not npc then
+            return
+        end
+
+        jobPeds[#jobPeds + 1] = { npc = npc, depot = depotIndex }
+        npc:SetCharacterName(pedName)
+        SetEntityInvincible(npc, true)
+    end, { CharacterName = pedName, bShowNameplate = true })
+end
+
+local function spawnJobVehicle(depot)
+    local vehicle = HVehicle(depot.vehicleSpawn, Rotator(0, depot.vehicleHeading or 0, 0), Config.Vehicle)
+    if vehicle and vehicle.SetFuel then
+        vehicle:SetFuel(100.0)
+    end
+    return vehicle
+end
 
 function onShutdown()
     for _, v in pairs(benches) do
-        if v and v:IsValid() then
-            DeleteEntity(v)
-        end
+        deleteActor(v)
     end
     benches = {}
 
     for i = 1, #jobPeds do
-        local ped = jobPeds[i].npc
-        if ped and ped:IsValid() then
-            DeleteEntity(ped)
-        end
+        deleteActor(jobPeds[i].npc)
     end
     jobPeds = {}
 
     for _, npc in pairs(pickupNPCs) do
-        if npc and npc:IsValid() then
-            DeleteEntity(npc)
-        end
+        deleteActor(npc)
     end
     pickupNPCs = {}
 end
 
 for i = 1, #Config.Locations['Benches'] do
-    local bench = StaticMesh(
-        Config.Locations['Benches'][i].coords,
-        Rotator(0, Config.Locations['Benches'][i].heading, 0),
-        '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop'
-    )
+    local bench = StaticMesh(Config.Locations['Benches'][i].coords, Rotator(0, Config.Locations['Benches'][i].heading, 0), '/QBCoreAssets/Meshes/SM_BusStop.SM_BusStop')
     benches[bench.Object] = bench.Object
 end
 
 RegisterServerEvent('HEvent:PlayerPossessed', function()
-    if Initialised then return end
+    if Initialised then
+        return
+    end
     for i = 1, #Config.Locations['Depots'] do
-        HPawn(Config.Locations['Depots'][i].pedSpawn.coords, Rotator(0, Config.Locations['Depots'][i].pedSpawn.heading, 0), function(npc)
-            jobPeds[#jobPeds + 1] = { npc = npc, depot = i }
-            npc:SetCharacterName('Taxi Depot')
-            SetEntityInvincible(npc, true)
-        end, { CharacterName = 'Taxi Depot', bShowNameplate = true })
+        spawnJobPed(Config.Locations.Depots[i], i)
     end
     Initialised = true
 end)
@@ -58,7 +73,9 @@ local function getRandomBench(excludeIndex)
             table.insert(availableBenches, i)
         end
     end
-    if #availableBenches == 0 then return nil end
+    if #availableBenches == 0 then
+        return nil
+    end
     return availableBenches[math.random(#availableBenches)]
 end
 
@@ -72,13 +89,15 @@ end)
 
 RegisterServerEvent('qb-taxijob:server:takeVehicle', function(source, args)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player or Player.PlayerData.job.name ~= 'taxi' then
+    if not Player or Player.PlayerData.job.name ~= Config.Job then
         print('qb-taxijob:server:takeVehicle - Player job is not taxi')
         return
     end
     local depot = Config.Locations.Depots[args.depot]
-    if not depot then return end
-    local vehicle = HVehicle(depot.vehicleSpawn.coords, Rotator(0, depot.vehicleSpawn.heading, 0), Config.Vehicle)
+    if not depot then
+        return
+    end
+    local vehicle = spawnJobVehicle(depot)
     playerVehicles[GetPlayerId(source)] = vehicle
 end)
 
@@ -109,7 +128,7 @@ RegisterServerEvent('qb-taxijob:server:startWork', function(source)
     local coords = {
         X = pickupBench.coords.X + 100,
         Y = pickupBench.coords.Y,
-        Z = pickupBench.coords.Z
+        Z = pickupBench.coords.Z,
     }
     HPawn(coords, Rotator(0, 0, 0), function(npc)
         table.insert(pickupNPCs, npc)
@@ -120,7 +139,7 @@ RegisterServerEvent('qb-taxijob:server:startWork', function(source)
             pickupBenchIndex = pickupBenchIndex,
             dropoffBenchIndex = dropoffBenchIndex,
             hasPickedUp = false,
-            maxFare = 0
+            maxFare = 0,
         }
         TriggerClientEvent(source, 'qb-taxijob:client:pickupSpot', coords, pickupBenchIndex)
     end, { CharacterName = 'Taxi Passenger', bShowNameplate = true })
@@ -149,27 +168,22 @@ RegisterServerEvent('qb-taxijob:server:pickupNPC', function(source, benchIndex)
         if npc and npc:IsValid() then
             local params = UE.FHEnterVehicleParams()
             params.bSkipAnimations = true
-            local success = UE.UHGameplaySystemGlobals.SendEnterVehicleEventToActor(
-                npc,
-                vehicle,
-                2,
-                params
-            )
+            local success = UE.UHGameplaySystemGlobals.SendEnterVehicleEventToActor(npc, vehicle, 2, params)
             if success then
-                job.hasPickedUp                             = true
+                job.hasPickedUp = true
                 Config.Locations['Benches'][benchIndex].npc = nil
-                local pickupCoords                          = Config.Locations['Benches'][job.pickupBenchIndex].coords
-                local dropoffCoords                         = Config.Locations['Benches'][job.dropoffBenchIndex].coords
-                local distanceUU                            = GetDistanceBetweenCoords(pickupCoords, dropoffCoords)
-                local miles                                 = distanceUU / CM_PER_MILE
-                local baseFare                              = miles * Config.Rate
-                local padding                               = Config.MaxFarePadding or 1.5
-                job.maxFare                                 = math.floor(baseFare * padding)
-                local baseDropoffCoords                     = Config.Locations['Benches'][job.dropoffBenchIndex].coords
-                local dropoffCoordsForZone                  = {
+                local pickupCoords = Config.Locations['Benches'][job.pickupBenchIndex].coords
+                local dropoffCoords = Config.Locations['Benches'][job.dropoffBenchIndex].coords
+                local distanceUU = GetDistanceBetweenCoords(pickupCoords, dropoffCoords)
+                local miles = distanceUU / CM_PER_MILE
+                local baseFare = miles * Config.Rate
+                local padding = Config.MaxFarePadding or 1.5
+                job.maxFare = math.floor(baseFare * padding)
+                local baseDropoffCoords = Config.Locations['Benches'][job.dropoffBenchIndex].coords
+                local dropoffCoordsForZone = {
                     X = baseDropoffCoords.X + 300,
                     Y = baseDropoffCoords.Y,
-                    Z = baseDropoffCoords.Z
+                    Z = baseDropoffCoords.Z,
                 }
                 TriggerClientEvent(source, 'qb-taxijob:client:dropoffSpot', dropoffCoordsForZone, job.dropoffBenchIndex)
             end
@@ -219,7 +233,9 @@ RegisterServerEvent('qb-taxijob:server:dropoffNPC', function(source, benchIndex,
         end, 7500)
 
         local rawFare = tonumber(meterFare) or 0
-        if rawFare < 0 then rawFare = 0 end
+        if rawFare < 0 then
+            rawFare = 0
+        end
 
         local maxFare = job.maxFare or rawFare
         local payout = math.min(rawFare, maxFare)

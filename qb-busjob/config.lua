@@ -1,6 +1,9 @@
 Config = {
     Job = 'bus',
     Vehicle = '/abcca-qbcore-veh/QBCoreVehicles/BP_Bus.BP_Bus_C',
+    TargetDistance = 1000,
+    PickupMarkerColor = LinearColor(0.15, 0.6, 1.0, 1.0),
+    DropoffMarkerColor = LinearColor(0.2, 0.85, 0.35, 1.0),
     StopRadius = 450,
     StopInteractionDistance = 1500,
     PassengerOffset = Vector(150, 0, 0),
@@ -17,8 +20,10 @@ Config = {
         Depots = {
             {
                 label = 'Bus Depot',
-                pedSpawn = { coords = Vector(-355210, -132250, -2882), heading = 176 },
-                vehicleSpawn = { coords = Vector(-356060, -132480, -2980), heading = 180 },
+                pedSpawn = Vector(521021, 608226, 4841),
+                pedHeading = -2,
+                vehicleSpawn = Vector(522224, 608081, 4841),
+                vehicleHeading = -81,
                 showBlip = true,
                 blipIcon = 'bus',
                 blipColor = LinearColor(0.1, 0.45, 1.0, 1.0),

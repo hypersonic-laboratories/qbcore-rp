@@ -3,7 +3,7 @@ Config = {
     DropLocation = { coords = Vector(104822.4, -309707.1, -3899.9), heading = 274.81 },
     SellMaterials = true, --  allow players to sell materials to a ped
     LimitedMaterials = true, -- limit the amount of materials that can be sold
-    SellPed = { coords = Vector(104984, -309408, -4000), heading = 178.84 },
+    SellPed = { coords = Vector(521301, 606713, 4841), heading = 14 },
     TargetDistance = 500,
     ZoneLength = 400,
     ZoneWidth = 200,
@@ -12,6 +12,13 @@ Config = {
     CarryPackageScale = Vector(0.35, 0.35, 0.35),
     CarryPackageOffset = Vector(-35, 0, 10),
     CarryPackageRotation = Rotator(-95, 0, 0),
+    Marker = {
+        label = 'Recycle Center',
+        description = 'Recycling work and material sales',
+        blipIcon = 'recycling',
+        blipColor = LinearColor(0.2, 0.75, 0.35, 1.0),
+        markerType = 'Store',
+    },
 
     PickupLocations = {
         { model = math.random(1, 7), loc = Vector(106768, -309557, -3990), heading = 342.39 },

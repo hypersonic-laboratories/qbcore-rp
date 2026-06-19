@@ -26,6 +26,12 @@ local Translations = {
         ['take_vehicle'] = 'Retrieve Bus',
         ['finish_work'] = 'Finish Route',
     },
+    marker = {
+        ['pickup'] = 'Bus Pickup',
+        ['pickup_description'] = 'Pick up your passenger',
+        ['dropoff'] = 'Bus Dropoff',
+        ['dropoff_description'] = 'Drop off your passenger',
+    },
 }
 
 ---@type { t: fun(key: string, subs?: table<string, any>): string, has: fun(key: string): boolean }

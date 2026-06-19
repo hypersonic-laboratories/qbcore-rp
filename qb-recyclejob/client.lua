@@ -7,11 +7,45 @@ local onDuty = false
 local registered = false
 local props = {}
 local registeredZones = {}
+local registeredTargets = {}
 local markerIds = {}
-local sellPed = nil
+local sellPeds = {}
 
 local function Notify(text, notifyType, length)
     exports['qb-core']:Notify(text, notifyType or 'primary', length)
+end
+
+local function AddMapMarker(coords, marker)
+    local markerId = exports['qb-hud']:AddMarker(coords, {
+        title = marker.label or 'Recycle Center',
+        description = marker.description or '',
+        icon = marker.blipIcon or marker.icon or 'recycling',
+        markerType = marker.markerType or 'Store',
+        color = marker.blipColor or marker.color,
+    })
+
+    if markerId then
+        markerIds[#markerIds + 1] = markerId
+    end
+end
+
+local function AddTargetEntity(entity, options, distance)
+    if not entity then
+        return
+    end
+
+    exports['qb-target']:AddTargetEntity(entity, {
+        options = options,
+        distance = distance or Config.TargetDistance,
+    })
+    registeredTargets[#registeredTargets + 1] = entity
+end
+
+local function ClearRegisteredTargets()
+    for _, entity in ipairs(registeredTargets) do
+        exports['qb-target']:RemoveTargetEntity(entity)
+    end
+    registeredTargets = {}
 end
 
 local function IsValidActor(actor)
@@ -166,51 +200,33 @@ local function CreateLocationMarker()
         return
     end
 
-    local markerId = exports['qb-hud']:AddMarker(Config.DutyLocation.coords, {
-        title = 'Recycle Center',
-        description = 'Recycling work and material sales',
-        icon = 'recycling',
-        markerType = 'Store',
-        color = LinearColor(0.2, 0.75, 0.35, 1.0),
-    })
-
-    if markerId then
-        markerIds[#markerIds + 1] = markerId
-    end
+    local marker = Config.Marker or {}
+    AddMapMarker(Config.DutyLocation.coords, marker)
 end
 
-local function CreateSellPed()
-    if not Config.SellMaterials or sellPed then
+local function SetupPeds()
+    if not Config.SellMaterials or #sellPeds > 0 then
         return
     end
 
-    local location = Config.SellPed
-    HPawn(location.coords, Rotator(0, location.heading or 0, 0), function(npc)
-        if not npc then
-            return
-        end
-
+    TriggerCallback('getPeds', function(jobPeds)
         if not registered then
-            DeleteEntity(npc)
             return
         end
 
-        sellPed = npc
-        npc:SetCharacterName('Recycling Buyer')
-        SetEntityInvincible(npc, true)
-
-        exports['qb-target']:AddTargetEntity(npc, {
-            options = {
+        for i = 1, #jobPeds do
+            local ped = jobPeds[i].npc
+            sellPeds[#sellPeds + 1] = ped
+            AddTargetEntity(ped, {
                 {
                     type = 'client',
                     event = 'qb-recyclejob:client:sellMaterials',
                     icon = 'dollar-sign',
                     label = Lang.t('text.sell_materials'),
                 },
-            },
-            distance = Config.TargetDistance,
-        })
-    end, { CharacterName = 'Recycling Buyer', bShowNameplate = true })
+            })
+        end
+    end)
 end
 
 local function CreatePickupProps()
@@ -226,20 +242,17 @@ local function CreatePickupProps()
                 actor:SetActorScale3D(objectData.scale)
             end
 
-            exports['qb-target']:AddTargetEntity(actor, {
-                options = {
-                    {
-                        type = 'client',
-                        event = 'qb-recyclejob:client:pickUp',
-                        label = Lang.t('text.get_package'),
-                        icon = 'package',
-                        packageIndex = k,
-                        canInteract = function()
-                            return onDuty and not carryPackage and packageCoords == k
-                        end,
-                    },
+            AddTargetEntity(actor, {
+                {
+                    type = 'client',
+                    event = 'qb-recyclejob:client:pickUp',
+                    label = Lang.t('text.get_package'),
+                    icon = 'package',
+                    packageIndex = k,
+                    canInteract = function()
+                        return onDuty and not carryPackage and packageCoords == k
+                    end,
                 },
-                distance = Config.TargetDistance,
             })
         end
     end
@@ -252,7 +265,7 @@ local function RegisterRecycleJob()
 
     registered = true
     CreateLocationMarker()
-    CreateSellPed()
+    SetupPeds()
     CreatePickupProps()
 
     AddZone('qb_recycle_duty', Config.DutyLocation.coords, Config.DutyLocation.heading, Lang.t('text.toggle_duty'), 'qb-recyclejob:client:toggleDuty')
@@ -262,13 +275,14 @@ local function RegisterRecycleJob()
 end
 
 local function UnregisterRecycleJob()
+    ClearRegisteredTargets()
+
     for _, zoneName in ipairs(registeredZones) do
         exports['qb-target']:RemoveZone(zoneName)
     end
     registeredZones = {}
 
     for _, actor in pairs(props) do
-        exports['qb-target']:RemoveTargetEntity(actor)
         if IsValidActor(actor) then
             DeleteEntity(actor)
         end
@@ -280,13 +294,7 @@ local function UnregisterRecycleJob()
     end
     markerIds = {}
 
-    if sellPed then
-        exports['qb-target']:RemoveTargetEntity(sellPed)
-        if IsValidActor(sellPed) then
-            DeleteEntity(sellPed)
-        end
-        sellPed = nil
-    end
+    sellPeds = {}
 
     if carryPackage then
         DropPackage()

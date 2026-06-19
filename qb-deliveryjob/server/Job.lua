@@ -3,6 +3,32 @@ Jobs = {}
 Job = {}
 Job.__index = Job
 
+local function getVehicleAsset(vehicleName)
+    local vehicleInfo = SharedVehicles[vehicleName]
+    return vehicleInfo and vehicleInfo.asset_name or vehicleName
+end
+
+local function getVehicleSpawnCoords(spawn)
+    local zOffset = Config.VehicleSpawnZOffset or 0
+    return Vector(spawn.X, spawn.Y, spawn.Z - zOffset)
+end
+
+local function spawnJobVehicle(depot, vehicleAsset, plate)
+    local vehicle = HVehicle(getVehicleSpawnCoords(depot.vehicleSpawn), Rotator(0, depot.vehicleHeading or 0, 0), vehicleAsset)
+    if not vehicle then
+        return nil
+    end
+
+    if vehicle.SetFuel then
+        vehicle:SetFuel(100.0)
+    end
+    if plate and vehicle.SetPlate then
+        vehicle:SetPlate(plate)
+    end
+
+    return vehicle
+end
+
 function Job.new(Courier, DepotInfo)
     local self = setmetatable({}, Job)
 
@@ -20,14 +46,13 @@ function Job.new(Courier, DepotInfo)
 end
 
 function Job:CreateDeliveryVehicle()
-    local Vehicle = Config.Vehicles[math.random(1, #Config.Vehicles)] or 'bp_deliverytruck'
-    local VehicleAsset = SharedVehicles[Vehicle].asset_name
-    local vehicleCoords = self.Depot.vehicleSpawn.coords
-    vehicleCoords.Z = vehicleCoords.Z - 20
-    local newVehicle = HVehicle(vehicleCoords, Rotator(0, self.Depot.vehicleSpawn.heading, 0), VehicleAsset)
-    newVehicle:SetFuel(100.0)
-    newVehicle:SetPlate('D-' .. self.DeliveryId)
-    if not newVehicle then return end
+    local vehicleName = Config.Vehicles[math.random(1, #Config.Vehicles)] or 'bp_deliverytruck'
+    local vehicleAsset = getVehicleAsset(vehicleName)
+    local plate = (Config.VehiclePlatePrefix or 'D-') .. self.DeliveryId
+    local newVehicle = spawnJobVehicle(self.Depot, vehicleAsset, plate)
+    if not newVehicle then
+        return nil
+    end
 
     self.Vehicle = newVehicle
 
@@ -39,8 +64,12 @@ end
 
 function Job:CreateDeliveryProp()
     local Pawn = GetPlayerPawn(self.Courier)
-    if not Pawn then return end
-    if self.Prop and self.Prop:IsValid() then DeleteEntity(self.Prop) end
+    if not Pawn then
+        return
+    end
+    if self.Prop and self.Prop:IsValid() then
+        DeleteEntity(self.Prop)
+    end
 
     local PawnCoords = GetEntityCoords(Pawn)
     self.Prop = StaticMesh(PawnCoords, Rotator(), Config.Prop.Mesh)
@@ -74,10 +103,14 @@ function Job:CreateRoute()
                 closestDistance = currentDist
             end
         end
-        if #Route == self.MaxStops then break end
+        if #Route == self.MaxStops then
+            break
+        end
     end
     -- Regenerate if Route isn't big enough
-    if #Route < Config.Stops.Minimum or #Route < self.MaxStops then return self:CreateRoute() end
+    if #Route < Config.Stops.Minimum or #Route < self.MaxStops then
+        return self:CreateRoute()
+    end
 
     -- Sort route by closest from closest start point
     table.sort(Route, function(a, b)
@@ -94,8 +127,12 @@ end
 function Job:DeliverPackage()
     local Pawn = GetPlayerPawn(self.Courier)
     local PawnCoords = GetEntityCoords(Pawn)
-    if self.CurrentStop > self.MaxStops then return false end
-    if PawnCoords:Dist(self.Route[self.CurrentStop]) > 1000 then return false end
+    if self.CurrentStop > self.MaxStops then
+        return false
+    end
+    if PawnCoords:Dist(self.Route[self.CurrentStop]) > 1000 then
+        return false
+    end
     self.CurrentStop = self.CurrentStop + 1
 
     DeleteEntity(self.Prop)
@@ -114,9 +151,13 @@ function Job:Payout()
     end
 
     local Player = exports['qb-core']:GetPlayer(self.Courier)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local Success = Player.AddMoney('bank', amount, 'delivery-job-payout')
-    if not Success then return end
+    if not Success then
+        return
+    end
 
     exports['qb-core']:NotifyPlayer(self.Courier, completedRoute and Lang.t('success.paid', { Amount = amount }) or Lang.t('success.incomplete_paid', { Amount = amount }), 'success')
 

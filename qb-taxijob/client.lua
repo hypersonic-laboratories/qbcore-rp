@@ -1,7 +1,11 @@
 local Lang = require('locales/en')
 local my_webui = WebUI('qb-taxijob', 'qb-taxijob/html/index.html')
+local TARGET_DISTANCE = Config.TargetDistance or 1000
 local meterOpen = false
 local depotMarkers = {}
+local registeredTargets = {}
+local pickupMarker = nil
+local dropoffMarker = nil
 local meterActive = false
 local inPickupZone = false
 local inDropoffZone = false
@@ -18,6 +22,39 @@ local meterData = {
     currentFare = 0,
     distanceTraveled = 0,
 }
+
+local function addMapMarker(coords, marker)
+    local markerId = exports['qb-hud']:AddMarker(coords, {
+        title = marker.label,
+        description = marker.description or '',
+        icon = marker.blipIcon or 'taxi',
+        color = marker.blipColor,
+        markerType = marker.markerType or 'Store',
+    })
+
+    if markerId then
+        depotMarkers[#depotMarkers + 1] = markerId
+    end
+end
+
+local function addTargetEntity(entity, options, distance)
+    if not entity then
+        return
+    end
+
+    exports['qb-target']:AddTargetEntity(entity, {
+        options = options,
+        distance = distance or TARGET_DISTANCE,
+    })
+    registeredTargets[#registeredTargets + 1] = entity
+end
+
+local function clearRegisteredTargets()
+    for _, entity in ipairs(registeredTargets) do
+        exports['qb-target']:RemoveTargetEntity(entity)
+    end
+    registeredTargets = {}
+end
 
 -- UI Events
 
@@ -48,14 +85,7 @@ end)
 local function createDepotMarkers()
     for _, depot in ipairs(Config.Locations.Depots) do
         if depot.showBlip then
-            local markerId = exports['qb-hud']:AddMarker(depot.pedSpawn.coords, {
-                title       = depot.label,
-                description = depot.description or '',
-                icon        = depot.blipIcon or 'taxi',
-                color       = depot.blipColor,
-                markerType  = 'Store',
-            })
-            if markerId then depotMarkers[#depotMarkers + 1] = markerId end
+            addMapMarker(depot.pedSpawn, depot)
         end
     end
 end
@@ -67,6 +97,29 @@ local function clearDepotMarkers()
     depotMarkers = {}
 end
 
+local function removeMarker(markerId)
+    if markerId then
+        exports['qb-hud']:RemoveMarker(markerId)
+    end
+end
+
+local function createFareMarker(coords, marker)
+    return exports['qb-hud']:AddMarker(coords, {
+        title = marker.label,
+        description = marker.description or '',
+        icon = marker.blipIcon or 'taxi',
+        color = marker.blipColor,
+        markerType = marker.markerType or 'Store',
+    })
+end
+
+local function clearFareMarkers()
+    removeMarker(pickupMarker)
+    removeMarker(dropoffMarker)
+    pickupMarker = nil
+    dropoffMarker = nil
+end
+
 function onShutdown()
     if my_webui then
         my_webui:Destroy()
@@ -76,13 +129,17 @@ function onShutdown()
         Timer.ClearInterval(distance_timer)
         distance_timer = nil
     end
+    clearRegisteredTargets()
+    clearFareMarkers()
     clearDepotMarkers()
 end
 
 -- Events
 
 function UpdateTaxiDistance()
-    if not meterActive then return end
+    if not meterActive then
+        return
+    end
 
     local vehicle = GetVehiclePedIsIn(GetPlayerPawn())
     if not vehicle then
@@ -97,7 +154,7 @@ function UpdateTaxiDistance()
         meterData.distanceTraveled = miles
         meterData.currentFare = math.floor(meterData.distanceTraveled * meterData.fareAmount)
         my_webui:SendEvent('updateMeter', {
-            meterData = meterData
+            meterData = meterData,
         })
     end
     lastVehiclePos = pos
@@ -107,31 +164,30 @@ local function setupPeds()
     TriggerCallback('getPeds', function(jobPeds)
         for i = 1, #jobPeds do
             local ped = jobPeds[i].npc
-            local distance = 1000
             local options = {
                 {
                     type = 'server',
                     event = 'QBCore:ToggleDuty',
                     label = Lang.t('target.toggle_duty'),
                     icon = 'clipboard',
-                    job = 'taxi'
+                    job = Config.Job,
                 },
                 {
                     type = 'server',
                     event = 'qb-taxijob:server:takeVehicle',
                     label = Lang.t('target.take_vehicle'),
                     icon = 'truck-field',
-                    job = 'taxi',
-                    depot = jobPeds[i].depot
+                    job = Config.Job,
+                    depot = jobPeds[i].depot,
                 },
                 {
                     event = 'qb-taxijob:client:finishWork',
                     label = Lang.t('target.finish_work'),
                     icon = 'circle-check',
-                    job = 'taxi'
-                }
+                    job = Config.Job,
+                },
             }
-            exports['qb-target']:AddTargetEntity(ped, { options = options, distance = distance })
+            addTargetEntity(ped, options)
         end
     end)
 end
@@ -142,10 +198,13 @@ RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+    clearRegisteredTargets()
+    clearFareMarkers()
     clearDepotMarkers()
 end)
 
 RegisterClientEvent('qb-taxijob:client:finishWork', function()
+    clearFareMarkers()
     if meterOpen then
         my_webui:SendEvent('openMeter', { toggle = false })
         meterOpen = false
@@ -162,7 +221,9 @@ end)
 
 RegisterClientEvent('qb-taxijob:client:toggleMeter', function()
     local vehicle = GetVehiclePedIsIn(GetPlayerPawn())
-    if not vehicle then return end
+    if not vehicle then
+        return
+    end
     if not meterOpen then
         my_webui:SendEvent('openMeter', { toggle = true, meterData = meterData })
         meterOpen = true
@@ -174,13 +235,23 @@ end)
 
 RegisterClientEvent('qb-taxijob:client:enableMeter', function()
     local vehicle = GetVehiclePedIsIn(GetPlayerPawn())
-    if not vehicle then return end
+    if not vehicle then
+        return
+    end
     if meterOpen then
         my_webui:SendEvent('toggleMeter')
     end
 end)
 
 RegisterClientEvent('qb-taxijob:client:pickupSpot', function(coords, benchIndex)
+    clearFareMarkers()
+    pickupMarker = createFareMarker(Vector(coords.X, coords.Y, coords.Z), {
+        label = Lang.t('marker.pickup'),
+        description = Lang.t('marker.pickup_description'),
+        blipIcon = 'user-round',
+        blipColor = Config.PickupMarkerColor,
+    })
+
     coords.X = coords.X + 300
     if pickupZone then
         DeleteEntity(pickupZone)
@@ -201,6 +272,16 @@ RegisterClientEvent('qb-taxijob:client:pickupSpot', function(coords, benchIndex)
 end)
 
 RegisterClientEvent('qb-taxijob:client:dropoffSpot', function(coords, benchIndex)
+    removeMarker(pickupMarker)
+    removeMarker(dropoffMarker)
+    pickupMarker = nil
+    dropoffMarker = createFareMarker(Vector(coords.X, coords.Y, coords.Z), {
+        label = Lang.t('marker.dropoff'),
+        description = Lang.t('marker.dropoff_description'),
+        blipIcon = 'map-pin-check',
+        blipColor = Config.DropoffMarkerColor,
+    })
+
     if pickupZone then
         DeleteEntity(pickupZone)
         pickupZone = nil
@@ -223,6 +304,8 @@ RegisterClientEvent('qb-taxijob:client:dropoffSpot', function(coords, benchIndex
 end)
 
 RegisterClientEvent('qb-taxijob:client:jobComplete', function(payout)
+    clearFareMarkers()
+
     if dropoffZone then
         DeleteEntity(dropoffZone)
         dropoffZone = nil

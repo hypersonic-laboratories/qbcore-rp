@@ -4,8 +4,43 @@ local busStops = {}
 local activeRoutes = {}
 local Initialised = false
 
+local function deleteActor(actor)
+    if actor and actor:IsValid() then
+        DeleteEntity(actor)
+    end
+end
+
 local function notify(source, message, notifyType)
     TriggerClientEvent(source, 'QBCore:Notify', message, notifyType or 'primary')
+end
+
+local function spawnJobPed(depot, depotIndex)
+    local pedName = depot.pedName or depot.label or 'Bus Depot'
+    HPawn(depot.pedSpawn, Rotator(0, depot.pedHeading or 0, 0), function(npc)
+        if not npc then
+            return
+        end
+
+        jobPeds[#jobPeds + 1] = { npc = npc, depot = depotIndex }
+        npc:SetCharacterName(pedName)
+        SetEntityInvincible(npc, true)
+    end, { CharacterName = pedName, bShowNameplate = true })
+end
+
+local function spawnJobVehicle(depot)
+    local vehicle = HVehicle(depot.vehicleSpawn, Rotator(0, depot.vehicleHeading or 0, 0), Config.Vehicle)
+    if not vehicle then
+        return nil
+    end
+
+    if vehicle.SetFuel then
+        vehicle:SetFuel(100.0)
+    end
+    if vehicle.SetPlate then
+        vehicle:SetPlate('BUS' .. tostring(math.random(1000, 9999)))
+    end
+
+    return vehicle
 end
 
 local function getPlayerRoute(source)
@@ -13,9 +48,7 @@ local function getPlayerRoute(source)
 end
 
 local function deletePassenger(route)
-    if route and route.passenger and route.passenger:IsValid() then
-        DeleteEntity(route.passenger)
-    end
+    deleteActor(route and route.passenger)
     if route then
         route.passenger = nil
         route.hasPassenger = false
@@ -161,17 +194,12 @@ function onShutdown()
     activeRoutes = {}
 
     for _, stop in pairs(busStops) do
-        if stop and stop:IsValid() then
-            DeleteEntity(stop)
-        end
+        deleteActor(stop)
     end
     busStops = {}
 
     for i = 1, #jobPeds do
-        local ped = jobPeds[i].npc
-        if ped and ped:IsValid() then
-            DeleteEntity(ped)
-        end
+        deleteActor(jobPeds[i].npc)
     end
     jobPeds = {}
 end
@@ -188,12 +216,7 @@ RegisterServerEvent('HEvent:PlayerPossessed', function()
     end
 
     for i = 1, #Config.Locations.Depots do
-        local depot = Config.Locations.Depots[i]
-        HPawn(depot.pedSpawn.coords, Rotator(0, depot.pedSpawn.heading, 0), function(npc)
-            jobPeds[#jobPeds + 1] = { npc = npc, depot = i }
-            npc:SetCharacterName('Bus Depot')
-            SetEntityInvincible(npc, true)
-        end, { CharacterName = 'Bus Depot', bShowNameplate = true })
+        spawnJobPed(Config.Locations.Depots[i], i)
     end
 
     Initialised = true
@@ -220,13 +243,10 @@ RegisterServerEvent('qb-busjob:server:takeVehicle', function(source, args)
         return
     end
 
-    local vehicle = HVehicle(depot.vehicleSpawn.coords, Rotator(0, depot.vehicleSpawn.heading, 0), Config.Vehicle)
+    local vehicle = spawnJobVehicle(depot)
     if not vehicle then
         return
     end
-
-    vehicle:SetFuel(100.0)
-    vehicle:SetPlate('BUS' .. tostring(math.random(1000, 9999)))
 
     activeRoutes[GetPlayerId(source)] = {
         vehicle = vehicle,

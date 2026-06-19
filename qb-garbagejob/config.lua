@@ -1,5 +1,7 @@
 Config = {
+    Job = 'garbage',
     Vehicle = '/abcca-qbcore-veh/QBCoreVehicles/BP_Garbage_Truck.BP_Garbage_Truck_C',
+    TargetDistance = 1000,
     MinStops = 3,
     MaxStops = 10,
     BagLowerWorth = 300,
@@ -8,13 +10,15 @@ Config = {
     Locations = {
         Depots = {
             {
-                label        = 'West Garbage Depot',
-                pedSpawn     = { coords = Vector(-355218, -133170, -2882), heading = 176 },
-                vehicleSpawn = { coords = Vector(-356090, -133100, -2981), heading = 180 },
-                showBlip     = true,
-                blipIcon     = 'waste-basket',
-                blipColor    = LinearColor(0.2, 0.55, 0.15, 1.0),
-                description  = 'Pick up & return garbage trucks',
+                label = 'West Garbage Depot',
+                pedSpawn = Vector(521249, 607129, 4841),
+                pedHeading = 9,
+                vehicleSpawn = Vector(522224, 608081, 4841),
+                vehicleHeading = -81,
+                showBlip = true,
+                blipIcon = 'waste-basket',
+                blipColor = LinearColor(0.2, 0.55, 0.15, 1.0),
+                description = 'Pick up & return garbage trucks',
             },
         },
 
