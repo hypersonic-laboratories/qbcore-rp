@@ -1,5 +1,33 @@
 Config = {
-	pumpModels = { 'SM_Downtown_PetrolStation_Pump_01B' }
+    defaultPumpRadius = 100.0,
+    defaultPumpDistance = 1000.0,
+    defaultVehicleSearchRadius = 750.0,
+    defaultRefuelAmount = 100.0,
+    defaultMarkerType = 'Store',
+    defaultBlipIcon = 'fuel',
+    Locations = {
+        ['jetstop'] = {
+            label = 'Jet Stop',
+            coords = Vector(560952, 561972, 4570),
+            showBlip = true,
+            blipIcon = 'fuel',
+            blipColor = LinearColor(0.95, 0.72, 0.18, 1.0),
+            markerType = 'Store',
+            description = 'Fuel station',
+            pumps = {
+                Vector(562230, 561322, 4570),
+                Vector(561990, 561315, 4570),
+                Vector(562018, 562566, 4570),
+                Vector(562249, 562555, 4570),
+                Vector(561096, 562597, 4570),
+                Vector(561033, 561354, 4570),
+                Vector(560816, 561341, 4570),
+                Vector(560855, 562587, 4570),
+                Vector(559914, 562625, 4570),
+                Vector(559859, 561390, 4570),
+                Vector(559660, 561387, 4570),
+                Vector(559699, 562629, 4570),
+            },
+        },
+    },
 }
-
-return Config
