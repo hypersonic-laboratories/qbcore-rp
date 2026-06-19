@@ -130,8 +130,8 @@ end
 -- Map markers
 
 local function clearDivingMarkers()
-    for _, handle in ipairs(CurrentDivingLocation.markers) do
-        HMap.RemoveMarkerAt(handle)
+    for _, id in ipairs(CurrentDivingLocation.markers) do
+        exports['qb-hud']:RemoveMarker(id)
     end
     CurrentDivingLocation.markers = {}
 end
@@ -149,12 +149,12 @@ local function setDivingLocation(divingLocation)
     CurrentDivingLocation.area = divingLocation
 
     local areaCoords = Config.CoralLocations[divingLocation].coords.Area
-    local handle = HMap.AddMarkerAt(areaCoords, {
-        Title = Lang.t('info.diving_area'),
-        MarkerType = 'Dive',
-        SizeMultiplier = 1.5,
+    local id = exports['qb-hud']:AddMarker(areaCoords, {
+        title      = Lang.t('info.diving_area'),
+        markerType = 'Dive',
+        size       = 1.5,
     })
-    CurrentDivingLocation.markers[#CurrentDivingLocation.markers + 1] = handle
+    CurrentDivingLocation.markers[#CurrentDivingLocation.markers + 1] = id
 
     for k, v in pairs(Config.CoralLocations[divingLocation].coords.Coral) do
         exports['qb-target']:AddBoxZone('diving_coral_zone_' .. k, v.coords, v.length, v.width, {
@@ -242,12 +242,12 @@ end)
 
 RegisterClientEvent('qb-diving:client:CallCops', function(coords, msg)
     Notify(Lang.t('error.911_chatmessage') .. ': ' .. msg, 'error')
-    local handle = HMap.AddMarkerAt(Vector(coords.X, coords.Y, coords.Z), {
-        Title = Lang.t('info.blip_text'),
-        MarkerType = 'Alert',
+    local id = exports['qb-hud']:AddMarker(Vector(coords.X, coords.Y, coords.Z), {
+        title      = Lang.t('info.blip_text'),
+        markerType = 'Alert',
     })
     Timer.SetTimeout(function()
-        HMap.RemoveMarkerAt(handle)
+        exports['qb-hud']:RemoveMarker(id)
     end, 72000)
 end)
 
