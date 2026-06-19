@@ -1,410 +1,295 @@
-require('locales/en')
-local Vehicles = exports['qb-core']:GetShared('Vehicles')
-local FingerprintSessions = {}
-local States = {
-    Escorted = {}, -- <target_ped: AHCharacter, escorting_source: AHPlayerController>
-    Cuffed = {}    -- <target_citizenid: string, cuffing_source: AHPlayerController> ID used for persistence
-}
+local Lang = require('locales/en')
+local sharedWeapons = exports['qb-core']:GetShared('Weapons') or {}
 
--- Functions
+QBCore = exports['qb-core']:GetCoreObject({ 'Functions' })
 
-local function GetClosestFingerprint(coords)
-    for locId, loc in pairs(Config.Locations) do
-        for i, point in ipairs(loc.fingerprint) do
-            if coords:Dist(point) <= 500 then
-                return locId .. '_' .. i
+local updatingCops = false
+
+local function notify(source, text, notifyType, length)
+    TriggerClientEvent(source, 'QBCore:Notify', text, notifyType, length)
+end
+
+local function isLeo(Player)
+    return Player and Player.PlayerData.job and Player.PlayerData.job.type == 'leo'
+end
+
+local function isLeoOnDuty(Player)
+    return isLeo(Player) and Player.PlayerData.job.onduty
+end
+
+local function getPawnCoords(source)
+    local pawn = GetPlayerPawn(source)
+    if not pawn then
+        return nil
+    end
+    return GetEntityCoords(pawn), GetEntityHeading(pawn)
+end
+
+local function UpdateBlips()
+    local dutyPlayers = {}
+    local players = exports['qb-core']:GetQBPlayers()
+    for _, v in pairs(players) do
+        if v and (v.PlayerData.job.type == 'leo' or v.PlayerData.job.type == 'ems') and v.PlayerData.job.onduty then
+            local coords, heading = getPawnCoords(v.PlayerData.source)
+            if coords then
+                dutyPlayers[#dutyPlayers + 1] = {
+                    source = v.PlayerData.source,
+                    label = v.PlayerData.metadata['callsign'],
+                    job = v.PlayerData.job.name,
+                    location = {
+                        x = coords.X,
+                        y = coords.Y,
+                        z = coords.Z,
+                        w = heading or 0.0,
+                    },
+                }
             end
         end
     end
-    return nil
+    BroadcastEvent('qb-policejob:client:UpdateBlips', dutyPlayers)
 end
 
-local function GetEscortedTarget(source)
-    for k, v in pairs(States.Escorted) do
-        if v == source then
-            return k
+local function GetCurrentCops()
+    local amount = 0
+    local players = exports['qb-core']:GetQBPlayers()
+    for _, v in pairs(players) do
+        if isLeoOnDuty(v) then
+            amount = amount + 1
         end
     end
-    return nil
+    return amount
 end
 
-local function ToggleEscort(source, target_ped)
-    local player_ped = GetPlayerPawn(source)
-    if not player_ped then return end
-    if not target_ped then return end
-    if not target_ped:IsValid() then
-        States.Escorted[target_ped] = nil
-        return true
+RegisterCallback('qb-policejob:GetDutyPlayers', function(_)
+    local dutyPlayers = {}
+    local players = exports['qb-core']:GetQBPlayers()
+    for _, v in pairs(players) do
+        if isLeoOnDuty(v) then
+            dutyPlayers[#dutyPlayers + 1] = {
+                source = v.PlayerData.source,
+                label = v.PlayerData.metadata['callsign'],
+                job = v.PlayerData.job.name,
+            }
+        end
     end
-
-    local target_coords = GetEntityCoords(target_ped)
-    local player_coords = GetEntityCoords(player_ped)
-    local distance = player_coords:Dist(target_coords)
-    if distance > 500 then return end
-
-    if not States.Escorted[target_ped] then
-        target_ped:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_None, nil)
-        AttachActorToComponent(target_ped, player_ped:K2_GetRootComponent(), Vector(100, 50, 0), Rotator(), 'root')
-        TriggerClientEvent(target_ped:GetController(), 'qb-policejob:client:setEscorted', player_ped, true)
-        States.Escorted[target_ped] = source
-        return true
-    else
-        DetachActor(target_ped)
-        TriggerClientEvent(target_ped:GetController(), 'qb-policejob:client:setEscorted', player_ped, false)
-        States.Escorted[target_ped] = nil
-        local player_rotation = GetEntityRotation(player_ped)
-        local placing_position = player_rotation:GetForwardVector() * 100
-        SetEntityCoords(target_ped, player_coords + placing_position)
-        local root = target_ped:K2_GetRootComponent()
-        target_ped:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_Walking, nil)
-        root:SetCollisionProfileName('LyraPawnCapsule', true) -- reset pawn collision
-        return true
-    end
-end
-
-local function IsHandcuffed(CitizenId)
-    return States.Cuffed[CitizenId] ~= nil
-end
-
-exports('qb-policejob', 'IsHandcuffed', IsHandcuffed)
-
--- Callbacks
-
-RegisterCallback('escort', function(source, target_ped)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-    target_ped = target_ped or GetEscortedTarget(source)
-
-    local Success = ToggleEscort(source, target_ped)
-    return Success
+    return dutyPlayers
 end)
 
-RegisterCallback('GetCuffedState', function(source, PlayAnimation)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-
-    local Cuffed = IsHandcuffed(Player.PlayerData.citizenid)
-    if Cuffed and PlayAnimation then
-        local BaseAnimPath = '/Game/Characters/Heroes/Unified/Animations/HostageSet/'
-        local AnimParams = UE.FHelixPlayAnimParams()
-        AnimParams.AnimSlotName = 'UpperBody'
-        AnimParams.LoopCount = -1
-        Animation.Play(GetPlayerPawn(source), BaseAnimPath .. 'Paired_Handcuffs/Paired_HandcuffHostage_Loop_Vic.Paired_HandcuffHostage_Loop_Vic', AnimParams)
-    end
-    return Cuffed
+RegisterCallback('qb-policejob:GetCops', function(_)
+    return GetCurrentCops()
 end)
 
--- Events
+RegisterCallback('qb-policejob:server:isPlayerDead', function(_, playerId)
+    local Player = exports['qb-core']:GetPlayer(playerId)
+    return Player and Player.PlayerData.metadata['isdead'] or false
+end)
 
-RegisterServerEvent('qb-policejob:server:openStash', function(source)
+RegisterCallback('qb-policejob:IsSilencedWeapon', function(source, weapon)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-    local citizenId = Player.PlayerData.citizenid
-    local stashName = 'policestash_' .. citizenId
+    local weaponInfo = sharedWeapons[weapon]
+    if not Player or not weaponInfo then
+        return false
+    end
+
+    local itemInfo = Player.GetItemByName(Player, weaponInfo.name)
+    if itemInfo and itemInfo.info and itemInfo.info.attachments then
+        for k in pairs(itemInfo.info.attachments) do
+            local component = itemInfo.info.attachments[k].component
+            if component == 'COMPONENT_AT_AR_SUPP_02' or component == 'COMPONENT_AT_AR_SUPP' or component == 'COMPONENT_AT_PI_SUPP_02' or component == 'COMPONENT_AT_PI_SUPP' then
+                return true
+            end
+        end
+    end
+    return false
+end)
+
+RegisterCallback('qb-policejob:server:IsPoliceForcePresent', function(_)
+    local players = exports['qb-core']:GetQBPlayers()
+    for _, v in pairs(players) do
+        if isLeo(v) and v.PlayerData.job.grade.level >= 2 then
+            return true
+        end
+    end
+    return false
+end)
+
+Timer.CreateThread(function()
+    pcall(function()
+        exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM inventories WHERE identifier = \'policetrash\'', {})
+    end)
+end)
+
+RegisterServerEvent('qb-policejob:server:stash', function(source)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not isLeo(Player) then
+        return
+    end
+
+    local stashName = 'policestash_' .. Player.PlayerData.citizenid
     exports['qb-inventory']:OpenInventory(source, stashName)
 end)
 
-RegisterServerEvent('qb-policejob:server:retrieveVehicle', function(source, data)
+RegisterServerEvent('qb-policejob:server:trash', function(source)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-
-    local loc = Config.Locations[data.locId]
-    if not loc then return end
-
-    local PlayerGrade = Player.PlayerData.job.grade.level
-    local VehicleName = data.vehicle
-    local authorized = false
-    for i = 0, PlayerGrade do
-        if loc.authorizedVehicles[i] and loc.authorizedVehicles[i][VehicleName] then
-            authorized = true
-            break
-        end
+    if not isLeo(Player) then
+        return
     end
-    if not authorized then return end
 
-    local VehicleData = Vehicles[VehicleName]
-    if not VehicleData then return end
-
-    local SpawnLocation = loc.vehicleSpawn
-    local Vehicle = HVehicle(SpawnLocation.coords, SpawnLocation.rotation, VehicleData.asset_name)
-    Vehicle:SetPlate(Lang.t('info.police_plate') .. tostring(math.random(1000, 9999)))
+    exports['qb-inventory']:OpenInventory(source, 'policetrash', {
+        maxweight = 4000000,
+        slots = 300,
+    })
 end)
 
-RegisterServerEvent('qb-policejob:server:evidence', function(source, drawer)
+RegisterServerEvent('qb-policejob:server:evidence', function(source, currentEvidence)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-    exports['qb-inventory']:OpenInventory(source, 'evidence_' .. drawer, {
+    if not isLeo(Player) then
+        return
+    end
+
+    exports['qb-inventory']:OpenInventory(source, currentEvidence, {
         maxweight = 4000000,
         slots = 500,
     })
 end)
 
-RegisterServerEvent('qb-policejob:server:openFingerprint', function(source)
-    local PlayerPawn = GetPlayerPawn(source)
-    if not PlayerPawn then return end
-    local ClosestFingerprint = GetClosestFingerprint(GetEntityCoords(PlayerPawn))
-    if not ClosestFingerprint then return end
-
-    -- Add client to nearest fingerprint session
-    FingerprintSessions[ClosestFingerprint] = FingerprintSessions[ClosestFingerprint] or {}
-    FingerprintSessions[ClosestFingerprint][source] = true
-    TriggerClientEvent(source, 'qb-policejob:client:openFingerprint')
-end)
-
-RegisterServerEvent('qb-policejob:server:closeFingerprint', function(source)
-    local PlayerPawn = GetPlayerPawn(source)
-    if not PlayerPawn then return end
-    local ClosestFingerprint = GetClosestFingerprint(GetEntityCoords(PlayerPawn))
-    if not ClosestFingerprint then return end
-
-    -- Remove client from nearest fingerprint session
-    if FingerprintSessions[ClosestFingerprint] then
-        FingerprintSessions[ClosestFingerprint][source] = nil
-    end
-end)
-
-RegisterServerEvent('qb-policejob:server:scanFinger', function(source)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-
-    local PlayerPawn = GetPlayerPawn(source)
-    local PlayerCoords = GetEntityCoords(PlayerPawn)
-    local FingerprintId = Player.PlayerData.metadata['fingerprint']
-
-    local ClosestFingerprint = GetClosestFingerprint(PlayerCoords)
-    if not ClosestFingerprint then return end
-
-    -- Notify relevant clients to update fingerprint UI
-    for target in pairs(FingerprintSessions[ClosestFingerprint] or {}) do
-        TriggerClientEvent(target, 'qb-policejob:client:updateFingerprint', FingerprintId)
-    end
-end)
-
-
-RegisterServerEvent('qb-policejob:server:search', function(source, data)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-
-    local target_ped = data.entity
-    if not target_ped then return end
-    local target_coords = GetEntityCoords(target_ped)
-    local player_coords = GetEntityCoords(GetPlayerPawn(source))
-    local distance = player_coords:Dist(target_coords)
-    if distance > 500 then return end
-    local target_player = target_ped:GetController()
-    exports['qb-inventory']:OpenInventoryById(source, target_player)
-end)
-
-RegisterServerEvent('qb-policejob:server:handcuff', function(source, data)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' and not Player.PlayerData.job.onduty then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.on_duty_police_only'), 'error')
+RegisterServerEvent('qb-policejob:server:policeAlert', function(source, text)
+    local coords = getPawnCoords(source)
+    if not coords then
         return
     end
-    local ped = GetPlayerPawn(source)
-    local ped_coords = GetEntityCoords(ped)
-    local target_ped = data.entity
-    local target_coords = GetEntityCoords(target_ped)
-    if ped_coords:Dist(target_coords) > 500 then return end
 
-    -- Target
-    local TargetAnimParams = UE.FHelixPlayAnimParams()
-    TargetAnimParams.AnimSlotName = 'UpperBody'
-    TargetAnimParams.LoopCount = -1
-
-    -- Cuffer
-    local AnimParams = UE.FHelixPlayAnimParams()
-    AnimParams.bUseMotionWarping = true
-
-    local FinalTransform = Transform()
-    FinalTransform.Translation = GetEntityCoords(target_ped)
-    FinalTransform.Rotation = GetEntityRotation(target_ped):ToQuat()
-    AnimParams.WarpTargetTransform = FinalTransform
-
-    local BaseAnimPath = '/Game/Characters/Heroes/Unified/Animations/HostageSet/'
-    Animation.Play(ped, BaseAnimPath .. 'Paired_Handcuffs/Paired_HandcuffHostage_Start_Att.Paired_HandcuffHostage_Start_Att', AnimParams)
-    Animation.Play(target_ped, BaseAnimPath .. 'Paired_Handcuffs/Paired_HandcuffHostage_Start_Vic.Paired_HandcuffHostage_Start_Vic', TargetAnimParams)
-
-    Timer.SetTimeout(function()
-        local Controller = target_ped:GetController()
-        local TargetPlayer = exports['qb-core']:GetPlayer(Controller)
-        if not TargetPlayer then return end
-        local PlayerId = TargetPlayer.PlayerData.citizenid
-        if IsHandcuffed(PlayerId) then
-            Animation.Stop(target_ped)
-            States.Cuffed[PlayerId] = nil
-            TriggerClientEvent(Controller, 'qb-policejob:client:setCuffed', false)
-        else
-            Animation.Stop(target_ped)
-            Animation.Play(target_ped, BaseAnimPath .. 'Paired_Handcuffs/Paired_HandcuffHostage_Loop_Vic.Paired_HandcuffHostage_Loop_Vic', TargetAnimParams)
-            States.Cuffed[PlayerId] = source
-            TriggerClientEvent(Controller, 'qb-policejob:client:setCuffed', true)
-        end
-    end, 5000)
-end)
-
-RegisterServerEvent('qb-policejob:server:putvehicle', function(source, data)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-    local target_ped = data.entity
-    if not target_ped then return end
-    if not target_ped:GetController() then return end
-    local closest_vehicle, distance = GetClosestVehicle(GetEntityCoords(target_ped))
-    if not closest_vehicle or distance > 500 then return end
-    local Seats = closest_vehicle:K2_GetComponentsByClass(UE.USeatComponent):ToTable()
-    for i = 3, #Seats do
-        local Seat = Seats[i]
-        if not Seat:IsSeatOccupied() then
-            if States.Escorted[target_ped] then ToggleEscort(States.Escorted[target_ped], target_ped) end -- stop escorting if being put in vehicle
-            local VehicleParams = UE.FHEnterVehicleParams()
-            VehicleParams.bSkipAnimations = true
-            UE.UHGameplaySystemGlobals.SendEnterVehicleEventToActorBySeat(target_ped, closest_vehicle, Seat, VehicleParams)
-            return
-        end
-    end
-end)
-
-local SEATS = {
-    RR = 2,
-    RL = 3,
-}
-RegisterServerEvent('qb-policejob:server:takevehicle', function(source, data)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-
-    local SeatIndex = (data.door == 'RR' and SEATS.RR) or (data.door == 'RL' and SEATS.RL)
-    local Vehicle = data.entity
-    local Seat = Vehicle:GetSeatByIndex(SeatIndex)
-    if not Seat then return end
-    local Occupant = Seat:GetSeatOccupancy()
-    if not Occupant then return end -- Notify no occupant
-
-    local VehicleParams = UE.FHExitVehicleParams()
-    VehicleParams.bSkipAnimations = true
-    UE.UHGameplaySystemGlobals.SendExitVehicleEventToActor(Occupant, VehicleParams)
-end)
-
-RegisterServerEvent('qb-policejob:server:toggleTracker', function(source, args)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-
-    local TargetPlayer = exports['qb-core']:GetPlayerByCitizenId(args.CitizenId)
-    if not TargetPlayer then return end
-
-    local TargetPed = GetPlayerPawn(TargetPlayer.PlayerData.source)
-    if not TargetPed then return end
-
-    local PlayerPawn = GetPlayerPawn(source)
-    local PlayerCoords = GetEntityCoords(PlayerPawn)
-    local TargetCoords = GetEntityCoords(TargetPed)
-    local distance = PlayerCoords:Dist(TargetCoords)
-    if distance > 500 then return end
-
-    local NewTrackerState = not TargetPlayer.PlayerData.metadata.tracker
-    TargetPlayer.SetMetaData('tracker', NewTrackerState)
-
-    local FirstName = TargetPlayer.PlayerData.charinfo.firstname
-    local LastName = TargetPlayer.PlayerData.charinfo.lastname
-    local NameData = { firstname = FirstName, lastname = LastName }
-    TriggerClientEvent(source, 'QBCore:Notify', NewTrackerState and Lang.t('success.put_anklet_on', NameData) or Lang.t('success.took_anklet_from', NameData), 'success')
-    TriggerClientEvent(TargetPlayer.PlayerData.source, 'QBCore:Notify', NewTrackerState and Lang.t('success.put_anklet') or Lang.t('success.anklet_taken_off'), 'success')
-
-    TargetPlayer.PlayerData.metadata.tracker = NewTrackerState -- transient, used for UI update
-    TriggerClientEvent(source, 'qb-policejob:client:viewCriminalRecord', { PlayerData = TargetPlayer.PlayerData })
-end)
-
-RegisterServerEvent('qb-policejob:server:info', function(source, data)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' then return end
-    local target_ped = data.entity or GetPlayerPawn(source)
-    if not target_ped then return end
-    local OtherPlayer = exports['qb-core']:GetPlayer(target_ped:GetController())
-    if not OtherPlayer then return end
-    TriggerClientEvent(source, 'qb-policejob:client:checkCitizenInfo', OtherPlayer.PlayerData)
-end)
---[[
-Events.SubscribeRemote('qb-policejob:server:leaveCamera', function(source, coords)
-    source:SetCameraLocation(coords)
-    local newChar = HCharacter(coords, Rotator(), source)
-    local player_dimension = source:GetDimension()
-    newChar:SetDimension(player_dimension)
-    source:Possess(newChar)
-end)
-
-Events.SubscribeRemote('qb-policejob:server:policeAlert', function(source, text)
-    local ped = source:GetControlledCharacter()
-    if not ped then return end
-    local ped_coords = ped:GetLocation()
-    local players = QBCore.Functions.GetQBPlayers()
+    local players = exports['qb-core']:GetQBPlayers()
     for _, v in pairs(players) do
-        if v and v.PlayerData.job.type == 'leo' and v.PlayerData.job.onduty then
-            Events.CallRemote('qb-policejob:client:policeAlert', v.PlayerData.source, ped_coords, text)
+        if isLeoOnDuty(v) then
+            local alertData = { title = Lang.t('info.new_call'), coords = { x = coords.X, y = coords.Y, z = coords.Z }, description = text }
+            TriggerClientEvent(v.PlayerData.source, 'qb-phone:client:addPoliceAlert', alertData)
+            TriggerClientEvent(v.PlayerData.source, 'qb-policejob:client:policeAlert', coords, text)
         end
     end
 end)
 
-Events.SubscribeRemote('qb-policejob:server:panicButton', function(source)
-    local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' and not Player.PlayerData.job.onduty then
-        Events.CallRemote('QBCore:Notify', source, Lang.t('error.on_duty_police_only'), 'error')
+RegisterServerEvent('qb-policejob:server:SendEmergencyMessage', function(_, coords, message)
+    if not coords then
         return
     end
-    local ped = source:GetControlledCharacter()
-    local ped_coords = ped:GetLocation()
-    local players = QBCore.Functions.GetQBPlayers()
-    local text = Lang.t('info.officer_down', { lastname = Player.PlayerData.charinfo.lastname, callsign = Player.PlayerData.metadata.callsign })
+
+    local players = exports['qb-core']:GetQBPlayers()
     for _, v in pairs(players) do
-        if v and v.PlayerData.job.type == 'leo' and v.PlayerData.job.onduty then
-            Events.CallRemote('qb-policejob:client:policeAlert', v.PlayerData.source, ped_coords, text)
+        if isLeoOnDuty(v) then
+            local alertData = { title = Lang.t('info.new_call'), coords = { x = coords.X or coords.x, y = coords.Y or coords.y, z = coords.Z or coords.z }, description = message }
+            TriggerClientEvent(v.PlayerData.source, 'qb-phone:client:addPoliceAlert', alertData)
+            TriggerClientEvent(v.PlayerData.source, 'qb-policejob:client:policeAlert', coords, message)
         end
     end
-end)]]
+end)
 
--- Items
+RegisterServerEvent('qb-policejob:server:UpdateBlips', function(_)
+    UpdateBlips()
+end)
 
-local function handcuff(source)
-    local closest_player, distance = QBCore.Functions.GetClosestPlayer(source)
-    if not closest_player or distance > 500 then return end
-    local ped = source:GetControlledCharacter()
-    local target_ped = closest_player:GetControlledCharacter()
-    local target_coords = target_ped:GetLocation()
-    ped:PlayAnimation('rp-anims-k::Paired_HandcuffHostage_Start_Att', AnimationSlotType.FullBody, false, 0.5, 0.5)
-    target_ped:PlayAnimation('rp-anims-k::Paired_HandcuffHostage_Start_Vic', AnimationSlotType.FullBody, false, 0.5, 0.5)
+RegisterServerEvent('qb-policejob:server:UpdateCurrentCops', function(_)
+    if updatingCops then
+        return
+    end
+    updatingCops = true
+    BroadcastEvent('qb-policejob:SetCopCount', GetCurrentCops())
+    updatingCops = false
+end)
 
-    Timer.SetTimeout(function()
-        if target_ped:GetValue('is_cuffed', false) then
-            target_ped:GetValue('handcuffs'):Destroy()
-            target_ped:StopAnimation('rp-anims-k::Paired_HandcuffHostage_Loop_Vic')
-            target_ped:SetValue('is_cuffed', false, true)
-        else
-            local handcuffs = StaticMesh(target_coords, Rotator(), 'abcca-qbcore::SM_Handcuffs', CollisionType.NoCollision)
-            handcuffs:AttachTo(target_ped, AttachmentRule.SnapToTarget, 'hand_r', 0, true)
-            target_ped:PlayAnimation('rp-anims-k::Paired_HandcuffHostage_Loop_Vic', AnimationSlotType.UpperBody, true, 0.5, 0.5)
-            target_ped:SetValue('is_cuffed', true, true)
-            target_ped:SetValue('handcuffs', handcuffs, true)
-        end
-    end, 5000)
-end
+RegisterServerEvent('qb-policejob:server:SetHandcuffStatus', function(source, handcuffed)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if Player then
+        Player.SetMetaData(Player, 'ishandcuffed', handcuffed)
+    end
+end)
+
+RegisterServerEvent('qb-policejob:server:showFingerprint', function(source, playerId)
+    TriggerClientEvent(playerId, 'qb-policejob:client:showFingerprint', source)
+    TriggerClientEvent(source, 'qb-policejob:client:showFingerprint', playerId)
+end)
+
+RegisterServerEvent('qb-policejob:server:showFingerprintId', function(source, sessionId)
+    local Player = exports['qb-core']:GetPlayer(source)
+    local fid = Player and Player.PlayerData.metadata['fingerprint'] or nil
+    TriggerClientEvent(sessionId, 'qb-policejob:client:showFingerprintId', fid)
+    TriggerClientEvent(source, 'qb-policejob:client:showFingerprintId', fid)
+end)
+
+RegisterServerEvent('qb-policejob:server:SetTracker', function(source, targetId)
+    local Target = exports['qb-core']:GetPlayer(targetId)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player or not Target or not isLeoOnDuty(Player) then
+        return
+    end
+
+    local TrackerMeta = Target.PlayerData.metadata['tracker']
+    if TrackerMeta then
+        Target.SetMetaData(Target, 'tracker', false)
+        notify(targetId, Lang.t('success.anklet_taken_off'), 'success')
+        notify(source, Lang.t('success.took_anklet_from', { firstname = Target.PlayerData.charinfo.firstname, lastname = Target.PlayerData.charinfo.lastname }), 'success')
+        TriggerClientEvent(targetId, 'qb-policejob:client:SetTracker', false)
+    else
+        Target.SetMetaData(Target, 'tracker', true)
+        notify(targetId, Lang.t('success.put_anklet'), 'success')
+        notify(source, Lang.t('success.put_anklet_on', { firstname = Target.PlayerData.charinfo.firstname, lastname = Target.PlayerData.charinfo.lastname }), 'success')
+        TriggerClientEvent(targetId, 'qb-policejob:client:SetTracker', true)
+    end
+end)
+
+RegisterServerEvent('qb-policejob:server:SendTrackerLocation', function(source, coords, requestId)
+    local Target = exports['qb-core']:GetPlayer(source)
+    if not Target then
+        return
+    end
+
+    local msg = Lang.t('info.target_location', { firstname = Target.PlayerData.charinfo.firstname, lastname = Target.PlayerData.charinfo.lastname })
+    local alertData = {
+        title = Lang.t('info.anklet_location'),
+        coords = {
+            x = coords.X or coords.x,
+            y = coords.Y or coords.y,
+            z = coords.Z or coords.z,
+        },
+        description = msg,
+    }
+    TriggerClientEvent(requestId, 'qb-policejob:client:TrackerMessage', msg, coords)
+    TriggerClientEvent(requestId, 'qb-phone:client:addPoliceAlert', alertData)
+end)
+
+Timer.SetInterval(function()
+    BroadcastEvent('qb-policejob:SetCopCount', GetCurrentCops())
+end, 1000 * 60 * 10)
+
+Timer.SetInterval(function()
+    UpdateBlips()
+end, 5000)
 
 exports['qb-core']:CreateUseableItem('handcuffs', { event = 'qb-policejob:server:useHandcuffs' })
+exports['qb-core']:CreateUseableItem('moneybag', { event = 'qb-policejob:server:useMoneyBag' })
 
 RegisterServerEvent('qb-policejob:server:useHandcuffs', function(source)
-    local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
-    if Player.PlayerData.job.type ~= 'leo' or not Player.PlayerData.job.onduty then
-        TriggerClientEvent(source, 'QBCore:Notify', Lang.t('error.on_duty_police_only'), 'error')
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player or not Player.GetItemByName(Player, 'handcuffs') then
         return
     end
-    handcuff(source)
+    TriggerClientEvent(source, 'qb-policejob:client:CuffPlayerSoft')
+end)
+
+RegisterServerEvent('qb-policejob:server:useMoneyBag', function(source, item)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player then
+        return
+    end
+    if not Player.GetItemByName(Player, 'moneybag') or not item or not item.info or item.info == '' then
+        return
+    end
+    if Player.PlayerData.job.type ~= 'leo' then
+        return
+    end
+
+    if not exports['qb-inventory']:RemoveItem(source, 'moneybag', 1, item.slot, 'qb-policejob:moneybag') then
+        return
+    end
+    Player.AddMoney(Player, 'cash', tonumber(item.info.cash), 'qb-policejob:moneybag')
 end)

@@ -1,0 +1,2 @@
+-- TODO(helix): Flagged-plate ANPR/radar checks need Helix vehicle and plate APIs.
+-- The server-side plate flag state is kept so this can be wired back in later.

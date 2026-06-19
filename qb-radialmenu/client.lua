@@ -162,7 +162,7 @@ local function SetupRadialMenu()
     --             title = Lang.t('options.emergency_button'),
     --             icon = 'circle-exclamation',
     --             type = 'client',
-    --             event = 'police:client:SendPoliceEmergencyAlert',
+    --             event = 'qb-policejob:client:SendPoliceEmergencyAlert',
     --             shouldClose = true,
     --         },
     --     }

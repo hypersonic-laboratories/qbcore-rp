@@ -49,42 +49,42 @@ Config.MenuItems = {
                     title = 'Cuff',
                     icon = 'user-lock',
                     type = 'client',
-                    event = 'police:client:CuffPlayerSoft',
+                    event = 'qb-policejob:client:CuffPlayerSoft',
                     shouldClose = true
                 }, {
                 id = 'playerinvehicle',
                 title = 'Put In Vehicle',
                 icon = 'car-side',
                 type = 'client',
-                event = 'police:client:PutPlayerInVehicle',
+                event = 'qb-policejob:client:PutPlayerInVehicle',
                 shouldClose = true
             }, {
                 id = 'playeroutvehicle',
                 title = 'Take Out Of Vehicle',
                 icon = 'car-side',
                 type = 'client',
-                event = 'police:client:SetPlayerOutVehicle',
+                event = 'qb-policejob:client:SetPlayerOutVehicle',
                 shouldClose = true
             }, {
                 id = 'stealplayer',
                 title = 'Rob',
                 icon = 'mask',
                 type = 'client',
-                event = 'police:client:RobPlayer',
+                event = 'qb-policejob:client:RobPlayer',
                 shouldClose = true
             }, {
                 id = 'escort',
                 title = 'Kidnap',
                 icon = 'user-group',
                 type = 'client',
-                event = 'police:client:KidnapPlayer',
+                event = 'qb-policejob:client:KidnapPlayer',
                 shouldClose = true
             }, {
                 id = 'escort2',
                 title = 'Escort',
                 icon = 'user-group',
                 type = 'client',
-                event = 'police:client:EscortPlayer',
+                event = 'qb-policejob:client:EscortPlayer',
                 shouldClose = true
             }, {
                 id = 'escort554',
@@ -462,7 +462,7 @@ Config.JobInteractions = {
             title = 'Emergency button',
             icon = 'bell',
             type = 'client',
-            event = 'police:client:SendPoliceEmergencyAlert',
+            event = 'qb-policejob:client:SendPoliceEmergencyAlert',
             shouldClose = true
         },
         {
@@ -564,7 +564,7 @@ Config.JobInteractions = {
             title = 'Emergency button',
             icon = 'bell',
             type = 'client',
-            event = 'police:client:SendPoliceEmergencyAlert',
+            event = 'qb-policejob:client:SendPoliceEmergencyAlert',
             shouldClose = true
         }, {
         id = 'checkvehstatus',
@@ -585,7 +585,7 @@ Config.JobInteractions = {
         title = 'Revoke Drivers License',
         icon = 'id-card',
         type = 'client',
-        event = 'police:client:SeizeDriverLicense',
+        event = 'qb-policejob:client:SeizeDriverLicense',
         shouldClose = true
     }, {
         id = 'policeinteraction',
@@ -604,28 +604,28 @@ Config.JobInteractions = {
             title = 'Check status',
             icon = 'question',
             type = 'client',
-            event = 'police:client:CheckStatus',
+            event = 'qb-policejob:client:CheckStatus',
             shouldClose = true
         }, {
             id = 'escort',
             title = 'Escort',
             icon = 'user-group',
             type = 'client',
-            event = 'police:client:EscortPlayer',
+            event = 'qb-policejob:client:EscortPlayer',
             shouldClose = true
         }, {
             id = 'searchplayer',
             title = 'Search',
             icon = 'magnifying-glass',
             type = 'server',
-            event = 'police:server:SearchPlayer',
+            event = 'qb-policejob:server:SearchPlayer',
             shouldClose = true
         }, {
             id = 'jailplayer',
             title = 'Jail',
             icon = 'user-lock',
             type = 'client',
-            event = 'police:client:JailPlayer',
+            event = 'qb-policejob:client:JailPlayer',
             shouldClose = true
         }
         }
@@ -639,49 +639,49 @@ Config.JobInteractions = {
                 title = 'Cone',
                 icon = 'triangle-exclamation',
                 type = 'client',
-                event = 'police:client:spawnCone',
+                event = 'qb-policejob:client:spawnCone',
                 shouldClose = false
             }, {
             id = 'spawnhek',
             title = 'Gate',
             icon = 'torii-gate',
             type = 'client',
-            event = 'police:client:spawnBarrier',
+            event = 'qb-policejob:client:spawnBarrier',
             shouldClose = false
         }, {
             id = 'spawnschotten',
             title = 'Speed Limit Sign',
             icon = 'sign-hanging',
             type = 'client',
-            event = 'police:client:spawnRoadSign',
+            event = 'qb-policejob:client:spawnRoadSign',
             shouldClose = false
         }, {
             id = 'spawntent',
             title = 'Tent',
             icon = 'campground',
             type = 'client',
-            event = 'police:client:spawnTent',
+            event = 'qb-policejob:client:spawnTent',
             shouldClose = false
         }, {
             id = 'spawnverlichting',
             title = 'Lighting',
             icon = 'lightbulb',
             type = 'client',
-            event = 'police:client:spawnLight',
+            event = 'qb-policejob:client:spawnLight',
             shouldClose = false
         }, {
             id = 'spikestrip',
             title = 'Spike Strips',
             icon = 'caret-up',
             type = 'client',
-            event = 'police:client:SpawnSpikeStrip',
+            event = 'qb-policejob:client:SpawnSpikeStrip',
             shouldClose = false
         }, {
             id = 'deleteobject',
             title = 'Remove object',
             icon = 'trash',
             type = 'client',
-            event = 'police:client:deleteObject',
+            event = 'qb-policejob:client:deleteObject',
             shouldClose = false
         }
         }

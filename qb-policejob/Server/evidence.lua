@@ -1,38 +1,107 @@
-local Weapons = exports['qb-core']:GetShared('Weapons')
-local EvidenceTypes = {
-    Casings = {},
-    BloodDrops = {},
-    Fingerprints = {},
-}
+local Lang = require('locales/en')
+local sharedItems = exports['qb-core']:GetShared('Items') or {}
+local sharedWeapons = exports['qb-core']:GetShared('Weapons') or {}
+
+local Casings = {}
+local BloodDrops = {}
+local FingerDrops = {}
 local PlayerStatus = {}
 
--- Functions
-
--- Only trigger events to police
-local function TriggerCLPoliceEvent(event, ...)
-    local Players = exports['qb-core']:GetQBPlayers()
-    for _, Player in pairs(Players) do
-        if Player.PlayerData.job.type == 'leo' then
-            TriggerClientEvent(Player.PlayerData.source, event, ...)
-        end
-    end
+local function notify(source, text, notifyType)
+    TriggerClientEvent(source, 'QBCore:Notify', text, notifyType)
 end
 
----@param EvidenceType string The key of the evidence type to create a unique id for
-local function CreateEvidenceId(EvidenceType)
-    if not EvidenceTypes[EvidenceType] then
+local function CreateBloodId()
+    local bloodId = 'blood-' .. GenerateId(8, 'mixed')
+    while BloodDrops[bloodId] do
+        bloodId = 'blood-' .. GenerateId(8, 'mixed')
+    end
+    return bloodId
+end
+
+local function CreateFingerId()
+    local fingerId = 'fingerprint-' .. GenerateId(8, 'mixed')
+    while FingerDrops[fingerId] do
+        fingerId = 'fingerprint-' .. GenerateId(8, 'mixed')
+    end
+    return fingerId
+end
+
+local function CreateCasingId()
+    local caseId = 'casing-' .. GenerateId(8, 'mixed')
+    while Casings[caseId] do
+        caseId = 'casing-' .. GenerateId(8, 'mixed')
+    end
+    return caseId
+end
+
+RegisterCallback('qb-policejob:GetPlayerStatus', function(_, playerId)
+    local Player = exports['qb-core']:GetPlayer(playerId)
+    local statList = {}
+    if Player and PlayerStatus[Player.PlayerData.source] and next(PlayerStatus[Player.PlayerData.source]) then
+        for k in pairs(PlayerStatus[Player.PlayerData.source]) do
+            statList[#statList + 1] = PlayerStatus[Player.PlayerData.source][k].text
+        end
+    end
+    return statList
+end)
+
+RegisterServerEvent('qb-policejob:server:UpdateStatus', function(source, data)
+    PlayerStatus[source] = data
+end)
+
+RegisterServerEvent('qb-policejob:server:CreateBloodDrop', function(_, citizenid, bloodtype, coords)
+    local bloodId = CreateBloodId()
+    BloodDrops[bloodId] = {
+        dna = citizenid,
+        bloodtype = bloodtype,
+    }
+    BroadcastEvent('qb-policejob:client:AddBlooddrop', bloodId, citizenid, bloodtype, coords)
+end)
+
+RegisterServerEvent('qb-policejob:server:CreateFingerDrop', function(source, coords)
+    local Player = exports['qb-core']:GetPlayer(source)
+    if not Player then
         return
     end
 
-    local UniqueId = GenerateId(8, 'number')
-    if EvidenceTypes[EvidenceType][UniqueId] then
-        return CreateEvidenceId(EvidenceType)
-    end -- if id already exists, try again
+    local fingerId = CreateFingerId()
+    FingerDrops[fingerId] = Player.PlayerData.metadata['fingerprint']
+    BroadcastEvent('qb-policejob:client:AddFingerPrint', fingerId, Player.PlayerData.metadata['fingerprint'], coords)
+end)
 
-    return UniqueId
-end
+RegisterServerEvent('qb-policejob:server:ClearBlooddrops', function(_, blooddropList)
+    if blooddropList and next(blooddropList) then
+        for _, v in pairs(blooddropList) do
+            BroadcastEvent('qb-policejob:client:RemoveBlooddrop', v)
+            BloodDrops[v] = nil
+        end
+    end
+end)
 
--- Events
+RegisterServerEvent('qb-policejob:server:AddBlooddropToInventory', function(source, bloodId, bloodInfo)
+    if exports['qb-inventory']:RemoveItem(source, 'empty_evidence_bag', 1, false, 'qb-policejob:server:AddBlooddropToInventory') then
+        if exports['qb-inventory']:AddItem(source, 'filled_evidence_bag', 1, false, bloodInfo, 'qb-policejob:server:AddBlooddropToInventory') then
+            TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems['filled_evidence_bag'], 'add')
+            BroadcastEvent('qb-policejob:client:RemoveBlooddrop', bloodId)
+            BloodDrops[bloodId] = nil
+        end
+    else
+        notify(source, Lang.t('error.have_evidence_bag'), 'error')
+    end
+end)
+
+RegisterServerEvent('qb-policejob:server:AddFingerprintToInventory', function(source, fingerId, fingerInfo)
+    if exports['qb-inventory']:RemoveItem(source, 'empty_evidence_bag', 1, false, 'qb-policejob:server:AddFingerprintToInventory') then
+        if exports['qb-inventory']:AddItem(source, 'filled_evidence_bag', 1, false, fingerInfo, 'qb-policejob:server:AddFingerprintToInventory') then
+            TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems['filled_evidence_bag'], 'add')
+            BroadcastEvent('qb-policejob:client:RemoveFingerprint', fingerId)
+            FingerDrops[fingerId] = nil
+        end
+    else
+        notify(source, Lang.t('error.have_evidence_bag'), 'error')
+    end
+end)
 
 RegisterServerEvent('qb-policejob:server:CreateCasing', function(source, weapon, coords)
     local Player = exports['qb-core']:GetPlayer(source)
@@ -40,101 +109,40 @@ RegisterServerEvent('qb-policejob:server:CreateCasing', function(source, weapon,
         return
     end
 
-    local WeaponItem = Player.GetItemByName(weapon)
-    local SerialNumber
-    if WeaponItem and type(WeaponItem.info) == 'table' then
-        SerialNumber = WeaponItem.info.serie
+    local casingId = CreateCasingId()
+    local weaponInfo = sharedWeapons[weapon]
+    local serieNumber = nil
+    if weaponInfo then
+        local weaponItem = Player.GetItemByName(Player, weaponInfo.name)
+        if weaponItem and weaponItem.info and weaponItem.info ~= '' then
+            serieNumber = weaponItem.info.serie
+        end
     end
 
-    local casing = {
-        id = CreateEvidenceId('Casings'),
+    Casings[casingId] = {
         weapon = weapon,
-        serialNumber = SerialNumber,
-        coords = coords,
-        time = os.time(),
+        serie = serieNumber,
     }
-    EvidenceTypes.Casings[casing.id] = casing
-    TriggerCLPoliceEvent('qb-policejob:client:SyncNewCasing', casing)
+    BroadcastEvent('qb-policejob:client:AddCasing', casingId, weapon, coords, serieNumber)
 end)
 
---@TODO: Sync with ambulance job damage system
-RegisterServerEvent('qb-policejob:server:CreateBlooddrop', function(source, coords)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then
-        return
+RegisterServerEvent('qb-policejob:server:ClearCasings', function(_, casingList)
+    if casingList and next(casingList) then
+        for _, v in pairs(casingList) do
+            BroadcastEvent('qb-policejob:client:RemoveCasing', v)
+            Casings[v] = nil
+        end
     end
-
-    local CitizenId = Player.PlayerData.citizenid
-    local BloodType = Player.PlayerData.metadata.bloodtype
-
-    local BloodDrop = {
-        id = CreateEvidenceId('BloodDrops'),
-        citizenId = CitizenId,
-        bloodType = BloodType,
-        coords = coords,
-    }
-    EvidenceTypes.BloodDrops[BloodDrop.id] = BloodDrop
-    TriggerCLPoliceEvent('qb-policejob:client:SyncNewBlooddrop', BloodDrop)
 end)
 
--- Triggered by packages to create a player fingerprint
-RegisterServerEvent('qb-policejob:server:CreateFingerprint', function(source, coords)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then
-        return
+RegisterServerEvent('qb-policejob:server:AddCasingToInventory', function(source, casingId, casingInfo)
+    if exports['qb-inventory']:RemoveItem(source, 'empty_evidence_bag', 1, false, 'qb-policejob:server:AddCasingToInventory') then
+        if exports['qb-inventory']:AddItem(source, 'filled_evidence_bag', 1, false, casingInfo, 'qb-policejob:server:AddCasingToInventory') then
+            TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems['filled_evidence_bag'], 'add')
+            BroadcastEvent('qb-policejob:client:RemoveCasing', casingId)
+            Casings[casingId] = nil
+        end
+    else
+        notify(source, Lang.t('error.have_evidence_bag'), 'error')
     end
-
-    local Fingerprint = {
-        id = CreateEvidenceId('Fingerprints'),
-        playerFingerprint = Player.PlayerData.metadata.fingerprint,
-        coords = coords,
-    }
-    Fingerprints[Fingerprint.id] = Fingerprint
-    TriggerCLPoliceEvent('qb-policejob:client:SyncNewFingerprint', Fingerprint)
-end)
-
-RegisterServerEvent('qb-policejob:server:UpdateStatus', function(source, statusList)
-    PlayerStatus[source] = statusList
-end)
-
--- Callbacks
-
-RegisterCallback('GetPlayerStatus', function(source)
-    local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then
-        return
-    end
-    if Player.PlayerData.job.type ~= 'leo' then
-        return
-    end
-
-    local PlayerPawn = GetPlayerPawn(source)
-    if not PlayerPawn then
-        return
-    end
-
-    local PlayerCoords = GetEntityCoords(PlayerPawn)
-    local ClosestPawn = GetClosestPawn(PlayerCoords, 500)
-    if not ClosestPawn or not ClosestPawn:IsPlayerControlled() then
-        exports['qb-core']:NotifyPlayer(source, 'You\'re not close enough to check status', 'error')
-        return
-    end
-
-    local ClosestPlayerStatus = PlayerStatus[ClosestPawn:GetController()]
-    if not ClosestPlayerStatus then
-        exports['qb-core']:NotifyPlayer(source, 'Player status is normal')
-        return
-    end
-
-    local FormattedStatuses = {}
-    for k, v in pairs(ClosestPlayerStatus) do
-        table.insert(FormattedStatuses, v.text)
-    end
-
-    if #FormattedStatuses <= 0 then
-        exports['qb-core']:NotifyPlayer(source, 'Player status is normal')
-        return
-    end
-
-    return FormattedStatuses
 end)
