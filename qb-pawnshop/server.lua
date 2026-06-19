@@ -53,13 +53,8 @@ local function ExploitBan(source, reason)
     local playerName = exports['qb-core']:GetPlayerName(source) or tostring(source)
     local license = Player and Player.PlayerData and Player.PlayerData.license or nil
 
-    exports['qb-core']:DatabaseAction(
-        'Execute',
-        'INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        { playerName, license or '', '', '', reason, 2147483647, 'qb-pawnshop' }
-    )
-    TriggerLocalServerEvent('qb-log:server:CreateLog', 'pawnshop', 'Player Banned', 'red',
-        string.format('%s was banned by qb-pawnshop for %s', playerName, reason), true)
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO bans (name, license, discord, ip, reason, expire, bannedby) VALUES (?, ?, ?, ?, ?, ?, ?)', { playerName, license or '', '', '', reason, 2147483647, 'qb-pawnshop' })
+    TriggerLocalServerEvent('qb-log:server:CreateLog', 'pawnshop', 'Player Banned', 'red', string.format('%s was banned by qb-pawnshop for %s', playerName, reason), true)
     source:Kick('You were permanently banned by the server for: Exploiting')
 end
 
@@ -68,29 +63,29 @@ local function SendMeltNotification(source)
         local Player = exports['qb-core']:GetPlayer(source)
         if Player and Player.PlayerData then
             local mailId = tostring(math.random(100000, 999999))
-            exports['qb-core']:DatabaseAction(
-                'Execute',
-                'INSERT INTO player_mails (citizenid, sender, sender_number, subject, message, read, starred, mailid) VALUES (?, ?, ?, ?, ?, 0, 0, ?)',
-                {
-                    Player.PlayerData.citizenid,
-                    Lang.t('info.title'),
-                    'pawnshop',
-                    Lang.t('info.subject'),
-                    Lang.t('info.message'),
-                    mailId,
-                }
+            exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO player_mails (citizenid, sender, sender_number, subject, message, read, starred, mailid) VALUES (?, ?, ?, ?, ?, 0, 0, ?)', {
+                Player.PlayerData.citizenid,
+                Lang.t('info.title'),
+                'pawnshop',
+                Lang.t('info.subject'),
+                Lang.t('info.message'),
+                mailId,
+            })
+            TriggerClientEvent(
+                source,
+                'qb-phone:client:emailReceived',
+                JSON.stringify({
+                    id = tonumber(mailId),
+                    from = Lang.t('info.title'),
+                    fromNumber = 'pawnshop',
+                    subject = Lang.t('info.subject'),
+                    snippet = Lang.t('info.message'),
+                    body = Lang.t('info.message'),
+                    time = os.date('%H:%M'),
+                    read = false,
+                    starred = false,
+                })
             )
-            TriggerClientEvent(source, 'qb-phone:client:emailReceived', JSON.stringify({
-                id = tonumber(mailId),
-                from = Lang.t('info.title'),
-                fromNumber = 'pawnshop',
-                subject = Lang.t('info.subject'),
-                snippet = Lang.t('info.message'),
-                body = Lang.t('info.message'),
-                time = os.date('%H:%M'),
-                read = false,
-                starred = false,
-            }))
             return
         end
     end
@@ -117,11 +112,11 @@ RegisterServerEvent('qb-pawnshop:server:sellPawnItems', function(source, itemNam
     end
 
     local totalPrice = amount * pawnItem.price
-    if Player:RemoveItem(itemName, amount, false) then
+    if Player.RemoveItem(itemName, amount, false) then
         if Config.BankMoney then
-            Player:AddMoney('bank', totalPrice, 'qb-pawnshop:server:sellPawnItems')
+            Player.AddMoney('bank', totalPrice, 'qb-pawnshop:server:sellPawnItems')
         else
-            Player:AddMoney('cash', totalPrice, 'qb-pawnshop:server:sellPawnItems')
+            Player.AddMoney('cash', totalPrice, 'qb-pawnshop:server:sellPawnItems')
         end
         Notify(source, Lang.t('success.sold', { value = amount, value2 = ItemLabel(itemName), value3 = totalPrice }), 'success')
         TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[itemName], 'remove')
@@ -154,7 +149,7 @@ RegisterServerEvent('qb-pawnshop:server:meltItemRemove', function(source, itemNa
         return
     end
 
-    if Player:RemoveItem(itemName, amount, false) then
+    if Player.RemoveItem(itemName, amount, false) then
         TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[itemName], 'remove')
         local meltTime = amount * meltItem.meltTime
         activeMelts[source] = true
@@ -203,7 +198,7 @@ RegisterServerEvent('qb-pawnshop:server:pickupMelted', function(source)
     for _, melted in pairs(meltedItems) do
         for _, reward in pairs(melted.rewards or {}) do
             local rewardAmount = melted.amount * reward.amount
-            if Player:AddItem(reward.item, rewardAmount, false, false) then
+            if Player.AddItem(reward.item, rewardAmount, false, false) then
                 TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems[reward.item], 'add')
                 Notify(source, Lang.t('success.items_received', { value = rewardAmount, value2 = ItemLabel(reward.item) }), 'success')
             else
