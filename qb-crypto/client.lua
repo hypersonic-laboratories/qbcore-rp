@@ -121,8 +121,6 @@ RegisterClientEvent('qb-crypto:client:GetRebootState', function(rebootInfo)
     Crypto.Exchange.RebootInfo.percentage = rebootInfo.percentage or 0
 end)
 
-Timer.SetTimeout(RegisterExchangeTarget, 1000)
-
 function onShutdown()
     SetRequiredItemsVisible(false)
     RemoveExchangeTarget()
