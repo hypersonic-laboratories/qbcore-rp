@@ -4,7 +4,7 @@ Config = {
     VehicleTargetDistance = 4000,
     VehiclePlatePrefix = 'D-',
     VehicleSpawnZOffset = 20,
-    DeliveryMarkerIcon = 'map-pin-check',
+    DeliveryMarkerIcon = 'marker',
     DeliveryMarkerColor = LinearColor(0.2, 0.85, 0.35, 1.0),
     Stops = { Minimum = 3, Maximum = 5 },
 
