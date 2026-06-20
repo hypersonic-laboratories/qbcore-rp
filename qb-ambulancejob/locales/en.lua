@@ -76,7 +76,7 @@ local Translations = {
     },
     menu = {
         amb_vehicles = 'Vehicles',
-        amb_helicotpers = 'Helicopters',
+        amb_helicopters = 'Helicopters',
         status = 'Health Status',
         close = '⬅ Close Menu',
     },
