@@ -13,6 +13,7 @@ local Translations = {
         ['nonb'] = 'No one nearby!',
         ['noaccess'] = 'Not Accessible',
         ['nosell'] = 'You can\'t sell this item..',
+        ['invinuse'] = 'Inventory is in use',
         ['itemexist'] = 'Item doesn\'t exist',
         ['notencash'] = 'You don\'t have enough cash..',
         ['noitem'] = 'You don\'t have the right items..',

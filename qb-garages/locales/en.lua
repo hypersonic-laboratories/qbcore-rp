@@ -29,6 +29,7 @@ local Translations = {
         rig_e = 'E - Rig Lot',
         depot_e = 'E - Depot',
         house_garage = 'E - House Garage',
+        house = 'House',
     },
 }
 

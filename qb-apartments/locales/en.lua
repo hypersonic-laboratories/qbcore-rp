@@ -5,6 +5,7 @@ local Translations = {
         to_far_from_door = 'You are too far away from the doorbell',
         nobody_home = 'There is nobody home..',
         nobody_at_door = 'There is nobody at the door..',
+        not_owner = 'You do not own this apartment',
     },
     success = {
         receive_apart = 'You got an apartment',
