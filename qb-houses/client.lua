@@ -25,7 +25,7 @@ local distanceInterval
 
 -- Functions
 
-local function RegisterInPropertyTarget(targetKey, coords, options, markerConfig)
+local function RegisterInPropertyTarget(targetKey, coords, options)
     if not InProperty then
         return
     end
@@ -85,7 +85,7 @@ local function RefreshEntrances()
                 coords = e.coords,
                 price = e.price or 0,
                 polyzoneBoxData = {
-                    distance = 100,
+                    distance = 1000,
                     created = false,
                 },
                 garageCoords = e.garageCoords,
@@ -185,7 +185,8 @@ local function RegisterEntranceTarget(entranceId, entranceData)
 
     if entranceId == ClosestEntranceId and OwnedEntrances[ClosestEntranceId] then
         if entranceData.garageCoords then
-            local garageCoords = entranceData.garageCoords.coords
+            local rawGarageCoords = entranceData.garageCoords.coords
+            local garageCoords = Vector(rawGarageCoords.X or rawGarageCoords.x, rawGarageCoords.Y or rawGarageCoords.y, rawGarageCoords.Z or rawGarageCoords.z)
             local garageBoxName = 'garageEntrance_' .. entranceId
 
             local garageOptions = {
@@ -201,7 +202,7 @@ local function RegisterEntranceTarget(entranceId, entranceData)
             exports['qb-target']:AddBoxZone(garageBoxName, garageCoords, 100, 100, {
                 name = garageBoxName,
                 heading = entranceData.garageCoords.heading or 0.0,
-                distance = 100,
+                distance = 1000,
                 debug = true,
             }, garageOptions)
 
@@ -254,7 +255,7 @@ local function SetInPropertyTargets(entrancePos, interiorRef)
             CurrentProperty = CurrentProperty,
         }
     end
-    RegisterInPropertyTarget('entrancePos', entrancePos, options, Config.DoorMarker)
+    RegisterInPropertyTarget('entrancePos', entrancePos, options)
 
     local shellData = Config.Shells[interiorRef]
     if not shellData then
@@ -720,7 +721,7 @@ RegisterClientEvent('qb-houses:client:GarageInteractions', function(garageCoords
             CurrentProperty = CurrentProperty,
         },
     }
-    RegisterInPropertyTarget('garageExit', { X = garageCoords.X, Y = garageCoords.Y, Z = garageCoords.Z }, options, Config.DoorMarker)
+    RegisterInPropertyTarget('garageExit', { X = garageCoords.X, Y = garageCoords.Y, Z = garageCoords.Z }, options)
     CreateVehicleTimer()
 end)
 

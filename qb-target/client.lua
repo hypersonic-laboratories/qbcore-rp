@@ -383,9 +383,9 @@ function disableTarget()
 end
 
 local function clearTarget()
-    if not target_entity then return end
+    if not target_entity and not next(nui_data) and not next(send_data) then return end
     target_entity = nil
-    nui_data = {}
+    nui_data, send_data = {}, {}
     if my_webui then my_webui:SendEvent('leftTarget') end
 end
 
@@ -427,6 +427,8 @@ Xray.RegisterListener(function(controller, target, state)
             if #nui_data > 0 and my_webui then
                 local target_icon = nui_data[1].targeticon or ''
                 my_webui:SendEvent('foundTarget', { icon = target_icon, options = nui_data })
+            else
+                clearTarget()
             end
         end
     elseif state == XrayState.EndFocus then
