@@ -7,7 +7,7 @@ local function SetMethod(methodName, handler)
         return false, 'method_exists'
     end
     QBCore.Functions[methodName] = handler
-    TriggerEvent('QBCore:Server:UpdateObject')
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'SetMethod', SetMethod)
@@ -21,7 +21,7 @@ local function SetField(fieldName, data)
         return false, 'field_exists'
     end
     QBCore[fieldName] = data
-    TriggerEvent('QBCore:Server:UpdateObject')
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'SetField', SetField)
@@ -35,8 +35,8 @@ local function AddJob(jobName, job)
         return false, 'job_exists'
     end
     QBCore.Shared.Jobs[jobName] = job
-    TriggerClientEvent('QBCore:Client:OnSharedUpdate', -1, 'Jobs', jobName, job)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdate', 'Jobs', jobName, job)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'AddJob', AddJob)
@@ -54,8 +54,8 @@ local function AddJobs(jobs)
     for key, value in pairs(jobs) do
         QBCore.Shared.Jobs[key] = value
     end
-    TriggerClientEvent('QBCore:Client:OnSharedUpdateMultiple', -1, 'Jobs', jobs)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdateMultiple', 'Jobs', jobs)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success', nil
 end
 exports('qb-core', 'AddJobs', AddJobs)
@@ -69,8 +69,8 @@ local function RemoveJob(jobName)
         return false, 'job_not_exists'
     end
     QBCore.Shared.Jobs[jobName] = nil
-    TriggerClientEvent('QBCore:Client:OnSharedUpdate', -1, 'Jobs', jobName, nil)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdate', 'Jobs', jobName, nil)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'RemoveJob', RemoveJob)
@@ -84,8 +84,8 @@ local function UpdateJob(jobName, job)
         return false, 'job_not_exists'
     end
     QBCore.Shared.Jobs[jobName] = job
-    TriggerClientEvent('QBCore:Client:OnSharedUpdate', -1, 'Jobs', jobName, job)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdate', 'Jobs', jobName, job)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'UpdateJob', UpdateJob)
@@ -99,8 +99,8 @@ local function AddItem(itemName, item)
         return false, 'item_exists'
     end
     QBCore.Shared.Items[itemName] = item
-    TriggerClientEvent('QBCore:Client:OnSharedUpdate', -1, 'Items', itemName, item)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdate', 'Items', itemName, item)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'AddItem', AddItem)
@@ -114,8 +114,8 @@ local function UpdateItem(itemName, item)
         return false, 'item_not_exists'
     end
     QBCore.Shared.Items[itemName] = item
-    TriggerClientEvent('QBCore:Client:OnSharedUpdate', -1, 'Items', itemName, item)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdate', 'Items', itemName, item)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'UpdateItem', UpdateItem)
@@ -133,8 +133,8 @@ local function AddItems(items)
     for key, value in pairs(items) do
         QBCore.Shared.Items[key] = value
     end
-    TriggerClientEvent('QBCore:Client:OnSharedUpdateMultiple', -1, 'Items', items)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdateMultiple', 'Items', items)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success', nil
 end
 exports('qb-core', 'AddItems', AddItems)
@@ -148,8 +148,8 @@ local function RemoveItem(itemName)
         return false, 'item_not_exists'
     end
     QBCore.Shared.Items[itemName] = nil
-    TriggerClientEvent('QBCore:Client:OnSharedUpdate', -1, 'Items', itemName, nil)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdate', 'Items', itemName, nil)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'RemoveItem', RemoveItem)
@@ -163,8 +163,8 @@ local function AddGang(gangName, gang)
         return false, 'gang_exists'
     end
     QBCore.Shared.Gangs[gangName] = gang
-    TriggerClientEvent('QBCore:Client:OnSharedUpdate', -1, 'Gangs', gangName, gang)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdate', 'Gangs', gangName, gang)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'AddGang', AddGang)
@@ -182,8 +182,8 @@ local function AddGangs(gangs)
     for key, value in pairs(gangs) do
         QBCore.Shared.Gangs[key] = value
     end
-    TriggerClientEvent('QBCore:Client:OnSharedUpdateMultiple', -1, 'Gangs', gangs)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdateMultiple', 'Gangs', gangs)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success', nil
 end
 exports('qb-core', 'AddGangs', AddGangs)
@@ -197,8 +197,8 @@ local function RemoveGang(gangName)
         return false, 'gang_not_exists'
     end
     QBCore.Shared.Gangs[gangName] = nil
-    TriggerClientEvent('QBCore:Client:OnSharedUpdate', -1, 'Gangs', gangName, nil)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdate', 'Gangs', gangName, nil)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'RemoveGang', RemoveGang)
@@ -212,8 +212,8 @@ local function UpdateGang(gangName, gang)
         return false, 'gang_not_exists'
     end
     QBCore.Shared.Gangs[gangName] = gang
-    TriggerClientEvent('QBCore:Client:OnSharedUpdate', -1, 'Gangs', gangName, gang)
-    TriggerEvent('QBCore:Server:UpdateObject')
+    BroadcastEvent('QBCore:Client:OnSharedUpdate', 'Gangs', gangName, gang)
+    TriggerLocalServerEvent('QBCore:Server:UpdateObject')
     return true, 'success'
 end
 exports('qb-core', 'UpdateGang', UpdateGang)
