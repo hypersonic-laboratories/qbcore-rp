@@ -451,7 +451,7 @@ local function RegisterStandTarget(stand)
 end
 
 local function StartWorking()
-    TriggerCallback('qb-hotdogjob:server:HasMoney', function(result)
+    TriggerCallback('HasMoney', function(result)
         local success = result == true or (type(result) == 'table' and result.success)
         if not success then
             local reason = type(result) == 'table' and result.reason or 'no_money'
@@ -483,7 +483,7 @@ local function StartWorking()
 end
 
 local function StopWorking()
-    TriggerCallback('qb-hotdogjob:server:BringBack', function(DidBail)
+    TriggerCallback('BringBack', function(DidBail)
         if DidBail then
             CleanupWorkState()
             Notify(Lang.t('success.deposit_returned', { deposit = Config.StandDeposit }), 'success')
@@ -510,7 +510,7 @@ local function setupPeds()
                     type = 'client',
                     event = 'qb-hotdogjob:client:ToggleWork',
                     label = Lang.t('target.toggle_work'),
-                    icon = 'hotdog',
+                    icon = 'bean',
                     job = Config.Job,
                 },
             })
@@ -619,7 +619,7 @@ RegisterClientEvent('qb-hotdogjob:client:StandRemoved', function()
     CleanupWorkState()
 end)
 
-Input.BindKey('G', function()
+Input.BindKey('K', function()
     if IsPushing then
         LetKraamLose()
     end

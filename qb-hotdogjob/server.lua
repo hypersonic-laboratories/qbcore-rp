@@ -296,7 +296,7 @@ RegisterCallback('getPeds', function()
     return jobPeds
 end)
 
-RegisterCallback('qb-hotdogjob:server:HasMoney', function(source)
+RegisterCallback('HasMoney', function(source)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then
         return { success = false }
@@ -327,7 +327,7 @@ RegisterCallback('qb-hotdogjob:server:HasMoney', function(source)
     return { success = true, stand = stand }
 end)
 
-RegisterCallback('qb-hotdogjob:server:BringBack', function(source)
+RegisterCallback('BringBack', function(source)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then
         return false
