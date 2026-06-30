@@ -1,5 +1,5 @@
 local Lang = require('locales/en')
-local player_data = {}
+local PlayerData = {}
 local hotbarShown = false
 local inv_open = false
 local my_webui = WebUI('Inventory', 'qb-inventory/html/index.html')
@@ -7,25 +7,67 @@ local my_webui = WebUI('Inventory', 'qb-inventory/html/index.html')
 -- Handlers
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
-    player_data = exports['qb-core']:GetPlayerData()
+    PlayerData = exports['qb-core']:GetPlayerData() or {}
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
-    player_data = nil
+    PlayerData = {}
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUpdated', function(key, value)
+    if key == 'all' then
+        PlayerData = value or {}
+        return
+    end
     if key == 'items' then
-        player_data.items = value
-        return
+        if type(PlayerData) ~= 'table' then
+            PlayerData = {}
+        end
+        PlayerData.items = value
     end
-    if key ~= 'all' then
-        return
-    end
-    player_data = value
 end)
 
 -- Functions
+
+--- Checks if the player has a certain item or items in their inventory with a specified amount.
+--- @param items string|table - The item(s) to check for. Can be a table of items or a single item as a string.
+--- @param amount number [optional] - The minimum amount required for each item. If not provided, any amount greater than 0 will be considered.
+--- @return boolean - Returns true if the player has the item(s) with the specified amount, false otherwise.
+function HasItem(items, amount)
+    local isTable = type(items) == 'table'
+    local isArray = isTable and table.type(items) == 'array' or false
+    local totalItems = isArray and #items or 0
+    local count = 0
+
+    if isTable and not isArray then
+        for _ in pairs(items) do
+            totalItems = totalItems + 1
+        end
+    end
+
+    if PlayerData and type(PlayerData.items) == 'table' then
+        for _, itemData in pairs(PlayerData.items) do
+            if isTable then
+                for k, v in pairs(items) do
+                    if itemData and itemData.name == (isArray and v or k) and ((amount and itemData.amount >= amount) or (not isArray and itemData.amount >= v) or (not amount and isArray)) then
+                        count = count + 1
+                        if count == totalItems then
+                            return true
+                        end
+                    end
+                end
+            else -- Single item as string
+                if itemData and itemData.name == items and (not amount or (itemData and amount and itemData.amount >= amount)) then
+                    return true
+                end
+            end
+        end
+    end
+
+    return false
+end
+
+exports('qb-inventory', 'HasItem', HasItem)
 
 local function FormatWeaponAttachments(itemdata)
     -- TODO
@@ -106,8 +148,8 @@ RegisterClientEvent('qb-inventory:client:updateInventory', function(items)
     if my_webui == nil then
         return
     end
-    if not items and player_data and type(player_data.items) == 'table' then
-        items = player_data.items
+    if not items and PlayerData and type(PlayerData.items) == 'table' then
+        items = PlayerData.items
     end
     my_webui:SendEvent('updateInventory', { inventory = items or {} })
 end)
@@ -236,7 +278,7 @@ for i = 1, 5 do
         if inv_open then
             return
         end
-        local itemData = player_data.items[i]
+        local itemData = PlayerData.items[i]
         if not itemData then
             return
         end
