@@ -3,7 +3,8 @@
         "config.lua"
     ],
     "client": [
-        "client.lua"
+        "client.lua",
+        "clothing.lua"
     ],
     "server": [
         "server.lua"
