@@ -36,13 +36,18 @@ end)
 
 RegisterServerEvent('QBCore:Server:ApplyHungerThirstDamage', function(source, amount)
     local pawn = GetPlayerPawn(source)
-    if not pawn then return end
-    local healthComp = pawn:GetComponentByClass(UE.UHActorHealthComponent)
-    if not healthComp then return end
-    local currentHealth = healthComp:GetHealth()
-    if currentHealth > 0 then
-        healthComp:SetHealth(math.max(0, currentHealth - amount))
+    if not pawn then
+        return
     end
+
+    local damageAmount = tonumber(amount) or 0
+    if damageAmount <= 0 then
+        return
+    end
+
+    DamageTarget(pawn, pawn, {
+        DamageAmount = damageAmount,
+    })
 end)
 
 RegisterServerEvent('QBCore:ToggleDuty', function(source)

@@ -368,93 +368,113 @@ local function buildVehiclesCatalog(vehiclesShared)
     end)
 end
 
+local function clampPercent(value)
+    return math.max(0, math.min(100, tonumber(value) or 0))
+end
+
 local function getPlayerPawnAndHealthComponent(player)
     local pawn = GetPlayerPawn(player)
     if not pawn then
         return nil, nil
     end
-    local ok, healthComp = pcall(function()
-        return pawn:GetComponentByClass(UE.UHActorHealthComponent)
-    end)
-    if not ok then
-        return pawn, nil
-    end
-    return pawn, healthComp
+    return pawn, FindHealthComponent(pawn)
 end
 
 local function getPlayerHealthPercent(player)
-    local _, healthComp = getPlayerPawnAndHealthComponent(player)
-    if not healthComp then
+    local pawn = GetPlayerPawn(player)
+    if not pawn then
         return nil
     end
-    local currentHealth = tonumber(healthComp:GetHealth()) or 0
-    local maxHealth = tonumber(healthComp:GetMaxHealth()) or 0
+
+    local normalizedHealth = tonumber(GetHealthNormalized(pawn))
+    if normalizedHealth then
+        return clampPercent(normalizedHealth * 100)
+    end
+
+    local currentHealth = tonumber(GetHealth(pawn)) or 0
+    local maxHealth = tonumber(GetMaxHealth(pawn)) or 0
     if maxHealth <= 0 then
         return nil
     end
-    return math.max(0, math.min(100, (currentHealth / maxHealth) * 100))
+    return clampPercent((currentHealth / maxHealth) * 100)
+end
+
+local function getPlayerArmorValue(player)
+    local pawn = GetPlayerPawn(player)
+    if not pawn then
+        return nil
+    end
+
+    return tonumber(GetArmor(pawn))
 end
 
 local function healPlayerToFull(player)
-    local pawn, healthComp = getPlayerPawnAndHealthComponent(player)
-    if not pawn or not healthComp then
+    local pawn = GetPlayerPawn(player)
+    if not pawn or GetHealth(pawn) == nil then
         return false
     end
-    if healthComp:IsDeadOrDying() then
-        local coords = GetEntityCoords(pawn)
-        if not coords then
-            return false
-        end
-        local spawnTransform = Transform()
-        spawnTransform.Translation = Vector(coords.X, coords.Y, coords.Z)
-        UE.UHGameplaySystemGlobals.RespawnPlayerByCharacterAtTransform(pawn, spawnTransform)
-        return true
+    if IsDeadOrDying(pawn) then
+        return false
     end
-    local currentHealth = tonumber(healthComp:GetHealth()) or 0
-    local maxHealth = tonumber(healthComp:GetMaxHealth()) or 0
+    local currentHealth = tonumber(GetHealth(pawn)) or 0
+    local maxHealth = tonumber(GetMaxHealth(pawn)) or 0
     if maxHealth <= 0 then
         return false
     end
     local healAmount = maxHealth - currentHealth
     if healAmount > 0 then
-        UE.UHGameplaySystemGlobals.HealTarget(pawn, healAmount)
-    else
-        UE.UHGameplaySystemGlobals.HealTarget(pawn, maxHealth)
+        return HealTarget(pawn, healAmount)
     end
-    return true
+    return HealTarget(pawn, maxHealth)
 end
 
 local function killPlayerOnServer(player)
-    local _, healthComp = getPlayerPawnAndHealthComponent(player)
-    if not healthComp then
+    local pawn = GetPlayerPawn(player)
+    if not pawn or GetHealth(pawn) == nil then
         return false
     end
-    healthComp:SetHealth(0)
+
+    if IsDeadOrDying(pawn) then
+        return true
+    end
+
+    local currentHealth = tonumber(GetHealth(pawn)) or 0
+    local maxHealth = tonumber(GetMaxHealth(pawn)) or 100
+    local currentArmor = tonumber(GetArmor(pawn)) or 0
+    local lethalDamage = math.max(currentHealth + currentArmor, maxHealth) + 1
+    local params = {
+        DamageAmount = lethalDamage,
+    }
+
+    if not DamageTarget(pawn, pawn, params) then
+        return false
+    end
+
+    if IsDowned(pawn) then
+        return DamageTarget(pawn, pawn, params)
+    end
+
     return true
 end
 
-local function setPlayerArmorOnServer(player, value)
+local function replenishPlayerArmorToFull(player)
     local pawn = GetPlayerPawn(player)
     if not pawn then
         return false
     end
-    local armorValue = math.max(0, math.min(100, tonumber(value) or 0))
-    local applied = false
-    pcall(function()
-        local armorComp = pawn:GetComponentByClass(UE.UHActorArmorComponent)
-        if armorComp then
-            armorComp:SetArmor(armorValue)
-            applied = true
-        end
-    end)
-    pcall(function()
-        local healthComp = pawn:GetComponentByClass(UE.UHActorHealthComponent)
-        if healthComp and healthComp.SetArmor then
-            healthComp:SetArmor(armorValue)
-            applied = true
-        end
-    end)
-    return applied
+
+    local currentArmor = tonumber(GetArmor(pawn))
+    local maxArmor = tonumber(GetMaxArmor(pawn))
+    if not currentArmor or not maxArmor or maxArmor <= 0 then
+        return false
+    end
+
+    local armorAmount = maxArmor - currentArmor
+    if armorAmount <= 0 then
+        return true
+    end
+
+    return GiveArmorToTarget(pawn, armorAmount)
 end
 
 local function setPlayerFrozenOnServer(player, frozen)
@@ -673,6 +693,7 @@ local function buildPlayerList(qbPlayers, jobsShared, gangsShared)
         local sharedJob = jobKey and jobsShared[jobKey] or nil
         local sharedGang = gangKey and gangsShared[gangKey] or nil
         local healthPercent = getPlayerHealthPercent(playerId)
+        local armorValue = getPlayerArmorValue(playerId)
         players[#players + 1] = {
             id = playerSource,
             character = characterName,
@@ -697,7 +718,7 @@ local function buildPlayerList(qbPlayers, jobsShared, gangsShared)
             },
             vitals = {
                 health = healthPercent or tonumber(metadata.health) or 100,
-                armor = tonumber(metadata.armor) or 0,
+                armor = armorValue or tonumber(metadata.armor) or 0,
                 hunger = tonumber(metadata.hunger) or 100,
                 thirst = tonumber(metadata.thirst) or 100,
             },
@@ -1270,7 +1291,9 @@ local vitalActions = {
         pushFeedEntry(adminName .. ' replenished health of ' .. targetName)
     end,
     armor = function(targetSrc, targetPlayer, targetName, adminName)
-        setPlayerArmorOnServer(targetSrc, 100)
+        if not replenishPlayerArmorToFull(targetSrc) then
+            return
+        end
         targetPlayer.SetMetaData('armor', 100)
         pushLogEntry('Replenish Armor', targetName, 'By ' .. adminName)
     end,

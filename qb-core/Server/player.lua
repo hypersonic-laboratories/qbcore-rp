@@ -14,19 +14,6 @@ function Player.new(PlayerData, Offline)
     return self
 end
 
--- ─────────────────────────── server-event hooks ─────────────────────────────
-
-RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
-    QBCore.Player.Logout(source)
-end)
-
-local PositionCache = {}
-RegisterServerEvent('HEvent:PlayerUnPossessed', function(source, Pawn)
-    if Pawn then
-        PositionCache[source] = Pawn:K2_GetActorLocation()
-    end
-end)
-
 -- ─────────────────────────── module-private helpers ─────────────────────────
 
 local function formatItems(inventory)
@@ -70,6 +57,191 @@ local function applyDefaults(playerData, defaults)
 end
 
 -- ─────────────────────────── instance methods ───────────────────────────────
+
+local function makeGameplayTag(tagName)
+    if tagName == nil or not UE or not UE.FGameplayTag then
+        return nil
+    end
+
+    local gameplayTag = UE.FGameplayTag()
+    gameplayTag.TagName = tostring(tagName)
+    return gameplayTag
+end
+
+local function readLimbStates(pawn)
+    if not pawn or not UE or not UE.TArray or not UE.FHLimbHealthState or type(GetTargetActorAllLimbHealthStates) ~= 'function' then
+        return nil
+    end
+
+    local limbArray = UE.TArray(UE.FHLimbHealthState)
+    if not limbArray then
+        return nil
+    end
+
+    if GetTargetActorAllLimbHealthStates(pawn, limbArray) == false then
+        return nil
+    end
+
+    local limbs = {}
+    local limbsByTag = {}
+    for i = 1, limbArray:Num() do
+        local healthState = limbArray[i]
+        local limbTag = healthState and healthState.LimbTag and healthState.LimbTag.TagName
+        if limbTag ~= nil then
+            local limbInfo = {
+                limbTag = tostring(limbTag),
+                currentHealth = tonumber(healthState.CurrentHealth),
+                maxHealth = tonumber(healthState.MaxHealth),
+                damageTypes = {},
+            }
+
+            local tagContainer = healthState.RecentDamageTypes
+            if tagContainer and tagContainer.GameplayTags then
+                for _, damageType in pairs(tagContainer.GameplayTags) do
+                    if damageType.TagName ~= nil then
+                        table.insert(limbInfo.damageTypes, tostring(damageType.TagName))
+                    end
+                end
+            end
+
+            table.insert(limbs, limbInfo)
+            limbsByTag[limbInfo.limbTag] = limbInfo
+        end
+    end
+
+    return limbs, limbsByTag
+end
+
+local function damageTargetLimb(pawn, limbTag, damageAmount)
+    return DamageTarget(pawn, pawn, {
+        DamageAmount = damageAmount,
+        LimbTag = limbTag,
+    })
+end
+
+local function syncPlayerVitalsMetadata(source, pawn)
+    local player = QBCore.Players[source]
+    if not player or not player.PlayerData or not player.PlayerData.metadata then
+        return false
+    end
+
+    pawn = pawn or GetPlayerPawn(source)
+    if not pawn then
+        return false
+    end
+
+    local synced = false
+    local healthValue = tonumber(GetHealth(pawn))
+    if healthValue ~= nil then
+        player.PlayerData.metadata.health = healthValue
+        synced = true
+    end
+
+    local armorValue = tonumber(GetArmor(pawn))
+    if armorValue ~= nil then
+        player.PlayerData.metadata.armor = armorValue
+        synced = true
+    end
+
+    local limbStates = readLimbStates(pawn)
+    if limbStates ~= nil then
+        player.PlayerData.metadata.limbs = limbStates
+        synced = true
+    end
+
+    return synced
+end
+
+local function applySavedVitalsMetadata(source, attempt)
+    local player = QBCore.Players[source]
+    if not player or not player.PlayerData or not player.PlayerData.metadata then
+        return false
+    end
+
+    local savedHealth = tonumber(player.PlayerData.metadata.health)
+    local savedArmor = tonumber(player.PlayerData.metadata.armor) or 0
+    local savedLimbs = type(player.PlayerData.metadata.limbs) == 'table' and player.PlayerData.metadata.limbs or nil
+    local hasSavedLimbs = savedLimbs and next(savedLimbs) ~= nil
+    if savedHealth == nil and savedArmor <= 0 and not hasSavedLimbs then
+        return true
+    end
+
+    local pawn = GetPlayerPawn(source)
+    local currentHealth = pawn and (savedHealth ~= nil) and tonumber(GetHealth(pawn)) or nil
+    local currentArmor = pawn and (savedArmor > 0) and tonumber(GetArmor(pawn)) or nil
+    local currentLimbsByTag = nil
+    if pawn and hasSavedLimbs then
+        local _, limbsByTag = readLimbStates(pawn)
+        currentLimbsByTag = limbsByTag
+    end
+    if not pawn or (savedHealth ~= nil and currentHealth == nil) or (savedArmor > 0 and currentArmor == nil) or (hasSavedLimbs and not currentLimbsByTag) then
+        attempt = (attempt or 1) + 1
+        if attempt <= 5 and Timer and Timer.SetTimeout then
+            Timer.SetTimeout(function()
+                applySavedVitalsMetadata(source, attempt)
+            end, 500)
+        end
+        return false
+    end
+
+    local applied = true
+    if savedHealth ~= nil then
+        local healthAmount = savedHealth - currentHealth
+        if healthAmount > 0 then
+            applied = HealTarget(pawn, healthAmount) ~= false and applied
+        elseif healthAmount < 0 then
+            applied = DamageTarget(pawn, pawn, {
+                DamageAmount = -healthAmount,
+            }) ~= false and applied
+        end
+    end
+
+    if hasSavedLimbs then
+        for _, savedLimb in pairs(savedLimbs) do
+            local limbTagName = savedLimb.limbTag or savedLimb.LimbTag
+            local savedLimbHealth = tonumber(savedLimb.currentHealth or savedLimb.CurrentHealth)
+            local currentLimb = limbTagName and currentLimbsByTag[tostring(limbTagName)] or nil
+            local currentLimbHealth = currentLimb and tonumber(currentLimb.currentHealth)
+            local limbTag = makeGameplayTag(limbTagName)
+
+            if limbTag and savedLimbHealth ~= nil and currentLimbHealth ~= nil then
+                local limbHealthAmount = savedLimbHealth - currentLimbHealth
+                if limbHealthAmount > 0 then
+                    applied = HealTargetLimb(pawn, limbTag, limbHealthAmount) ~= false and applied
+                elseif limbHealthAmount < 0 then
+                    applied = damageTargetLimb(pawn, limbTag, -limbHealthAmount) ~= false and applied
+                end
+            end
+        end
+    end
+
+    if savedArmor > 0 then
+        currentArmor = tonumber(GetArmor(pawn)) or currentArmor
+        local armorAmount = savedArmor - currentArmor
+        if armorAmount > 0 then
+            applied = GiveArmorToTarget(pawn, armorAmount) ~= false and applied
+        end
+    end
+
+    return applied
+end
+
+local PositionCache = {}
+
+-- ─────────────────────────── server-event hooks ─────────────────────────────
+
+RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
+    QBCore.Player.Logout(source)
+end)
+
+RegisterServerEvent('HEvent:PlayerUnPossessed', function(source, Pawn)
+    if Pawn then
+        PositionCache[source] = Pawn:K2_GetActorLocation()
+        syncPlayerVitalsMetadata(source, Pawn)
+    end
+end)
+
+-- ────────────────────────────────────────────────────────
 
 function Player:GetPlayerData()
     return self.PlayerData
@@ -645,6 +817,7 @@ function QBCore.Player.CreatePlayer(PlayerData, Offline)
     if not Offline then
         QBCore.Players[PlayerData.source] = player
         QBCore.PlayersByCitizenId[PlayerData.citizenid] = player
+        applySavedVitalsMetadata(PlayerData.source)
         QBCore.Player.Save(PlayerData.source)
         TriggerLocalServerEvent('QBCore:Server:PlayerLoaded', player)
         player:UpdateClient()
@@ -707,6 +880,8 @@ function QBCore.Player.Save(source)
         print('[ERROR] QBCORE.PLAYER.SAVE - PLAYERDATA IS EMPTY!')
         return
     end
+
+    syncPlayerVitalsMetadata(source)
 
     local pcoords = QBCore.Config.DefaultSpawn
     local ped = GetPlayerPawn(source)
