@@ -31,6 +31,15 @@ local function FormatWeaponAttachments(itemdata)
     -- TODO
 end
 
+local function GetLocalInventoryOwner()
+    return HPlayer or GetLocalPlayer()
+end
+
+local function IsInventoryBusy()
+    local player = GetLocalInventoryOwner()
+    return inv_open or (player and GetValue(player, 'inv_busy') == true) or false
+end
+
 -- Events
 
 RegisterClientEvent('qb-inventory:client:openInventory', function(items, other)
@@ -76,6 +85,19 @@ RegisterClientEvent('qb-inventory:client:closeInv', function()
     if my_webui == nil then
         return
     end
+    inv_open = false
+    my_webui:SetInputMode(0)
+    my_webui:SendEvent('close')
+end)
+
+RegisterClientEvent('qb-inventory:client:closeIfBusy', function()
+    if not IsInventoryBusy() then
+        return
+    end
+    if my_webui == nil then
+        return
+    end
+    inv_open = false
     my_webui:SetInputMode(0)
     my_webui:SendEvent('close')
 end)
@@ -160,12 +182,19 @@ end)
 
 -- Vending
 
+RegisterClientEvent('qb-inventory:client:openVending', function(data)
+    if IsInventoryBusy() then
+        return
+    end
+    TriggerServerEvent('qb-inventory:server:openVending', data)
+end)
+
 for _, model in pairs(Config.VendingObjects) do
     exports['qb-target']:AddTargetModel(model, {
         options = {
             {
-                type = 'server',
-                event = 'qb-inventory:server:openVending',
+                type = 'client',
+                event = 'qb-inventory:client:openVending',
                 icon = 'cash-register',
                 label = Lang.t('menu.vending'),
             },
@@ -180,11 +209,17 @@ Input.BindKey(Config.Keybinds.Open, function()
     if inv_open then
         my_webui:SendEvent('close')
     else
+        if IsInventoryBusy() then
+            return
+        end
         TriggerServerEvent('qb-inventory:server:openInventory')
     end
 end, 'Released')
 
 Input.BindKey(Config.Keybinds.Hotbar, function()
+    if IsInventoryBusy() then
+        return
+    end
     TriggerServerEvent('qb-inventory:server:toggleHotbar')
 end)
 

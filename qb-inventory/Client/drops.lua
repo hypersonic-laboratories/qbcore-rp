@@ -3,9 +3,17 @@ local heldDrop = nil
 CurrentDrop = nil
 local activeDropTargets = {}
 
+local function IsInventoryBusy()
+    local player = HPlayer or GetLocalPlayer()
+    return (player and GetValue(player, 'inv_busy') == true) or false
+end
+
 -- Events
 
 RegisterClientEvent('qb-inventory:client:openDrop', function(data)
+    if IsInventoryBusy() then
+        return
+    end
     CurrentDrop = data.dropId
     TriggerServerEvent('qb-inventory:server:openDrop', data.dropId)
 end)

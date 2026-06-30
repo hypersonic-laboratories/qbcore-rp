@@ -2,6 +2,21 @@ local sharedItems = exports['qb-core']:GetShared('Items')
 
 -- Local Functions
 
+local function GetPlayerSource(source)
+    if type(source) == 'number' then
+        local Player = exports['qb-core']:GetPlayer(source)
+        return Player and Player.PlayerData and Player.PlayerData.source
+    end
+    return source
+end
+
+local function SetInventoryBusy(source, busy)
+    local playerSource = GetPlayerSource(source)
+    if playerSource then
+        SetValue(playerSource, 'inv_busy', busy)
+    end
+end
+
 local function InitializeInventory(inventoryId, data)
     Inventories[inventoryId] = {
         items = {},
@@ -498,7 +513,7 @@ function CloseInventory(source, identifier)
     if identifier and Inventories[identifier] then
         Inventories[identifier].isOpen = false
     end
-    --source:SetValue('inv_busy', false, true)
+    SetInventoryBusy(source, false)
     TriggerClientEvent(source, 'qb-inventory:client:closeInv')
 end
 
@@ -510,9 +525,8 @@ function OpenInventoryById(source, targetId)
     if not Player or not TargetPlayer then
         return
     end
-    -- if targetId:GetValue('inv_busy') then
-    --     CloseInventory(targetId)
-    -- end
+    local targetSource = TargetPlayer.PlayerData.source
+    TriggerClientEvent(targetSource, 'qb-inventory:client:closeIfBusy')
     local playerItems = Player.PlayerData.items
     local targetItems = TargetPlayer.PlayerData.items
     local formattedInventory = {
@@ -522,7 +536,7 @@ function OpenInventoryById(source, targetId)
         slots = Config.MaxSlots,
         inventory = targetItems,
     }
-    --targetId:SetValue('inv_busy', true, true)
+    SetInventoryBusy(targetSource, true)
     TriggerClientEvent(source, 'qb-inventory:client:openInventory', playerItems, formattedInventory)
 end
 
@@ -593,14 +607,13 @@ end
 exports('qb-inventory', 'OpenShop', OpenShop)
 
 function OpenInventory(source, identifier, data)
-    --if source:GetValue('inv_busy') then return end
     local QBPlayer = exports['qb-core']:GetPlayer(source)
     if not QBPlayer then
         return
     end
 
     if not identifier then
-        --source:SetValue('inv_busy', true, true)
+        SetInventoryBusy(source, true)
         TriggerClientEvent(source, 'qb-inventory:client:openInventory', QBPlayer.PlayerData.items)
         return
     end
@@ -632,7 +645,7 @@ function OpenInventory(source, identifier, data)
         slots = inventory.slots,
         inventory = inventory.items,
     }
-    --source:SetValue('inv_busy', true, true)
+    SetInventoryBusy(source, true)
     TriggerClientEvent(source, 'qb-inventory:client:openInventory', QBPlayer.PlayerData.items, formattedInventory)
 end
 

@@ -4,6 +4,21 @@ RegisteredShops = {}
 local sharedItems = exports['qb-core']:GetShared('Items')
 local sharedWeapons = exports['qb-core']:GetShared('Weapons')
 
+local function GetPlayerSource(source)
+    if type(source) == 'number' then
+        local Player = exports['qb-core']:GetPlayer(source)
+        return Player and Player.PlayerData and Player.PlayerData.source
+    end
+    return source
+end
+
+local function SetInventoryBusy(source, busy)
+    local playerSource = GetPlayerSource(source)
+    if playerSource then
+        SetValue(playerSource, 'inv_busy', busy)
+    end
+end
+
 Timer.CreateThread(function()
     local results = exports['qb-core']:DatabaseAction('Select', 'SELECT * FROM inventories')
     if type(results) ~= 'table' then
@@ -114,7 +129,6 @@ RegisterServerEvent('qb-inventory:server:openInventory', function(source)
 end)
 
 RegisterServerEvent('qb-inventory:server:toggleHotbar', function(source)
-    --if source:GetValue('inv_busy', false) then return end
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player or Player.PlayerData.metadata['isdead'] or Player.PlayerData.metadata['inlaststand'] or Player.PlayerData.metadata['ishandcuffed'] then
         return
@@ -149,7 +163,7 @@ RegisterServerEvent('qb-inventory:server:closeInventory', function(source, inven
     if not Player then
         return
     end
-    -- Player(source).state.inv_busy = false
+    SetInventoryBusy(source, false)
     if not inventory then
         return
     end
@@ -158,7 +172,10 @@ RegisterServerEvent('qb-inventory:server:closeInventory', function(source, inven
     end
     if inventory:find('otherplayer%-') then
         local targetId = tonumber(inventory:match('otherplayer%-(.+)'))
-        -- Player(targetId).state.inv_busy = false
+        local TargetPlayer = targetId and exports['qb-core']:GetPlayer(targetId)
+        if TargetPlayer and TargetPlayer.PlayerData and TargetPlayer.PlayerData.source then
+            SetInventoryBusy(TargetPlayer.PlayerData.source, false)
+        end
         return
     end
     if Drops[inventory] then
