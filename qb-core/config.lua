@@ -75,7 +75,6 @@ QBCore.Config.Player.PlayerDefaults = {
         injail = 0,
         jailitems = {},
         status = {},
-        phone = {},
         rep = {},
         currentapartment = nil,
         callsign = 'NO CALLSIGN',
