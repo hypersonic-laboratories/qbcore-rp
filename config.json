@@ -26,6 +26,7 @@
     "qb-ambulancejob",
     "qb-policejob",
     "qb-garbagejob",
+    "qb-hotdogjob",
     "qb-taxijob",
     "qb-deliveryjob",
     "qb-busjob",
