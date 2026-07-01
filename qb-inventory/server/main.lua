@@ -2,7 +2,6 @@ Inventories = {}
 Drops = {}
 RegisteredShops = {}
 local sharedItems = exports['qb-core']:GetShared('Items')
-local sharedWeapons = exports['qb-core']:GetShared('Weapons')
 
 local function GetPlayerSource(source)
     if type(source) == 'number' then
@@ -50,21 +49,59 @@ end, Config.CleanupDropInterval * 60000)
 
 -- Functions
 
-local function checkWeapon(source, item)
-    local currentWeapon = item
-    local ped = GetPlayerPed(source)
-    local weapon = GetSelectedPedWeapon(ped)
-    local weaponInfo = sharedWeapons[weapon]
-    local info = {}
-
-    if type(item) == 'table' then
-        currentWeapon = item.name
-        info = item.info or {}
+local function GetSourcePawn(source)
+    if type(source) ~= 'number' and source and source.GetPawn then
+        local pawn = source:GetPawn()
+        if pawn then
+            return pawn
+        end
     end
 
-    if weaponInfo and weaponInfo.name == currentWeapon then
-        RemoveWeaponFromPed(ped, weapon)
-        TriggerClientEvent('qb-weapons:client:UseWeapon', source, { name = currentWeapon, info = info }, false)
+    return GetPlayerPawn(source)
+end
+
+local function EquipWeaponItem(source, itemData)
+    if not itemData or not itemData.name then
+        return
+    end
+
+    local itemInfo = sharedItems[itemData.name]
+    if not itemInfo or itemInfo.type ~= 'weapon' or not itemInfo.asset_name then
+        return
+    end
+
+    local pawn = GetSourcePawn(source)
+    if not pawn then
+        return
+    end
+
+    local itemDef = HInventory.GetItemDefinitionByAssetName(itemInfo.asset_name, true)
+    if not itemDef then
+        TriggerClientEvent(source, 'QBCore:Notify', 'Weapon definition not found', 'error')
+        return
+    end
+
+    HInventory.ClearQuickBar(pawn)
+    HInventory.ClearInventory(pawn)
+    HInventory.UnequipAllItems(pawn)
+    HInventory.GiveItem(pawn, itemDef, 1, nil)
+
+    Timer.Delay(pawn, 0.2, function()
+        local itemInstance = HInventory.GetFirstItemByDefinition(pawn, itemDef)
+        if itemInstance then
+            HInventory.AddItemToQuickBarFirstEmpty(pawn, itemInstance)
+            HInventory.EquipItem(pawn, itemInstance)
+        end
+    end)
+end
+
+RegisterServerEvent('qb-inventory:server:useWeaponItem', function(source, itemData)
+    EquipWeaponItem(source, itemData)
+end)
+
+for itemName, itemInfo in pairs(sharedItems) do
+    if itemInfo.type == 'weapon' then
+        exports['qb-core']:CreateUseableItem(itemName, { event = 'qb-inventory:server:useWeaponItem' })
     end
 end
 
@@ -200,13 +237,8 @@ RegisterServerEvent('qb-inventory:server:useItem', function(source, item)
         return
     end
     local itemInfo = sharedItems[itemData.name]
-    if itemInfo.type == 'weapon' then
-        -- TriggerClientEvent(source, 'qb-weapons:client:UseWeapon', itemData, itemData.info.quality and itemData.info.quality > 0)
-        TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'use')
-    else
-        UseItem(itemData.name, source, itemData)
-        TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'use')
-    end
+    UseItem(itemData.name, source, itemData)
+    TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'use')
     if itemInfo.shouldClose then
         TriggerClientEvent(source, 'qb-inventory:client:closeInv')
     end
@@ -554,10 +586,6 @@ RegisterServerEvent('qb-inventory:server:SetInventoryData', function(source, fro
         if not toItem and toAmount > fromItem.amount then
             return
         end
-        if fromInventory == 'player' and toInventory ~= 'player' then
-            --checkWeapon(source, fromItem)
-        end
-
         local fromId = getIdentifier(fromInventory, source)
         local toId = getIdentifier(toInventory, source)
 

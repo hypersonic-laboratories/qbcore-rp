@@ -18,7 +18,7 @@ local function GetCoreObject(filters)
 end
 exports('qb-core', 'GetCoreObject', GetCoreObject)
 
---- @param namespace 'Vehicles' | 'VehicleHashes' | 'Items' | 'Gangs' | 'Jobs' | 'Locations' | 'Weapons' | 'StarterItems'
+--- @param namespace 'Vehicles' | 'VehicleHashes' | 'Items' | 'Gangs' | 'Jobs' | 'Locations' | 'StarterItems'
 --- @param item string?
 --- @return table?
 function GetShared(namespace, item)

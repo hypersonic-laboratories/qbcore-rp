@@ -1,9 +1,30 @@
 local Lang = require('locales/en')
-local sharedWeapons = exports['qb-core']:GetShared('Weapons') or {}
+local sharedItems = exports['qb-core']:GetShared('Items') or {}
 
 QBCore = exports['qb-core']:GetCoreObject({ 'Functions' })
 
 local updatingCops = false
+
+local function GetWeaponItem(weapon)
+    if not weapon then
+        return nil
+    end
+
+    local weaponName = tostring(weapon)
+    local itemInfo = sharedItems[weaponName] or sharedItems[string.lower(weaponName)]
+    if itemInfo and itemInfo.type == 'weapon' then
+        return itemInfo
+    end
+
+    local loweredWeaponName = string.lower(weaponName)
+    for _, sharedItem in pairs(sharedItems) do
+        if sharedItem.type == 'weapon' and sharedItem.asset_name and string.lower(sharedItem.asset_name) == loweredWeaponName then
+            return sharedItem
+        end
+    end
+
+    return nil
+end
 
 local function notify(source, text, notifyType, length)
     TriggerClientEvent(source, 'QBCore:Notify', text, notifyType, length)
@@ -86,7 +107,7 @@ end)
 
 RegisterCallback('qb-policejob:IsSilencedWeapon', function(source, weapon)
     local Player = exports['qb-core']:GetPlayer(source)
-    local weaponInfo = sharedWeapons[weapon]
+    local weaponInfo = GetWeaponItem(weapon)
     if not Player or not weaponInfo then
         return false
     end

@@ -1,6 +1,5 @@
 local Lang = require('locales/en')
 local sharedItems = exports['qb-core']:GetShared('Items') or {}
-local sharedWeapons = exports['qb-core']:GetShared('Weapons') or {}
 
 local Casings = {}
 local BloodDrops = {}
@@ -33,6 +32,27 @@ local function CreateCasingId()
         caseId = 'casing-' .. GenerateId(8, 'mixed')
     end
     return caseId
+end
+
+local function GetWeaponItem(weapon)
+    if not weapon then
+        return nil
+    end
+
+    local weaponName = tostring(weapon)
+    local itemInfo = sharedItems[weaponName] or sharedItems[string.lower(weaponName)]
+    if itemInfo and itemInfo.type == 'weapon' then
+        return itemInfo
+    end
+
+    local loweredWeaponName = string.lower(weaponName)
+    for _, sharedItem in pairs(sharedItems) do
+        if sharedItem.type == 'weapon' and sharedItem.asset_name and string.lower(sharedItem.asset_name) == loweredWeaponName then
+            return sharedItem
+        end
+    end
+
+    return nil
 end
 
 RegisterCallback('qb-policejob:GetPlayerStatus', function(_, playerId)
@@ -110,7 +130,7 @@ RegisterServerEvent('qb-policejob:server:CreateCasing', function(source, weapon,
     end
 
     local casingId = CreateCasingId()
-    local weaponInfo = sharedWeapons[weapon]
+    local weaponInfo = GetWeaponItem(weapon)
     local serieNumber = nil
     if weaponInfo then
         local weaponItem = Player.GetItemByName(Player, weaponInfo.name)

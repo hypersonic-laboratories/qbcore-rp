@@ -6,12 +6,12 @@ Config.ArmoryWhitelist = {}
 Config.WhitelistedVehicles = {}
 
 Config.AmmoLabels = {
-    AMMO_PISTOL = '9x19mm parabellum bullet',
-    AMMO_SMG = '9x19mm parabellum bullet',
-    AMMO_RIFLE = '7.62x39mm bullet',
-    AMMO_MG = '7.92x57mm mauser bullet',
-    AMMO_SHOTGUN = '12-gauge bullet',
-    AMMO_SNIPER = 'Large caliber bullet',
+    pistol_ammo = '9x19mm parabellum bullet',
+    smg_ammo = '9x19mm parabellum bullet',
+    rifle_ammo = '7.62x39mm bullet',
+    mg_ammo = '7.92x57mm mauser bullet',
+    shotgun_ammo = '12-gauge bullet',
+    snp_ammo = 'Large caliber bullet',
 }
 
 Config.Objects = {

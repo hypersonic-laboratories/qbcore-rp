@@ -1,5 +1,5 @@
 local Lang = require('locales/en')
-local sharedWeapons = exports['qb-core']:GetShared('Weapons') or {}
+local sharedItems = exports['qb-core']:GetShared('Items') or {}
 
 local CurrentStatusList = {}
 local Casings = {}
@@ -80,22 +80,38 @@ local function getLocalPlayerPawn()
     return GetPlayerPawn()
 end
 
+local function getWeaponItem(weapon)
+    if not weapon then
+        return nil
+    end
+
+    local weaponName = tostring(weapon)
+    local itemInfo = sharedItems[weaponName] or sharedItems[string.lower(weaponName)]
+    if itemInfo and itemInfo.type == 'weapon' then
+        return itemInfo
+    end
+
+    local loweredWeaponName = string.lower(weaponName)
+    for _, sharedItem in pairs(sharedItems) do
+        if sharedItem.type == 'weapon' and sharedItem.asset_name and string.lower(sharedItem.asset_name) == loweredWeaponName then
+            return sharedItem
+        end
+    end
+
+    return nil
+end
+
 local function getCurrentWeaponName()
     if not CurrentWeapon or CurrentWeapon == '' then
         return 'unknown_weapon'
     end
 
-    local weaponName = tostring(CurrentWeapon)
-    if sharedWeapons[weaponName] then
-        return weaponName
+    local weaponInfo = getWeaponItem(CurrentWeapon)
+    if weaponInfo then
+        return weaponInfo.name
     end
 
-    local loweredWeaponName = string.lower(weaponName)
-    if sharedWeapons[loweredWeaponName] then
-        return loweredWeaponName
-    end
-
-    return weaponName
+    return tostring(CurrentWeapon)
 end
 
 local function handleWeaponFire(ownerActor)
@@ -285,14 +301,14 @@ RegisterClientEvent('qb-policejob:client:CollectCasing', function(data)
         return
     end
 
-    local weaponInfo = sharedWeapons[casing.type] or {}
-    local ammoType = weaponInfo.ammotype or weaponInfo.ammo_type or casing.type
+    local weaponInfo = getWeaponItem(casing.type) or {}
+    local ammoType = weaponInfo.ammo_type or casing.type
     local info = {
         label = Lang.t('info.casing'),
         type = 'casing',
         street = getStreetLabel(casing.coords),
         ammolabel = Config.AmmoLabels[ammoType] or tostring(ammoType),
-        ammotype = casing.type,
+        weapon = casing.type,
         serie = casing.serie,
     }
     TriggerServerEvent('qb-policejob:server:AddCasingToInventory', casingId, info)
