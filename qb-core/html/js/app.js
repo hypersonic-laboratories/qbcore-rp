@@ -21,6 +21,10 @@ const VariantDefinitions = {
         icon: "triangle-alert",
         accent: "#FA9600",
     },
+    announcement: {
+        icon: "radio-tower",
+        accent: "#F6C90E",
+    },
 
     // ── Emergency services ────────────────────────────────
     police: {

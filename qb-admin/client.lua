@@ -213,10 +213,6 @@ RegisterClientEvent('qb-admin:client:reportsClearedResolved', function(payload)
     my_webui:SendEvent('qb-admin:reportsClearedResolved', payload)
 end)
 
-RegisterClientEvent('qb-admin:client:dashboardAnnounce', function(message)
-    -- TO DO: Display dashboard announcements to players/admins.
-end)
-
 RegisterClientEvent('qb-admin:client:openClothing', function()
     exports['qb-clothing']:OpenClothing()
 end)

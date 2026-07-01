@@ -1351,7 +1351,7 @@ RegisterServerEvent('qb-admin:server:dashboard:announce', function(_, data)
     if message == '' then
         return
     end
-    BroadcastEvent('qb-admin:client:dashboardAnnounce', message)
+    BroadcastEvent('QBCore:Notify', { text = message, caption = 'Announcement' }, 'announcement', 10000)
 end)
 
 local dashboardActions = {
