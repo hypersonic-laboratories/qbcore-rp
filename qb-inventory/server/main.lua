@@ -412,50 +412,81 @@ RegisterCallback('attemptPurchase', function(source, data)
     end
 end)
 
-RegisterCallback('giveItem', function(source, target, item, amount)
+RegisterCallback('giveItem', function(source, target, item, amount, slot)
     local player = exports['qb-core']:GetPlayer(source)
     if not player or player.PlayerData.metadata['isdead'] or player.PlayerData.metadata['inlaststand'] or player.PlayerData.metadata['ishandcuffed'] then
         return false
     end
     local playerPed = GetPlayerPawn(source)
+    if not playerPed then
+        return false
+    end
     local Target = exports['qb-core']:GetPlayer(target)
     if not Target or Target.PlayerData.metadata['isdead'] or Target.PlayerData.metadata['inlaststand'] or Target.PlayerData.metadata['ishandcuffed'] then
         return false
     end
-    local targetPed = GetPlayerPawn(target)
+    local targetSource = Target.PlayerData.source
+    if not targetSource then
+        return false
+    end
+    if targetSource == source or tonumber(target) == tonumber(player.PlayerData.netId) then
+        return false
+    end
+    local targetPed = GetPlayerPawn(targetSource)
+    if not targetPed then
+        return false
+    end
     local pCoords = GetEntityCoords(playerPed)
     local tCoords = GetEntityCoords(targetPed)
     if GetDistanceBetweenCoords(pCoords, tCoords) > 1000 then
         return false
     end
-    local itemInfo = sharedItems[item:lower()]
+    if type(item) ~= 'string' then
+        return false
+    end
+    local itemName = item:lower()
+    local itemInfo = sharedItems[itemName]
     if not itemInfo then
         return false
     end
-    local hasItem = HasItem(source, item)
-    if not hasItem then
+
+    local giveAmount = tonumber(amount)
+    if not giveAmount or giveAmount <= 0 or giveAmount ~= math.floor(giveAmount) then
         return false
     end
-    local itemAmount = GetItemByName(source, item).amount
+
+    local selectedSlot = tonumber(slot)
+    local itemData = selectedSlot and GetItemBySlot(source, selectedSlot) or GetItemByName(source, itemName)
+    if not itemData or not itemData.name or itemData.name:lower() ~= itemName then
+        return false
+    end
+    local itemMeta = type(itemData.info) == 'table' and itemData.info or {}
+
+    local itemAmount = tonumber(itemData.amount) or 0
     if itemAmount <= 0 then
         return false
     end
-    local giveAmount = tonumber(amount)
     if giveAmount > itemAmount then
         return false
     end
-    local removeItem = RemoveItem(source, item, giveAmount)
+
+    if not CanAddItem(targetSource, itemName, giveAmount) then
+        return false
+    end
+
+    local removeSlot = itemData.slot or selectedSlot
+    local removeItem = RemoveItem(source, itemName, giveAmount, removeSlot)
     if not removeItem then
         return false
     end
-    local giveItem = AddItem(target, item, giveAmount)
+    local giveItem = AddItem(targetSource, itemName, giveAmount, false, itemMeta)
     if not giveItem then
-        AddItem(source, item, giveAmount)
+        AddItem(source, itemName, giveAmount, removeSlot, itemMeta)
         return false
     end
 
     TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'remove', giveAmount)
-    TriggerClientEvent(target, 'qb-inventory:client:ItemBox', itemInfo, 'add', giveAmount)
+    TriggerClientEvent(targetSource, 'qb-inventory:client:ItemBox', itemInfo, 'add', giveAmount)
     return true
 end)
 

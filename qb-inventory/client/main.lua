@@ -198,12 +198,14 @@ my_webui:RegisterEventHandler('AttemptPurchase', function(data)
 end)
 
 my_webui:RegisterEventHandler('GiveItem', function(data)
-    local player, distance = exports['qb-core']:GetClosestPlayer()
-    if player and distance < 500 then
-        local playerId = GetPlayerId(player)
+    local pawn = GetPlayerPawn()
+    local coords = pawn and GetEntityCoords(pawn)
+    local targetPawn = GetClosestPawn(coords, 1000)
+    if targetPawn and targetPawn.PlayerState and targetPawn:IsPlayerControlled() and data and data.item then
+        local playerId = targetPawn.PlayerState:GetPlayerId()
         TriggerCallback('giveItem', function(success)
             my_webui:SendEvent('giveItemResult', { success = success or false })
-        end, playerId, data.item.name, data.amount)
+        end, playerId, data.item.name, data.amount, data.slot or data.item.slot)
     else
         exports['qb-core']:Notify(Lang.t('notify.nonb'), 'error')
         my_webui:SendEvent('giveItemResult', { success = false })

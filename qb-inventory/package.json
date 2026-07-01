@@ -8,7 +8,7 @@
         "client/vehicles.lua"
     ],
     "server": [
-        "server/main.lua",
-        "server/functions.lua"
+        "server/functions.lua",
+        "server/main.lua"
     ]
 }
