@@ -442,6 +442,9 @@
                                             <span class="catalog-tag">Should Close: {{ item.shouldClose ? 'Yes' : 'No' }}</span>
                                         </div>
                                         <p class="item-description">{{ item.description }}</p>
+                                        <div class="item-card-actions">
+                                            <button class="catalog-action-button" title="Give Yourself Item" @click="giveSelfItem(item)"><i data-lucide="package-plus" class="ui-icon" aria-hidden="true"></i>Give</button>
+                                        </div>
                                     </article>
                                 </div>
                             </div>
@@ -457,7 +460,7 @@
                                     <article v-for="vehicle in vehiclesCatalog" :key="vehicle.key" class="catalog-card vehicle-catalog-card">
                                         <header class="catalog-card-header">
                                             <strong>{{ vehicle.label }}</strong>
-                                            <span class="catalog-tag">{{ vehicle.brand }}</span>
+                                            <span v-if="vehicle.brand" class="catalog-tag">{{ vehicle.brand }}</span>
                                         </header>
                                         <div class="catalog-meta">
                                             <span class="vehicle-key">Key: {{ vehicle.key }}</span>

@@ -135,6 +135,10 @@ my_webui:RegisterEventHandler('players:currencyAdjust', function(data)
     TriggerServerEvent('qb-admin:server:players:currencyAdjust', data)
 end)
 
+my_webui:RegisterEventHandler('items:giveSelf', function(data)
+    TriggerServerEvent('qb-admin:server:items:giveSelf', data)
+end)
+
 my_webui:RegisterEventHandler('dashboard:announce', function(data)
     TriggerServerEvent('qb-admin:server:dashboard:announce', data)
 end)

@@ -1061,6 +1061,44 @@ RegisterServerEvent('qb-admin:server:chat:send', function(source, data)
     BroadcastEvent('qb-admin:client:chatMessage', entry)
 end)
 
+RegisterServerEvent('qb-admin:server:items:giveSelf', function(source, data)
+    local itemName = tostring(data and (data.item or data.name) or ''):lower()
+    local amount = math.floor(tonumber(data and data.amount) or 1)
+    if itemName == '' or amount < 1 then
+        return
+    end
+
+    local itemInfo = itemsShared[itemName]
+    if not itemInfo then
+        TriggerClientEvent(source, 'QBCore:Notify', 'Item does not exist', 'error')
+        return
+    end
+
+    if itemInfo.unique then
+        amount = 1
+    else
+        amount = math.min(amount, 100)
+    end
+
+    local canAdd, reason = exports['qb-inventory']:CanAddItem(source, itemName, amount)
+    if not canAdd then
+        local message = reason == 'weight' and 'Cannot hold item: too heavy' or 'Cannot hold item: no free slots'
+        TriggerClientEvent(source, 'QBCore:Notify', message, 'error')
+        return
+    end
+
+    if not exports['qb-inventory']:AddItem(source, itemName, amount, false, {}, 'qb-admin:items:giveSelf') then
+        TriggerClientEvent(source, 'QBCore:Notify', 'Could not give item', 'error')
+        return
+    end
+
+    local adminName = GetPlayerName(source)
+    local itemLabel = itemInfo.label or itemName
+    TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'add', amount)
+    pushLogEntry('Give Self Item', adminName, 'Gave self ' .. amount .. 'x ' .. itemLabel)
+    pushFeedEntry(adminName .. ' gave themselves ' .. amount .. 'x ' .. itemLabel)
+end)
+
 RegisterServerEvent('qb-admin:server:developer:spawnVehicle', function(source, data)
     local playerPed = GetPlayerPawn(source)
     local playerCoords = GetEntityCoords(playerPed)

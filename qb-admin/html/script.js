@@ -445,6 +445,18 @@ const app = createApp({
             this.appendDisciplinaryLog(`Spawned object ${name} (${model}).`);
         },
 
+        giveSelfItem(item) {
+            if (!item || !item.name) {
+                return;
+            }
+
+            this.sendServerCallback("items:giveSelf", {
+                item: item.name,
+                amount: 1,
+            });
+            this.appendDisciplinaryLog(`Admin You requested 1x ${item.label || item.name}.`);
+        },
+
         copyCurrentCoordinates() {
             this.sendServerCallback("developer:copyCoords", {});
         },

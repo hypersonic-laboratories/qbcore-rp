@@ -191,17 +191,17 @@ textarea {
     font: inherit;
 }
 
-:where(button, input, select, textarea, .nav-button, .action-button, .icon-action-button, .context-item, .vehicle-action-btn):focus-visible {
+:where(button, input, select, textarea, .nav-button, .action-button, .icon-action-button, .context-item, .vehicle-action-btn, .catalog-action-button):focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
 }
 
-:where(button, .nav-button, .action-button, .icon-action-button, .context-item, .vehicle-action-btn) {
+:where(button, .nav-button, .action-button, .icon-action-button, .context-item, .vehicle-action-btn, .catalog-action-button) {
     position: relative;
     overflow: clip;
 }
 
-:where(button, .nav-button, .action-button, .icon-action-button, .context-item, .vehicle-action-btn)::after {
+:where(button, .nav-button, .action-button, .icon-action-button, .context-item, .vehicle-action-btn, .catalog-action-button)::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -211,11 +211,11 @@ textarea {
     transition: opacity var(--duration-fast) var(--easing-standard);
 }
 
-:where(button, .nav-button, .action-button, .icon-action-button, .context-item, .vehicle-action-btn):hover::after {
+:where(button, .nav-button, .action-button, .icon-action-button, .context-item, .vehicle-action-btn, .catalog-action-button):hover::after {
     opacity: var(--state-hover-opacity);
 }
 
-:where(button, .nav-button, .action-button, .icon-action-button, .context-item, .vehicle-action-btn):active::after {
+:where(button, .nav-button, .action-button, .icon-action-button, .context-item, .vehicle-action-btn, .catalog-action-button):active::after {
     opacity: var(--state-pressed-opacity);
 }
 
@@ -1552,6 +1552,32 @@ input[type="range"]:focus-visible {
 
 .item-catalog-card {
     gap: 10px;
+}
+
+.item-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
+}
+
+.catalog-action-button {
+    border: 1px solid var(--md-primary);
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--type-label-sm);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+}
+
+.catalog-action-button .ui-icon {
+    width: 14px;
+    height: 14px;
 }
 
 .item-key {
