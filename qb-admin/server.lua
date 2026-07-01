@@ -743,7 +743,7 @@ local function buildOpenAdminContext(src)
     local players = buildPlayerList(qbPlayers, jobsShared, gangsShared)
     local playersOnline = #players
     local serverUptime = formatUptime(os.time() - resourceStartTime)
-    local ping = GetPlayerPing(src) or 0
+    local ping = math.max(0, math.floor((tonumber(GetPlayerPing(src)) or 0) + 0.5))
     local adminName = GetPlayerName(src)
     local adminPlayer = exports['qb-core']:GetPlayer(src)
     local adminNetId = (adminPlayer and tonumber(adminPlayer.PlayerData.netId)) or 0
@@ -773,7 +773,7 @@ local function buildOpenAdminContext(src)
         stats = {
             { label = 'Players Online', value = tostring(playersOnline) },
             { label = 'Server Uptime', value = serverUptime },
-            { label = 'Server Ping', value = tostring(ping) .. 'ms' },
+            { label = 'Admin Ping', value = tostring(ping) .. 'ms' },
         },
         disciplinaryFeed = disciplinaryFeedState,
         reports = reportsState,
