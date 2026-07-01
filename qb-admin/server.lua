@@ -1251,7 +1251,10 @@ local quickControlActions = {
         if not targetSrc then
             return
         end
-        TriggerClientEvent(source, 'qb-admin:client:openInventory', targetPlayerId)
+        if not exports['qb-inventory']:OpenInventoryById(source, targetPlayerId) then
+            return
+        end
+        TriggerClientEvent(source, 'qb-admin:client:closePanel')
         pushLogEntry('Inventory', targetName, 'Viewed by ' .. adminName)
     end,
     revive = function(_, targetPlayerId, adminName)

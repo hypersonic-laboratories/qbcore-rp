@@ -523,7 +523,7 @@ function OpenInventoryById(source, targetId)
     local Player = exports['qb-core']:GetPlayer(source)
     local TargetPlayer = exports['qb-core']:GetPlayer(targetId)
     if not Player or not TargetPlayer then
-        return
+        return false
     end
     local targetSource = TargetPlayer.PlayerData.source
     TriggerClientEvent(targetSource, 'qb-inventory:client:closeIfBusy')
@@ -538,6 +538,7 @@ function OpenInventoryById(source, targetId)
     }
     SetInventoryBusy(targetSource, true)
     TriggerClientEvent(source, 'qb-inventory:client:openInventory', playerItems, formattedInventory)
+    return true
 end
 
 exports('qb-inventory', 'OpenInventoryById', OpenInventoryById)

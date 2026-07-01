@@ -221,8 +221,10 @@ RegisterClientEvent('qb-admin:client:openClothing', function()
     exports['qb-clothing']:OpenClothing()
 end)
 
-RegisterClientEvent('qb-admin:client:openInventory', function(targetPlayerId)
-    TriggerLocalClientEvent('qb-inventory:client:openInventory', targetPlayerId)
+RegisterClientEvent('qb-admin:client:closePanel', function()
+    ui_open = false
+    my_webui:SetInputMode(0)
+    my_webui:SendEvent('closeAdmin')
 end)
 
 local noclipActive = false
