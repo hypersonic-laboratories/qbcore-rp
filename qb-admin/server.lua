@@ -11,6 +11,7 @@ local disciplinaryFeedState = {}
 local chatMessagesState = {}
 local logsHistoryState = {}
 local adminQuickActionStates = {}
+local playerFreezeStates = {}
 local nextReportId = 1
 local nextTicketId = 1
 local nextLogId = 1
@@ -513,6 +514,52 @@ local function setPlayerFrozenOnServer(player, frozen)
     end)
     return applied
 end
+
+local function getPlayerFreezeStateKey(player, playerId)
+    local resolvedPlayerId = tonumber(playerId)
+    if not resolvedPlayerId then
+        pcall(function()
+            resolvedPlayerId = tonumber(GetPlayerId(player))
+        end)
+    end
+    return tostring(resolvedPlayerId or player)
+end
+
+local function togglePlayerFrozenOnServer(player, playerId)
+    local stateKey = getPlayerFreezeStateKey(player, playerId)
+    local nextFrozen = not playerFreezeStates[stateKey]
+    if not setPlayerFrozenOnServer(player, nextFrozen) then
+        return nil
+    end
+
+    playerFreezeStates[stateKey] = nextFrozen or nil
+    return nextFrozen
+end
+
+local function clearPlayerFreezeState(player, playerId)
+    if player ~= nil then
+        playerFreezeStates[tostring(player)] = nil
+        playerFreezeStates[getPlayerFreezeStateKey(player)] = nil
+    end
+
+    if playerId ~= nil then
+        playerFreezeStates[tostring(playerId)] = nil
+    end
+end
+
+RegisterServerEvent('playerDropped', function()
+    local droppedSource = source
+    local droppedPlayer = exports['qb-core']:GetPlayer(droppedSource)
+    local droppedPlayerId = droppedPlayer and droppedPlayer.PlayerData and droppedPlayer.PlayerData.netId
+    clearPlayerFreezeState(droppedSource, droppedPlayerId)
+end)
+
+RegisterServerEvent('QBCore:Server:OnPlayerUnload', function(playerSource)
+    local unloadSource = playerSource or source
+    local unloadPlayer = exports['qb-core']:GetPlayer(unloadSource)
+    local unloadPlayerId = unloadPlayer and unloadPlayer.PlayerData and unloadPlayer.PlayerData.netId
+    clearPlayerFreezeState(unloadSource, unloadPlayerId)
+end)
 
 local function getAdminQuickActionState(player)
     local playerId = GetPlayerId(player)
@@ -1058,11 +1105,19 @@ local contextActions = {
     end,
     freeze = function(_, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc or not setPlayerFrozenOnServer(targetSrc, true) then
+        if not targetSrc then
             return
         end
-        pushLogEntry('Freeze', targetName, 'Frozen by ' .. adminName)
-        pushFeedEntry(adminName .. ' froze player #' .. targetPlayerId)
+        local isFrozen = togglePlayerFrozenOnServer(targetSrc, targetPlayerId)
+        if isFrozen == nil then
+            return
+        end
+        pushLogEntry(
+            isFrozen and 'Freeze' or 'Unfreeze',
+            targetName,
+            (isFrozen and 'Frozen' or 'Unfrozen') .. ' by ' .. adminName
+        )
+        pushFeedEntry(adminName .. (isFrozen and ' froze ' or ' unfroze ') .. 'player #' .. targetPlayerId)
     end,
     heal = function(_, targetPlayerId, adminName)
         local targetSrc, targetPlayer, targetName = getTargetContext(targetPlayerId, true)
@@ -1232,11 +1287,19 @@ local quickControlActions = {
     end,
     freeze = function(_, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
-        if not targetSrc or not setPlayerFrozenOnServer(targetSrc, true) then
+        if not targetSrc then
             return
         end
-        pushLogEntry('Freeze', targetName, 'Frozen by ' .. adminName)
-        pushFeedEntry(adminName .. ' froze player #' .. targetPlayerId)
+        local isFrozen = togglePlayerFrozenOnServer(targetSrc, targetPlayerId)
+        if isFrozen == nil then
+            return
+        end
+        pushLogEntry(
+            isFrozen and 'Freeze' or 'Unfreeze',
+            targetName,
+            (isFrozen and 'Frozen' or 'Unfrozen') .. ' by ' .. adminName
+        )
+        pushFeedEntry(adminName .. (isFrozen and ' froze ' or ' unfroze ') .. 'player #' .. targetPlayerId)
     end,
     clothing = function(_, targetPlayerId, adminName)
         local targetSrc, _, targetName = getTargetContext(targetPlayerId)
@@ -1453,12 +1516,17 @@ local investigationActions = {
         pushLogEntry('Heal Reporter', targetName, 'Healed by ' .. adminName)
         pushFeedEntry(adminName .. ' healed report player ' .. targetName)
     end,
-    freeze = function(_, targetSrc, targetName, adminName)
-        if not setPlayerFrozenOnServer(targetSrc, true) then
+    freeze = function(_, targetSrc, targetName, adminName, targetPlayerId)
+        local isFrozen = togglePlayerFrozenOnServer(targetSrc, targetPlayerId)
+        if isFrozen == nil then
             return
         end
-        pushLogEntry('Freeze Reporter', targetName, 'Frozen by ' .. adminName)
-        pushFeedEntry(adminName .. ' froze report player ' .. targetName)
+        pushLogEntry(
+            isFrozen and 'Freeze Reporter' or 'Unfreeze Reporter',
+            targetName,
+            (isFrozen and 'Frozen' or 'Unfrozen') .. ' by ' .. adminName
+        )
+        pushFeedEntry(adminName .. (isFrozen and ' froze ' or ' unfroze ') .. 'report player ' .. targetName)
     end,
 }
 
@@ -1471,7 +1539,7 @@ RegisterServerEvent('qb-admin:server:reports:investigationAction', function(sour
     end
     local targetSrc, _, targetName = getTargetContext(targetPlayerId)
     if targetSrc then
-        handler(source, targetSrc, targetName, GetPlayerName(source))
+        handler(source, targetSrc, targetName, GetPlayerName(source), targetPlayerId)
     end
 end)
 
