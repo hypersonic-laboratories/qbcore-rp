@@ -1,7 +1,9 @@
 -- Player Dropped
 RegisterServerEvent('playerDropped', function(reason)
     local src = source
-    if not QBCore.Players[src] then return end
+    if not QBCore.Players[src] then
+        return
+    end
     local player = QBCore.Players[src]
     TriggerLocalServerEvent('qb-log:server:CreateLog', 'joinleave', 'Dropped', 'red', '**' .. GetPlayerName(src) .. '** (' .. player.PlayerData.license .. ') left..' .. '\n **Reason:** ' .. reason)
     player:Save()
@@ -15,10 +17,14 @@ end)
 local updateCooldowns = {}
 RegisterServerEvent('QBCore:UpdatePlayer', function(source)
     local now = os.time()
-    if updateCooldowns[source] and (now - updateCooldowns[source]) < 10 then return end
+    if updateCooldowns[source] and (now - updateCooldowns[source]) < 10 then
+        return
+    end
     updateCooldowns[source] = now
     local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local newHunger = Player.PlayerData.metadata['hunger'] - QBCore.Config.Player.HungerRate
     local newThirst = Player.PlayerData.metadata['thirst'] - QBCore.Config.Player.ThirstRate
     if newHunger <= 0 then
@@ -45,14 +51,17 @@ RegisterServerEvent('QBCore:Server:ApplyHungerThirstDamage', function(source, am
         return
     end
 
-    DamageTarget(pawn, pawn, {
-        DamageAmount = damageAmount,
-    })
+    local lib = UE.UHGameplaySystemGlobals
+    local damageData = UE.FHDamageData()
+    damageData.BaseDamage = damageAmount
+    lib.DamageTarget(pawn, pawn, damageData)
 end)
 
 RegisterServerEvent('QBCore:ToggleDuty', function(source)
     local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     if Player.PlayerData.job.onduty then
         Player:SetJobDuty(false)
         TriggerClientEvent(source, 'QBCore:Notify', Lang:t('info.off_duty'))
@@ -78,7 +87,9 @@ end)
 
 -- Server Callback
 RegisterServerEvent('QBCore:Server:TriggerCallback', function(source, name, ...)
-    if not QBCore.ServerCallbacks[name] then return end
+    if not QBCore.ServerCallbacks[name] then
+        return
+    end
 
     QBCore.ServerCallbacks[name](source, function(...)
         TriggerClientEvent(source, 'QBCore:Client:TriggerCallback', name, ...)
