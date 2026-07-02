@@ -501,19 +501,3 @@ RegisterServerEvent('qb-hotdogjob:server:UpdateReputation', function(source, qua
 
     TriggerClientEvent(source, 'qb-hotdogjob:client:UpdateReputation', Player.PlayerData.metadata['rep'])
 end)
-
-RegisterCommand('removestand', Lang.t('info.command'), function(source)
-    local pawn = GetPlayerPawn(source)
-    if not pawn then
-        return
-    end
-
-    local pawnCoords = GetEntityCoords(pawn)
-    for _, session in pairs(activeStands) do
-        if isValidActor(session.stand) and GetDistanceBetweenCoords(pawnCoords, GetEntityCoords(session.stand)) <= Config.AdminRemoveDistance then
-            clearStand(session.source)
-            notify(source, Lang.t('info.admin_removed'), 'primary')
-            return
-        end
-    end
-end, true)

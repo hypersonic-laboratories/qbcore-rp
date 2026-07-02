@@ -498,7 +498,7 @@ local function setupPeds()
     TriggerCallback('getPeds', function(jobPeds)
         for i = 1, #jobPeds do
             local ped = jobPeds[i].npc
-            addRegisteredTarget(ped, {
+            local options = {
                 {
                     type = 'server',
                     event = 'QBCore:ToggleDuty',
@@ -513,7 +513,8 @@ local function setupPeds()
                     icon = 'bean',
                     job = Config.Job,
                 },
-            })
+            }
+            addRegisteredTarget(ped, options)
         end
     end)
 end
