@@ -15,7 +15,8 @@ Crypto = {
 
     Exchange = {
         coords = Vector(521190, 607561, 4841),
-        radius = 100,
+        pedName = 'Crypto Exchange',
+        pedHeading = 9,
         targetDistance = 400,
         RebootInfo = {
             state = false,

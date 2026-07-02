@@ -389,10 +389,40 @@ if Ticker.Enabled then
     Ticker.Enabled = false
 end
 
+local exchangePed = nil
+local exchangePedInitialised = false
+
+RegisterServerEvent('HEvent:PlayerPossessed', function()
+    if exchangePedInitialised then
+        return
+    end
+    exchangePedInitialised = true
+
+    local pedName = Crypto.Exchange.pedName or 'Crypto Exchange'
+    HPawn(Crypto.Exchange.coords, Rotator(0, Crypto.Exchange.pedHeading or 0, 0), function(npc)
+        if not npc then
+            return
+        end
+
+        exchangePed = npc
+        npc:SetCharacterName(pedName)
+        SetEntityInvincible(npc, true)
+    end, { CharacterName = pedName, bShowNameplate = true })
+end)
+
+RegisterCallback('getPeds', function()
+    return exchangePed
+end)
+
 function onShutdown()
     StopRebootTimer()
     if priceTimer then
         Timer.ClearInterval(priceTimer)
         priceTimer = nil
     end
+
+    if exchangePed and (not exchangePed.IsValid or exchangePed:IsValid()) then
+        DeleteEntity(exchangePed)
+    end
+    exchangePed = nil
 end

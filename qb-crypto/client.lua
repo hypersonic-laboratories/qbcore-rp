@@ -1,7 +1,6 @@
 local Lang = require('locales/en')
 local sharedItems = exports['qb-core']:GetShared('Items')
-local exchangeZoneName = 'qb_crypto_exchange'
-local exchangeZoneRegistered = false
+local exchangePed = nil
 
 local requiredItems = {
     {
@@ -19,32 +18,38 @@ local function SetRequiredItemsVisible(visible)
 end
 
 local function RegisterExchangeTarget()
-    if exchangeZoneRegistered then
+    if exchangePed then
         return
     end
 
-    exports['qb-target']:AddSphereZone(exchangeZoneName, Crypto.Exchange.coords, Crypto.Exchange.radius or 100, {
-        debug = false,
-        distance = Crypto.Exchange.targetDistance or 400,
-    }, {
-        {
-            icon = 'bitcoin',
-            label = Lang.t('text.exchange_usb'),
-            type = 'client',
-            event = 'qb-crypto:client:startExchange',
-        },
-    })
+    TriggerCallback('getPeds', function(ped)
+        if not ped or exchangePed then
+            return
+        end
 
-    exchangeZoneRegistered = true
+        exports['qb-target']:AddTargetEntity(ped, {
+            distance = Crypto.Exchange.targetDistance or 400,
+            options = {
+                {
+                    icon = 'bitcoin',
+                    label = Lang.t('text.exchange_usb'),
+                    type = 'client',
+                    event = 'qb-crypto:client:startExchange',
+                },
+            },
+        })
+
+        exchangePed = ped
+    end)
 end
 
 local function RemoveExchangeTarget()
-    if not exchangeZoneRegistered then
+    if not exchangePed then
         return
     end
 
-    exports['qb-target']:RemoveZone(exchangeZoneName)
-    exchangeZoneRegistered = false
+    exports['qb-target']:RemoveTargetEntity(exchangePed)
+    exchangePed = nil
 end
 
 local function ExchangeSuccess()
