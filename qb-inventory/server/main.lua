@@ -158,6 +158,11 @@ local function EquipWeaponItem(source, itemData)
         return
     end
 
+    if IsHeldWeaponItem(pawn, itemData.name, itemInfo) then
+        UnequipHeldWeaponItem(pawn, itemInfo)
+        return
+    end
+
     local itemDef = HInventory.GetItemDefinitionByAssetName(itemInfo.asset_name, true)
     if not itemDef then
         TriggerClientEvent(source, 'QBCore:Notify', 'Weapon definition not found', 'error')
