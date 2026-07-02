@@ -2,6 +2,8 @@ Inventories = {}
 Drops = {}
 RegisteredShops = {}
 local sharedItems = exports['qb-core']:GetShared('Items')
+local DROP_INTERACTION_ANIMATION = '/HelixAnimation/Unified/Animations/Actions/PickUp/A_PickUp_Low.A_PickUp_Low'
+local DROP_INTERACTION_FALLBACK_MS = 2000
 
 local function GetPlayerSource(source)
     if type(source) == 'number' then
@@ -58,6 +60,87 @@ local function GetSourcePawn(source)
     end
 
     return GetPlayerPawn(source)
+end
+
+local function NormalizeWeaponDisplayName(name)
+    if not name then
+        return nil
+    end
+
+    return tostring(name):lower():gsub('[^%w]', '')
+end
+
+local function GetHeldWeaponName(pawn)
+    local equippedItems = HInventory.GetEquippedItems(pawn)
+    if not equippedItems or equippedItems:Length() == 0 then
+        return nil
+    end
+
+    local equipmentInstance = equippedItems:Get(1)
+    local owningItemInstance = equipmentInstance and HInventory.GetOwningItemFromEquipment(equipmentInstance)
+    local itemDef = owningItemInstance and owningItemInstance:GetItemDef()
+    return itemDef and itemDef.DisplayName
+end
+
+local function GetWeaponDisplayNameFromAssetName(assetName)
+    if not assetName then
+        return nil
+    end
+
+    return assetName:match('^ID_Weapon_[^_]+_(.+)$') or assetName:match('^ID_Weapon_(.+)$')
+end
+
+local function IsHeldWeaponItem(pawn, itemName, itemInfo)
+    if not pawn or not itemInfo or itemInfo.type ~= 'weapon' then
+        return false
+    end
+
+    local heldWeaponName = NormalizeWeaponDisplayName(GetHeldWeaponName(pawn))
+    if not heldWeaponName then
+        return false
+    end
+
+    local itemDisplayName = itemName and itemName:gsub('^weapon_', '')
+    return heldWeaponName == NormalizeWeaponDisplayName(itemInfo.label) or heldWeaponName == NormalizeWeaponDisplayName(GetWeaponDisplayNameFromAssetName(itemInfo.asset_name)) or heldWeaponName == NormalizeWeaponDisplayName(itemDisplayName)
+end
+
+local function UnequipHeldWeaponItem(pawn, itemInfo)
+    if not pawn or not itemInfo or not itemInfo.asset_name then
+        return
+    end
+
+    HInventory.UnequipAllItems(pawn)
+    HInventory.ClearQuickBar(pawn)
+    HInventory.RemoveItemByName(pawn, itemInfo.asset_name, 1)
+end
+
+local function PlayDropInteractionAnimation(pawn, onEnded)
+    if not pawn or not Animation or not Animation.Play then
+        return false
+    end
+
+    return Animation.Play(pawn, DROP_INTERACTION_ANIMATION, nil, onEnded)
+end
+
+local function AfterDropInteractionAnimation(pawn, onComplete)
+    local completed = false
+    local function complete()
+        if completed then
+            return
+        end
+
+        completed = true
+        onComplete()
+    end
+
+    if not PlayDropInteractionAnimation(pawn, complete) then
+        complete()
+        return
+    end
+
+    if Timer and Timer.SetTimeout then
+        Timer.SetTimeout(complete, DROP_INTERACTION_FALLBACK_MS)
+    end
 end
 
 local function EquipWeaponItem(source, itemData)
@@ -271,25 +354,44 @@ end)
 
 RegisterServerEvent('qb-inventory:server:updateDrop', function(source, dropId)
     local DropData = Drops[dropId]
-    if not DropData then
+    if not DropData or not DropData.isHeld or DropData.isPickupPending or DropData.isReleasing then
         return
     end
     local playerPed = GetPlayerPawn(source)
-    local playerCoords = GetEntityCoords(playerPed)
-    local ForwardVec = playerPed:GetActorForwardVector()
-    local SpawnX = playerCoords.X + ForwardVec.X * 200
-    local SpawnY = playerCoords.Y + ForwardVec.Y * 200
-    local hit = Trace:LineSingle(Vector(SpawnX, SpawnY, playerCoords.Z + 200), Vector(SpawnX, SpawnY, playerCoords.Z - 500))
-    local SpawnZ = (hit and hit.ImpactPoint) and hit.ImpactPoint.Z or (playerCoords.Z - 88)
-    local DropPosition = Vector(SpawnX, SpawnY, SpawnZ)
-    DropData.coords = DropPosition
-    DropData.isHeld = nil
-    DetachActor(DropData.entity.Object, {
-        Location = DetachmentRule.KeepWorld,
-        Rotation = DetachmentRule.KeepWorld,
-    })
-    SetEntityCoords(DropData.entity.Object, DropPosition)
-    DropData.entity.Component:SetCollisionProfileName('BlockAllDynamic', true)
+    if not playerPed then
+        return
+    end
+
+    DropData.isReleasing = true
+    AfterDropInteractionAnimation(playerPed, function()
+        if Drops[dropId] ~= DropData then
+            return
+        end
+        local currentPed = GetPlayerPawn(source) or playerPed
+        if not currentPed or not DropData.entity or not DropData.entity.Object then
+            DropData.isReleasing = nil
+            return
+        end
+
+        local playerCoords = GetEntityCoords(currentPed)
+        local PawnRotation = GetEntityRotation(currentPed)
+        local ForwardVec = currentPed:GetActorForwardVector()
+        local SpawnX = playerCoords.X + ForwardVec.X * 200
+        local SpawnY = playerCoords.Y + ForwardVec.Y * 200
+        local hit = Trace:LineSingle(Vector(SpawnX, SpawnY, playerCoords.Z + 200), Vector(SpawnX, SpawnY, playerCoords.Z - 500))
+        local SpawnZ = (hit and hit.ImpactPoint) and hit.ImpactPoint.Z or (playerCoords.Z - 88)
+        local DropPosition = Vector(SpawnX, SpawnY, SpawnZ)
+        DropData.coords = DropPosition
+        DropData.isHeld = nil
+        DropData.isReleasing = nil
+        DetachActor(DropData.entity.Object, {
+            Location = DetachmentRule.KeepWorld,
+            Rotation = DetachmentRule.KeepWorld,
+        })
+        SetEntityCoords(DropData.entity.Object, DropPosition)
+        SetEntityRotation(DropData.entity.Object, Rotator(0, PawnRotation.Yaw, 0))
+        DropData.entity.Component:SetCollisionProfileName('BlockAllDynamic', true)
+    end)
 end)
 
 RegisterServerEvent('qb-inventory:server:pickupDrop', function(source, data)
@@ -309,17 +411,31 @@ RegisterServerEvent('qb-inventory:server:pickupDrop', function(source, data)
     if GetDistanceBetweenCoords(playerCoords, DropData.coords) > 250 then
         return
     end
-    local mesh = playerPed:GetCharacterBaseMesh()
-    if not mesh then
+    if not playerPed:GetCharacterBaseMesh() then
         return
     end
-    AttachActorToComponent(DropData.entity.Object, mesh, Vector(-35, 0, 10), Rotator(-95, 0, 0), 'hand_r', {
-        Location = AttachmentRule.SnapToTarget,
-        Rotation = AttachmentRule.SnapToTarget,
-        Scale = AttachmentRule.SnapToTarget,
-    })
     DropData.isHeld = true
-    TriggerClientEvent(source, 'qb-inventory:client:holdDrop', dropId)
+    DropData.isPickupPending = true
+    AfterDropInteractionAnimation(playerPed, function()
+        if Drops[dropId] ~= DropData then
+            return
+        end
+        local currentPed = GetPlayerPawn(source) or playerPed
+        local currentMesh = currentPed and currentPed:GetCharacterBaseMesh()
+        if not currentMesh or not DropData.entity or not DropData.entity.Object then
+            DropData.isHeld = nil
+            DropData.isPickupPending = nil
+            return
+        end
+
+        AttachActorToComponent(DropData.entity.Object, currentMesh, Vector(45, 0, 0), Rotator(-90, 0, 180), 'hand_l', {
+            Location = AttachmentRule.SnapToTarget,
+            Rotation = AttachmentRule.SnapToTarget,
+            Scale = AttachmentRule.SnapToTarget,
+        })
+        DropData.isPickupPending = nil
+        TriggerClientEvent(source, 'qb-inventory:client:holdDrop', dropId)
+    end)
 end)
 
 -- Callbacks
@@ -333,11 +449,21 @@ RegisterCallback('createDrop', function(source, item)
     if not Player then
         return false
     end
+    if type(item) ~= 'table' or type(item.name) ~= 'string' then
+        return false
+    end
     local playerPed = GetPlayerPawn(source)
+    if not playerPed then
+        return false
+    end
     local playerCoords = GetEntityCoords(playerPed)
+    local itemInfo = sharedItems[item.name:lower()]
+    local shouldUnequipHeldWeapon = IsHeldWeaponItem(playerPed, item.name, itemInfo)
     if RemoveItem(source, item.name, item.amount, item.fromSlot) then
-        --if item.type == 'weapon' then SetCurrentPedWeapon(playerPed, `WEAPON_UNARMED`, true) end
-        --TaskPlayAnim(playerPed, 'pickup_object', 'pickup_low', 8.0, -8.0, 2000, 0, 0, false, false, false)
+        if shouldUnequipHeldWeapon then
+            UnequipHeldWeaponItem(playerPed, itemInfo)
+        end
+        PlayDropInteractionAnimation(playerPed)
         local PawnRotation = GetEntityRotation(playerPed)
         local ForwardVec = playerPed:GetActorForwardVector()
         local SpawnX = playerCoords.X + ForwardVec.X * 200
@@ -506,6 +632,7 @@ RegisterCallback('giveItem', function(source, target, item, amount, slot)
         return false
     end
 
+    local shouldUnequipHeldWeapon = IsHeldWeaponItem(playerPed, itemName, itemInfo)
     local removeSlot = itemData.slot or selectedSlot
     local removeItem = RemoveItem(source, itemName, giveAmount, removeSlot)
     if not removeItem then
@@ -517,6 +644,9 @@ RegisterCallback('giveItem', function(source, target, item, amount, slot)
         return false
     end
 
+    if shouldUnequipHeldWeapon then
+        UnequipHeldWeaponItem(playerPed, itemInfo)
+    end
     TriggerClientEvent(source, 'qb-inventory:client:ItemBox', itemInfo, 'remove', giveAmount)
     TriggerClientEvent(targetSource, 'qb-inventory:client:ItemBox', itemInfo, 'add', giveAmount)
     return true

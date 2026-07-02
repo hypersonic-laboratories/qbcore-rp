@@ -110,7 +110,6 @@ Config.Products = {
         { name = 'weapon_ronin777', price = 0, amount = 250 },
         { name = 'weapon_sabra', price = 0, amount = 250 },
         { name = 'weapon_sovwhisper', price = 0, amount = 250 },
-        { name = 'weapon_unarmed', price = 0, amount = 250 },
         { name = 'weapon_vulcan', price = 0, amount = 250 },
     },
     ['prison'] = {

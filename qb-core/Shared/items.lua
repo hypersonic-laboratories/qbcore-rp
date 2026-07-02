@@ -37,7 +37,6 @@ QBCore.Shared.Items = {
     weapon_ronin777 = { name = 'weapon_ronin777', label = 'RONIN 777', weight = 1000, type = 'weapon', image = 'weapon_ronin777.png', asset_name = 'ID_Weapon_Sniper_Ronin-777', ammo_type = 'snp_ammo', unique = true, useable = true, shouldClose = true, description = '' },
     weapon_sabra = { name = 'weapon_sabra', label = 'SABRA', weight = 1000, type = 'weapon', image = 'weapon_sabra.png', asset_name = 'ID_Weapon_LMG_Sabra', ammo_type = 'mg_ammo', unique = true, useable = true, shouldClose = true, description = '' },
     weapon_sovwhisper = { name = 'weapon_sovwhisper', label = 'SOV WHISPER', weight = 1000, type = 'weapon', image = 'weapon_sovwhisper.png', asset_name = 'ID_Weapon_Rifle_SovWhisper', ammo_type = 'rifle_ammo', unique = true, useable = true, shouldClose = true, description = '' },
-    weapon_unarmed = { name = 'weapon_unarmed', label = 'Unarmed', weight = 0, type = 'weapon', image = 'weapon_unarmed.png', asset_name = 'ID_Weapon_Melee_Unarmed', unique = true, useable = true, shouldClose = true, description = '' },
     weapon_vulcan = { name = 'weapon_vulcan', label = 'VULCAN', weight = 1000, type = 'weapon', image = 'weapon_vulcan.png', asset_name = 'ID_Weapon_SMG_Vulcan', ammo_type = 'smg_ammo', unique = true, useable = true, shouldClose = true, description = '' },
 
     -- ITEMS
