@@ -5,6 +5,14 @@ Config.LicenseRank = 2
 Config.ArmoryWhitelist = {}
 Config.WhitelistedVehicles = {}
 
+Config.Evidence = {
+    ZoneRadius = 35,
+    TargetDistance = 300,
+    DebugZones = true,
+    CasingDropChance = 35,
+    CasingDropCooldown = 2,
+}
+
 Config.AmmoLabels = {
     pistol_ammo = '9x19mm parabellum bullet',
     smg_ammo = '9x19mm parabellum bullet',

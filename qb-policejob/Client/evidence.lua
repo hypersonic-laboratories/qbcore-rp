@@ -17,6 +17,7 @@ local WeaponFireTag = nil
 local WeaponFireCallback = nil
 local WeaponFirePawn = nil
 local WeaponFireListenerRequested = false
+local LastCasingDropAt = 0
 
 local StatusList = {
     ['fight'] = Lang.t('evidence.red_hands'),
@@ -52,11 +53,22 @@ local function removeEvidenceZone(kind, id)
     end
 end
 
+local function getEvidenceConfig(key, default)
+    local evidenceConfig = Config.Evidence or {}
+    if evidenceConfig[key] == nil then
+        return default
+    end
+    return evidenceConfig[key]
+end
+
 local function addEvidenceZone(kind, id, coords, label, eventName, icon)
     removeEvidenceZone(kind, id)
     local zoneName = ('police_evidence_%s_%s'):format(kind, id)
     EvidenceZones[kind][id] = zoneName
-    exports['qb-target']:AddSphereZone(zoneName, coordsToVector(coords), 35, { distance = 250, debug = true }, {
+    exports['qb-target']:AddSphereZone(zoneName, coordsToVector(coords), getEvidenceConfig('ZoneRadius', 100), {
+        distance = getEvidenceConfig('TargetDistance', 300),
+        debug = getEvidenceConfig('DebugZones', true),
+    }, {
         {
             type = 'client',
             event = eventName,
@@ -114,14 +126,37 @@ local function getCurrentWeaponName()
     return tostring(CurrentWeapon)
 end
 
+local function shouldCreateCasingEvidence()
+    local cooldown = tonumber(getEvidenceConfig('CasingDropCooldown', 2)) or 0
+    local now = os.time()
+    if cooldown > 0 and LastCasingDropAt > 0 and (now - LastCasingDropAt) < cooldown then
+        return false
+    end
+
+    local chance = tonumber(getEvidenceConfig('CasingDropChance', 35)) or 100
+    if chance <= 0 then
+        return false
+    end
+    if chance < 100 and math.random(1, 100) > chance then
+        return false
+    end
+
+    LastCasingDropAt = now
+    return true
+end
+
 local function handleWeaponFire(ownerActor)
     local pawn = ownerActor or getLocalPlayerPawn()
     if not pawn then
         return
     end
 
-    local coords = GetEntityCoords(pawn)
-    TriggerServerEvent('qb-policejob:server:CreateCasing', getCurrentWeaponName(), coords)
+    if shouldCreateCasingEvidence() then
+        local coords = GetEntityCoords(pawn)
+        if coords then
+            TriggerServerEvent('qb-policejob:server:CreateCasing', getCurrentWeaponName(), coords)
+        end
+    end
 
     local gunpowderStatus = CurrentStatusList['gunpowder']
     if not gunpowderStatus or (gunpowderStatus.time or 0) < 20 then

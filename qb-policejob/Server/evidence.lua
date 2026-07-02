@@ -5,6 +5,7 @@ local Casings = {}
 local BloodDrops = {}
 local FingerDrops = {}
 local PlayerStatus = {}
+local LastCasingCreatedAt = {}
 
 local function notify(source, text, notifyType)
     TriggerClientEvent(source, 'QBCore:Notify', text, notifyType)
@@ -32,6 +33,30 @@ local function CreateCasingId()
         caseId = 'casing-' .. GenerateId(8, 'mixed')
     end
     return caseId
+end
+
+local function getEvidenceConfig(key, default)
+    local evidenceConfig = Config.Evidence or {}
+    if evidenceConfig[key] == nil then
+        return default
+    end
+    return evidenceConfig[key]
+end
+
+local function canCreateCasingForSource(source)
+    local cooldown = tonumber(getEvidenceConfig('CasingDropCooldown', 2)) or 0
+    if cooldown <= 0 then
+        return true
+    end
+
+    local now = os.time()
+    local lastCreatedAt = LastCasingCreatedAt[source] or 0
+    if lastCreatedAt > 0 and (now - lastCreatedAt) < cooldown then
+        return false
+    end
+
+    LastCasingCreatedAt[source] = now
+    return true
 end
 
 local function GetWeaponItem(weapon)
@@ -126,6 +151,12 @@ end)
 RegisterServerEvent('qb-policejob:server:CreateCasing', function(source, weapon, coords)
     local Player = exports['qb-core']:GetPlayer(source)
     if not Player then
+        return
+    end
+    if not coords then
+        return
+    end
+    if not canCreateCasingForSource(source) then
         return
     end
 
