@@ -1,5 +1,6 @@
 local Lang = require('locales/en')
-local PoliceJobUI = WebUI('qb-policejob', 'qb-policejob/html/index.html')
+-- global: job.lua (fingerprint UI) and evidence.lua (shutdown) use this too
+PoliceJobUI = WebUI('qb-policejob', 'qb-policejob/html/index.html')
 local currentCameraIndex = 0
 local currentCameraActor = nil
 local cameraTimeTimer = nil
@@ -224,9 +225,9 @@ RegisterClientEvent('qb-policejob:client:SetCamera', function(key, isOnline)
     end
 end)
 
-RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+PoliceUnloadHandlers[#PoliceUnloadHandlers + 1] = function()
     closeCamera()
-end)
+end
 
 Input.BindKey('Backspace', function()
     if currentCameraIndex ~= 0 then

@@ -187,9 +187,9 @@ local function registerPlayerTargets()
     })
 end
 
-RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
+PoliceLoadedHandlers[#PoliceLoadedHandlers + 1] = function()
     registerPlayerTargets()
-end)
+end
 
 RegisterClientEvent('qb-policejob:client:SetOutVehicle', function()
     -- TODO(helix): Vehicle seat ejection needs Helix vehicle support.

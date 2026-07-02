@@ -32,7 +32,25 @@ local function createStationMarkers()
     end
 end
 
+-- RegisterClientEvent keeps only one handler per event name per package, so
+-- client files must append to these lists instead of registering the QBCore
+-- load/unload events themselves (later registrations overwrite earlier ones).
+PoliceLoadedHandlers = {}
+PoliceUnloadHandlers = {}
+
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
+    for _, handler in ipairs(PoliceLoadedHandlers) do
+        handler()
+    end
+end)
+
+RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+    for _, handler in ipairs(PoliceUnloadHandlers) do
+        handler()
+    end
+end)
+
+PoliceLoadedHandlers[#PoliceLoadedHandlers + 1] = function()
     local player = exports['qb-core']:GetPlayerData()
     PlayerJob = player.job or {}
     isHandcuffed = false
@@ -42,9 +60,9 @@ RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
     createStationMarkers()
 
     -- TODO(helix): Tracker clothing/accessory application is not available yet.
-end)
+end
 
-RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+PoliceUnloadHandlers[#PoliceUnloadHandlers + 1] = function()
     TriggerServerEvent('qb-policejob:server:UpdateBlips')
     TriggerServerEvent('qb-policejob:server:SetHandcuffStatus', false)
     TriggerServerEvent('qb-policejob:server:UpdateCurrentCops')
@@ -52,7 +70,7 @@ RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
     isEscorted = false
     PlayerJob = {}
     clearStationMarkers()
-end)
+end
 
 RegisterClientEvent('QBCore:Client:SetDuty', function(newDuty)
     PlayerJob.onduty = newDuty

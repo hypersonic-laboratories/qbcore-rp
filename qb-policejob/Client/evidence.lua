@@ -398,15 +398,15 @@ local function ensureEvidenceStatusTimer()
     end, 10000)
 end
 
-RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
+PoliceLoadedHandlers[#PoliceLoadedHandlers + 1] = function()
     ensureEvidenceStatusTimer()
     registerWeaponFireListener()
-end)
+end
 
-RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
+PoliceUnloadHandlers[#PoliceUnloadHandlers + 1] = function()
     CurrentStatusList = {}
     unregisterWeaponFireListener()
-end)
+end
 
 function onShutdown()
     TriggerLocalClientEvent('qb-policejob:client:CloseCamera')

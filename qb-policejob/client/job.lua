@@ -450,6 +450,6 @@ local function registerPoliceTargets()
     end
 end
 
-RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
+PoliceLoadedHandlers[#PoliceLoadedHandlers + 1] = function()
     registerPoliceTargets()
-end)
+end
