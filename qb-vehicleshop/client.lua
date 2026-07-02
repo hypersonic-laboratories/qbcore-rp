@@ -19,13 +19,15 @@ local function setupTargets()
 
         if shopData['ShowBlip'] then
             local markerId = exports['qb-hud']:AddMarker(shopData['BlipCoords'], {
-                title       = shopData['Label'] or shop,
+                title = shopData['Label'] or shop,
                 description = shopData['Description'] or '',
-                icon        = shopData['BlipIcon'] or 'car-rental',
-                color       = shopData['BlipColor'],
-                markerType  = 'Store',
+                icon = shopData['BlipIcon'] or 'car-rental',
+                color = shopData['BlipColor'],
+                markerType = 'Store',
             })
-            if markerId then shopMarkers[#shopMarkers + 1] = markerId end
+            if markerId then
+                shopMarkers[#shopMarkers + 1] = markerId
+            end
         end
 
         exports['qb-target']:AddBoxZone(shop .. '_finance', shopData['FinanceZone'], 500, 500, {
@@ -35,12 +37,12 @@ local function setupTargets()
             distance = 1000,
         }, {
             {
-                icon = 'money-bill',
+                icon = 'clipboard',
                 label = 'Manage Financed Vehicles',
                 type = 'server',
                 event = 'qb-vehicleshop:server:manageFinancedVehicles',
                 shop = shop,
-            }
+            },
         })
 
         for i = 1, #vehicles do
@@ -50,25 +52,25 @@ local function setupTargets()
                 {
                     type = 'server',
                     event = 'qb-vehicleshop:server:testDrive',
-                    icon = 'car',
+                    icon = 'timer',
                     label = Lang.t('menus.test_header'),
                     shop = shop,
-                    index = i
+                    index = i,
                 },
                 {
                     icon = 'shuffle',
                     label = 'Swap Vehicle',
                     event = 'qb-vehicleshop:client:vehMenu',
                     shop = shop,
-                    index = i
+                    index = i,
                 },
                 {
-                    icon = 'basket-shopping',
+                    icon = 'dollar-sign',
                     label = 'Purchase Vehicle',
                     type = 'server',
                     event = 'qb-vehicleshop:server:purchaseVehicle',
                     shop = shop,
-                    index = i
+                    index = i,
                 },
             }
 
@@ -117,7 +119,7 @@ RegisterClientEvent('qb-vehicleshop:client:vehMenu', function(data)
             isMenuHeader = true,
             header = 'Vehicles',
             icon = 'car',
-        }
+        },
     }
 
     for vehicleName, vehicleData in pairs(Vehicles) do
@@ -130,8 +132,8 @@ RegisterClientEvent('qb-vehicleshop:client:vehMenu', function(data)
                     vehicle = vehicleName,
                     shop = shop,
                     index = index,
-                }
-            }
+                },
+            },
         }
     end
 
