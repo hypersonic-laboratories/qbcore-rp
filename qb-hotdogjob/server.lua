@@ -238,14 +238,25 @@ local function beginCustomerMove(source)
     end, Config.Customer.MoveTickMs or 500)
 end
 
-local function getCustomerSpawn()
-    local base = Config.Customer.SpawnLocation
-    local radius = Config.Customer.SpawnRadius or 0
-    if radius <= 0 then
-        return base
+local function getCustomerSpawn(source)
+    local session = getSession(source)
+    local base = getStandCoords(session)
+    if not base then
+        local pawn = GetPlayerPawn(source)
+        if not pawn then
+            return nil, 0
+        end
+        base = GetEntityCoords(pawn)
     end
 
-    return Vector(base.X + math.random(-radius, radius), base.Y + math.random(-radius, radius), base.Z)
+    local minDist = Config.Customer.SpawnDistanceMin or 1500
+    local maxDist = Config.Customer.SpawnDistanceMax or 3000
+    local angle = math.random() * 2 * math.pi
+    local dist = minDist + math.random() * (maxDist - minDist)
+
+    local spawn = Vector(base.X + math.cos(angle) * dist, base.Y + math.sin(angle) * dist, base.Z)
+    local heading = math.deg(math.atan(base.Y - spawn.Y, base.X - spawn.X))
+    return spawn, heading
 end
 
 local function getMaxHotdogPrice()
@@ -407,7 +418,14 @@ RegisterServerEvent('qb-hotdogjob:server:RequestCustomer', function(source)
         return
     end
 
-    HPawn(getCustomerSpawn(), Rotator(0, Config.Customer.SpawnHeading or 0, 0), function(npc)
+    local spawnCoords, spawnHeading = getCustomerSpawn(source)
+    if not spawnCoords then
+        notify(source, Lang.t('error.customer_failed'), 'error')
+        TriggerClientEvent(source, 'qb-hotdogjob:client:ClearCustomer')
+        return
+    end
+
+    HPawn(spawnCoords, Rotator(0, spawnHeading, 0), function(npc)
         session = getSession(source)
         if not session then
             deleteActor(npc)

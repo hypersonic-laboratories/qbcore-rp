@@ -18,9 +18,8 @@ Config.Stand = {
 
 Config.Customer = {
     Name = 'Hotdog Customer',
-    SpawnLocation = Vector(579446, 558671, 4551),
-    SpawnHeading = 180,
-    SpawnRadius = 500,
+    SpawnDistanceMin = 1500,
+    SpawnDistanceMax = 3000,
     AcceptanceRadius = 150,
     RequestDistance = 900,
     TargetDistance = 500,
@@ -33,16 +32,16 @@ Config.Locations = {
     take = {
         label = 'Hotdog Stand',
         pedName = 'Hotdog Manager',
-        coords = Vector(582143, 562867, 4552),
-        heading = 0,
+        coords = Vector(521200, 607528, 4841),
+        heading = 9,
         showBlip = true,
         blipIcon = 'fast-food',
         blipColor = LinearColor(1.0, 0.38, 0.08, 1.0),
         description = 'Pick up and return a hotdog stand',
     },
     spawn = {
-        coords = Vector(582143, 562867, 4552),
-        heading = 180,
+        coords = Vector(521530, 607400, 4750),
+        heading = 0,
     },
 }
 
