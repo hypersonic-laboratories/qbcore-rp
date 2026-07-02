@@ -113,10 +113,15 @@ local function readLimbStates(pawn)
 end
 
 local function damageTargetLimb(pawn, limbTag, damageAmount)
-    return DamageTarget(pawn, pawn, {
-        DamageAmount = damageAmount,
-        LimbTag = limbTag,
-    })
+    local damageData = UE.FHDamageData()
+    damageData.BaseDamage = damageAmount
+
+    -- Limb identifiers travel in AdditionalTags; FHDamageData has no LimbTag field
+    local tags = UE.FGameplayTagContainer()
+    tags.GameplayTags:Add(limbTag)
+    damageData.AdditionalTags = tags
+
+    return UE.UHGameplaySystemGlobals.DamageTarget(pawn, pawn, damageData)
 end
 
 local function syncPlayerVitalsMetadata(source, pawn)
@@ -190,9 +195,9 @@ local function applySavedVitalsMetadata(source, attempt)
         if healthAmount > 0 then
             applied = HealTarget(pawn, healthAmount) ~= false and applied
         elseif healthAmount < 0 then
-            applied = DamageTarget(pawn, pawn, {
-                DamageAmount = -healthAmount,
-            }) ~= false and applied
+            local damageData = UE.FHDamageData()
+            damageData.BaseDamage = -healthAmount
+            applied = UE.UHGameplaySystemGlobals.DamageTarget(pawn, pawn, damageData) ~= false and applied
         end
     end
 

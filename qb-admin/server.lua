@@ -443,16 +443,15 @@ local function killPlayerOnServer(player)
     local maxHealth = tonumber(GetMaxHealth(pawn)) or 100
     local currentArmor = tonumber(GetArmor(pawn)) or 0
     local lethalDamage = math.max(currentHealth + currentArmor, maxHealth) + 1
-    local params = {
-        DamageAmount = lethalDamage,
-    }
+    local damageData = UE.FHDamageData()
+    damageData.BaseDamage = lethalDamage
 
-    if not DamageTarget(pawn, pawn, params) then
+    if not UE.UHGameplaySystemGlobals.DamageTarget(pawn, pawn, damageData) then
         return false
     end
 
     if IsDowned(pawn) then
-        return DamageTarget(pawn, pawn, params)
+        return UE.UHGameplaySystemGlobals.DamageTarget(pawn, pawn, damageData)
     end
 
     return true
