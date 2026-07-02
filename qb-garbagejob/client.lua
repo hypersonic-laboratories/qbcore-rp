@@ -88,7 +88,7 @@ local function setupPeds()
                     type = 'server',
                     event = 'qb-garbagejob:server:startJob',
                     label = Lang.t('target.start_job'),
-                    icon = 'truck-field',
+                    icon = 'play',
                     job = Config.Job,
                     depot = jobPeds[i].depot,
                 },
@@ -96,7 +96,7 @@ local function setupPeds()
                     type = 'server',
                     event = 'qb-garbagejob:server:completeJob',
                     label = Lang.t('target.complete_route'),
-                    icon = 'circle-check',
+                    icon = 'check',
                     job = Config.Job,
                 },
             }
