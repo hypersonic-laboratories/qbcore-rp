@@ -1,132 +1,97 @@
-Config = Config or {}
-Config.Job = 'hotdog'
-Config.TargetDistance = 1000
-Config.ServerDistance = 700
-Config.AdminRemoveDistance = 1200
-Config.StandDeposit = 250
-Config.MyLevel = 1
-Config.MaxReputation = 200
-
-Config.Stand = {
-    Mesh = '/QBCoreAssets/Meshes/SM_CraftingBench.SM_CraftingBench',
-    Scale = Vector(0.8, 0.8, 0.8),
-    InteractionDistance = 450,
-    PushOffset = Vector(130, 0, -60),
-    PushRotation = Rotator(0, 90, 0),
-    CustomerOffset = Vector(180, 0, 0),
-}
-
-Config.Customer = {
-    Name = 'Hotdog Customer',
-    SpawnDistanceMin = 1500,
-    SpawnDistanceMax = 3000,
-    AcceptanceRadius = 150,
-    RequestDistance = 900,
+Config = {
+    Job = 'hotdog',
     TargetDistance = 1000,
-    MoveTickMs = 500,
-    NextDelayMs = 2500,
-    MaxHotdogsPerSale = 3,
-}
+    ServerDistance = 700,
+    AdminRemoveDistance = 1200,
+    StandDeposit = 250,
+    MyLevel = 1,
+    MaxReputation = 200,
 
-Config.Locations = {
-    take = {
-        label = 'Hotdog Stand',
-        pedName = 'Hotdog Manager',
-        coords = Vector(521200, 607528, 4841),
-        heading = 9,
-        showBlip = true,
-        blipIcon = 'fast-food',
-        blipColor = LinearColor(1.0, 0.38, 0.08, 1.0),
-        description = 'Pick up and return a hotdog stand',
+    Stand = {
+        Mesh = '/QBCoreAssets/Meshes/SM_CraftingBench.SM_CraftingBench',
+        Scale = Vector(0.8, 0.8, 0.8),
+        InteractionDistance = 450,
+        PushOffset = Vector(130, 0, -60),
+        PushRotation = Rotator(0, 90, 0),
+        CustomerOffset = Vector(180, 0, 0),
     },
-    spawn = {
-        coords = Vector(521530, 607400, 4750),
-        heading = 0,
-    },
-}
 
-Config.Stock = {
-    exotic = {
-        Current = 0,
-        Max = {
-            [1] = 15,
-            [2] = 30,
-            [3] = 45,
-            [4] = 60,
+    Customer = {
+        Name = 'Hotdog Customer',
+        SpawnDistanceMin = 1500,
+        SpawnDistanceMax = 3000,
+        AcceptanceRadius = 150,
+        RequestDistance = 900,
+        TargetDistance = 1000,
+        MoveTickMs = 500,
+        NextDelayMs = 2500,
+        MaxHotdogsPerSale = 3,
+    },
+
+    Locations = {
+        take = {
+            label = 'Hotdog Stand',
+            pedName = 'Hotdog Manager',
+            coords = Vector(520986, 608711, 4841),
+            heading = 10,
+            showBlip = true,
+            blipIcon = 'fast-food',
+            blipColor = LinearColor(1.0, 0.38, 0.08, 1.0),
+            description = 'Pick up and return a hotdog stand',
         },
-        Label = 'Perfect (A)',
-        Price = {
-            [1] = {
-                min = 8,
-                max = 12,
-            },
-            [2] = {
-                min = 9,
-                max = 13,
-            },
-            [3] = {
-                min = 10,
-                max = 14,
-            },
-            [4] = {
-                min = 11,
-                max = 15,
-            },
+        spawn = {
+            coords = Vector(521276, 608815, 4750),
+            heading = 0,
         },
     },
-    rare = {
-        Current = 0,
-        Max = {
-            [1] = 15,
-            [2] = 30,
-            [3] = 45,
-            [4] = 60,
-        },
-        Label = 'Rare (B)',
-        Price = {
-            [1] = {
-                min = 6,
-                max = 9,
+
+    Stock = {
+        exotic = {
+            Current = 0,
+            Max = {
+                [1] = 15,
+                [2] = 30,
+                [3] = 45,
+                [4] = 60,
             },
-            [2] = {
-                min = 7,
-                max = 10,
-            },
-            [3] = {
-                min = 8,
-                max = 11,
-            },
-            [4] = {
-                min = 9,
-                max = 12,
+            Label = 'Perfect (A)',
+            Price = {
+                { min = 8, max = 12 },
+                { min = 9, max = 13 },
+                { min = 10, max = 14 },
+                { min = 11, max = 15 },
             },
         },
-    },
-    common = {
-        Current = 0,
-        Max = {
-            [1] = 15,
-            [2] = 30,
-            [3] = 45,
-            [4] = 60,
+        rare = {
+            Current = 0,
+            Max = {
+                [1] = 15,
+                [2] = 30,
+                [3] = 45,
+                [4] = 60,
+            },
+            Label = 'Rare (B)',
+            Price = {
+                { min = 6, max = 9 },
+                { min = 7, max = 10 },
+                { min = 8, max = 11 },
+                { min = 9, max = 12 },
+            },
         },
-        Label = 'Common (C)',
-        Price = {
-            [1] = {
-                min = 4,
-                max = 6,
+        common = {
+            Current = 0,
+            Max = {
+                [1] = 15,
+                [2] = 30,
+                [3] = 45,
+                [4] = 60,
             },
-            [2] = {
-                min = 5,
-                max = 7,
-            },
-            [3] = {
-                min = 6,
-                max = 9,
-            },
-            [4] = {
-                min = 7,
-                max = 9,
+            Label = 'Common (C)',
+            Price = {
+                { min = 4, max = 6 },
+                { min = 5, max = 7 },
+                { min = 6, max = 9 },
+                { min = 7, max = 9 },
             },
         },
     },
