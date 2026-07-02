@@ -69,16 +69,13 @@ local function makeGameplayTag(tagName)
 end
 
 local function readLimbStates(pawn)
-    if not pawn or not UE or not UE.TArray or not UE.FHLimbHealthState or type(GetTargetActorAllLimbHealthStates) ~= 'function' then
+    if not pawn or not UE or not UE.UHGameplaySystemGlobals then
         return nil
     end
 
-    local limbArray = UE.TArray(UE.FHLimbHealthState)
-    if not limbArray then
-        return nil
-    end
-
-    if GetTargetActorAllLimbHealthStates(pawn, limbArray) == false then
+    -- Out param comes back as a second return value, not by filling a passed-in array
+    local ok, limbArray = UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(pawn)
+    if ok == false or not limbArray then
         return nil
     end
 

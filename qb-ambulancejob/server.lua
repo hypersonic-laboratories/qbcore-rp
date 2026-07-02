@@ -85,8 +85,8 @@ end)
 
 RegisterServerEvent('qb-hospitaljob:server:status', function(source, data)
     local pawn = data.entity
-    local boneArray = UE.TArray(UE.FHLimbHealthState)
-    UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(pawn, boneArray)
+    local ok, boneArray = UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(pawn)
+    if not ok or not boneArray then return end
     local limbData = {}
     for i = 1, boneArray:Num() do
         local healthState = boneArray[i]
@@ -158,8 +158,8 @@ RegisterServerEvent('qb-hospitaljob:server:treatLimb', function(source, data)
     local success = UE.UHGameplaySystemGlobals.HealTargetLimb(targetPawn, gameplayTag, healAmount)
     if success then
         TriggerClientEvent(source, 'QBCore:Notify', limbName .. ' healed', 'success')
-        local boneArray = UE.TArray(UE.FHLimbHealthState)
-        UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(targetPawn, boneArray)
+        local ok, boneArray = UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(targetPawn)
+        if not ok or not boneArray then return end
         local limbData = {}
         for i = 1, boneArray:Num() do
             local healthState = boneArray[i]
