@@ -161,11 +161,12 @@ local function setupSalesLots()
             minZ = zone.SellVehicle.coords.Z - 250,
             maxZ = zone.SellVehicle.coords.Z + 250,
             distance = 1000,
+            debug = true,
         }, {
             {
                 type = 'client',
                 event = 'qb-occasions:client:MainMenu',
-                icon = 'badge-dollar-sign',
+                icon = 'dollar-sign',
                 label = Lang.t('menu.sell_vehicle'),
                 zone = zoneName,
             },
@@ -273,7 +274,7 @@ RegisterClientEvent('qb-occasions:client:MainMenu', function(data)
         {
             header = Lang.t('menu.sell_vehicle'),
             txt = Lang.t('menu.sell_vehicle_help'),
-            icon = 'badge-dollar-sign',
+            icon = 'dollar-sign',
             params = {
                 event = 'qb-vehiclesales:client:SellVehicle',
                 args = {

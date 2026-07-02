@@ -18,12 +18,14 @@ end
 
 local function MenuGarage(locId)
     local loc = Config.Locations[locId]
-    if not loc then return end
+    if not loc then
+        return
+    end
     local vehicleMenu = {
         {
             header = Lang.t('menu.amb_vehicles'),
-            isMenuHeader = true
-        }
+            isMenuHeader = true,
+        },
     }
 
     local authorizedVehicles = getAuthorizedVehicles(exports['qb-core']:GetPlayerData().job.grade.level, loc.authorizedVehicles)
@@ -36,18 +38,17 @@ local function MenuGarage(locId)
                 event = 'qb-ambulancejob:server:retrieveVehicle',
                 args = {
                     vehicle = veh,
-                    locId = locId
-                }
-            }
+                    locId = locId,
+                },
+            },
         }
     end
     vehicleMenu[#vehicleMenu + 1] = {
         header = Lang.t('menu.close'),
         txt = '',
         params = {
-            event = 'qb-menu:client:closeMenu'
-        }
-
+            event = 'qb-menu:client:closeMenu',
+        },
     }
     exports['qb-menu']:openMenu(vehicleMenu)
 end
@@ -66,12 +67,14 @@ end
 
 local function MenuHelicopter(locId)
     local loc = Config.Locations[locId]
-    if not loc then return end
+    if not loc then
+        return
+    end
     local helicopterMenu = {
         {
             header = Lang.t('menu.amb_helicopters'),
-            isMenuHeader = true
-        }
+            isMenuHeader = true,
+        },
     }
 
     local authorizedHelicopters = getAuthorizedHelicopters(exports['qb-core']:GetPlayerData().job.grade.level, loc.authorizedHelicopters)
@@ -84,27 +87,24 @@ local function MenuHelicopter(locId)
                 event = 'qb-ambulancejob:server:retrieveHelicopter',
                 args = {
                     vehicle = heli,
-                    locId = locId
-                }
-            }
+                    locId = locId,
+                },
+            },
         }
     end
     helicopterMenu[#helicopterMenu + 1] = {
         header = Lang.t('menu.close'),
         txt = '',
         params = {
-            event = 'qb-menu:client:closeMenu'
-        }
-
+            event = 'qb-menu:client:closeMenu',
+        },
     }
     exports['qb-menu']:openMenu(helicopterMenu)
 end
 
 -- Events
 
-RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
-
-end)
+RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function() end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
     for _, id in ipairs(hospitalMarkers) do
@@ -130,8 +130,8 @@ RegisterClientEvent('qb-hospitaljob:client:openStatusMenu', function(limbData)
     local statusMenu = {
         {
             header = Lang.t('menu.status'),
-            isMenuHeader = true
-        }
+            isMenuHeader = true,
+        },
     }
     for _, limb in ipairs(limbData) do
         local healthPercent = math.floor((limb.currentHealth / limb.maxHealth) * 100)
@@ -153,12 +153,7 @@ RegisterClientEvent('qb-hospitaljob:client:openStatusMenu', function(limbData)
         end
         table.insert(statusMenu, {
             header = '<span style="color: ' .. healthColor .. ';">' .. limbName .. '</span>',
-            txt = string.format('Health: %d%% (%d/%d)%s',
-                healthPercent,
-                limb.currentHealth,
-                limb.maxHealth,
-                damageText
-            ),
+            txt = string.format('Health: %d%% (%d/%d)%s', healthPercent, limb.currentHealth, limb.maxHealth, damageText),
             params = {
                 isServer = true,
                 event = 'qb-hospitaljob:server:treatLimb',
@@ -168,16 +163,16 @@ RegisterClientEvent('qb-hospitaljob:client:openStatusMenu', function(limbData)
                     health = limb.currentHealth,
                     maxHealth = limb.maxHealth,
                     damageTypes = limb.damageTypes,
-                    entity = limb.entity
-                }
-            }
+                    entity = limb.entity,
+                },
+            },
         })
     end
     table.insert(statusMenu, {
         header = Lang.t('menu.close'),
         params = {
-            event = 'qb-menu:client:closeMenu'
-        }
+            event = 'qb-menu:client:closeMenu',
+        },
     })
     exports['qb-menu']:openMenu(statusMenu)
 end)
@@ -196,83 +191,62 @@ end)
 
 for locId, loc in pairs(Config.Locations) do
     for i, point in ipairs(loc.checking) do
-        exports['qb-target']:AddSphereZone(
-            'ambchecking_' .. locId .. '_' .. i,
-            point, 75, { distance = 1000 },
+        exports['qb-target']:AddSphereZone('ambchecking_' .. locId .. '_' .. i, point, 75, { distance = 1000, debug = true }, {
             {
-                {
-                    icon = 'clipboard-check',
-                    label = 'Check In',
-                    type = 'server',
-                    event = 'qb-ambulancejob:server:checkIn',
-                    -- job = 'ambulance'
-                }
-            }
-        )
+                icon = 'clipboard-check',
+                label = 'Check In',
+                type = 'server',
+                event = 'qb-ambulancejob:server:checkIn',
+            },
+        })
     end
 
     for i, point in ipairs(loc.duty) do
-        exports['qb-target']:AddSphereZone(
-            'ambduty_' .. locId .. '_' .. i,
-            point, 75, { distance = 1000 },
+        exports['qb-target']:AddSphereZone('ambduty_' .. locId .. '_' .. i, point, 75, { distance = 1000, debug = true }, {
             {
-                {
-                    icon = 'clipboard',
-                    label = 'Toggle Duty',
-                    type = 'server',
-                    event = 'QBCore:ToggleDuty',
-                    -- job = 'ambulance'
-                }
-            }
-        )
+                icon = 'clipboard',
+                label = 'Toggle Duty',
+                type = 'server',
+                event = 'QBCore:ToggleDuty',
+                job = 'ambulance',
+            },
+        })
     end
 
     for i, point in ipairs(loc.stash) do
-        exports['qb-target']:AddSphereZone(
-            'ambstash_' .. locId .. '_' .. i,
-            point, 75, { distance = 1000 },
+        exports['qb-target']:AddSphereZone('ambstash_' .. locId .. '_' .. i, point, 75, { distance = 1000, debug = true }, {
             {
-                {
-                    icon = 'box',
-                    label = 'Open Stash',
-                    type = 'server',
-                    event = 'qb-ambulancejob:server:openStash',
-                    -- job = 'ambulance'
-                }
-            }
-        )
+                icon = 'box',
+                label = 'Open Stash',
+                type = 'server',
+                event = 'qb-ambulancejob:server:openStash',
+                job = 'ambulance',
+            },
+        })
     end
 
     for i, point in ipairs(loc.vehicle) do
-        exports['qb-target']:AddSphereZone(
-            'ambvehicle_' .. locId .. '_' .. i,
-            point, 75, { distance = 1000 },
+        exports['qb-target']:AddSphereZone('ambvehicle_' .. locId .. '_' .. i, point, 75, { distance = 1000, debug = true }, {
             {
-                {
-                    icon = 'car',
-                    label = 'Retrieve Vehicle',
-                    event = 'qb-ambulancejob:client:vehicleMenu',
-                    args = { locId = locId },
-                    -- job = 'ambulance'
-                }
-            }
-        )
+                icon = 'car',
+                label = 'Retrieve Vehicle',
+                event = 'qb-ambulancejob:client:vehicleMenu',
+                args = { locId = locId },
+                job = 'ambulance',
+            },
+        })
     end
 
     for i, point in ipairs(loc.helicopter) do
-        exports['qb-target']:AddSphereZone(
-            'ambhelicopter_' .. locId .. '_' .. i,
-            point, 75, { distance = 1000 },
+        exports['qb-target']:AddSphereZone('ambhelicopter_' .. locId .. '_' .. i, point, 75, { distance = 1000, debug = true }, {
             {
-                {
-                    icon = 'helicopter',
-                    label = 'Retrieve Helicopter',
-                    event = 'qb-ambulancejob:client:helicopterMenu',
-                    args = { locId = locId },
-                    -- job = 'ambulance'
-                }
-            }
-        )
+                icon = 'helicopter',
+                label = 'Retrieve Helicopter',
+                event = 'qb-ambulancejob:client:helicopterMenu',
+                args = { locId = locId },
+                job = 'ambulance',
+            },
+        })
     end
 end
 
@@ -280,11 +254,13 @@ end
 
 for _, loc in pairs(Config.Locations) do
     local markerId = exports['qb-hud']:AddMarker(loc.checking[1], {
-        title      = loc.label,
-        icon       = 'hospital',
+        title = loc.label,
+        icon = 'hospital',
         markerType = 'Hospital',
     })
-    if markerId then hospitalMarkers[#hospitalMarkers + 1] = markerId end
+    if markerId then
+        hospitalMarkers[#hospitalMarkers + 1] = markerId
+    end
 end
 
 -- Global Player
@@ -319,6 +295,6 @@ exports['qb-target']:AddGlobalPlayer({
             type = 'server',
             event = 'qb-hospitaljob:server:escort',
             -- job = 'ambulance'
-        }
-    }
+        },
+    },
 })
