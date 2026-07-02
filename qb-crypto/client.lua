@@ -15,6 +15,9 @@ end
 
 local function SetRequiredItemsVisible(visible)
     TriggerLocalClientEvent('qb-inventory:client:requiredItems', requiredItems, visible)
+    Timer.SetTimeout(function()
+        TriggerLocalClientEvent('qb-inventory:client:requiredItems', requiredItems, false)
+    end, 5000)
 end
 
 local function RegisterExchangeTarget()

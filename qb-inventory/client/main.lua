@@ -2,6 +2,7 @@ local Lang = require('locales/en')
 local PlayerData = {}
 local hotbarShown = false
 local inv_open = false
+local sharedItems = exports['qb-core']:GetShared('Items')
 local my_webui = WebUI('Inventory', 'qb-inventory/html/index.html')
 
 -- Handlers
@@ -104,7 +105,7 @@ RegisterClientEvent('qb-inventory:client:requiredItems', function(items, bool)
         for k in pairs(items) do
             itemTable[#itemTable + 1] = {
                 item = items[k].name,
-                label = QBShared.Items[items[k].name]['label'],
+                label = sharedItems[items[k].name]['label'],
                 image = items[k].image,
             }
         end

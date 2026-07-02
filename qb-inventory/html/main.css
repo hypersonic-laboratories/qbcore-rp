@@ -413,17 +413,18 @@ div {
     display: flex;
     justify-content: center;
     position: fixed;
-    bottom: 2vh;
+    bottom: 0;
     left: 50%;
-    transform: translate(-50%);
+    transform: translateX(-50%);
+    padding-bottom: 3vh;
 }
 
 .required-item {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 2px;
+    gap: 6px;
+    padding: 8px;
     width: 28vw;
-    padding: 0;
     box-sizing: border-box;
 }
 
