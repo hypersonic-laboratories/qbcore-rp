@@ -9,7 +9,7 @@ local function GetFuelOptions(stationKey, pumpIndex)
     return {
         {
             type = 'client',
-            icon = 'oil-can',
+            icon = 'container',
             label = 'Fuel Can',
             event = 'qb-fuel:client:FuelCan',
             station = stationKey,
@@ -17,7 +17,7 @@ local function GetFuelOptions(stationKey, pumpIndex)
         },
         {
             type = 'server',
-            icon = 'gas-pump',
+            icon = 'fuel',
             label = 'Refuel',
             event = 'qb-fuel:server:Refuel',
             station = stationKey,
