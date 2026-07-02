@@ -13,19 +13,12 @@ local function getClosestPlayerId(maxDistance)
         return nil, -1
     end
 
-    local pos = GetEntityCoords(pawn)
-    local closestPlayerId, closestDistance = nil, maxDistance or 250.0
-    for _, otherPawn in pairs(GetAllPawns()) do
-        if otherPawn ~= pawn and otherPawn.PlayerState and otherPawn:IsPlayerControlled() then
-            local distance = GetDistanceBetweenCoords(pos, GetEntityCoords(otherPawn))
-            if distance < closestDistance then
-                closestPlayerId = otherPawn.PlayerState:GetPlayerId()
-                closestDistance = distance
-            end
-        end
+    local closestPawn, distance = GetClosestPawn(GetEntityCoords(pawn), maxDistance or 250.0, pawn)
+    if closestPawn and closestPawn.PlayerState then
+        return closestPawn.PlayerState:GetPlayerId(), distance
     end
 
-    return closestPlayerId, closestPlayerId and closestDistance or -1
+    return nil, -1
 end
 
 local function getTargetPlayerId(data)

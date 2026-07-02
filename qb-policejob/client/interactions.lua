@@ -1,8 +1,7 @@
 local Lang = require('locales/en')
-
 local isEscorting = false
 local playerTargetsRegistered = false
-local HOSTAGE_ANIM_PREFIX = '/Game/Characters/Heroes/Unified/Animations/HostageSet/'
+local HOSTAGE_ANIM_PREFIX = '/HelixAnimation/Unified/Animations/HostageSet/'
 local CUFF_START_OFFICER_ANIM = HOSTAGE_ANIM_PREFIX .. 'Paired_Handcuffs/Paired_HandcuffHostage_Start_Att.Paired_HandcuffHostage_Start_Att'
 local CUFF_START_VICTIM_ANIM = HOSTAGE_ANIM_PREFIX .. 'Paired_Handcuffs/Paired_HandcuffHostage_Start_Vic.Paired_HandcuffHostage_Start_Vic'
 local CUFF_LOOP_VICTIM_ANIM = HOSTAGE_ANIM_PREFIX .. 'Paired_Handcuffs/Paired_HandcuffHostage_Loop_Vic.Paired_HandcuffHostage_Loop_Vic'
@@ -24,19 +23,12 @@ local function getClosestPlayerId(maxDistance)
         return nil, -1
     end
 
-    local pos = GetEntityCoords(pawn)
-    local closestPlayerId, closestDistance = nil, maxDistance or 250.0
-    for _, otherPawn in pairs(GetAllPawns()) do
-        if otherPawn ~= pawn and otherPawn.PlayerState and otherPawn:IsPlayerControlled() then
-            local distance = GetDistanceBetweenCoords(pos, GetEntityCoords(otherPawn))
-            if distance < closestDistance then
-                closestPlayerId = otherPawn.PlayerState:GetPlayerId()
-                closestDistance = distance
-            end
-        end
+    local closestPawn, distance = GetClosestPawn(GetEntityCoords(pawn), maxDistance or 250.0, pawn)
+    if closestPawn and closestPawn.PlayerState then
+        return closestPawn.PlayerState:GetPlayerId(), distance
     end
 
-    return closestPlayerId, closestPlayerId and closestDistance or -1
+    return nil, -1
 end
 
 local function getTargetPlayerId(data, maxDistance)
