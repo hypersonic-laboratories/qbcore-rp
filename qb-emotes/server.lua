@@ -33,7 +33,7 @@ local function findEmote(categoryName, emoteId)
         if category.name == categoryName then
             for j = 1, #category.emotes do
                 if category.emotes[j].id == emoteId then
-                    return category.emotes[j]
+                    return category.emotes[j], category
                 end
             end
             return nil
@@ -149,8 +149,8 @@ end
 -- Events
 
 RegisterServerEvent('qb-emotes:server:play', function(source, categoryName, emoteId)
-    local emote = findEmote(categoryName, emoteId)
-    if not emote then
+    local emote, category = findEmote(categoryName, emoteId)
+    if not emote or not category then
         return
     end
 
@@ -166,7 +166,7 @@ RegisterServerEvent('qb-emotes:server:play', function(source, categoryName, emot
 
     -- A new custom animation won't start while one is still playing
     Animation.Stop(pawn)
-    Animation.Play(pawn, emote.anim, buildParams(true, emote.upperBody))
+    Animation.Play(pawn, emote.anim, buildParams(not category.oneShot, emote.upperBody))
 end)
 
 RegisterServerEvent('qb-emotes:server:stop', function(source)

@@ -11,12 +11,15 @@ local BASE = '/HelixAnimation/Unified/Animations/'
 --   label     shown in the menu
 --   anim      full asset path
 --   upperBody plays on the UpperBody slot so the player can keep walking
--- All emotes loop indefinitely until toggled off or another emote is started.
+-- Emotes loop indefinitely until toggled off or another emote is started,
+-- except in categories marked oneShot = true, where they play once and end
+-- on their own.
 Config.Categories = {
     {
         name = 'gestures',
         label = 'Gestures',
         icon = 'hand',
+        oneShot = true,
         emotes = {
             { id = 'wave', label = 'Wave', anim = BASE .. 'Actions/A_Action_Wave.A_Action_Wave', upperBody = true },
             { id = 'nod', label = 'Nod', anim = BASE .. 'Actions/A_Action_Nod.A_Action_Nod', upperBody = true },

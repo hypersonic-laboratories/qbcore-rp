@@ -162,6 +162,16 @@ RegisterClientEvent('qb-emotes:client:stopEmote', function()
 end)
 
 RegisterClientEvent('qb-emotes:client:selectEmote', function(data)
+    local category = findCategory(data.category)
+
+    -- One-shot emotes end on their own, so there is nothing to toggle off.
+    -- Playing one still stops whatever looping emote was active server-side.
+    if category and category.oneShot then
+        activeEmote = nil
+        TriggerServerEvent('qb-emotes:server:play', data.category, data.id)
+        return
+    end
+
     local key = data.category .. ':' .. data.id
     if activeEmote == key then
         activeEmote = nil
