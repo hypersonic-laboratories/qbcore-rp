@@ -2,13 +2,9 @@ Config = {}
 
 Config.PawnLocation = {
     {
-        coords = Vector(573912, 525302, 4562),
-        length = 150,
-        width = 150,
-        heading = 0.0,
-        debug = false,
-        minZ = 4462,
-        maxZ = 4662,
+        coords = Vector(574131, 525296, 4551),
+        heading = 176,
+        label = 'Pawnshop Dealer',
         distance = 500,
         serverDistance = 750,
         showBlip = true,

@@ -3,7 +3,8 @@ local sharedItems = exports['qb-core']:GetShared('Items')
 
 local isMelting = false
 local canTake = false
-local registeredZones = {}
+local registered = false
+local pawnPeds = {}
 local markerIds = {}
 
 local function Notify(text, notifyType, length)
@@ -30,30 +31,40 @@ local function IsPawnshopOpen()
     return hour >= Config.TimeOpen and hour <= Config.TimeClosed
 end
 
+local function SetupPeds()
+    TriggerCallback('getPeds', function(jobPeds)
+        if not registered then
+            return
+        end
+
+        for i = 1, #jobPeds do
+            local ped = jobPeds[i].npc
+            local location = Config.PawnLocation[jobPeds[i].shop]
+            pawnPeds[#pawnPeds + 1] = ped
+            exports['qb-target']:AddTargetEntity(ped, {
+                options = {
+                    {
+                        type = 'client',
+                        event = 'qb-pawnshop:client:openMenu',
+                        icon = 'gem',
+                        label = Lang.t('info.title'),
+                    },
+                },
+                distance = location and location.distance or 500,
+            })
+        end
+    end)
+end
+
 local function RegisterPawnshop()
-    if #registeredZones > 0 then
+    if registered then
         return
     end
+    registered = true
 
-    for key, value in pairs(Config.PawnLocation) do
-        local zoneName = 'PawnShop' .. key
-        exports['qb-target']:AddBoxZone(zoneName, value.coords, value.length, value.width, {
-            name = zoneName,
-            heading = value.heading,
-            minZ = value.minZ,
-            maxZ = value.maxZ,
-            debug = value.debug,
-            distance = value.distance,
-        }, {
-            {
-                type = 'client',
-                event = 'qb-pawnshop:client:openMenu',
-                icon = 'gem',
-                label = Lang.t('info.title'),
-            },
-        })
-        registeredZones[#registeredZones + 1] = zoneName
+    SetupPeds()
 
+    for _, value in pairs(Config.PawnLocation) do
         if value.showBlip ~= false then
             local markerId = exports['qb-hud']:AddMarker(value.coords, {
                 title = Lang.t('info.title'),
@@ -70,15 +81,16 @@ local function RegisterPawnshop()
 end
 
 local function UnregisterPawnshop()
-    for _, zoneName in ipairs(registeredZones) do
-        exports['qb-target']:RemoveZone(zoneName)
+    for _, ped in ipairs(pawnPeds) do
+        exports['qb-target']:RemoveTargetEntity(ped)
     end
-    registeredZones = {}
+    pawnPeds = {}
 
     for _, markerId in ipairs(markerIds) do
         exports['qb-hud']:RemoveMarker(markerId)
     end
     markerIds = {}
+    registered = false
 end
 
 local function OpenPawnshopMenu()
