@@ -20,8 +20,8 @@ Config = {
         Depots = {
             {
                 label = 'Bus Depot',
-                pedSpawn = Vector(521021, 608226, 4841),
-                pedHeading = -2,
+                pedSpawn = Vector(521076, 608140, 4841),
+                pedHeading = 9,
                 vehicleSpawn = Vector(522224, 608081, 4841),
                 vehicleHeading = -81,
                 showBlip = true,

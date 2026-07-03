@@ -11,7 +11,7 @@ Config = {
         Depots = {
             {
                 label = 'West Garbage Depot',
-                pedSpawn = Vector(521249, 607129, 4841),
+                pedSpawn = Vector(521256, 606998, 4841),
                 pedHeading = 9,
                 vehicleSpawn = Vector(522224, 608081, 4841),
                 vehicleHeading = -81,

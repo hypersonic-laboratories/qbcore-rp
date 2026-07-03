@@ -3,7 +3,7 @@ Config = {
     DropLocation = { coords = Vector(104822.4, -309707.1, -3899.9), heading = 274.81 },
     SellMaterials = true, --  allow players to sell materials to a ped
     LimitedMaterials = true, -- limit the amount of materials that can be sold
-    SellPed = { coords = Vector(521301, 606713, 4841), heading = 14 },
+    SellPed = { coords = Vector(521301, 606713, 4841), heading = 9 },
     TargetDistance = 500,
     ZoneLength = 400,
     ZoneWidth = 200,

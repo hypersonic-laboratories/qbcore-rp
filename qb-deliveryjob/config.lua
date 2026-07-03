@@ -11,8 +11,8 @@ Config = {
     Depots = {
         {
             label = 'Delivery Job',
-            pedSpawn = Vector(521127, 607939, 4841),
-            pedHeading = 13,
+            pedSpawn = Vector(521121, 607855, 4841),
+            pedHeading = 9,
             vehicleSpawn = Vector(522224, 608081, 4841),
             vehicleHeading = -81,
             showBlip = true,

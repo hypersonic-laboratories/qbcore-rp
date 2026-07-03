@@ -71,26 +71,26 @@ local function pickProcess()
     onTaskComplete()
 end
 
+RegisterClientEvent('qb-vineyard:client:pickGrapes', function()
+    if not startVineyard or not tasking then
+        return
+    end
+    pickProcess()
+end)
+
 local function AddActiveGrapeZone()
     RemoveActiveGrapeZone()
-    local loc = Config.grapeLocations[random]
-    exports['qb-target']:AddBoxZone('vineyard_grape_active', loc, 4.0, 4.0, {
-        name = 'vineyard_grape_active',
-        heading = 0,
-        debugPoly = false,
-        minZ = loc.Z - 1.0,
-        maxZ = loc.Z + 1.0,
+    exports['qb-target']:AddSphereZone('vineyard_grape_active', Config.grapeLocations[random], 0, {
+        distance = 400,
+        useMesh = true,
     }, {
-        options = {
-            {
-                label = Lang.t('task.pick_grapes'),
-                icon = 'fa-solid fa-hand',
-                action = function()
-                    pickProcess()
-                end,
-            },
+        {
+            icon = 'hand',
+            label = Lang.t('task.pick_grapes'),
+            type = 'client',
+            event = 'qb-vineyard:client:pickGrapes',
+            job = 'vineyard',
         },
-        distance = 2.0,
     })
 end
 
@@ -153,10 +153,6 @@ local function refreshJob()
     end)
 end
 
-RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
-    refreshJob()
-end)
-
 RegisterClientEvent('QBCore:Client:OnPlayerUpdated', function(key, val)
     if key == 'job' then
         PlayerJob = val
@@ -165,127 +161,152 @@ RegisterClientEvent('QBCore:Client:OnPlayerUpdated', function(key, val)
     end
 end)
 
--- Zone: Start shift
+-- Ped: Start shift
 
-exports['qb-target']:AddBoxZone('vineyard_start_zone', Config.Vineyard.start.coords, 6.0, 5.0, {
-    name = 'vineyard_start_zone',
-    heading = 0,
-    debugPoly = false,
-    minZ = Config.Vineyard.start.coords.Z - 1.0,
-    maxZ = Config.Vineyard.start.coords.Z + 1.0,
-}, {
-    options = {
-        {
-            label = Lang.t('task.start_shift'),
-            icon = 'fa-solid fa-play',
-            action = function()
-                if not PlayerJob or PlayerJob.name ~= 'vineyard' then
-                    Notify(Lang.t('error.invalid_job'), 'error')
-                    return
-                end
-                if startVineyard then
-                    return
-                end
-                startVinyard()
-            end,
-        },
-    },
-    distance = 2.5,
-})
+local vineyardPeds = {}
+local pedsRegistered = false
+
+RegisterClientEvent('qb-vineyard:client:startShift', function()
+    if not PlayerJob or PlayerJob.name ~= 'vineyard' then
+        Notify(Lang.t('error.invalid_job'), 'error')
+        return
+    end
+    if startVineyard then
+        return
+    end
+    startVinyard()
+end)
+
+local function SetupPeds()
+    if pedsRegistered then
+        return
+    end
+    pedsRegistered = true
+    TriggerCallback('getPeds', function(jobPeds)
+        for i = 1, #jobPeds do
+            local ped = jobPeds[i].npc
+            vineyardPeds[#vineyardPeds + 1] = ped
+            exports['qb-target']:AddTargetEntity(ped, {
+                options = {
+                    {
+                        type = 'client',
+                        event = 'qb-vineyard:client:startShift',
+                        icon = 'play',
+                        label = Lang.t('task.start_shift'),
+                    },
+                },
+                distance = Config.Vineyard.start.distance or 500,
+            })
+        end
+    end)
+end
+
+RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
+    refreshJob()
+    SetupPeds()
+end)
 
 -- Zone: Wine making (3 sequential options, each checks its own preconditions)
 
-exports['qb-target']:AddBoxZone('vineyard_wine_zone', Config.Vineyard.wine.coords, 10.0, 6.0, {
-    name = 'vineyard_wine_zone',
-    heading = 0,
-    debugPoly = false,
-    minZ = Config.Vineyard.wine.coords.Z - 1.0,
-    maxZ = Config.Vineyard.wine.coords.Z + 1.0,
+RegisterClientEvent('qb-vineyard:client:loadIngredients', function()
+    if not PlayerJob or PlayerJob.name ~= 'vineyard' then
+        return
+    end
+    if startVineyard or loadIngredients or wineStarted then
+        return
+    end
+    TriggerCallback('qb-vineyard:server:loadIngredients', function(result)
+        if result then
+            loadIngredients = true
+        end
+    end)
+end)
+
+RegisterClientEvent('qb-vineyard:client:wineProcess', function()
+    if not PlayerJob or PlayerJob.name ~= 'vineyard' then
+        return
+    end
+    if startVineyard or not loadIngredients or wineStarted or finishedWine then
+        return
+    end
+    StartWineProcess()
+end)
+
+RegisterClientEvent('qb-vineyard:client:getWine', function()
+    if not PlayerJob or PlayerJob.name ~= 'vineyard' then
+        return
+    end
+    if startVineyard or not finishedWine then
+        return
+    end
+    TriggerServerEvent('qb-vineyard:server:receiveWine')
+    finishedWine = false
+    loadIngredients = false
+end)
+
+exports['qb-target']:AddSphereZone('vineyard_wine_zone', Config.Vineyard.wine.coords, 0, {
+    distance = 400,
+    useMesh = true,
 }, {
-    options = {
-        {
-            label = Lang.t('task.load_ingrediants'),
-            icon = 'fa-solid fa-wine-bottle',
-            action = function()
-                if not PlayerJob or PlayerJob.name ~= 'vineyard' then
-                    return
-                end
-                if startVineyard or loadIngredients or wineStarted then
-                    return
-                end
-                TriggerCallback('qb-vineyard:server:loadIngredients', function(result)
-                    if result then
-                        loadIngredients = true
-                    end
-                end)
-            end,
-        },
-        {
-            label = Lang.t('task.wine_process'),
-            icon = 'fa-solid fa-flask',
-            action = function()
-                if not PlayerJob or PlayerJob.name ~= 'vineyard' then
-                    return
-                end
-                if startVineyard or not loadIngredients or wineStarted or finishedWine then
-                    return
-                end
-                StartWineProcess()
-            end,
-        },
-        {
-            label = Lang.t('task.get_wine'),
-            icon = 'fa-solid fa-bottle-droplet',
-            action = function()
-                if not PlayerJob or PlayerJob.name ~= 'vineyard' then
-                    return
-                end
-                if startVineyard or not finishedWine then
-                    return
-                end
-                TriggerServerEvent('qb-vineyard:server:receiveWine')
-                finishedWine = false
-                loadIngredients = false
-            end,
-        },
+    {
+        icon = 'wine-bottle',
+        label = Lang.t('task.load_ingrediants'),
+        type = 'client',
+        event = 'qb-vineyard:client:loadIngredients',
+        job = 'vineyard',
     },
-    distance = 2.5,
+    {
+        icon = 'flask',
+        label = Lang.t('task.wine_process'),
+        type = 'client',
+        event = 'qb-vineyard:client:wineProcess',
+        job = 'vineyard',
+    },
+    {
+        icon = 'bottle-droplet',
+        label = Lang.t('task.get_wine'),
+        type = 'client',
+        event = 'qb-vineyard:client:getWine',
+        job = 'vineyard',
+    },
 })
 
 -- Zone: Grape juice processing
 
-exports['qb-target']:AddBoxZone('vineyard_grapejuice_zone', Config.Vineyard.grapejuice.coords, 7.0, 8.0, {
-    name = 'vineyard_grapejuice_zone',
-    heading = 0,
-    debugPoly = false,
-    minZ = Config.Vineyard.grapejuice.coords.Z - 1.0,
-    maxZ = Config.Vineyard.grapejuice.coords.Z + 1.0,
+RegisterClientEvent('qb-vineyard:client:makeGrapeJuice', function()
+    if not PlayerJob or PlayerJob.name ~= 'vineyard' then
+        return
+    end
+    if startVineyard then
+        return
+    end
+    TriggerCallback('qb-vineyard:server:grapeJuice', function(result)
+        if result then
+            grapeJuiceProcess()
+        end
+    end)
+end)
+
+exports['qb-target']:AddSphereZone('vineyard_grapejuice_zone', Config.Vineyard.grapejuice.coords, 0, {
+    distance = 400,
+    useMesh = true,
 }, {
-    options = {
-        {
-            label = Lang.t('task.make_grape_juice'),
-            icon = 'fa-solid fa-blender',
-            action = function()
-                if not PlayerJob or PlayerJob.name ~= 'vineyard' then
-                    return
-                end
-                if startVineyard then
-                    return
-                end
-                TriggerCallback('qb-vineyard:server:grapeJuice', function(result)
-                    if result then
-                        grapeJuiceProcess()
-                    end
-                end)
-            end,
-        },
+    {
+        icon = 'blender',
+        label = Lang.t('task.make_grape_juice'),
+        type = 'client',
+        event = 'qb-vineyard:client:makeGrapeJuice',
+        job = 'vineyard',
     },
-    distance = 2.5,
 })
 
 function onShutdown()
     DeleteMarker()
     RemoveActiveGrapeZone()
+    for _, ped in ipairs(vineyardPeds) do
+        exports['qb-target']:RemoveTargetEntity(ped)
+    end
+    vineyardPeds = {}
     if wineIntervalId then
         Timer.ClearInterval(wineIntervalId)
         wineIntervalId = nil

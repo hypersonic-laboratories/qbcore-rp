@@ -1,7 +1,50 @@
 local Lang = require('locales/en')
 local sharedItems = exports['qb-core']:GetShared('Items')
 
+-- Job ped
+
+local jobPeds = {}
+local Initialised = false
+
+local function deleteActor(actor)
+    if actor and actor:IsValid() then
+        DeleteEntity(actor)
+    end
+end
+
+local function spawnJobPed(location)
+    local pedName = location.pedName or 'Vineyard Foreman'
+    HPawn(location.coords, Rotator(0, location.heading or 0, 0), function(npc)
+        if not npc then
+            return
+        end
+
+        jobPeds[#jobPeds + 1] = { npc = npc }
+        npc:SetCharacterName(pedName)
+        SetEntityInvincible(npc, true)
+    end, { CharacterName = pedName, bShowNameplate = true })
+end
+
+RegisterServerEvent('HEvent:PlayerPossessed', function()
+    if Initialised then
+        return
+    end
+    spawnJobPed(Config.Vineyard.start)
+    Initialised = true
+end)
+
+function onShutdown()
+    for i = 1, #jobPeds do
+        deleteActor(jobPeds[i].npc)
+    end
+    jobPeds = {}
+end
+
 -- Callbacks
+
+RegisterCallback('getPeds', function()
+    return jobPeds
+end)
 
 RegisterCallback('qb-vineyard:server:getPlayerJob', function(source)
     local Player = exports['qb-core']:GetPlayer(source)

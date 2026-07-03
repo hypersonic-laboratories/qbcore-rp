@@ -10,8 +10,8 @@ Config = {
         Depots = {
             {
                 label = 'Taxi Depot',
-                pedSpawn = Vector(521006, 608453, 4841),
-                pedHeading = 1,
+                pedSpawn = Vector(521031, 608426, 4841),
+                pedHeading = 9,
                 vehicleSpawn = Vector(522224, 608081, 4841),
                 vehicleHeading = -81,
                 showBlip = true,
