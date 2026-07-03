@@ -87,7 +87,7 @@ function DeliveryJob:CreateDeliveryProp()
     local Mesh = Pawn:GetCharacterBaseMesh()
     local Attached = AttachActorToComponent(self.Prop.Object, Mesh, Vector(0, -50, 0), Rotator(), 'hand_r')
     self.Prop:SetActorScale3D(Vector(0.3, 0.3, 0.3))
-    local PlayAnims = UE.FHelixPlayAnimParams()
+    local PlayAnims = UE.FHPlayAnimParams()
     PlayAnims.bIgnoreMovementInput = false
     PlayAnims.LoopCount = -1
     PlayAnims.AnimSlotName = 'UpperBody'

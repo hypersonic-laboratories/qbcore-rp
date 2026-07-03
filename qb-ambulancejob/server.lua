@@ -18,28 +18,44 @@ end
 
 RegisterServerEvent('qb-ambulancejob:server:retrieveVehicle', function(source, data)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local loc = Config.Locations[data.locId]
-    if not loc then return end
+    if not loc then
+        return
+    end
     local vehicleData = Vehicles[data.vehicle]
     local vehicleAsset = vehicleData and vehicleData.asset_name
-    if not vehicleAsset then return end
+    if not vehicleAsset then
+        return
+    end
     local vehicle = HVehicle(loc.vehicleSpawn.coords, Rotator(0, loc.vehicleSpawn.heading, 0), vehicleAsset)
-    if not vehicle then return end
+    if not vehicle then
+        return
+    end
     local plate = Lang.t('info.amb_plate') .. tostring(math.random(1000, 9999))
     vehicle:SetPlate(plate)
 end)
 
 RegisterServerEvent('qb-ambulancejob:server:retrieveHelicopter', function(source, data)
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local loc = Config.Locations[data.locId]
-    if not loc then return end
+    if not loc then
+        return
+    end
     local vehicleData = Vehicles[data.vehicle]
     local vehicleAsset = vehicleData and vehicleData.asset_name
-    if not vehicleAsset then return end
+    if not vehicleAsset then
+        return
+    end
     local vehicle = HVehicle(loc.helicopterSpawn.coords, Rotator(0, loc.helicopterSpawn.heading, 0), vehicleAsset)
-    if not vehicle then return end
+    if not vehicle then
+        return
+    end
     local plate = Lang.t('info.heli_plate') .. tostring(math.random(1000, 9999))
     vehicle:SetPlate(plate)
 end)
@@ -47,7 +63,9 @@ end)
 RegisterServerEvent('qb-ambulancejob:server:openStash', function(source)
     print('qb-ambulancejob:server:openStash')
     local Player = exports['qb-core']:GetPlayer(source)
-    if not Player then return end
+    if not Player then
+        return
+    end
     local citizenid = Player.PlayerData.citizenid
     print('Opening ambulance stash for citizen ID:', citizenid)
     exports['qb-inventory']:OpenInventory(source, citizenid)
@@ -65,7 +83,7 @@ RegisterServerEvent('qb-ambulancejob:server:checkIn', function(source)
         --     Scale = AttachmentRule.SnapToTarget
         -- })
         Timer.SetTimeout(function()
-            local AnimParams = UE.FHelixPlayAnimParams()
+            local AnimParams = UE.FHPlayAnimParams()
             AnimParams.LoopCount = -1
             local result = Animation.Play(pawn, '/Game/Characters/Heroes/Unified/Animations/SleepAnimPack/Sleep_Bed/A_Sleep_Bed_RightSide_SleepLoop.A_Sleep_Bed_RightSide_SleepLoop', AnimParams, function() end)
         end, 2000)
@@ -78,7 +96,9 @@ RegisterServerEvent('qb-ambulancejob:server:checkOut', function(source)
     --DetachActor(pawn)
     Animation.Stop(pawn)
     local _, loc = next(Config.Locations)
-    if not loc then return end
+    if not loc then
+        return
+    end
     local c = loc.checking[1]
     SetEntityCoords(pawn, Vector(c.X, c.Y + 300, c.Z))
 end)
@@ -86,7 +106,9 @@ end)
 RegisterServerEvent('qb-hospitaljob:server:status', function(source, data)
     local pawn = data.entity
     local ok, boneArray = UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(pawn)
-    if not ok or not boneArray then return end
+    if not ok or not boneArray then
+        return
+    end
     local limbData = {}
     for i = 1, boneArray:Num() do
         local healthState = boneArray[i]
@@ -95,7 +117,7 @@ RegisterServerEvent('qb-hospitaljob:server:status', function(source, data)
             currentHealth = healthState.CurrentHealth,
             maxHealth = healthState.MaxHealth,
             entity = pawn,
-            damageTypes = {}
+            damageTypes = {},
         }
         local tagContainer = healthState.RecentDamageTypes
         for k, v in pairs(tagContainer.GameplayTags) do
@@ -108,10 +130,14 @@ end)
 
 RegisterServerEvent('qb-hospitaljob:server:revive', function(source, data)
     local pawn = data.entity
-    if not pawn then return end
+    if not pawn then
+        return
+    end
 
     local healthComp = pawn:GetComponentByClass(UE.UHActorHealthComponent)
-    if not healthComp then return end
+    if not healthComp then
+        return
+    end
 
     local isDead = healthComp:IsDeadOrDying()
     local currentHealth = healthComp:GetHealth()
@@ -133,10 +159,14 @@ end)
 
 RegisterServerEvent('qb-hospitaljob:server:bandage', function(source, data)
     local pawn = data.entity
-    if not pawn then return end
+    if not pawn then
+        return
+    end
 
     local healthComp = pawn:GetComponentByClass(UE.UHActorHealthComponent)
-    if not healthComp then return end
+    if not healthComp then
+        return
+    end
 
     local currentHealth = healthComp:GetHealth()
     local maxHealth = healthComp:GetMaxHealth()
@@ -159,7 +189,9 @@ RegisterServerEvent('qb-hospitaljob:server:treatLimb', function(source, data)
     if success then
         TriggerClientEvent(source, 'QBCore:Notify', limbName .. ' healed', 'success')
         local ok, boneArray = UE.UHGameplaySystemGlobals.GetTargetActorAllLimbHealthStates(targetPawn)
-        if not ok or not boneArray then return end
+        if not ok or not boneArray then
+            return
+        end
         local limbData = {}
         for i = 1, boneArray:Num() do
             local healthState = boneArray[i]
@@ -168,7 +200,7 @@ RegisterServerEvent('qb-hospitaljob:server:treatLimb', function(source, data)
                 currentHealth = healthState.CurrentHealth,
                 maxHealth = healthState.MaxHealth,
                 entity = targetPawn,
-                damageTypes = {}
+                damageTypes = {},
             }
             local tagContainer = healthState.RecentDamageTypes
             for k, v in pairs(tagContainer.GameplayTags) do
@@ -185,11 +217,15 @@ end)
 RegisterServerEvent('qb-hospitaljob:server:escort', function(source, data)
     local pawn = GetPlayerPawn(source)
     local target_pawn = data.entity
-    if not target_pawn then return end
+    if not target_pawn then
+        return
+    end
     local target_coords = GetEntityCoords(target_pawn)
     local player_coords = GetEntityCoords(pawn)
     local distance = player_coords:Dist(target_coords)
-    if distance > 500 then return end
+    if distance > 500 then
+        return
+    end
     if not target_pawn:GetAttachParentActor() then
         target_pawn:GetComponentByClass(UE.UCharacterMovementComponent):SetMovementMode(UE.EMovementMode.MOVE_None, nil)
         -- AttachActorToComponent(target_pawn, pawn:K2_GetRootComponent(), Vector(100, 50, 0), Rotator(), 'root')

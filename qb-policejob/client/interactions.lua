@@ -57,7 +57,7 @@ local function playPoliceAnimation(assetPath, loop, onEnded)
         return false
     end
 
-    local animParams = UE.FHelixPlayAnimParams()
+    local animParams = UE.FHPlayAnimParams()
     animParams.LoopCount = loop and -1 or 1
     return Animation.Play(pawn, assetPath, animParams, onEnded)
 end

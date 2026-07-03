@@ -40,6 +40,7 @@
     "qb-phone",
     "qb-crypto",
     "qb-consumables",
-    "qb-crafting"
+    "qb-crafting",
+    "qb-emotes"
   ]
 }
