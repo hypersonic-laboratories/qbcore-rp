@@ -511,7 +511,7 @@ function Player:AddMoney(moneytype, amount, reason)
         self:UpdateClient('money', self.PlayerData.money)
         local logExtra = amount > 100000
         TriggerLocalServerEvent('qb-log:server:CreateLog', 'playermoney', 'AddMoney', 'lightgreen', '**' .. self.PlayerData.name .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. tostring(self.PlayerData.source) .. ')** $' .. amount .. ' (' .. moneytype .. ') added, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason, logExtra)
-        TriggerClientEvent(self.PlayerData.source, 'hud:client:OnMoneyChange', moneytype, amount, false)
+        TriggerClientEvent(self.PlayerData.source, 'qb-hud:client:OnMoneyChange', moneytype, amount, false)
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnMoneyChange', moneytype, amount, 'add', reason)
         TriggerLocalServerEvent('QBCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'add', reason)
     end
@@ -541,7 +541,7 @@ function Player:RemoveMoney(moneytype, amount, reason)
         self:UpdateClient('money', self.PlayerData.money)
         local logExtra = amount > 100000
         TriggerLocalServerEvent('qb-log:server:CreateLog', 'playermoney', 'RemoveMoney', 'red', '**' .. self.PlayerData.name .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. tostring(self.PlayerData.source) .. ')** $' .. amount .. ' (' .. moneytype .. ') removed, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason, logExtra)
-        TriggerClientEvent(self.PlayerData.source, 'hud:client:OnMoneyChange', moneytype, amount, true)
+        TriggerClientEvent(self.PlayerData.source, 'qb-hud:client:OnMoneyChange', moneytype, amount, true)
         if moneytype == 'bank' then
             TriggerClientEvent(self.PlayerData.source, 'qb-phone:client:RemoveBankMoney', amount)
         end
@@ -566,7 +566,7 @@ function Player:SetMoney(moneytype, amount, reason)
     if not self.Offline then
         self:UpdateClient('money', self.PlayerData.money)
         TriggerLocalServerEvent('qb-log:server:CreateLog', 'playermoney', 'SetMoney', 'green', '**' .. self.PlayerData.name .. ' (citizenid: ' .. self.PlayerData.citizenid .. ' | id: ' .. tostring(self.PlayerData.source) .. ')** $' .. amount .. ' (' .. moneytype .. ') set, new ' .. moneytype .. ' balance: ' .. self.PlayerData.money[moneytype] .. ' reason: ' .. reason)
-        TriggerClientEvent(self.PlayerData.source, 'hud:client:OnMoneyChange', moneytype, math.abs(difference), difference < 0)
+        TriggerClientEvent(self.PlayerData.source, 'qb-hud:client:OnMoneyChange', moneytype, math.abs(difference), difference < 0)
         TriggerClientEvent(self.PlayerData.source, 'QBCore:Client:OnMoneyChange', moneytype, amount, 'set', reason)
         TriggerLocalServerEvent('QBCore:Server:OnMoneyChange', self.PlayerData.source, moneytype, amount, 'set', reason)
     end
