@@ -1,5 +1,6 @@
 local Lang = require('locales/en')
 local Vehicles = exports['qb-core']:GetShared('Vehicles')
+local sharedItems = exports['qb-core']:GetShared('Items')
 
 -- Functions
 
@@ -211,6 +212,80 @@ RegisterServerEvent('qb-hospitaljob:server:treatLimb', function(source, data)
         TriggerClientEvent(source, 'qb-hospitaljob:client:openStatusMenu', limbData)
     else
         TriggerClientEvent(source, 'QBCore:Notify', 'Failed to heal ' .. limbName, 'error')
+    end
+end)
+
+-- Usable items
+
+exports['qb-core']:CreateUseableItem('bandage', { event = 'qb-ambulancejob:server:useBandage' })
+exports['qb-core']:CreateUseableItem('firstaid', { event = 'qb-ambulancejob:server:useFirstAid' })
+
+RegisterServerEvent('qb-ambulancejob:server:useBandage', function(source, itemData)
+    local Player = exports['qb-core']:GetPlayer(source)
+    local pawn = GetPlayerPawn(source)
+    if not Player or not pawn then
+        return
+    end
+    if IsDowned(pawn) or IsDeadOrDying(pawn) then
+        TriggerClientEvent(source, 'QBCore:Notify', 'You can\'t use a bandage right now', 'error')
+        return
+    end
+    local currentHealth = GetHealth(pawn) or 0
+    local maxHealth = GetMaxHealth(pawn) or 100
+    if currentHealth >= maxHealth then
+        TriggerClientEvent(source, 'QBCore:Notify', 'You are already at full health', 'error')
+        return
+    end
+    if Player.RemoveItem('bandage', 1, itemData and itemData.slot) then
+        TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems['bandage'], 'remove')
+        HealTarget(pawn, 30.0)
+        TriggerClientEvent(source, 'QBCore:Notify', 'You applied a bandage', 'success')
+    end
+end)
+
+RegisterServerEvent('qb-ambulancejob:server:useFirstAid', function(source, itemData)
+    local Player = exports['qb-core']:GetPlayer(source)
+    local pawn = GetPlayerPawn(source)
+    if not Player or not pawn then
+        return
+    end
+    local medicCoords = GetEntityCoords(pawn)
+    local targetPawn, targetCtrl = nil, nil
+    local closestDist = 500
+    for _, otherCtrl in pairs(GetAllPlayers()) do
+        if otherCtrl ~= source then
+            local otherPawn = GetPlayerPawn(otherCtrl)
+            if otherPawn and IsDowned(otherPawn) then
+                local dist = medicCoords:Dist(GetEntityCoords(otherPawn))
+                if dist < closestDist then
+                    closestDist = dist
+                    targetPawn = otherPawn
+                    targetCtrl = otherCtrl
+                end
+            end
+        end
+    end
+    if not targetPawn then
+        TriggerClientEvent(source, 'QBCore:Notify', 'No downed player nearby', 'error')
+        return
+    end
+    if Player.RemoveItem('firstaid', 1, itemData and itemData.slot) then
+        TriggerClientEvent(source, 'qb-inventory:client:ItemBox', sharedItems['firstaid'], 'remove')
+        Animation.Play(pawn, '/HelixAnimation/Unified/Animations/ReviveAnimationPack/Revive/A_Reviver_With_Medic_R2.A_Reviver_With_Medic_R2', nil, function() end)
+        Timer.SetTimeout(function()
+            if not IsDowned(targetPawn) then
+                Animation.Stop(pawn)
+                TriggerClientEvent(source, 'QBCore:Notify', 'The patient no longer needs reviving', 'error')
+                return
+            end
+            ReviveFromDownedState(targetPawn)
+            HealTarget(targetPawn, 100)
+            Animation.Stop(pawn)
+            Animation.Play(pawn, '/HelixAnimation/Unified/Animations/ReviveAnimationPack/Revive/A_Reviver_Without_Medic_L.A_Reviver_Without_Medic_L', nil, function() end)
+            Animation.Play(targetPawn, '/HelixAnimation/Unified/Animations/ReviveAnimationPack/Revive/A_Revive_Without_Medic_R.A_Revive_Without_Medic_R', nil, function() end)
+            TriggerClientEvent(source, 'QBCore:Notify', 'You revived the patient', 'success')
+            TriggerClientEvent(targetCtrl, 'QBCore:Notify', 'You have been revived', 'success')
+        end, 3000)
     end
 end)
 
