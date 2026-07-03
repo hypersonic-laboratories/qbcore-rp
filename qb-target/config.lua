@@ -1,5 +1,5 @@
 Config = {
-    Debug = true, -- print xray event flow for troubleshooting
+    Debug = false, -- print xray event flow for troubleshooting
     NearbyScanInterval = 2500, -- interval (ms) for rescanning the world to register newly spawned targets and sweep destroyed ones
     MaxDistance = 200, -- default interaction distance for options; also the focus (green outline) range
     DetectionDistance = 300, -- range at which targetable actors get the highlight outline

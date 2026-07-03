@@ -359,8 +359,8 @@ Timer.SetTimeout(function()
     for job, zones in pairs(Config.BossMenus) do
         for index, coords in ipairs(zones) do
             local zoneName = job .. '_bossmenu_' .. index
-            exports['qb-target']:AddSphereZone(zoneName, coords, 100, {
-                debug = true,
+            exports['qb-target']:AddSphereZone(zoneName, coords, 0, {
+                useMesh = true,
                 distance = 1000,
             }, {
                 {
@@ -375,8 +375,8 @@ Timer.SetTimeout(function()
     for gang, zones in pairs(Config.GangMenus) do
         for index, coords in ipairs(zones) do
             local zoneName = gang .. '_gangmenu_' .. index
-            exports['qb-target']:AddSphereZone(zoneName, coords, 100, {
-                debug = true,
+            exports['qb-target']:AddSphereZone(zoneName, coords, 0, {
+                useMesh = true,
                 distance = 1000,
             }, {
                 {

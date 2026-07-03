@@ -47,7 +47,7 @@ local function notifyVehicleTodo()
 end
 
 local function addTargetSphere(name, coords, radius, option)
-    exports['qb-target']:AddSphereZone(name, coords, radius, { distance = 250, debug = true }, { option })
+    exports['qb-target']:AddSphereZone(name, coords, radius, { distance = 250, useMesh = true }, { option })
 end
 
 local function getStationKey(stationKey)
@@ -327,7 +327,7 @@ local function registerPoliceTargets()
 
     for stationKey, station in pairs(Config.Locations) do
         for i, coords in ipairs(station.duty or {}) do
-            addTargetSphere('PoliceDuty_' .. stationKey .. '_' .. i, coords, 50, {
+            addTargetSphere('PoliceDuty_' .. stationKey .. '_' .. i, coords, 0, {
                 type = 'client',
                 event = 'qb-policejob:client:ToggleDuty',
                 icon = 'log-in',
@@ -338,7 +338,7 @@ local function registerPoliceTargets()
         end
 
         for i, coords in ipairs(station.stash or {}) do
-            addTargetSphere('PoliceStash_' .. stationKey .. '_' .. i, coords, 75, {
+            addTargetSphere('PoliceStash_' .. stationKey .. '_' .. i, coords, 0, {
                 type = 'server',
                 event = 'qb-policejob:server:stash',
                 icon = 'archive',
@@ -349,7 +349,7 @@ local function registerPoliceTargets()
         end
 
         for i, coords in ipairs(station.clothing or {}) do
-            addTargetSphere('PoliceClothing_' .. stationKey .. '_' .. i, coords, 50, {
+            addTargetSphere('PoliceClothing_' .. stationKey .. '_' .. i, coords, 0, {
                 type = 'client',
                 event = 'qb-policejob:client:OpenClothing',
                 icon = 'shirt',
@@ -360,7 +360,7 @@ local function registerPoliceTargets()
         end
 
         for i, coords in ipairs(station.trash or {}) do
-            addTargetSphere('PoliceTrash_' .. stationKey .. '_' .. i, coords, 50, {
+            addTargetSphere('PoliceTrash_' .. stationKey .. '_' .. i, coords, 0, {
                 type = 'server',
                 event = 'qb-policejob:server:trash',
                 icon = 'trash',
@@ -371,7 +371,7 @@ local function registerPoliceTargets()
         end
 
         for i, coords in ipairs(station.fingerprint or {}) do
-            addTargetSphere('PoliceFingerprint_' .. stationKey .. '_' .. i, coords, 50, {
+            addTargetSphere('PoliceFingerprint_' .. stationKey .. '_' .. i, coords, 0, {
                 type = 'client',
                 event = 'qb-policejob:client:scanFingerPrint',
                 icon = 'fingerprint',
@@ -382,7 +382,7 @@ local function registerPoliceTargets()
         end
 
         for i, coords in ipairs(station.camera or {}) do
-            addTargetSphere('PoliceCamera_' .. stationKey .. '_' .. i, coords, 50, {
+            addTargetSphere('PoliceCamera_' .. stationKey .. '_' .. i, coords, 0, {
                 type = 'client',
                 event = 'qb-policejob:client:CameraMenu',
                 icon = 'camera',
@@ -393,7 +393,7 @@ local function registerPoliceTargets()
         end
 
         for i, coords in ipairs(station.evidence or {}) do
-            addTargetSphere('PoliceEvidence_' .. stationKey .. '_' .. i, coords, 50, {
+            addTargetSphere('PoliceEvidence_' .. stationKey .. '_' .. i, coords, 0, {
                 type = 'client',
                 event = 'qb-policejob:client:EvidenceStashDrawer',
                 icon = 'archive',
@@ -405,7 +405,7 @@ local function registerPoliceTargets()
         end
 
         for i, coords in ipairs(station.vehicle or {}) do
-            addTargetSphere('PoliceGarage_' .. stationKey .. '_' .. i, coords, 150, {
+            addTargetSphere('PoliceGarage_' .. stationKey .. '_' .. i, coords, 0, {
                 type = 'client',
                 event = 'qb-policejob:client:VehicleMenuHeader',
                 icon = 'car',
@@ -416,7 +416,7 @@ local function registerPoliceTargets()
         end
 
         for i, coords in ipairs(station.impound or {}) do
-            addTargetSphere('PoliceImpound_' .. stationKey .. '_' .. i, coords, 100, {
+            addTargetSphere('PoliceImpound_' .. stationKey .. '_' .. i, coords, 0, {
                 type = 'client',
                 event = 'qb-policejob:client:ImpoundMenuHeader',
                 icon = 'warehouse',
@@ -427,7 +427,7 @@ local function registerPoliceTargets()
         end
 
         for i, coords in ipairs(station.helicopter or {}) do
-            addTargetSphere('PoliceHelicopter_' .. stationKey .. '_' .. i, coords, 250, {
+            addTargetSphere('PoliceHelicopter_' .. stationKey .. '_' .. i, coords, 0, {
                 type = 'client',
                 event = 'qb-policejob:client:spawnHelicopter',
                 icon = 'helicopter',

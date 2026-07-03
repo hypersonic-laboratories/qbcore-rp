@@ -30,9 +30,9 @@ local function setupTargets()
             end
         end
 
-        exports['qb-target']:AddBoxZone(shop .. '_finance', shopData['FinanceZone'], 500, 500, {
+        exports['qb-target']:AddSphereZone(shop .. '_finance', shopData['FinanceZone'], 0, {
             name = shop .. '_finance',
-            heading = 0,
+            useMesh = true,
             debug = true,
             distance = 1000,
         }, {
@@ -74,22 +74,14 @@ local function setupTargets()
                 },
             }
 
-            local boxName = 'vehicle_shop_' .. shop .. '_' .. i
-            local coords = vehicleData['coords'].location
+            local zoneName = 'vehicle_shop_' .. shop .. '_' .. i
+            local coords = vehicleData['targetZone'] or vehicleData['coords'].location
 
-            local boxData = {
-                length = 500,
-                width = 500,
-                heading = 0,
+            exports['qb-target']:AddSphereZone(zoneName, coords, 0, {
+                name = zoneName,
+                useMesh = true,
                 debug = true,
                 distance = 1000,
-            }
-
-            exports['qb-target']:AddBoxZone(boxName, coords, boxData.length, boxData.width, {
-                name = boxName,
-                heading = boxData.heading,
-                debug = boxData.debug,
-                distance = boxData.distance,
             }, options)
         end
     end

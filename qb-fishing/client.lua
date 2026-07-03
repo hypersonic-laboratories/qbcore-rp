@@ -57,9 +57,9 @@ local function SpawnFishingMarkers()
 
             local mesh = StaticMesh(zone, Rotator(0, 0, 0), '/Game/HL_assets/InventoryItems/SM_MarkerCylinder.SM_MarkerCylinder')
 
-            exports['qb-target']:AddSphereZone(zoneName, zone, 100, {
+            exports['qb-target']:AddSphereZone(zoneName, zone, 0, {
                 distance = 400,
-                debug = true,
+                useMesh = true,
             }, {
                 {
                     icon = 'fish',

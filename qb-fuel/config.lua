@@ -1,5 +1,5 @@
 Config = {
-    defaultPumpRadius = 100.0,
+    defaultPumpRadius = 0,
     defaultPumpDistance = 1000.0,
     defaultVehicleSearchRadius = 750.0,
     defaultRefuelAmount = 100.0,

@@ -32,7 +32,7 @@ local function RegisterFuelStations()
             local zoneName = 'fuel_' .. stationKey .. '_' .. i
             exports['qb-target']:AddSphereZone(zoneName, pumpCoords, station.pumpRadius or Config.defaultPumpRadius, {
                 distance = station.pumpDistance or Config.defaultPumpDistance,
-                debug = true,
+                useMesh = true,
             }, GetFuelOptions(stationKey, i))
             registeredZones[#registeredZones + 1] = zoneName
         end

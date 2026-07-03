@@ -191,7 +191,7 @@ end)
 
 for locId, loc in pairs(Config.Locations) do
     for i, point in ipairs(loc.checking) do
-        exports['qb-target']:AddSphereZone('ambchecking_' .. locId .. '_' .. i, point, 75, { distance = 1000, debug = true }, {
+        exports['qb-target']:AddSphereZone('ambchecking_' .. locId .. '_' .. i, point, 0, { distance = 1000, useMesh = true }, {
             {
                 icon = 'clipboard-check',
                 label = 'Check In',
@@ -202,7 +202,7 @@ for locId, loc in pairs(Config.Locations) do
     end
 
     for i, point in ipairs(loc.duty) do
-        exports['qb-target']:AddSphereZone('ambduty_' .. locId .. '_' .. i, point, 75, { distance = 1000, debug = true }, {
+        exports['qb-target']:AddSphereZone('ambduty_' .. locId .. '_' .. i, point, 0, { distance = 1000, useMesh = true }, {
             {
                 icon = 'clipboard',
                 label = 'Toggle Duty',
@@ -214,7 +214,7 @@ for locId, loc in pairs(Config.Locations) do
     end
 
     for i, point in ipairs(loc.stash) do
-        exports['qb-target']:AddSphereZone('ambstash_' .. locId .. '_' .. i, point, 75, { distance = 1000, debug = true }, {
+        exports['qb-target']:AddSphereZone('ambstash_' .. locId .. '_' .. i, point, 0, { distance = 1000, useMesh = true }, {
             {
                 icon = 'box',
                 label = 'Open Stash',
@@ -226,7 +226,7 @@ for locId, loc in pairs(Config.Locations) do
     end
 
     for i, point in ipairs(loc.vehicle) do
-        exports['qb-target']:AddSphereZone('ambvehicle_' .. locId .. '_' .. i, point, 75, { distance = 1000, debug = true }, {
+        exports['qb-target']:AddSphereZone('ambvehicle_' .. locId .. '_' .. i, point, 0, { distance = 1000, useMesh = true }, {
             {
                 icon = 'car',
                 label = 'Retrieve Vehicle',
@@ -238,7 +238,7 @@ for locId, loc in pairs(Config.Locations) do
     end
 
     for i, point in ipairs(loc.helicopter) do
-        exports['qb-target']:AddSphereZone('ambhelicopter_' .. locId .. '_' .. i, point, 75, { distance = 1000, debug = true }, {
+        exports['qb-target']:AddSphereZone('ambhelicopter_' .. locId .. '_' .. i, point, 0, { distance = 1000, useMesh = true }, {
             {
                 icon = 'helicopter',
                 label = 'Retrieve Helicopter',

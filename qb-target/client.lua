@@ -82,7 +82,7 @@ end
 
 local function getStaticMeshActorClass()
     if not StaticMeshActorClass then
-        StaticMeshActorClass = UE.UClass.Load('/Script/Engine.StaticMeshActor')
+        StaticMeshActorClass = LoadClass('/Script/Engine.StaticMeshActor')
     end
     return StaticMeshActorClass
 end
@@ -95,7 +95,7 @@ local function resolveTypeClass(classKey)
     if cached ~= nil then
         return cached or nil
     end
-    local ok, class = pcall(UE.UClass.Load, classKey)
+    local ok, class = pcall(LoadClass, classKey)
     class = (ok and class) or nil
     TypeClasses[classKey] = class or false
     return class
@@ -507,27 +507,62 @@ local function AddBoxZone(name, center, length, width, zoneOptions, targetoption
     local yaw_degrees = zoneOptions.heading or zoneOptions.yaw or 0.0
     local minZ, maxZ = zoneOptions.minZ, zoneOptions.maxZ
     local height = (minZ and maxZ) and math.abs(maxZ - minZ) or (zoneOptions.height or zoneOptions.fullHeight or 200.0)
-    local spawnCenter = UE.FVector(center.X, center.Y, center.Z)
+    local spawnCenter = Vector(center.X, center.Y, center.Z)
     if minZ and maxZ then
         spawnCenter.Z = (minZ + maxZ) * 0.5
     end
-    local xform = UE.FTransform()
+    local xform = Transform()
     xform.Translation = spawnCenter
-    xform.Rotation = UE.FQuat(0, 0, math.sin(math.rad(yaw_degrees) * 0.5), math.cos(math.rad(yaw_degrees) * 0.5))
+    xform.Rotation = Quat(0, 0, math.sin(math.rad(yaw_degrees) * 0.5), math.cos(math.rad(yaw_degrees) * 0.5))
     local actor = HWorld:SpawnActor(UE.AActor, xform, UE.ESpawnActorCollisionHandlingMethod.AlwaysSpawn)
     if not actor then
         return nil
     end
+
+    -- the box is added first so it becomes the root, pinned exactly at the
+    -- zone coordinate; the mesh is purely visual and hangs off it
     local box = actor:AddComponentByClass(UE.UBoxComponent, false, xform, false)
     if not box then
         return nil
     end
-    local full = UE.FVector(length, width, height)
-    local half = UE.FVector(full.X * 0.5, full.Y * 0.5, full.Z * 0.5)
+    local full = Vector(length, width, height)
+    local half = Vector(full.X * 0.5, full.Y * 0.5, full.Z * 0.5)
+
+    -- with useMesh, a visual mesh (meshPath, or the default marker arrow) is
+    -- spawned at the zone center and the box extents grow per-axis to fit it
+    -- if the passed size is smaller
+    if zoneOptions.useMesh then
+        local meshPath = zoneOptions.meshPath
+        if not meshPath or meshPath == '' then
+            meshPath = '/Game/HL_assets/InventoryItems/SM_MarkerArrow.SM_MarkerArrow'
+        end
+        local meshAsset = LoadObject(meshPath)
+        if meshAsset then
+            local bounds = meshAsset:GetBounds()
+            local meshXform = Transform()
+            meshXform.Translation = Vector(-bounds.Origin.X, -bounds.Origin.Y, -bounds.Origin.Z)
+            local meshComp = actor:AddComponentByClass(UE.UStaticMeshComponent, false, meshXform, false)
+            if meshComp then
+                meshComp:SetStaticMesh(meshAsset)
+                meshComp:SetCollisionEnabled(UE.ECollisionEnabled.NoCollision)
+                half = Vector(
+                    math.max(half.X, bounds.BoxExtent.X),
+                    math.max(half.Y, bounds.BoxExtent.Y),
+                    math.max(half.Z, bounds.BoxExtent.Z)
+                )
+            else
+                print('[Xray] Zone mesh setup failed: ' .. meshPath)
+            end
+        else
+            print('[Xray] Zone mesh setup failed: ' .. meshPath)
+        end
+    end
+
     box:SetBoxExtent(half, true)
     local debug = (zoneOptions.debug ~= nil) and zoneOptions.debug or false
-    box:SetHiddenInGame(not debug, true)
-    box:SetVisibility(debug, true)
+    box:SetHiddenInGame(not debug, false)
+    box:SetVisibility(debug, false)
+
     box:SetCastShadow(false)
     box:SetMobility(UE.EComponentMobility.Stationary)
     box:SetCollisionEnabled(UE.ECollisionEnabled.QueryOnly)
@@ -550,22 +585,51 @@ local function AddSphereZone(name, center, radius, zoneOptions, targetoptions)
     if Zones[name] then
         return
     end
-    local spawnCenter = UE.FVector(center.X, center.Y, center.Z)
-    local xform = UE.FTransform()
+    local spawnCenter = Vector(center.X, center.Y, center.Z)
+    local xform = Transform()
     xform.Translation = spawnCenter
-    xform.Rotation = UE.FQuat(0, 0, 0, 1)
+    xform.Rotation = Quat(0, 0, 0, 1)
     local actor = HWorld:SpawnActor(UE.AActor, xform, UE.ESpawnActorCollisionHandlingMethod.AlwaysSpawn)
     if not actor then
         return nil
     end
+
     local sphere = actor:AddComponentByClass(UE.USphereComponent, false, xform, false)
     if not sphere then
         return nil
     end
+
+    -- with useMesh, a visual mesh (meshPath, or the default marker arrow) is
+    -- spawned at the zone center and the sphere radius grows to fit it if the
+    -- passed radius is smaller
+    if zoneOptions.useMesh then
+        local meshPath = zoneOptions.meshPath
+        if not meshPath or meshPath == '' then
+            meshPath = '/Game/HL_assets/InventoryItems/SM_MarkerArrow.SM_MarkerArrow'
+        end
+        local meshAsset = LoadObject(meshPath)
+        if meshAsset then
+            local bounds = meshAsset:GetBounds()
+            local meshXform = Transform()
+            meshXform.Translation = Vector(-bounds.Origin.X, -bounds.Origin.Y, -bounds.Origin.Z)
+            local meshComp = actor:AddComponentByClass(UE.UStaticMeshComponent, false, meshXform, false)
+            if meshComp then
+                meshComp:SetStaticMesh(meshAsset)
+                meshComp:SetCollisionEnabled(UE.ECollisionEnabled.NoCollision)
+                radius = math.max(radius, bounds.SphereRadius)
+            else
+                print('[Xray] Zone mesh setup failed: ' .. meshPath)
+            end
+        else
+            print('[Xray] Zone mesh setup failed: ' .. meshPath)
+        end
+    end
+
     sphere:SetSphereRadius(radius, true)
     local debug = (zoneOptions.debug ~= nil) and zoneOptions.debug or false
-    sphere:SetHiddenInGame(not debug, true)
-    sphere:SetVisibility(debug, true)
+    sphere:SetHiddenInGame(not debug, false)
+    sphere:SetVisibility(debug, false)
+
     sphere:SetCastShadow(false)
     sphere:SetMobility(UE.EComponentMobility.Stationary)
     sphere:SetCollisionEnabled(UE.ECollisionEnabled.QueryOnly)
@@ -595,7 +659,7 @@ local function AddMeshTarget(name, location, rotation, meshPath, meshOptions, ta
         bStationary = true
     end
     local distance = meshOptions.distance or Config.MaxDistance
-    local meshWrapper = StaticMesh(location, rotation or UE.FRotator(0, 0, 0), meshPath, collisionType, bStationary)
+    local meshWrapper = StaticMesh(location, rotation or Rotator(0, 0, 0), meshPath, collisionType, bStationary)
     local actor = meshWrapper and meshWrapper.Object
     if not actor then
         print('AddMeshTarget: Failed to spawn static mesh for ' .. tostring(name))

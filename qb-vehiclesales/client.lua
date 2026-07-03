@@ -161,7 +161,7 @@ local function setupSalesLots()
             minZ = zone.SellVehicle.coords.Z - 250,
             maxZ = zone.SellVehicle.coords.Z + 250,
             distance = 1000,
-            debug = true,
+            useMesh = true,
         }, {
             {
                 type = 'client',

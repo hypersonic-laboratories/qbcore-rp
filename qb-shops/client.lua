@@ -3,31 +3,33 @@ local shopMarkers = {}
 
 local function RegisterShopsAndMarkers()
     for shop, shopData in pairs(Config.Locations) do
-        exports['qb-target']:AddSphereZone(shop, shopData.coords, 100.0, {
-            debug    = true,
-            distance = 500
+        exports['qb-target']:AddSphereZone(shop, shopData.coords, 0, {
+            useMesh = true,
+            distance = 500,
         }, {
             {
-                icon  = shopData.targetIcon or Config.defaultTargetIcon,
+                icon = shopData.targetIcon or Config.defaultTargetIcon,
                 label = shopData.targetLabel or Config.defaultTargetLabel,
                 event = 'qb-shops:client:openShop',
-                shop  = shop,
-                item  = shopData.requiredItem,
-                job   = shopData.requiredJob,
-                gang  = shopData.requiredGang,
-            }
+                shop = shop,
+                item = shopData.requiredItem,
+                job = shopData.requiredJob,
+                gang = shopData.requiredGang,
+            },
         })
         registeredZones[shop] = true
 
         if shopData.showblip then
             local markerId = exports['qb-hud']:AddMarker(shopData.coords, {
-                title       = shopData.label,
+                title = shopData.label,
                 description = shopData.description or '',
-                icon        = shopData.blipIcon or 'grocery',
-                color       = shopData.blipColor,
-                markerType  = 'Store',
+                icon = shopData.blipIcon or 'grocery',
+                color = shopData.blipColor,
+                markerType = 'Store',
             })
-            if markerId then shopMarkers[#shopMarkers + 1] = markerId end
+            if markerId then
+                shopMarkers[#shopMarkers + 1] = markerId
+            end
         end
     end
 end
