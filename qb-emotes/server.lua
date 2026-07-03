@@ -1,8 +1,28 @@
 local activePairs = {} -- netId -> partner netId
 local pendingRequests = {} -- target netId -> { requester = netId, emote = emoteId }
 
+-- State tables key players by numeric netId, but GetPlayerPawn and
+-- TriggerClientEvent only accept controller objects — resolve on demand.
+local function getPawnByNetId(netId)
+    local controller = GetPlayerById(netId)
+    return controller and GetPlayerPawn(controller) or nil
+end
+
+local function sendClient(netId, eventName, ...)
+    local controller = GetPlayerById(netId)
+    if controller then
+        TriggerClientEvent(controller, eventName, ...)
+    end
+end
+
+-- target may be a controller (event source) or a numeric netId
 local function notify(target, text, notifyType)
-    TriggerClientEvent(target, 'QBCore:Notify', text, notifyType)
+    if type(target) == 'number' then
+        target = GetPlayerById(target)
+    end
+    if target then
+        TriggerClientEvent(target, 'QBCore:Notify', text, notifyType)
+    end
 end
 
 local function getNetId(source)
@@ -19,8 +39,8 @@ local function getCharacterName(Player)
 end
 
 local function isNear(a, b, maxDistance)
-    local pawnA = GetPlayerPawn(a)
-    local pawnB = GetPlayerPawn(b)
+    local pawnA = getPawnByNetId(a)
+    local pawnB = getPawnByNetId(b)
     if not pawnA or not pawnB then
         return false
     end
@@ -71,11 +91,11 @@ local function stopPairFor(netId)
     activePairs[partner] = nil
 
     for _, id in ipairs({ netId, partner }) do
-        local pawn = GetPlayerPawn(id)
+        local pawn = getPawnByNetId(id)
         if pawn then
             Animation.Stop(pawn)
         end
-        TriggerClientEvent(id, 'qb-emotes:client:emoteCleared')
+        sendClient(id, 'qb-emotes:client:emoteCleared')
     end
     return true
 end
@@ -90,7 +110,7 @@ local function playPairedSide(netId, pawn, side)
                 if activePairs[netId] ~= partner then
                     return
                 end
-                local currentPawn = GetPlayerPawn(netId)
+                local currentPawn = getPawnByNetId(netId)
                 if currentPawn then
                     Animation.Play(currentPawn, side.loop, buildParams(true))
                 end
@@ -104,8 +124,8 @@ local function playPairedSide(netId, pawn, side)
 end
 
 local function startPairedEmote(attNetId, vicNetId, emote)
-    local attPawn = GetPlayerPawn(attNetId)
-    local vicPawn = GetPlayerPawn(vicNetId)
+    local attPawn = getPawnByNetId(attNetId)
+    local vicPawn = getPawnByNetId(vicNetId)
     if not attPawn or not vicPawn then
         return
     end
@@ -133,8 +153,8 @@ local function startPairedEmote(attNetId, vicNetId, emote)
     playPairedSide(attNetId, attPawn, emote.att)
     playPairedSide(vicNetId, vicPawn, emote.vic)
 
-    TriggerClientEvent(attNetId, 'qb-emotes:client:pairedStarted', emote.id)
-    TriggerClientEvent(vicNetId, 'qb-emotes:client:pairedStarted', emote.id)
+    sendClient(attNetId, 'qb-emotes:client:pairedStarted', emote.id)
+    sendClient(vicNetId, 'qb-emotes:client:pairedStarted', emote.id)
 
     -- One-shot paired emotes clean themselves up
     if not emote.att.loop then
@@ -212,7 +232,7 @@ RegisterServerEvent('qb-emotes:server:pairedRequest', function(source, targetId,
         end
     end, Config.PairedRequestTimeout)
 
-    TriggerClientEvent(targetNetId, 'qb-emotes:client:pairedRequest', requesterNetId, getCharacterName(Requester), emote.id, emote.label)
+    sendClient(targetNetId, 'qb-emotes:client:pairedRequest', requesterNetId, getCharacterName(Requester), emote.id, emote.label)
     notify(source, 'Emote request sent to the nearest player', 'primary')
 end)
 
