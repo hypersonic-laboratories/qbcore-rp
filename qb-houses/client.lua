@@ -33,11 +33,10 @@ local function RegisterInPropertyTarget(targetKey, coords, options)
         return
     end
     local boxName = 'inPropertyTarget_' .. targetKey
-    exports['qb-target']:AddBoxZone(boxName, coords, 100, 100, {
+    exports['qb-target']:AddSphereZone(boxName, coords, 0, {
         name = boxName,
-        heading = 0.0,
+        useMesh = true,
         distance = 500,
-        debug = true,
     }, options)
     InPropertyTargets[targetKey] = InPropertyTargets[targetKey] or {}
     InPropertyTargets[targetKey].created = true
@@ -173,11 +172,10 @@ local function RegisterEntranceTarget(entranceId, entranceData)
         end
     end
 
-    exports['qb-target']:AddBoxZone(boxName, coords, 100, 100, {
+    exports['qb-target']:AddSphereZone(boxName, coords, 0, {
         name = boxName,
-        heading = 0.0,
+        useMesh = true,
         distance = boxData.distance,
-        debug = true,
     }, options)
 
     boxData.created = true
@@ -199,11 +197,10 @@ local function RegisterEntranceTarget(entranceId, entranceData)
                 },
             }
 
-            exports['qb-target']:AddBoxZone(garageBoxName, garageCoords, 100, 100, {
+            exports['qb-target']:AddSphereZone(garageBoxName, garageCoords, 0, {
                 name = garageBoxName,
-                heading = entranceData.garageCoords.heading or 0.0,
+                useMesh = true,
                 distance = 1000,
-                debug = true,
             }, garageOptions)
 
             EntranceTargets[entranceId].garage = true

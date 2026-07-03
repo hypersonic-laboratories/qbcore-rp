@@ -244,16 +244,17 @@ exports('qb-clothing', 'LoadAndApplySkin', LoadAndApplySkin)
 local registeredZones = {}
 local shopMarkers = {}
 
-local function RegisterShopZone(zoneId, coords, heading, options)
+local function RegisterShopZone(zoneId, coords, options)
     if registeredZones[zoneId] then
         return
     end
     if not coords then
         return
     end
-    exports['qb-target']:AddBoxZone(zoneId, coords, 1.5, 1.5, {
-        heading = heading or 0,
-        distance = 2.5,
+    exports['qb-target']:AddSphereZone(zoneId, coords, 0, {
+        name = zoneId,
+        useMesh = true,
+        distance = 500,
     }, options)
     registeredZones[zoneId] = true
 end
@@ -282,7 +283,7 @@ local function RegisterAllShopZones()
         if not def then
             goto continue
         end
-        RegisterShopZone(def.zonePrefix .. '_' .. id, shop.coords, shop.heading, {
+        RegisterShopZone(def.zonePrefix .. '_' .. id, shop.coords, {
             {
                 type = 'client',
                 event = 'qb-clothing:client:OpenShop',

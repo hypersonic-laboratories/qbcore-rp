@@ -79,9 +79,9 @@ local function RegisterApartmentEntranceTarget(apartmentName, apartmentData)
         label = Lang.t('text.ring_doorbell'),
     }
 
-    exports['qb-target']:AddBoxZone(boxName, coords, boxData.length, boxData.width, {
+    exports['qb-target']:AddSphereZone(boxName, coords, 0, {
         name = boxName,
-        heading = boxData.heading,
+        useMesh = true,
         debug = boxData.debug,
         distance = boxData.distance,
     }, options)
@@ -89,7 +89,7 @@ local function RegisterApartmentEntranceTarget(apartmentName, apartmentData)
     boxData.created = true
 end
 
-local function RegisterInApartmentTarget(targetKey, coords, heading, options)
+local function RegisterInApartmentTarget(targetKey, coords, options)
     if not InApartment then
         return
     end
@@ -98,11 +98,10 @@ local function RegisterInApartmentTarget(targetKey, coords, heading, options)
     end
 
     local boxName = 'inApartmentTarget_' .. targetKey
-    exports['qb-target']:AddBoxZone(boxName, coords, 100, 100, {
+    exports['qb-target']:AddSphereZone(boxName, coords, 0, {
         name = boxName,
-        heading = heading,
-        distance = 500,
         useMesh = true,
+        distance = 500,
     }, options)
 
     InApartmentTargets[targetKey] = InApartmentTargets[targetKey] or {}
@@ -127,7 +126,7 @@ local function SetInApartmentTargets(apartmentName)
     local stashPos = Vector(Apartments.Locations[apartmentName].coords[1] - POIOffsets.stash.x, Apartments.Locations[apartmentName].coords[2] - POIOffsets.stash.y, Apartments.Locations[apartmentName].coords[3] + CurrentOffset + POIOffsets.stash.z)
     local outfitsPos = Vector(Apartments.Locations[apartmentName].coords[1] - POIOffsets.clothes.x, Apartments.Locations[apartmentName].coords[2] - POIOffsets.clothes.y, Apartments.Locations[apartmentName].coords[3] + CurrentOffset + POIOffsets.clothes.z)
     local logoutPos = Vector(Apartments.Locations[apartmentName].coords[1] - POIOffsets.logout.x, Apartments.Locations[apartmentName].coords[2] - POIOffsets.logout.y, Apartments.Locations[apartmentName].coords[3] + CurrentOffset + POIOffsets.logout.z)
-    RegisterInApartmentTarget('entrancePos', entrancePos, 0, {
+    RegisterInApartmentTarget('entrancePos', entrancePos, {
         {
             icon = 'clipboard-list',
             label = Lang.t('text.open_door'),
@@ -142,7 +141,7 @@ local function SetInApartmentTargets(apartmentName)
             CurrentApartment = CurrentApartment,
         },
     })
-    RegisterInApartmentTarget('stashPos', stashPos, 0, {
+    RegisterInApartmentTarget('stashPos', stashPos, {
         {
             icon = 'box',
             label = Lang.t('text.open_stash'),
@@ -151,7 +150,7 @@ local function SetInApartmentTargets(apartmentName)
             CurrentApartment = CurrentApartment,
         },
     })
-    RegisterInApartmentTarget('outfitsPos', outfitsPos, 0, {
+    RegisterInApartmentTarget('outfitsPos', outfitsPos, {
         {
             type = 'client',
             event = 'qb-apartments:client:ChangeOutfit',
@@ -159,7 +158,7 @@ local function SetInApartmentTargets(apartmentName)
             label = Lang.t('text.change_outfit'),
         },
     })
-    RegisterInApartmentTarget('logoutPos', logoutPos, 0, {
+    RegisterInApartmentTarget('logoutPos', logoutPos, {
         {
             icon = 'log-out',
             label = Lang.t('text.logout'),
