@@ -1,11 +1,11 @@
 -- State
 
-local isLoggedIn  = false
-local my_webui    = WebUI('qb-hud', 'qb-hud/html/index.html')
+local isLoggedIn = false
+local my_webui = WebUI('qb-hud', 'qb-hud/html/index.html')
 local player_data = {}
-local health      = 100
-local playerDead  = false
-local round       = math.floor
+local health = 100
+local playerDead = false
+local round = math.floor
 
 -- Helpers
 
@@ -20,30 +20,56 @@ end
 
 local function GetPackageDir()
     local info = debug.getinfo(1, 'S')
-    local src  = info.source or ''
-    if src:sub(1, 1) == '@' then src = src:sub(2) end
+    local src = info.source or ''
+    if src:sub(1, 1) == '@' then
+        src = src:sub(2)
+    end
     return src:match('^(.*)[/\\].-$') or '.'
 end
 
 local function SendHUDUpdate()
-    if not my_webui or not isLoggedIn then return end
+    if not my_webui or not isLoggedIn then
+        return
+    end
     local meta = player_data.metadata
-    if not meta then return end
-    my_webui:SendEvent('UpdateHUD', health, meta['armor'], meta['hunger'], meta['thirst'], meta['stress'], playerDead)
+    if not meta then
+        return
+    end
+    local pawn = GetPlayerPawn()
+    local hp = (pawn and GetHealth(pawn)) or health
+    local armor = (pawn and GetArmor(pawn)) or 0
+    my_webui:SendEvent('UpdateHUD', round(hp), round(armor), meta['hunger'], meta['thirst'], meta['stress'], playerDead)
+end
+
+local boundHealthComp = nil
+
+local function BindArmorDelegate()
+    local pawn = GetPlayerPawn()
+    if not pawn then
+        return
+    end
+    local comp = FindHealthComponent(pawn)
+    if not comp or comp == boundHealthComp then
+        return
+    end
+    boundHealthComp = comp
+    comp.OnArmorChanged:Add(comp, function()
+        SendHUDUpdate()
+    end)
 end
 
 -- Markers
 
 local MarkerTextures = {}
-local MarkerHandles  = {}
-local nextMarkerId   = 0
+local MarkerHandles = {}
+local nextMarkerId = 0
 
 local function GetMarkerTexture(iconName)
-    if not iconName then return nil end
+    if not iconName then
+        return nil
+    end
     if not MarkerTextures[iconName] then
-        MarkerTextures[iconName] = UE.UKismetRenderingLibrary.ImportFileAsTexture2D(
-            HWorld, GetPackageDir() .. '/images/' .. iconName .. '.png'
-        )
+        MarkerTextures[iconName] = UE.UKismetRenderingLibrary.ImportFileAsTexture2D(HWorld, GetPackageDir() .. '/images/' .. iconName .. '.png')
     end
     return MarkerTextures[iconName]
 end
@@ -51,14 +77,16 @@ end
 exports('qb-hud', 'AddMarker', function(coords, opts)
     opts = opts or {}
     local handle = HMap.AddMarkerAt(coords, {
-        Title           = opts.title or '',
-        Description     = opts.description or '',
-        MarkerType      = opts.markerType or 'Store',
-        SizeMultiplier  = opts.size or 1.0,
-        OverrideColor   = opts.color,
+        Title = opts.title or '',
+        Description = opts.description or '',
+        MarkerType = opts.markerType or 'Store',
+        SizeMultiplier = opts.size or 1.0,
+        OverrideColor = opts.color,
         OverrideTexture = GetMarkerTexture(opts.icon),
     })
-    if not handle or handle == 0 then return nil end
+    if not handle or handle == 0 then
+        return nil
+    end
     nextMarkerId = nextMarkerId + 1
     MarkerHandles[nextMarkerId] = handle
     return nextMarkerId
@@ -66,7 +94,9 @@ end)
 
 exports('qb-hud', 'RemoveMarker', function(id)
     local handle = MarkerHandles[id]
-    if not handle then return end
+    if not handle then
+        return
+    end
     HMap.RemoveMarkerAt(handle)
     MarkerHandles[id] = nil
 end)
@@ -83,17 +113,18 @@ end
 -- Player Events
 
 RegisterClientEvent('QBCore:Client:OnPlayerLoaded', function()
-    isLoggedIn  = true
+    isLoggedIn = true
     player_data = exports['qb-core']:GetPlayerData()
     disableDefaultHUD()
     if my_webui and player_data.money then
         my_webui:SendEvent('ShowCashAmount', round(player_data.money['cash'] or 0))
     end
+    BindArmorDelegate()
     SendHUDUpdate()
 end)
 
 RegisterClientEvent('QBCore:Client:OnPlayerUnload', function()
-    isLoggedIn  = false
+    isLoggedIn = false
     player_data = {}
 end)
 
@@ -112,7 +143,9 @@ end)
 -- Money Events
 
 RegisterClientEvent('qb-hud:client:ShowAccounts', function(type, amount)
-    if not my_webui then return end
+    if not my_webui then
+        return
+    end
     if type == 'cash' then
         my_webui:SendEvent('ShowCashAmount', round(amount))
     else
@@ -121,24 +154,33 @@ RegisterClientEvent('qb-hud:client:ShowAccounts', function(type, amount)
 end)
 
 RegisterClientEvent('qb-hud:client:OnMoneyChange', function(type, amount, isMinus)
-    if not my_webui then return end
-    local money      = player_data.money or {}
+    if not my_webui then
+        return
+    end
+    local money = player_data.money or {}
     local cashAmount = money['cash'] or 0
     local bankAmount = money['bank'] or 0
     my_webui:SendEvent('UpdateMoney', {
-        cashAmount   = round(cashAmount),
-        bankAmount   = round(bankAmount),
+        cashAmount = round(cashAmount),
+        bankAmount = round(bankAmount),
         changeAmount = round(amount),
-        isMinus      = isMinus,
-        type         = type,
+        isMinus = isMinus,
+        type = type,
     })
 end)
 
 -- Game Events
 
+RegisterClientEvent('HEvent:PlayerPossessed', function()
+    BindArmorDelegate()
+    SendHUDUpdate()
+end)
+
 RegisterClientEvent('HEvent:HealthChanged', function(_, newHealth)
     health = newHealth
-    if newHealth > 0 and playerDead then playerDead = false end
+    if newHealth > 0 and playerDead then
+        playerDead = false
+    end
     SendHUDUpdate()
 end)
 
@@ -148,7 +190,9 @@ RegisterClientEvent('HEvent:Death', function()
 end)
 
 RegisterClientEvent('HEvent:VoiceStateChanged', function(isTalking)
-    if not my_webui then return end
+    if not my_webui then
+        return
+    end
     my_webui:SendEvent('IsTalking', isTalking)
 end)
 
@@ -169,6 +213,8 @@ RegisterClientEvent('HEvent:ExitedVehicle', function(seat)
 end)
 
 RegisterClientEvent('qb-hud:client:onRadio', function(bool)
-    if not my_webui then return end
+    if not my_webui then
+        return
+    end
     my_webui:SendEvent('onRadio', bool)
 end)
