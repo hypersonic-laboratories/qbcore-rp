@@ -110,9 +110,12 @@ local function startPairedEmote(attNetId, vicNetId, emote)
         return
     end
 
-    -- Break any pair either player is already in
+    -- Break any pair either player is already in, and stop any solo emote
+    -- still playing (a new custom animation won't start over a running one)
     stopPairFor(attNetId)
     stopPairFor(vicNetId)
+    Animation.Stop(attPawn)
+    Animation.Stop(vicPawn)
 
     -- Place the target relative to the requester
     local attCoords = GetEntityCoords(attPawn)
@@ -161,6 +164,8 @@ RegisterServerEvent('qb-emotes:server:play', function(source, categoryName, emot
         stopPairFor(netId)
     end
 
+    -- A new custom animation won't start while one is still playing
+    Animation.Stop(pawn)
     Animation.Play(pawn, emote.anim, buildParams(true, emote.upperBody))
 end)
 
