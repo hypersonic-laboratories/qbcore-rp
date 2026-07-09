@@ -83,7 +83,10 @@ function onShutdown()
         end
     end
     for src in pairs(activeMiners) do
-        HInventory.RemoveItemByName(src, TOOL_ID, 1)
+        local pawn = GetPlayerPawn(src)
+        if pawn then
+            HInventory.RemoveItemByName(pawn, TOOL_ID, 1)
+        end
     end
     activeMiners = {}
     netRocks = {}
@@ -110,8 +113,12 @@ RegisterServerEvent('qb-mining:server:completeMine', function(source, data)
     if not Player then
         return
     end
+    local pawn = GetPlayerPawn(source)
+    if not pawn then
+        return
+    end
     if activeMiners[source] then
-        HInventory.RemoveItemByName(source, TOOL_ID, 1)
+        HInventory.RemoveItemByName(pawn, TOOL_ID, 1)
         activeMiners[source] = nil
     end
     if not data then

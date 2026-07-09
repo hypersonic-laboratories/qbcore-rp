@@ -117,7 +117,11 @@ local function CompleteJob(source, returnedTruck)
     end
 
     if route.holdingBag then
-        HInventory.RemoveItemByName(source, 'ID_Misc_TrashBag', 1)
+        local pawn = GetPlayerPawn(source)
+        if not pawn then
+            return
+        end
+        HInventory.RemoveItemByName(pawn, 'ID_Misc_TrashBag', 1)
     end
 
     routes[GetPlayerId(source)] = nil
@@ -240,7 +244,12 @@ RegisterServerEvent('qb-garbagejob:server:loadBag', function(source)
         return
     end
 
-    HInventory.RemoveItemByName(source, 'ID_Misc_TrashBag', 1)
+    local pawn = GetPlayerPawn(source)
+    if not pawn then
+        return
+    end
+
+    HInventory.RemoveItemByName(pawn, 'ID_Misc_TrashBag', 1)
     routes[GetPlayerId(source)].holdingBag = nil
 
     routes[GetPlayerId(source)].stopsCompleted = route.stopsCompleted + 1

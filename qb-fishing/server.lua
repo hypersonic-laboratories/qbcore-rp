@@ -3,7 +3,10 @@ local TOOL_ID = 'ID_Misc_FishingRod'
 
 RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
     if activeFishers[source] then
-        HInventory.RemoveItemByName(source, TOOL_ID, 1)
+        local pawn = GetPlayerPawn(source)
+        if pawn then
+            HInventory.RemoveItemByName(pawn, TOOL_ID, 1)
+        end
         activeFishers[source] = nil
     end
 end)
@@ -24,7 +27,11 @@ RegisterServerEvent('qb-fishing:server:completeFishing', function(source, waterT
     end
 
     if activeFishers[source] then
-        HInventory.RemoveItemByName(source, TOOL_ID, 1)
+        local pawn = GetPlayerPawn(source)
+        if not pawn then
+            return
+        end
+        HInventory.RemoveItemByName(pawn, TOOL_ID, 1)
         activeFishers[source] = nil
     end
 
@@ -41,7 +48,10 @@ end)
 
 function onShutdown()
     for src in pairs(activeFishers) do
-        HInventory.RemoveItemByName(src, TOOL_ID, 1)
+        local pawn = GetPlayerPawn(src)
+        if pawn then
+            HInventory.RemoveItemByName(pawn, TOOL_ID, 1)
+        end
     end
     activeFishers = {}
 end

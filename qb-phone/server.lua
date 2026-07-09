@@ -661,7 +661,7 @@ RegisterServerEvent('qb-phone:server:takePhone', function(source)
     if not pawn then
         return
     end
-    HInventory.RemoveItemByName(pawn, 'ID_Misc_Phone')
+    HInventory.RemoveItemByName(pawn, 'ID_Misc_Phone', 1)
 end)
 
 RegisterCallback('qb-phone:loadCoreData', function(source)
