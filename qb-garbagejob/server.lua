@@ -118,9 +118,6 @@ local function CompleteJob(source, returnedTruck)
 
     if route.holdingBag then
         local pawn = GetPlayerPawn(source)
-        if not pawn then
-            return
-        end
         HInventory.RemoveItemByName(pawn, 'ID_Misc_TrashBag', 1)
     end
 

@@ -28,9 +28,6 @@ RegisterServerEvent('qb-fishing:server:completeFishing', function(source, waterT
 
     if activeFishers[source] then
         local pawn = GetPlayerPawn(source)
-        if not pawn then
-            return
-        end
         HInventory.RemoveItemByName(pawn, TOOL_ID, 1)
         activeFishers[source] = nil
     end
