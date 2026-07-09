@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MDT</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!--
+    qb-mdt frontend — NIGHTWATCH terminal inside a tablet frame.
+    Bridge:
+      JS -> Lua : hEvent('mdt:request', {action, payload, reqId}) | 'mdt:close' | 'mdt:panic' | 'mdt:setWaypoint'
+      Lua -> JS : window 'message' {action, args:[payload]} — mdt:open/close/response + push events
+-->
+<div id="tablet" class="hidden">
+    <div class="screen"><div id="stage" class="shell police"></div></div>
+    <img class="frame" src="assets/tablet.png" alt="">
+</div>
+<!-- Unit radio PTT indicator — game HUD, independent of the tablet -->
+<div id="radioHud" class="police hidden"></div>
+<script src="app.js"></script>
+</body>
+</html>

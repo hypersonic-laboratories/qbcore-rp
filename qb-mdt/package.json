@@ -1,0 +1,17 @@
+{
+    "shared": [
+        "config.lua"
+    ],
+    "client": [
+        "client/main.lua"
+    ],
+    "server": [
+        "server/database.lua",
+        "server/main.lua",
+        "server/search.lua",
+        "server/incidents.lua",
+        "server/records.lua",
+        "server/dispatch.lua",
+        "server/medical.lua"
+    ]
+}
