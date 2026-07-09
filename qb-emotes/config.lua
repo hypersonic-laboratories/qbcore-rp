@@ -1,6 +1,5 @@
 Config = {}
-
-Config.OpenKey = 'K' -- key that opens the emote menu
+Config.OpenKey = 'F1' -- key that opens the emote menu
 Config.PairedRequestDistance = 250.0 -- max distance to the nearest player for a paired emote request
 Config.PairedRequestTimeout = 15000 -- ms before a pending paired request expires
 
