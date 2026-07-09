@@ -97,7 +97,11 @@ RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
 end)
 
 RegisterServerEvent('qb-mining:server:startMiningItem', function(source)
-    HInventory.GiveAndEquipItemByName(source, TOOL_ID)
+    local pawn = GetPlayerPawn(source)
+    if not pawn then
+        return
+    end
+    HInventory.GiveAndEquipItemByName(pawn, TOOL_ID)
     activeMiners[source] = true
 end)
 

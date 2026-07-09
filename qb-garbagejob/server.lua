@@ -212,7 +212,12 @@ RegisterServerEvent('qb-garbagejob:server:grabBag', function(source, data)
         return
     end
 
-    local gotItem = HInventory.GiveAndEquipItemByName(source, 'ID_Misc_TrashBag')
+    local pawn = GetPlayerPawn(source)
+    if not pawn then
+        return
+    end
+
+    local gotItem = HInventory.GiveAndEquipItemByName(pawn, 'ID_Misc_TrashBag')
     routes[GetPlayerId(source)].holdingBag = gotItem
     routes[GetPlayerId(source)].collectedDumpsters[data.entity] = true
     notify(source, Lang.t('info.load_bag'))

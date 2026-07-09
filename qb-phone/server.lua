@@ -5,35 +5,39 @@ local function nonEmpty(s)
 end
 
 local function textValue(value)
-    if value == nil then return nil end
+    if value == nil then
+        return nil
+    end
     local text = tostring(value)
     return text ~= '' and text or nil
 end
 
 local pendingCalls = {}
-local activeCalls  = {}
+local activeCalls = {}
 
 local function genChannel()
     return math.random(50000, 99999)
 end
 
-local contacts    = {}
-local messages    = {}
+local contacts = {}
+local messages = {}
 local callHistory = {}
-local posts       = {}
-local likes       = {}
-local reposts     = {}
-local comments    = {}
-local follows     = {}
-local emails      = {}
-local photos      = {}
+local posts = {}
+local likes = {}
+local reposts = {}
+local comments = {}
+local follows = {}
+local emails = {}
+local photos = {}
 
 local function getPlayer(source)
     return exports['qb-core']:GetPlayer(source)
 end
 
 local function getCharInfo(player)
-    if not player or not player.PlayerData then return {} end
+    if not player or not player.PlayerData then
+        return {}
+    end
     return player.PlayerData.charinfo or {}
 end
 
@@ -53,17 +57,25 @@ local function makeHandle(fullName)
 end
 
 local function pairKey(a, b)
-    if a < b then return a .. '|' .. b else return b .. '|' .. a end
+    if a < b then
+        return a .. '|' .. b
+    else
+        return b .. '|' .. a
+    end
 end
 
 local function countSet(t)
     local n = 0
-    for _ in pairs(t) do n = n + 1 end
+    for _ in pairs(t) do
+        n = n + 1
+    end
     return n
 end
 
 local function ensureTable(t, key)
-    if not t[key] then t[key] = {} end
+    if not t[key] then
+        t[key] = {}
+    end
     return t[key]
 end
 
@@ -74,10 +86,10 @@ local function genId()
 end
 
 local function getCitizenIdFromPlayer(player)
-    if not player or not player.PlayerData then return nil end
-    return textValue(player.PlayerData.citizenid)
-        or getCharField(player, 'citizenid')
-        or getCharField(player, 'phone')
+    if not player or not player.PlayerData then
+        return nil
+    end
+    return textValue(player.PlayerData.citizenid) or getCharField(player, 'citizenid') or getCharField(player, 'phone')
 end
 
 local function getFirstName(player)
@@ -98,7 +110,9 @@ end
 
 local function syncPlayerAccount(player)
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return nil end
+    if not citizenid then
+        return nil
+    end
 
     local phone = getPhoneNumber(player, citizenid)
     local firstName = getFirstName(player)
@@ -140,9 +154,13 @@ local function getOwnerKeyForPhone(number)
 end
 
 local function decodeJsonArray(value)
-    if not value or value == '' then return {} end
+    if not value or value == '' then
+        return {}
+    end
     local ok, decoded = pcall(JSON.parse, value)
-    if ok and type(decoded) == 'table' then return decoded end
+    if ok and type(decoded) == 'table' then
+        return decoded
+    end
     return {}
 end
 
@@ -151,11 +169,17 @@ local function dbBool(value)
 end
 
 local function displayTime(value)
-    if not value or value == '' then return os.date('%H:%M') end
+    if not value or value == '' then
+        return os.date('%H:%M')
+    end
     local h, m = string.match(tostring(value), '(%d%d):(%d%d):%d%d')
-    if h and m then return h .. ':' .. m end
+    if h and m then
+        return h .. ':' .. m
+    end
     h, m = string.match(tostring(value), '(%d%d):(%d%d)')
-    if h and m then return h .. ':' .. m end
+    if h and m then
+        return h .. ':' .. m
+    end
     return tostring(value)
 end
 
@@ -225,13 +249,17 @@ local function loadConversations(citizenid, phone, contactList)
 end
 
 local function saveConversationMessages(ownerKey, otherNumber, displayName, image, messageList)
-    if not ownerKey or ownerKey == '' or not otherNumber or otherNumber == '' then return end
+    if not ownerKey or ownerKey == '' or not otherNumber or otherNumber == '' then
+        return
+    end
     exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_messages WHERE citizenid = ? AND number = ?', { ownerKey, otherNumber })
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_messages (citizenid, number, display_name, image, messages, updated_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)', { ownerKey, otherNumber, displayName or otherNumber, image or '', JSON.stringify(messageList or {}) })
 end
 
 local function appendConversationMessage(ownerKey, otherNumber, displayName, image, message)
-    if not ownerKey or ownerKey == '' then return end
+    if not ownerKey or ownerKey == '' then
+        return
+    end
     local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT messages FROM phone_messages WHERE citizenid = ? AND number = ? LIMIT 1', { ownerKey, otherNumber }) or {}
     local messageList = rows[1] and decodeJsonArray(rows[1].messages or rows[1].Messages) or {}
     table.insert(messageList, message)
@@ -255,7 +283,9 @@ local function loadCallHistory(citizenid, phone)
 end
 
 local function saveCallHistory(ownerKey, name, number, callType, time, missed)
-    if not ownerKey or ownerKey == '' then return end
+    if not ownerKey or ownerKey == '' then
+        return
+    end
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_call_history (citizenid, name, number, type, missed, time) VALUES (?, ?, ?, ?, ?, ?)', { ownerKey, name or number or '', number or '', callType or '', missed and 1 or 0, time or os.date('%H:%M') })
 end
 
@@ -285,19 +315,19 @@ local function loadCalendarEvents(citizenid, phone)
 
     local result = {}
     for _, row in ipairs(rows) do
-        local year     = tonumber(row.year or row.Year) or 0
-        local month    = tonumber(row.month or row.Month) or 0
-        local day      = tonumber(row.day or row.Day) or 1
-        local yearKey  = tostring(year)
+        local year = tonumber(row.year or row.Year) or 0
+        local month = tonumber(row.month or row.Month) or 0
+        local day = tonumber(row.day or row.Day) or 1
+        local yearKey = tostring(year)
         local monthKey = tostring(month)
-        local dayKey   = tostring(day)
+        local dayKey = tostring(day)
         ensureTable(result, yearKey)
         ensureTable(result[yearKey], monthKey)
         ensureTable(result[yearKey][monthKey], dayKey)
         table.insert(result[yearKey][monthKey][dayKey], {
-            id     = row.id or row.Id,
-            title  = row.title or row.Title or '',
-            time   = row.event_time or row.Event_time or row.EventTime or '',
+            id = row.id or row.Id,
+            title = row.title or row.Title or '',
+            time = row.event_time or row.Event_time or row.EventTime or '',
             detail = row.detail or row.Detail or '',
         })
     end
@@ -325,10 +355,14 @@ local function loadPhotos(citizenid, phone)
 end
 
 local function buildPhotoPayloadForPlayer(player)
-    if not player then return '[]' end
+    if not player then
+        return '[]'
+    end
 
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return '[]' end
+    if not citizenid then
+        return '[]'
+    end
     local phone = getPhoneNumber(player, citizenid)
     return JSON.stringify(loadPhotos(citizenid, phone))
 end
@@ -456,7 +490,8 @@ do
     local hasYear = false
     for _, col in ipairs(cols) do
         if (col.name or '') == 'year' then
-            hasYear = true; break
+            hasYear = true
+            break
         end
     end
     if not hasYear then
@@ -466,7 +501,9 @@ end
 
 RegisterServerEvent('qb-phone:server:dial', function(source, targetNumber)
     local caller = getPlayer(source)
-    if not caller then return end
+    if not caller then
+        return
+    end
 
     local target = exports['qb-core']:GetPlayerByPhone(targetNumber)
     if not target then
@@ -477,22 +514,24 @@ RegisterServerEvent('qb-phone:server:dial', function(source, targetNumber)
     local callerIntSrc = caller.PlayerData.source
     local targetIntSrc = target.PlayerData.source
 
-    if targetIntSrc == callerIntSrc then return end
+    if targetIntSrc == callerIntSrc then
+        return
+    end
 
     if pendingCalls[targetIntSrc] then
         TriggerClientEvent(callerIntSrc, 'qb-phone:client:callFailed', 'busy')
         return
     end
 
-    local callerName           = getFullName(caller)
-    local callerNumber         = caller.PlayerData.charinfo.phone
-    local targetName           = getFullName(target)
+    local callerName = getFullName(caller)
+    local callerNumber = caller.PlayerData.charinfo.phone
+    local targetName = getFullName(target)
 
     pendingCalls[targetIntSrc] = {
-        callerSrc    = source,
+        callerSrc = source,
         callerIntSrc = callerIntSrc,
-        channel      = genChannel(),
-        callerName   = callerName,
+        channel = genChannel(),
+        callerName = callerName,
         callerNumber = callerNumber,
         targetNumber = targetNumber,
     }
@@ -503,25 +542,33 @@ end)
 
 RegisterServerEvent('qb-phone:server:accept', function(source)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
 
     local targetIntSrc = player.PlayerData.source
     local pending = pendingCalls[targetIntSrc]
-    if not pending then return end
+    if not pending then
+        return
+    end
 
     pendingCalls[targetIntSrc] = nil
 
     activeCalls[pending.channel] = {
-        callerSrc    = pending.callerSrc,
-        targetSrc    = source,
+        callerSrc = pending.callerSrc,
+        targetSrc = source,
         callerIntSrc = pending.callerIntSrc,
         targetIntSrc = targetIntSrc,
     }
 
     local callerTalker = GetVoipTalker(pending.callerSrc)
     local targetTalker = GetVoipTalker(source)
-    if callerTalker then callerTalker:SetVoiceChannel(pending.channel, true) end
-    if targetTalker then targetTalker:SetVoiceChannel(pending.channel, true) end
+    if callerTalker then
+        callerTalker:SetVoiceChannel(pending.channel, true)
+    end
+    if targetTalker then
+        targetTalker:SetVoiceChannel(pending.channel, true)
+    end
 
     TriggerClientEvent(pending.callerIntSrc, 'qb-phone:client:callStarted', pending.channel)
     TriggerClientEvent(targetIntSrc, 'qb-phone:client:callStarted', pending.channel)
@@ -529,28 +576,34 @@ end)
 
 RegisterServerEvent('qb-phone:server:hangup', function(source)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
 
     local intSrc = player.PlayerData.source
-    local time   = os.date('%H:%M')
+    local time = os.date('%H:%M')
 
     for channel, call in pairs(activeCalls) do
         if call.callerIntSrc == intSrc or call.targetIntSrc == intSrc then
             activeCalls[channel] = nil
             local callerTalker = GetVoipTalker(call.callerSrc)
             local targetTalker = GetVoipTalker(call.targetSrc)
-            if callerTalker then callerTalker:SetVoiceChannel(channel, false) end
-            if targetTalker then targetTalker:SetVoiceChannel(channel, false) end
+            if callerTalker then
+                callerTalker:SetVoiceChannel(channel, false)
+            end
+            if targetTalker then
+                targetTalker:SetVoiceChannel(channel, false)
+            end
             TriggerClientEvent(call.callerIntSrc, 'qb-phone:client:callEnded')
             TriggerClientEvent(call.targetIntSrc, 'qb-phone:client:callEnded')
 
             local callerPlayer = getPlayer(call.callerSrc)
             local targetPlayer = getPlayer(call.targetSrc)
             if callerPlayer and targetPlayer then
-                local callerPhone     = callerPlayer.PlayerData.charinfo.phone
-                local targetPhone     = targetPlayer.PlayerData.charinfo.phone
-                local callerName      = getFullName(callerPlayer)
-                local targetName      = getFullName(targetPlayer)
+                local callerPhone = callerPlayer.PlayerData.charinfo.phone
+                local targetPhone = targetPlayer.PlayerData.charinfo.phone
+                local callerName = getFullName(callerPlayer)
+                local targetName = getFullName(targetPlayer)
                 local callerCitizenId = syncPlayerAccount(callerPlayer)
                 local targetCitizenId = syncPlayerAccount(targetPlayer)
                 ensureTable(callHistory, callerPhone)
@@ -575,10 +628,10 @@ RegisterServerEvent('qb-phone:server:hangup', function(source)
             local callerPlayer = getPlayer(pending.callerSrc)
             local targetPlayer = getPlayer(targetSrc)
             if callerPlayer and targetPlayer then
-                local callerPhone     = callerPlayer.PlayerData.charinfo.phone
-                local targetPhone     = targetPlayer.PlayerData.charinfo.phone
-                local callerName      = getFullName(callerPlayer)
-                local targetName      = getFullName(targetPlayer)
+                local callerPhone = callerPlayer.PlayerData.charinfo.phone
+                local targetPhone = targetPlayer.PlayerData.charinfo.phone
+                local callerName = getFullName(callerPlayer)
+                local targetName = getFullName(targetPlayer)
                 local callerCitizenId = syncPlayerAccount(callerPlayer)
                 local targetCitizenId = syncPlayerAccount(targetPlayer)
                 ensureTable(callHistory, callerPhone)
@@ -596,51 +649,69 @@ RegisterServerEvent('qb-phone:server:hangup', function(source)
 end)
 
 RegisterServerEvent('qb-phone:server:givePhone', function(source)
-    local ped = GetPlayerPawn(source)
-    HInventory.GiveAndEquipItemByName(ped, 'ID_Misc_Phone')
+    local pawn = GetPlayerPawn(source)
+    if not pawn then
+        return
+    end
+    HInventory.GiveAndEquipItemByName(pawn, 'ID_Misc_Phone')
 end)
 
 RegisterServerEvent('qb-phone:server:takePhone', function(source)
-    local ped = GetPlayerPawn(source)
-    HInventory.RemoveItemByName(ped, 'ID_Misc_Phone')
+    local pawn = GetPlayerPawn(source)
+    if not pawn then
+        return
+    end
+    HInventory.RemoveItemByName(pawn, 'ID_Misc_Phone')
 end)
 
 RegisterCallback('qb-phone:loadCoreData', function(source)
     local player = getPlayer(source)
-    if not player then return nil end
+    if not player then
+        return nil
+    end
     local citizenid = syncPlayerAccount(player)
-    if not citizenid then return nil end
+    if not citizenid then
+        return nil
+    end
     local phone = getPhoneNumber(player, citizenid)
     local contactList = loadContacts(citizenid, phone)
     return {
-        contacts      = JSON.stringify(contactList),
+        contacts = JSON.stringify(contactList),
         conversations = JSON.stringify(loadConversations(citizenid, phone, contactList)),
-        callHistory   = JSON.stringify(loadCallHistory(citizenid, phone)),
-        playerName    = getFullName(player),
-        phoneNumber   = tostring(phone),
-        citizenid     = tostring(citizenid),
+        callHistory = JSON.stringify(loadCallHistory(citizenid, phone)),
+        playerName = getFullName(player),
+        phoneNumber = tostring(phone),
+        citizenid = tostring(citizenid),
         accountNumber = tostring(getAccountNumber(player)),
     }
 end)
 
 RegisterCallback('qb-phone:loadFeed', function(source)
     local player = getPlayer(source)
-    if not player then return nil end
+    if not player then
+        return nil
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return nil end
+    if not citizenid then
+        return nil
+    end
     return {
-        feed  = JSON.stringify(buildFeedForPhone(phone, citizenid)),
+        feed = JSON.stringify(buildFeedForPhone(phone, citizenid)),
         users = JSON.stringify(buildUsersForPhone(phone, citizenid)),
     }
 end)
 
 RegisterCallback('qb-phone:loadEmails', function(source)
     local player = getPlayer(source)
-    if not player then return nil end
+    if not player then
+        return nil
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return nil end
+    if not citizenid then
+        return nil
+    end
     return {
         emails = JSON.stringify(loadEmails(citizenid, phone)),
     }
@@ -648,7 +719,9 @@ end)
 
 RegisterCallback('qb-phone:loadPhotos', function(source)
     local player = getPlayer(source)
-    if not player then return nil end
+    if not player then
+        return nil
+    end
     return {
         photos = buildPhotoPayloadForPlayer(player),
     }
@@ -656,33 +729,43 @@ end)
 
 RegisterServerEvent('qb-phone:server:requestPhotos', function(source)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     TriggerClientEvent(source, 'qb-phone:client:photosLoaded', buildPhotoPayloadForPlayer(player))
 end)
 
 RegisterCallback('qb-phone:loadProfile', function(source)
     local player = getPlayer(source)
-    if not player then return nil end
+    if not player then
+        return nil
+    end
     local citizenid = syncPlayerAccount(player)
-    if not citizenid then return nil end
-    local rows    = exports['qb-core']:DatabaseAction('Select', 'SELECT name, phone FROM phone_accounts WHERE citizenid = ? LIMIT 1', { citizenid }) or {}
+    if not citizenid then
+        return nil
+    end
+    local rows = exports['qb-core']:DatabaseAction('Select', 'SELECT name, phone FROM phone_accounts WHERE citizenid = ? LIMIT 1', { citizenid }) or {}
     local account = rows[1]
-    local name    = nonEmpty(account and (account.name or account.Name)) or getFullName(player)
-    local phone   = nonEmpty(account and (account.phone or account.Phone)) or getPhoneNumber(player, citizenid)
+    local name = nonEmpty(account and (account.name or account.Name)) or getFullName(player)
+    local phone = nonEmpty(account and (account.phone or account.Phone)) or getPhoneNumber(player, citizenid)
     return {
-        name      = tostring(name),
-        phone     = tostring(phone),
+        name = tostring(name),
+        phone = tostring(phone),
         citizenid = tostring(citizenid),
-        account   = tostring(getAccountNumber(player)),
+        account = tostring(getAccountNumber(player)),
     }
 end)
 
 RegisterServerEvent('qb-phone:server:deleteConversation', function(source, targetNumber)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     messages[pairKey(phone, targetNumber)] = nil
     exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_messages WHERE citizenid = ? AND number = ?', { citizenid, targetNumber })
     if phone ~= citizenid then
@@ -692,21 +775,23 @@ end)
 
 RegisterServerEvent('qb-phone:server:sendMessage', function(source, targetNumber, text)
     local sender = getPlayer(source)
-    if not sender then return end
+    if not sender then
+        return
+    end
 
-    local senderName      = getFullName(sender)
-    local senderNumber    = sender.PlayerData.charinfo.phone
+    local senderName = getFullName(sender)
+    local senderNumber = sender.PlayerData.charinfo.phone
     local senderCitizenId = getCitizenIdFromPlayer(sender)
-    local time            = os.date('%H:%M')
-    local key             = pairKey(senderNumber, targetNumber)
+    local time = os.date('%H:%M')
+    local key = pairKey(senderNumber, targetNumber)
 
     ensureTable(messages, key)
     local msg = {
-        id           = genId(),
+        id = genId(),
         senderNumber = senderNumber,
-        senderName   = senderName,
-        text         = text,
-        time         = time,
+        senderName = senderName,
+        text = text,
+        time = time,
     }
     table.insert(messages[key], msg)
 
@@ -738,10 +823,14 @@ end)
 
 RegisterServerEvent('qb-phone:server:saveContact', function(source, name, number, image)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     ensureTable(contacts, phone)
     for i, c in ipairs(contacts[phone]) do
         if c.number == number then
@@ -750,7 +839,7 @@ RegisterServerEvent('qb-phone:server:saveContact', function(source, name, number
             if phone ~= citizenid then
                 exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { phone, number })
             end
-            exports['qb-core']:DatabaseAction('Execute', "INSERT INTO player_contacts (citizenid, name, number, image, iban) VALUES (?, ?, ?, ?, '0')", { citizenid, name, number, image or '' })
+            exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO player_contacts (citizenid, name, number, image, iban) VALUES (?, ?, ?, ?, \'0\')', { citizenid, name, number, image or '' })
             return
         end
     end
@@ -759,15 +848,19 @@ RegisterServerEvent('qb-phone:server:saveContact', function(source, name, number
     if phone ~= citizenid then
         exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_contacts WHERE citizenid = ? AND number = ?', { phone, number })
     end
-    exports['qb-core']:DatabaseAction('Execute', "INSERT INTO player_contacts (citizenid, name, number, image, iban) VALUES (?, ?, ?, ?, '0')", { citizenid, name, number, image or '' })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO player_contacts (citizenid, name, number, image, iban) VALUES (?, ?, ?, ?, \'0\')', { citizenid, name, number, image or '' })
 end)
 
 RegisterServerEvent('qb-phone:server:deleteContact', function(source, number)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     if contacts[phone] then
         for i, c in ipairs(contacts[phone]) do
             if c.number == number then
@@ -786,48 +879,54 @@ local _recentPostCreates = {}
 
 RegisterServerEvent('qb-phone:server:createPost', function(source, content, image)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
 
-    local authorName      = getFullName(player)
-    local authorNumber    = player.PlayerData.charinfo.phone
+    local authorName = getFullName(player)
+    local authorNumber = player.PlayerData.charinfo.phone
     local authorCitizenId = getCitizenIdFromPlayer(player)
-    if not authorCitizenId then return end
+    if not authorCitizenId then
+        return
+    end
     local dedupeKey = authorCitizenId .. '|' .. (content or '') .. '|' .. (image or '')
     local now = os.time()
-    if _recentPostCreates[dedupeKey] and now - _recentPostCreates[dedupeKey] < 5 then return end
+    if _recentPostCreates[dedupeKey] and now - _recentPostCreates[dedupeKey] < 5 then
+        return
+    end
     _recentPostCreates[dedupeKey] = now
     local firstName = getFirstName(player)
-    local lastName  = getLastName(player)
-    local handle    = makeHandle(authorName)
-    local time      = os.date('%H:%M')
-    local postId    = genId()
+    local lastName = getLastName(player)
+    local handle = makeHandle(authorName)
+    local time = os.date('%H:%M')
+    local postId = genId()
 
-    local post      = {
-        id           = postId,
-        authorName   = authorName,
+    local post = {
+        id = postId,
+        authorName = authorName,
         authorNumber = authorNumber,
-        handle       = handle,
-        content      = content,
-        image        = image or '',
-        time         = time,
+        handle = handle,
+        content = content,
+        image = image or '',
+        time = time,
     }
     table.insert(posts, 1, post)
-    likes[postId]    = {}
-    reposts[postId]  = {}
+    likes[postId] = {}
+    reposts[postId] = {}
     comments[postId] = {}
 
-    exports['qb-core']:DatabaseAction('Execute', "INSERT INTO phone_tweets (citizenid, firstName, lastName, handle, message, url, picture, tweetId) VALUES (?, ?, ?, ?, ?, ?, './img/default.png', ?)", { authorCitizenId, firstName, lastName, handle, content, image or '', tostring(postId) })
+    exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_tweets (citizenid, firstName, lastName, handle, message, url, picture, tweetId) VALUES (?, ?, ?, ?, ?, ?, \'./img/default.png\', ?)', { authorCitizenId, firstName, lastName, handle, content, image or '', tostring(postId) })
 
     local payload = {
-        id       = postId,
-        author   = authorName,
-        handle   = handle,
-        content  = content,
-        image    = image or '',
-        time     = time,
-        likes    = 0,
-        liked    = false,
-        reposts  = 0,
+        id = postId,
+        author = authorName,
+        handle = handle,
+        content = content,
+        image = image or '',
+        time = time,
+        likes = 0,
+        liked = false,
+        reposts = 0,
         reposted = false,
         comments = {},
     }
@@ -836,15 +935,19 @@ end)
 
 RegisterServerEvent('qb-phone:server:deletePost', function(source, postId)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     for i, post in ipairs(posts) do
         if post.id == postId and post.authorNumber == phone then
             table.remove(posts, i)
-            likes[postId]    = nil
-            reposts[postId]  = nil
+            likes[postId] = nil
+            reposts[postId] = nil
             comments[postId] = nil
             exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_reactions WHERE tweet_id = ?', { tostring(postId) })
             exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_tweet_comments WHERE tweet_id = ?', { tostring(postId) })
@@ -865,10 +968,14 @@ end)
 
 RegisterServerEvent('qb-phone:server:likePost', function(source, postId, liked)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     ensureTable(likes, postId)
     if liked then
         likes[postId][phone] = true
@@ -885,10 +992,14 @@ end)
 
 RegisterServerEvent('qb-phone:server:repostPost', function(source, postId, reposted)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     ensureTable(reposts, postId)
     if reposted then
         reposts[postId][phone] = true
@@ -905,12 +1016,16 @@ end)
 
 RegisterServerEvent('qb-phone:server:followUser', function(source, handle, following, targetPhone)
     local follower = getPlayer(source)
-    if not follower then return end
+    if not follower then
+        return
+    end
 
-    local followerName      = getFullName(follower)
-    local followerNumber    = follower.PlayerData.charinfo.phone
+    local followerName = getFullName(follower)
+    local followerNumber = follower.PlayerData.charinfo.phone
     local followerCitizenId = getCitizenIdFromPlayer(follower)
-    if not followerCitizenId then return end
+    if not followerCitizenId then
+        return
+    end
     local targetCitizenId = ''
     local targetHandle = ''
     local targetName = handle or ''
@@ -950,23 +1065,27 @@ end)
 
 RegisterServerEvent('qb-phone:server:addComment', function(source, postId, text)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
 
-    local authorName      = getFullName(player)
-    local authorNumber    = player.PlayerData.charinfo.phone
+    local authorName = getFullName(player)
+    local authorNumber = player.PlayerData.charinfo.phone
     local authorCitizenId = getCitizenIdFromPlayer(player)
-    if not authorCitizenId then return end
+    if not authorCitizenId then
+        return
+    end
     local firstName = getFirstName(player)
-    local lastName  = getLastName(player)
-    local handle    = makeHandle(authorName)
-    local time      = os.date('%H:%M')
-    local comment   = {
-        id           = genId(),
-        authorName   = authorName,
+    local lastName = getLastName(player)
+    local handle = makeHandle(authorName)
+    local time = os.date('%H:%M')
+    local comment = {
+        id = genId(),
+        authorName = authorName,
         authorNumber = authorNumber,
-        handle       = handle,
-        text         = text,
-        time         = time,
+        handle = handle,
+        text = text,
+        time = time,
     }
     ensureTable(comments, postId)
     table.insert(comments[postId], comment)
@@ -979,26 +1098,28 @@ end)
 
 RegisterServerEvent('qb-phone:server:sendEmail', function(source, toNumber, subject, body)
     local sender = getPlayer(source)
-    if not sender then return end
+    if not sender then
+        return
+    end
 
-    local senderName   = getFullName(sender)
+    local senderName = getFullName(sender)
     local senderNumber = sender.PlayerData.charinfo.phone
     getCitizenIdFromPlayer(sender)
-    local time               = os.date('%H:%M')
+    local time = os.date('%H:%M')
     local recipientCitizenId = getOwnerKeyForPhone(toNumber)
-    local emailId            = genId()
+    local emailId = genId()
 
     ensureTable(emails, toNumber)
     local email = {
-        id         = emailId,
-        from       = senderName,
+        id = emailId,
+        from = senderName,
         fromNumber = senderNumber,
-        subject    = subject,
-        snippet    = string.sub(body, 1, 80),
-        body       = body,
-        time       = time,
-        read       = false,
-        starred    = false,
+        subject = subject,
+        snippet = string.sub(body, 1, 80),
+        body = body,
+        time = time,
+        read = false,
+        starred = false,
     }
     table.insert(emails[toNumber], 1, email)
 
@@ -1012,37 +1133,53 @@ end)
 
 RegisterServerEvent('qb-phone:server:deleteEmail', function(source, emailId)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM player_mails WHERE mailid = ? AND citizenid = ?', { tostring(emailId), citizenid })
 end)
 
 RegisterServerEvent('qb-phone:server:loadCalendar', function(source)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     sendCalendarEvents(player, citizenid, phone)
 end)
 
 RegisterServerEvent('qb-phone:server:saveCalendarEvent', function(source, year, month, day, title, time, detail)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_calendar_events (citizenid, year, month, day, title, event_time, detail) VALUES (?, ?, ?, ?, ?, ?, ?)', { citizenid, tonumber(year) or 0, tonumber(month) or 0, tonumber(day) or 1, title, time, detail })
     sendCalendarEvents(player, citizenid, phone)
 end)
 
 RegisterServerEvent('qb-phone:server:deleteCalendarEvent', function(source, eventId)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     exports['qb-core']:DatabaseAction('Execute', 'DELETE FROM phone_calendar_events WHERE id = ? AND citizenid = ?', { tonumber(eventId), citizenid })
     sendCalendarEvents(player, citizenid, phone)
 end)
@@ -1050,14 +1187,22 @@ end)
 local _recentPhotoSaves = {}
 
 RegisterServerEvent('qb-phone:server:savePhoto', function(source, url)
-    if not url or url == '' then return end
+    if not url or url == '' then
+        return
+    end
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
     local dedupeKey = citizenid .. '|' .. url
     local now = os.time()
-    if _recentPhotoSaves[dedupeKey] and now - _recentPhotoSaves[dedupeKey] < 5 then return end
+    if _recentPhotoSaves[dedupeKey] and now - _recentPhotoSaves[dedupeKey] < 5 then
+        return
+    end
     _recentPhotoSaves[dedupeKey] = now
     exports['qb-core']:DatabaseAction('Execute', 'INSERT INTO phone_gallery (citizenid, image) VALUES (?, ?)', { citizenid, url })
 end)
@@ -1088,7 +1233,9 @@ end)
 
 RegisterServerEvent('qb-phone:server:sendMoney', function(source, targetNumber, amount)
     local sender = getPlayer(source)
-    if not sender then return end
+    if not sender then
+        return
+    end
 
     amount = math.floor(tonumber(amount) or 0)
     if amount <= 0 then
@@ -1114,19 +1261,19 @@ RegisterServerEvent('qb-phone:server:sendMoney', function(source, targetNumber, 
     exports['qb-banking']:CreateBankStatement(source, 'checking', amount, 'Phone transfer to ' .. tostring(targetNumber), 'withdraw', 'player')
     exports['qb-banking']:CreateBankStatement(target.PlayerData.source, 'checking', amount, 'Phone transfer from ' .. senderPhone, 'deposit', 'player')
 
-    local senderName     = getFullName(sender)
+    local senderName = getFullName(sender)
     local senderCitizenId = getCitizenIdFromPlayer(sender)
     local targetCitizenId = syncPlayerAccount(target)
     local time = os.date('%H:%M')
-    local key  = pairKey(senderPhone, tostring(targetNumber))
+    local key = pairKey(senderPhone, tostring(targetNumber))
     local text = '[PAYMENT:' .. amount .. ']'
 
     ensureTable(messages, key)
     local msg = { id = genId(), senderNumber = senderPhone, senderName = senderName, text = text, time = time }
     table.insert(messages[key], msg)
 
-    appendConversationMessage(senderCitizenId, targetNumber, tostring(targetNumber), '', { id = msg.id, sender = 'me',   text = text, time = time })
-    appendConversationMessage(targetCitizenId, senderPhone,  senderName,             '', { id = msg.id, sender = 'them', text = text, time = time })
+    appendConversationMessage(senderCitizenId, targetNumber, tostring(targetNumber), '', { id = msg.id, sender = 'me', text = text, time = time })
+    appendConversationMessage(targetCitizenId, senderPhone, senderName, '', { id = msg.id, sender = 'them', text = text, time = time })
 
     TriggerClientEvent(target.PlayerData.source, 'qb-phone:client:messageReceived', senderName, senderPhone, text, time)
     TriggerClientEvent(source, 'qb-phone:client:moneyTransferResult', true, amount)
@@ -1134,10 +1281,14 @@ end)
 
 RegisterServerEvent('qb-phone:server:deletePhoto', function(source, photoId)
     local player = getPlayer(source)
-    if not player then return end
+    if not player then
+        return
+    end
     local phone = player.PlayerData.charinfo.phone
     local citizenid = getCitizenIdFromPlayer(player)
-    if not citizenid then return end
+    if not citizenid then
+        return
+    end
 
     if photos[phone] then
         for i, p in ipairs(photos[phone]) do

@@ -9,7 +9,11 @@ RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
 end)
 
 RegisterServerEvent('qb-fishing:server:startFishingItem', function(source)
-    HInventory.GiveAndEquipItemByName(source, TOOL_ID)
+    local pawn = GetPlayerPawn(source)
+    if not pawn then
+        return
+    end
+    HInventory.GiveAndEquipItemByName(pawn, TOOL_ID)
     activeFishers[source] = true
 end)
 
