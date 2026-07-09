@@ -47,6 +47,44 @@ local function ensureXrayComponent(actor)
     end
 end
 
+-- entities registered from a server event can arrive before the actor has
+-- finished replicating; the Xray component can't be added until the actor is
+-- valid, so keep retrying instead of silently skipping
+local XRAY_RETRY_MS = 250
+local XRAY_RETRY_MAX = 20
+local pendingXray = setmetatable({}, { __mode = 'k' })
+
+local function ensureXrayComponentWhenValid(actor)
+    if isActorValid(actor) then
+        pendingXray[actor] = nil
+        ensureXrayComponent(actor)
+        return
+    end
+    if pendingXray[actor] then
+        return
+    end
+    pendingXray[actor] = true
+    local attempts = 0
+    local function retry()
+        if not pendingXray[actor] or not Entities[actor] then
+            pendingXray[actor] = nil
+            return
+        end
+        if isActorValid(actor) then
+            pendingXray[actor] = nil
+            ensureXrayComponent(actor)
+            return
+        end
+        attempts = attempts + 1
+        if attempts >= XRAY_RETRY_MAX then
+            pendingXray[actor] = nil
+            return
+        end
+        Timer.SetTimeout(retry, XRAY_RETRY_MS)
+    end
+    Timer.SetTimeout(retry, XRAY_RETRY_MS)
+end
+
 local function removeXrayComponent(actor)
     if not isActorValid(actor) then
         return
@@ -198,7 +236,7 @@ end
 
 local function sweepInvalidTargets()
     for actor in pairs(Entities) do
-        if not isActorValid(actor) then
+        if not isActorValid(actor) and not pendingXray[actor] then
             Entities[actor] = nil
         end
     end
@@ -423,7 +461,7 @@ local function AddTargetEntity(entity, parameters)
         Entities[entity] = {}
     end
     SetOptions(Entities[entity], distance, options)
-    ensureXrayComponent(entity)
+    ensureXrayComponentWhenValid(entity)
 end
 exports('qb-target', 'AddTargetEntity', AddTargetEntity)
 
@@ -455,6 +493,7 @@ local function RemoveTargetEntity(entity)
         return
     end
     Entities[entity] = nil
+    pendingXray[entity] = nil
     if isActorValid(entity) and not actorHasOptions(entity) then
         removeXrayComponent(entity)
     end

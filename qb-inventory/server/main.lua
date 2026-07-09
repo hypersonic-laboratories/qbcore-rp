@@ -199,6 +199,9 @@ RegisterServerEvent('QBCore:Server:PlayerLoaded', function(Player)
     local src = Player.PlayerData.source
     for dropId, drop in pairs(Drops) do
         TriggerClientEvent(src, 'qb-inventory:client:registerDropTarget', drop.entity.Object, dropId)
+        if drop.isHeld then
+            TriggerClientEvent(src, 'qb-inventory:client:setDropCollision', dropId, 'HandAttachedMesh')
+        end
     end
 end)
 
@@ -396,6 +399,7 @@ RegisterServerEvent('qb-inventory:server:updateDrop', function(source, dropId)
         SetEntityCoords(DropData.entity.Object, DropPosition)
         SetEntityRotation(DropData.entity.Object, Rotator(0, PawnRotation.Yaw, 0))
         DropData.entity.Component:SetCollisionProfileName('BlockAllDynamic', true)
+        BroadcastEvent('qb-inventory:client:setDropCollision', dropId, 'BlockAllDynamic')
     end)
 end)
 
@@ -432,8 +436,11 @@ RegisterServerEvent('qb-inventory:server:pickupDrop', function(source, data)
             DropData.isPickupPending = nil
             return
         end
-
-        AttachActorToComponent(DropData.entity.Object, currentMesh, Vector(45, 0, 0), Rotator(-90, 0, 180), 'hand_l', {
+        local bagObject = DropData.entity.Object
+        DropData.entity.Component:SetMobility(UE.EComponentMobility.Movable)
+        DropData.entity.Component:SetCollisionProfileName('HandAttachedMesh', true)
+        BroadcastEvent('qb-inventory:client:setDropCollision', dropId, 'HandAttachedMesh')
+        AttachActorToComponent(bagObject, currentMesh, Vector(45, 0, 0), Rotator(-90, 0, 180), 'hand_l', {
             Location = AttachmentRule.SnapToTarget,
             Rotation = AttachmentRule.SnapToTarget,
             Scale = AttachmentRule.SnapToTarget,
@@ -487,7 +494,7 @@ RegisterCallback('createDrop', function(source, item)
                 entity = bag,
                 creator = source,
                 createdTime = os.time(),
-                coords = playerCoords,
+                coords = SpawnPosition,
                 maxweight = Config.DropSize.maxweight,
                 slots = Config.DropSize.slots,
                 isOpen = false,
@@ -496,6 +503,15 @@ RegisterCallback('createDrop', function(source, item)
             table.insert(Drops[newDropId].items, item)
         end
         BroadcastEvent('qb-inventory:client:registerDropTarget', bag.Object, newDropId)
+        -- the broadcast races the bag's first replication; clients that process
+        -- it before the actor exists (typically the dropper) receive nil, so
+        -- re-broadcast once the actor has had time to replicate
+        Timer.SetTimeout(function()
+            local drop = Drops[newDropId]
+            if drop and drop.entity and drop.entity.Object and drop.entity:IsValid() then
+                BroadcastEvent('qb-inventory:client:registerDropTarget', drop.entity.Object, newDropId)
+            end
+        end, 1000)
         Drops[newDropId].isOpen = true
         local formattedDrop = {
             name = newDropId,
