@@ -1,0 +1,14 @@
+{
+    "shared": [
+        "config.lua"
+    ],
+    "client": [
+        "client/drops.lua",
+        "client/main.lua",
+        "client/vehicles.lua"
+    ],
+    "server": [
+        "server/functions.lua",
+        "server/main.lua"
+    ]
+}

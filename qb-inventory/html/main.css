@@ -1,0 +1,651 @@
+@import url("https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap");
+
+:root {
+    /* HELIX BRAND PRIMARY PALETTE */
+    --primary: #ffffff;
+    --on-primary: #0a0a0a;
+    --primary-container: #222222;
+    --on-primary-container: #ffffff;
+
+    /* HELIX GREYSCALE SCALE */
+    --helix-black: #0a0a0a;
+    --helix-white: #ffffff;
+    --helix-lighter-grey: #595959; /* 32% Opacity look */
+    --helix-grey: #3b3b3b; /* 20% Opacity look */
+    --helix-dark-grey: #222222; /* 10% Opacity look */
+    --helix-darker-grey: #161616; /* 5% Opacity look */
+
+    /* Surface Mappings */
+    --surface: var(--helix-black);
+    --on-surface: var(--helix-white);
+    --surface-container-lowest: var(--helix-black);
+    --surface-container-low: var(--helix-darker-grey);
+    --surface-container: var(--helix-dark-grey);
+    --surface-container-high: var(--helix-grey);
+    --surface-container-highest: var(--helix-lighter-grey);
+
+    /* Functional Colors (Muted for Tactical Theme) */
+    --error: #ff3333;
+    --success: #ffffff; /* Kept white for monochrome consistency */
+    --warning: #ffb400;
+
+    /* Outlines */
+    --outline: var(--helix-dark-grey);
+    --outline-variant: var(--helix-darker-grey);
+
+    /* Shape values (Sharp / Geometric) */
+    --radius-small: 0px;
+    --radius-medium: 0px;
+    --radius-large: 0px;
+
+    /* Typography */
+    --font-primary: "Exo 2", sans-serif;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+
+    /* Elevation (Darker shadows for dark UI) */
+    --elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.5);
+    --elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.7);
+    --elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.9);
+
+    /* Tooltip */
+    --v-popper-theme-background-color: var(--helix-black);
+    --v-popper-theme-text-color: var(--helix-white);
+    --v-popper-theme-border-radius: var(--radius-small);
+    --v-popper-theme-padding: 12px;
+    --v-popper-theme-box-shadow: var(--elevation-2);
+}
+
+body {
+    margin: 0;
+    background-color: transparent; /* Assuming game handles background */
+}
+
+div {
+    font-family: var(--font-primary);
+}
+
+::-webkit-scrollbar {
+    width: 3px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--helix-black);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--helix-lighter-grey);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--helix-white);
+}
+
+#app {
+    height: 100vh;
+    width: 100vw;
+}
+
+.inventory-container {
+    height: 100%;
+    width: 100%;
+}
+
+.inventory-section {
+    position: absolute;
+    top: 50vh;
+    width: 28vw;
+    height: 47.16vh;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+}
+
+.player-inventory-section {
+    left: 14vw;
+}
+
+.other-inventory-section {
+    right: 14vw;
+}
+
+.centered-inventory-section {
+    left: 50vw;
+    transform: translate(-50%, -50%);
+}
+
+.inventory-header {
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    font-weight: var(--font-weight-bold);
+    color: var(--helix-white);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background: linear-gradient(180deg, rgba(22, 22, 22, 0.95), rgba(10, 10, 10, 0.95));
+    border: 1px solid #2a2a2a;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.04),
+        0 4px 12px rgba(0, 0, 0, 0.6);
+    position: relative;
+}
+
+.inventory-header::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.08), transparent);
+}
+
+.inventory-grid {
+    flex-grow: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: linear-gradient(180deg, rgba(12, 12, 12, 0.9), rgba(6, 6, 6, 0.95));
+    padding: 6px;
+}
+
+.labels-container {
+    display: flex;
+    width: 100%;
+}
+
+.inventory-label {
+    flex-grow: 1;
+}
+
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    padding: 8px;
+    background: linear-gradient(180deg, #0f0f0f, #0a0a0a);
+    border: 1px solid #1f1f1f;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.02),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.item-slot {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #1a1a1a, #121212);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    aspect-ratio: 1;
+    transition:
+        transform 120ms ease,
+        border 120ms ease,
+        background 120ms ease,
+        box-shadow 120ms ease;
+}
+
+.item-slot-img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    height: 80%;
+}
+
+.item-slot-img img {
+    width: 75%;
+    height: auto;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.8));
+}
+
+.item-slot-key p,
+.item-slot-amount p,
+.item-price p,
+.item-slot-label p {
+    margin: 0;
+    line-height: 1;
+}
+
+.item-slot-amount p,
+.current-weight p,
+.item-price p {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+}
+
+.item-slot-key {
+    font-weight: var(--font-weight-bold);
+    color: var(--helix-black);
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--helix-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--elevation-1);
+}
+
+.item-slot-amount {
+    font-size: 0.7vh;
+    color: var(--helix-white);
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.item-slot:hover {
+    background: linear-gradient(180deg, #232323, #1a1a1a);
+    cursor: pointer;
+}
+
+.item-slot:empty {
+    background-color: var(--helix-darker-grey);
+}
+
+.item-price {
+    font-size: 0.7vh;
+    color: var(--helix-white);
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.item-slot-label {
+    position: absolute;
+    white-space: nowrap;
+    bottom: 0;
+    height: 1.2vh;
+    width: 100%;
+    background-color: rgba(10, 10, 10, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid var(--helix-dark-grey);
+}
+
+.item-slot-durability {
+    position: absolute;
+    left: 0;
+    bottom: 0vh;
+    width: 100%;
+    height: 2px;
+    background-color: var(--helix-dark-grey);
+}
+
+.hotbar .item-slot-label {
+    bottom: 3px;
+}
+
+.item-slot-durability-fill {
+    height: 100%;
+    transition: width 0.2s;
+}
+
+.item-slot-durability-fill.high {
+    background-color: var(--success);
+}
+
+.item-slot-durability-fill.medium {
+    background-color: var(--warning);
+}
+
+.item-slot-durability-fill.low {
+    background-color: var(--error);
+}
+
+.item-slot-label > p {
+    text-transform: uppercase;
+    font-weight: var(--font-weight-bold);
+    color: var(--helix-white);
+    font-size: 0.7vh;
+    text-align: center;
+}
+
+/* Weight Bar Styles */
+
+.current-weight > p {
+    text-align: right;
+    padding-right: 5px;
+}
+
+.weight-bar {
+    width: 100%;
+    background-color: var(--helix-dark-grey);
+}
+
+.weight-bar-fill {
+    height: 3px;
+    transition: width 0.2s;
+}
+
+.weight-bar-fill.low {
+    background-color: var(--success);
+}
+
+.weight-bar-fill.medium {
+    background-color: var(--warning);
+}
+
+.weight-bar-fill.high {
+    background-color: var(--error);
+}
+
+/* Hotbar */
+
+.hotbar-container {
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-bottom: 3vh;
+}
+
+.hotbar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    padding: 8px;
+    background: linear-gradient(180deg, #0f0f0f, #0a0a0a);
+    border: 1px solid #1f1f1f;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.02),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.8);
+    width: 28vw;
+}
+
+.notification-container {
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    bottom: 2vh;
+    left: 50%;
+    transform: translate(-50%);
+}
+
+.notification-slot {
+    position: relative;
+    width: 10vh;
+    height: 10vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--helix-black);
+    border: 1px solid var(--helix-grey);
+    box-shadow: var(--elevation-2);
+}
+
+.notification-title {
+    color: var(--helix-white);
+    align-self: flex-start;
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+.notification-title p {
+    margin: 0;
+    padding: 0;
+    font-size: 0.7vh;
+    text-transform: uppercase;
+}
+
+.required-item-container {
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-bottom: 3vh;
+}
+
+.required-item {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    padding: 8px;
+    width: 28vw;
+    box-sizing: border-box;
+}
+
+/* Context Menu */
+
+.context-menu {
+    position: absolute;
+    font-size: 1vh;
+    background-color: var(--helix-black);
+    border: 1px solid var(--helix-grey);
+    z-index: 1000;
+    width: fit-content;
+    cursor: pointer;
+    color: var(--helix-white);
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: var(--elevation-3);
+    text-transform: uppercase;
+}
+
+.context-menu li {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--helix-dark-grey);
+}
+
+.context-menu li:last-child {
+    border-bottom: none;
+}
+
+.context-menu li:hover {
+    background-color: var(--helix-dark-grey);
+}
+
+.submenu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    font-size: 0.9vh;
+    background-color: var(--helix-black);
+    border: 1px solid var(--helix-grey);
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: none;
+    box-shadow: var(--elevation-3);
+    z-index: 1001;
+}
+
+.context-menu li:hover .submenu {
+    display: block;
+}
+
+.submenu li {
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+}
+
+.submenu li:hover {
+    background-color: var(--helix-dark-grey);
+}
+
+/* Input Container */
+
+.input-container {
+    position: absolute;
+    width: 4%;
+    top: calc(26% + ((47.16% - 3vh) / 2));
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--helix-black);
+    border: 1px solid var(--helix-grey);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--elevation-3);
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.input-container input {
+    border: none;
+    background-color: transparent;
+    color: var(--helix-white);
+    font-size: 1vh;
+    font-family: var(--font-primary);
+    width: 85%;
+    outline: none;
+    text-align: center;
+    flex: 1;
+}
+
+.clear-button {
+    margin-left: 5px;
+    background-color: transparent;
+    border: none;
+    color: var(--helix-lighter-grey);
+    cursor: pointer;
+}
+
+.clear-button:hover .fas {
+    color: var(--helix-white);
+}
+
+.clear-button .fas {
+    color: var(--helix-lighter-grey);
+    transition: color 0.15s ease;
+}
+
+/* Tooltips */
+
+.v-popper--theme-tooltip .v-popper__inner {
+    background-color: var(--helix-black) !important;
+    color: var(--helix-white) !important;
+    border: 1px solid var(--helix-grey) !important;
+    border-radius: var(--radius-small) !important;
+    padding: 12px !important;
+    box-shadow: var(--elevation-2) !important;
+    max-width: 20vw !important;
+}
+
+.v-popper--theme-tooltip .v-popper__arrow-outer {
+    border-color: var(--helix-grey) !important;
+}
+
+/* Weapon Attachments */
+
+.weapon-attachments {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 12vw;
+    height: 21vh;
+    margin: 0 auto;
+    top: 50%;
+    left: 15%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+
+.weapon {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.attachment-slot {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-color: var(--helix-darker-grey);
+    border: 1px solid var(--helix-dark-grey);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: var(--elevation-1);
+    transition: background-color 0.15s ease;
+}
+
+.attachment-slot:hover {
+    background-color: var(--helix-grey);
+    cursor: pointer;
+}
+
+.attachment-slot img {
+    width: 75%;
+    height: auto;
+}
+
+.attachment-slot:nth-child(0) {
+    transform: rotate(0deg) translate(150px) rotate(0deg);
+}
+
+.attachment-slot:nth-child(1) {
+    transform: rotate(0deg) translate(150px) rotate(0deg);
+}
+
+.attachment-slot:nth-child(2) {
+    transform: rotate(60deg) translate(150px) rotate(-60deg);
+}
+
+.attachment-slot:nth-child(3) {
+    transform: rotate(120deg) translate(150px) rotate(-120deg);
+}
+
+.attachment-slot:nth-child(4) {
+    transform: rotate(180deg) translate(150px) rotate(-180deg);
+}
+
+.attachment-slot:nth-child(5) {
+    transform: rotate(240deg) translate(150px) rotate(-240deg);
+}
+
+.attachment-slot:nth-child(6) {
+    transform: rotate(300deg) translate(150px) rotate(-300deg);
+}
+
+.attachment-slot:nth-child(7) {
+    transform: rotate(0deg) translate(150px) rotate(0deg);
+}
+
+.invalid-slot-highlight {
+    border: 2px solid var(--error) !important;
+}
+
+.dragged-item {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.9;
+    box-shadow: var(--elevation-3);
+    border: 1px solid var(--helix-white); /* Highlights the item being dragged */
+}
