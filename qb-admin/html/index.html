@@ -467,6 +467,9 @@
                                             <span>Brand: {{ vehicle.brand }}</span>
                                             <span>Price: {{ vehicle.price ? ('$' + vehicle.price.toLocaleString()) : 'Service Vehicle' }}</span>
                                         </div>
+                                        <div class="item-card-actions">
+                                            <button class="catalog-action-button" title="Spawn Vehicle" @click="spawnCatalogVehicle(vehicle)"><i data-lucide="car-front" class="ui-icon" aria-hidden="true"></i>Spawn</button>
+                                        </div>
                                     </article>
                                 </div>
                             </div>

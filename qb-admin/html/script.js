@@ -434,6 +434,15 @@ const app = createApp({
             this.appendDisciplinaryLog(`Spawned vehicle ${name} (${model}).`);
         },
 
+        spawnCatalogVehicle(vehicle) {
+            if (!vehicle || !vehicle.key) {
+                return;
+            }
+
+            this.sendServerCallback("developer:spawnVehicle", { model: vehicle.key });
+            this.appendDisciplinaryLog(`Spawned vehicle ${vehicle.label || vehicle.key} (${vehicle.key}).`);
+        },
+
         spawnSelectedObject() {
             if (!this.selectedSpawnObject) {
                 this.appendDisciplinaryLog("Select an object first.");
