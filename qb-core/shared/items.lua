@@ -136,6 +136,7 @@ QBCore.Shared.Items = {
     harness = { name = 'harness', label = 'Race Harness', weight = 1000, type = 'item', image = 'harness.png', unique = true, useable = true, shouldClose = true, description = 'Racing Harness so no matter what you stay in the car' },
     jerry_can = { name = 'jerry_can', label = 'Jerrycan 20L', weight = 20000, type = 'item', image = 'jerry_can.png', unique = false, useable = true, shouldClose = true, description = 'A can full of Fuel' },
     tirerepairkit = { name = 'tirerepairkit', label = 'Tire Repair Kit', weight = 1000, type = 'item', image = 'tirerepairkit.png', unique = false, useable = true, shouldClose = true, description = 'A kit to repair your tires' },
+    rim_paint = { name = 'rim_paint', label = 'Rim Paint', weight = 500, type = 'item', image = 'veh_wheels.png', unique = false, useable = true, shouldClose = true, description = 'Paint one or more rims on a nearby vehicle' },
 
     -- Mechanic Parts
     veh_toolbox = { name = 'veh_toolbox', label = 'Toolbox', weight = 1000, type = 'item', image = 'veh_toolbox.png', unique = false, useable = true, shouldClose = true, description = 'Check vehicle status' },

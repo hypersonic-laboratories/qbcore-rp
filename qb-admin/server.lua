@@ -1099,13 +1099,27 @@ RegisterServerEvent('qb-admin:server:items:giveSelf', function(source, data)
 end)
 
 RegisterServerEvent('qb-admin:server:developer:spawnVehicle', function(source, data)
+    local model = tostring(data and data.model or ''):lower()
+    local vehicleInfo = vehiclesShared[model]
+    if not vehicleInfo or not vehicleInfo.asset_name then
+        TriggerClientEvent(source, 'QBCore:Notify', 'Vehicle does not exist', 'error')
+        return
+    end
+
     local playerPed = GetPlayerPawn(source)
+    if not playerPed then
+        return
+    end
+
     local playerCoords = GetEntityCoords(playerPed)
     local ForwardVec = playerPed:GetActorForwardVector()
     local SpawnPosition = playerCoords + (ForwardVec * 800)
     SpawnPosition = Vector(SpawnPosition.X, SpawnPosition.Y, SpawnPosition.Z - 100)
-    local vehicleInfo = vehiclesShared[data.model]
-    HVehicle(SpawnPosition, Rotator(0, 0, 0), vehicleInfo.asset_name)
+    local vehicle = HVehicle(SpawnPosition, Rotator(0, 0, 0), vehicleInfo.asset_name)
+    if not vehicle then
+        TriggerClientEvent(source, 'QBCore:Notify', 'Could not spawn vehicle', 'error')
+        return
+    end
 end)
 
 RegisterServerEvent('qb-admin:server:developer:spawnObject', function(source, _)
@@ -1149,11 +1163,7 @@ local contextActions = {
         if isFrozen == nil then
             return
         end
-        pushLogEntry(
-            isFrozen and 'Freeze' or 'Unfreeze',
-            targetName,
-            (isFrozen and 'Frozen' or 'Unfrozen') .. ' by ' .. adminName
-        )
+        pushLogEntry(isFrozen and 'Freeze' or 'Unfreeze', targetName, (isFrozen and 'Frozen' or 'Unfrozen') .. ' by ' .. adminName)
         pushFeedEntry(adminName .. (isFrozen and ' froze ' or ' unfroze ') .. 'player #' .. targetPlayerId)
     end,
     heal = function(_, targetPlayerId, adminName)
@@ -1331,11 +1341,7 @@ local quickControlActions = {
         if isFrozen == nil then
             return
         end
-        pushLogEntry(
-            isFrozen and 'Freeze' or 'Unfreeze',
-            targetName,
-            (isFrozen and 'Frozen' or 'Unfrozen') .. ' by ' .. adminName
-        )
+        pushLogEntry(isFrozen and 'Freeze' or 'Unfreeze', targetName, (isFrozen and 'Frozen' or 'Unfrozen') .. ' by ' .. adminName)
         pushFeedEntry(adminName .. (isFrozen and ' froze ' or ' unfroze ') .. 'player #' .. targetPlayerId)
     end,
     clothing = function(_, targetPlayerId, adminName)
@@ -1558,11 +1564,7 @@ local investigationActions = {
         if isFrozen == nil then
             return
         end
-        pushLogEntry(
-            isFrozen and 'Freeze Reporter' or 'Unfreeze Reporter',
-            targetName,
-            (isFrozen and 'Frozen' or 'Unfrozen') .. ' by ' .. adminName
-        )
+        pushLogEntry(isFrozen and 'Freeze Reporter' or 'Unfreeze Reporter', targetName, (isFrozen and 'Frozen' or 'Unfrozen') .. ' by ' .. adminName)
         pushFeedEntry(adminName .. (isFrozen and ' froze ' or ' unfroze ') .. 'report player ' .. targetName)
     end,
 }
