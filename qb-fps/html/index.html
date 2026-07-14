@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>qb-fps</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="lucide.min.js"></script>
+</head>
+<body>
+    <div id="root" class="hidden">
+        <div class="panel">
+            <header class="panel-head">
+                <div class="title">
+                    <span class="title-icon" data-icon="monitor-cog"></span>
+                    <div>
+                        <h1>Graphics</h1>
+                        <p class="subtitle">Performance &amp; VRAM settings</p>
+                    </div>
+                </div>
+                <button id="close-btn" class="icon-btn" title="Close (Esc)">
+                    <span data-icon="x"></span>
+                </button>
+            </header>
+
+            <nav class="tabs">
+                <button class="tab active" data-tab="presets">Presets</button>
+                <button class="tab" data-tab="advanced">Advanced</button>
+            </nav>
+
+            <section id="tab-presets" class="tab-body active">
+                <div id="preset-grid" class="preset-grid"></div>
+                <p class="hint">
+                    Applied instantly, per player, and remembered for next launch.
+                </p>
+            </section>
+
+            <section id="tab-advanced" class="tab-body">
+                <div id="advanced-list" class="advanced-list"></div>
+                <p class="hint hint-warn">
+                    Some memory settings (Nanite pool, Lumen atlas) can only be set at launch.
+                    See the resource README for the launch option.
+                </p>
+            </section>
+
+            <footer class="panel-foot">
+                <span id="status" class="status"></span>
+                <span class="key-hint"><kbd id="key-label">/fps</kbd> to toggle</span>
+            </footer>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
