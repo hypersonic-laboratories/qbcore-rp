@@ -63,6 +63,7 @@ const S = {
     // ui
     modal: null, toast: null, panic: null, dutyPick: "available",
     unitBoard: [],          // [{id, channel, occupants:[{citizenid,name}]}]
+    cameras: [],            // CCTV [{id,label,isOnline}] from qb-policejob
     myUnit: null,           // unit currently connected to (callsign + radio)
 };
 
@@ -144,11 +145,12 @@ const ICO = {
     reports: svg('<path d="M14 2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V7z"/><path d="M14 2v5h5M9 13h6M9 17h6"/>'),
     bolo: svg('<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>'),
     person: svg('<circle cx="12" cy="7.4" r="4.4" fill="currentColor" stroke="none"/><path d="M3.6 21.5c.8-4.7 4.3-7.1 8.4-7.1s7.6 2.4 8.4 7.1z" fill="currentColor" stroke="none"/>'),
+    cctv: svg('<rect x="2" y="5" width="13" height="7" rx="2"/><path d="M15 8.5l6-2.5v7l-6-2.5M6.5 12v4.5a2 2 0 002 2H12"/>'),
 };
 
 function navDef() {
     return S.role === "police"
-        ? [["dash", "DASHBOARD"], ["dispatch", "DISPATCH"], ["citizen", "CITIZENS"], ["vehicle", "VEHICLES"], ["reports", "REPORTS"], ["bolo", "BOLO BOARD"]]
+        ? [["dash", "DASHBOARD"], ["dispatch", "DISPATCH"], ["citizen", "CITIZENS"], ["vehicle", "VEHICLES"], ["reports", "REPORTS"], ["bolo", "BOLO BOARD"], ["cctv", "CCTV"]]
         : [["dash", "DASHBOARD"], ["dispatch", "DISPATCH"], ["citizen", "PATIENTS"], ["bolo", "ADVISORIES"]];
 }
 
@@ -431,6 +433,22 @@ function renderDash() {
     </div>`;
 }
 
+function renderCctv() {
+    const cards = S.cameras.map(c => `<div class="panel cctvcard">
+        <div class="cctvfeed">${ICO.cctv}<span class="mono fs11 dim2">FEED ${c.isOnline ? "STANDBY" : "LOST"}</span></div>
+        <div class="pad16">
+            <div class="fx ac jb"><span class="disp fs15 fw7">${esc(c.label)}</span><span class="pill ${c.isOnline ? "pok" : "pbad"}">${c.isOnline ? "ONLINE" : "OFFLINE"}</span></div>
+            <div class="mono fs12 dim2 mt8">CAM-${String(c.id).padStart(2, "0")} · 145.101.0.${c.id}</div>
+            <button class="btnp btn w100 mt12" data-act="viewCamera" data-arg="${c.id}" ${c.isOnline ? "" : "disabled"}>VIEW FEED</button>
+        </div>
+    </div>`).join("");
+    return `<div class="scr">
+        <div class="fx ac jb"><div><h1>CCTV</h1><div class="mono fs12 dim mt8">CITY SURVEILLANCE NETWORK · ${S.cameras.length} CAMERAS</div></div></div>
+        ${S.cameras.length ? `<div class="cctvgrid stag">${cards}</div>` : `<div class="empty">No cameras on the network</div>`}
+        <div class="mono fs12 dim2">Viewing a feed closes the terminal — press BACKSPACE on the feed to return, F5 to reopen.</div>
+    </div>`;
+}
+
 function renderDispatch() {
     const live = S.calls.filter(c => c.status !== "closed");
     const call = live.find(c => String(c.id) === String(S.callId)) || live[0];
@@ -525,7 +543,7 @@ function renderCitizen() {
         <div class="fx ac jb"><h1>${S.role === "ems" ? "Patient" : "Citizen"} Record</h1><span class="mono fs13 dim">${esc(c.citizenid)} ${c.online ? '· <span class="bok">IN CITY</span>' : ""}</span></div>
         <div class="citgrid">
             <div class="panel pad20 col gap16 oauto">
-                <div class="fx gap16"><div class="mug">${c.image ? `<img src="${esc(c.image)}" alt="">` : ICO.person}</div>
+                <div class="fx gap16"><div class="mug${c.image ? " zoomable" : ""}"${c.image ? ` data-act="viewPhoto" data-arg="${esc(c.image)}" title="Click to enlarge"` : ""}>${c.image ? `<img src="${esc(c.image)}" alt="">` : ICO.person}</div>
                     <div class="f1"><div class="disp fs26 fw7" style="line-height:1.15">${esc(name)}</div><div class="mono fs13 dim mt8">${esc(c.citizenid)}</div>
                     <div class="fx gap8 mt12 wrap">${flags}</div></div></div>
                 <div>
@@ -682,6 +700,11 @@ function renderModal() {
     if (!S.modal) return "";
     const { kind, data } = S.modal;
     let inner = "";
+    if (kind === "photo") {
+        // Lightbox: bare image, no form chrome. Backdrop click closes (.ovl
+        // handler); the image itself closes too.
+        return `<div class="ovl"><div class="photobox" data-act="closeModal"><img src="${esc(data.src)}" alt=""></div></div>`;
+    }
     if (kind === "bulletin") {
         inner = `<div class="disp fs22 fw7">Post Bulletin</div>
         <input id="mTitle" class="inp w100 mt16" placeholder="Title">
@@ -771,7 +794,7 @@ function render() {
     if (S.screen === "boot") inner = renderBoot();
     else if (S.screen === "login") inner = renderLogin();
     else {
-        const scr = { dash: renderDash, dispatch: renderDispatch, citizen: renderCitizen, vehicle: renderVehicle, reports: renderReports, bolo: renderBolo }[S.screen] || renderDash;
+        const scr = { dash: renderDash, dispatch: renderDispatch, citizen: renderCitizen, vehicle: renderVehicle, reports: renderReports, bolo: renderBolo, cctv: renderCctv }[S.screen] || renderDash;
         inner = `<div class="fx w100" style="height:100%">${renderSidebar()}<div class="col f1 ohide">${renderTopbar()}<div class="content">${scr()}</div></div></div>`;
     }
     stage.innerHTML = `<div class="gridbg"></div>${inner}<div id="overlays"><div id="modalHost"></div><div id="toastHost"></div><div id="panicHost"></div></div><div class="scanl"></div>`;
@@ -863,6 +886,10 @@ const ACTIONS = {
         // Nested objects don't survive hEvent JS->Lua — stringify, Lua parses (same as rpc()).
         if (call && call.coords) { hEvent("mdt:setWaypoint", { payload: JSON.stringify({ coords: call.coords, title: call.title }) }); toast("Waypoint set"); }
     },
+    viewCamera(arg) {
+        // Nested objects don't survive hEvent JS->Lua — stringify (rpc pattern).
+        hEvent("mdt:viewCamera", { payload: JSON.stringify({ id: Number(arg) }) });
+    },
     // reports
     openReport(arg) { openReport(arg ? Number(arg) : null); },
     closeReport() { S.report = null; render(); },
@@ -905,6 +932,7 @@ const ACTIONS = {
     },
     // warrants
     modalWarrant(arg) { openModal("warrant", { citizenid: arg }); },
+    viewPhoto(arg) { if (arg) openModal("photo", { src: arg }); },
     async submitWarrant() {
         const reason = (($("#mTitle") || {}).value || "").trim();
         const exp = ($("#mExp") || {}).value;
@@ -1104,6 +1132,7 @@ window.addEventListener("message", (event) => {
             S.unitBoard = toArr(payload.unitBoard);
             S.myUnit = (S.officer.callsign && S.officer.callsign !== "NO CALLSIGN") ? S.officer.callsign : null;
             S.penal = toArr(payload.penalCode);
+            S.cameras = toArr(payload.cameras);
             S.priorities = payload.priorities || {};
             S.statuses = toArr(payload.statuses);
             tablet.classList.remove("hidden", "closing");
@@ -1177,7 +1206,9 @@ if (IS_PREVIEW) {
             citizenid: "CIT88012", firstname: "Marcus", lastname: "Delgado", dob: "1989-03-14", gender: 0,
             nationality: "USA", phone: "555-0142", job: { label: "Civilian", grade: "Freelancer" }, gang: { label: "Vago Kings" },
             bloodtype: "O-", licences: { driver: false, weapon: false }, notes: "Known to frequent Dockside Row.",
-            flags: ["VIOLENT", "ARMED"], image: "", online: true,
+            flags: ["VIOLENT", "ARMED"], online: true,
+            // placeholder mugshot so the preview exercises the photo lightbox
+            image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI3MjAiIGhlaWdodD0iOTAwIj48cmVjdCB3aWR0aD0iNzIwIiBoZWlnaHQ9IjkwMCIgZmlsbD0iIzhmOTU5ZCIvPjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzExMSIgc3Ryb2tlLXdpZHRoPSI2Ij48bGluZSB4MT0iMCIgeTE9IjkwIiB4Mj0iNzIwIiB5Mj0iOTAiLz48bGluZSB4MT0iMCIgeTE9IjE4MCIgeDI9IjcyMCIgeTI9IjE4MCIvPjxsaW5lIHgxPSIwIiB5MT0iMjcwIiB4Mj0iNzIwIiB5Mj0iMjcwIi8+PGxpbmUgeDE9IjAiIHkxPSIzNjAiIHgyPSI3MjAiIHkyPSIzNjAiLz48bGluZSB4MT0iMCIgeTE9IjQ1MCIgeDI9IjcyMCIgeTI9IjQ1MCIvPjxsaW5lIHgxPSIwIiB5MT0iNTQwIiB4Mj0iNzIwIiB5Mj0iNTQwIi8+PGxpbmUgeDE9IjAiIHkxPSI2MzAiIHgyPSI3MjAiIHkyPSI2MzAiLz48bGluZSB4MT0iMCIgeTE9IjcyMCIgeDI9IjcyMCIgeTI9IjcyMCIvPjxsaW5lIHgxPSIwIiB5MT0iODEwIiB4Mj0iNzIwIiB5Mj0iODEwIi8+PC9nPjxjaXJjbGUgY3g9IjM2MCIgY3k9IjMzMCIgcj0iMTEwIiBmaWxsPSIjYzlhMTg0Ii8+PHJlY3QgeD0iMjUwIiB5PSI0MzAiIHdpZHRoPSIyMjAiIGhlaWdodD0iMzAwIiByeD0iNjAiIGZpbGw9IiNkZmUzZTgiLz48L3N2Zz4=",
             vehicles: [{ plate: "KRT4402", vehicle: "Warrener GTS", garage: "downtown", state: 0, fuel: 80 }],
             convictions: [{ id: 1, charges: [{ code: "PR-06", label: "Armed Robbery", fine: 5000, sentence: 45 }], fine: 5000, sentence: 45, officer_name: "K. Reyes", created: "2026-07-02 21:40" }],
             warrants: [{ id: 12, reason: "Armed Robbery — PR-06", status: "active", author_name: "K. Reyes", created: "2026-07-02 22:00" }],
@@ -1241,6 +1272,11 @@ if (IS_PREVIEW) {
                 bulletins: [{ id: 1, title: "Vago Kings activity up 40% in Old Town", content: "Increased presence requested on the Dockside corridor between 20:00-04:00.", author_name: "Det. Ames", author_cid: "X", created: "2026-07-07 18:20" }],
                 units: demo.units,
                 unitBoard: demo.unitBoard,
+                cameras: [
+                    { id: 1, label: "9five Convenience", isOnline: true },
+                    { id: 2, label: "Jet Stop Fuel", isOnline: true },
+                    { id: 3, label: "Meridian Savings ATM", isOnline: false },
+                ],
                 penalCode: [
                     { category: "Offenses Against Persons", charges: [{ code: "P-01", label: "Assault", class: "misdemeanor", fine: 250, sentence: 10 }, { code: "P-05", label: "Murder", class: "felony", fine: 10000, sentence: 120 }] },
                     { category: "Offenses Against Property", charges: [{ code: "PR-06", label: "Armed Robbery", class: "felony", fine: 5000, sentence: 45 }] },

@@ -86,8 +86,9 @@ Engineering constraints this resource is built around (they differ from FiveM):
 - Dispatch map is a placeholder grid — needs a top-down world image, two
   calibration coordinates and unit position sync.
 - No dispatch/all-units broadcast role yet (multi-channel voice).
-- Mugshot/BOLO photos render when a profile has an `image` URL; there is no
-  in-game capture source.
+- Profile photos come from the qb-policejob mugshot station (pushed through
+  `exports['qb-mdt']:SetProfileImage`); BOLO photos still need an `image` URL
+  set by hand.
 - Voice gating (mute-by-distance, PTT) still needs multiplayer testing.
 
 ## Development

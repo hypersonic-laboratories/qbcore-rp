@@ -72,3 +72,33 @@ Config.CarItems = {
     { name = 'empty_evidence_bag', amount = 10, info = {}, type = 'item', slot = 2 },
     { name = 'police_stormram', amount = 1, info = {}, type = 'item', slot = 3 },
 }
+
+-- Mugshot stations. Officer targets the tripod (interact) -> live viewfinder
+-- from camPos/camRot aimed at the height chart -> E captures -> photo uploads
+-- and is stored in police_mugshots (latest per citizen readable by any
+-- resource via exports['qb-policejob']:GetMugshot). Subject = ray test along
+-- the camera sight line (camPos -> stand): the player CLOSEST to the lens
+-- within corridorCm of that line wins, like a raycast's first hit.
+-- Calibrate with /mugshotsetup in game: run it once standing AT the tripod
+-- facing the chart (gives interact/camPos/camRot) and once standing ON the
+-- chart mark (gives stand).
+Config.Mugshot = {
+    imageApi = {
+        url = 'https://api.fivemanage.com/api/v3/file',
+        key = 'Py4jfdWgiRLzTTboAofHBC2aoiCSfrar',
+    },
+    stations = {
+        { -- South Beach PD booking room
+            interact = Vector(562173, 570672, 4665),
+            -- camPos z = subject face height (camera looks level, so aim
+            -- height = camera height); fov 24 frames head + shoulders at the
+            -- 1.6m tripod-to-chart distance. X nudged 25cm toward the chart
+            -- so the lens clears the tripod prop.
+            camPos = Vector(562148, 570672, 4725),
+            camRot = Rotator(0, -179.5, 0),
+            stand = Vector(562013, 570678, 4654),
+            corridorCm = 100, -- sight-line half-width for the subject ray test
+            fov = 24,
+        },
+    },
+}

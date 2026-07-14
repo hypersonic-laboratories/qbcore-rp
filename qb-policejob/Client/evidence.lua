@@ -410,6 +410,7 @@ end
 
 function onShutdown()
     TriggerLocalClientEvent('qb-policejob:client:CloseCamera')
+    if PoliceMugshotTeardown then PoliceMugshotTeardown() end -- client/mugshot.lua
     unregisterWeaponFireListener()
     for kind, zones in pairs(EvidenceZones) do
         for id in pairs(zones) do

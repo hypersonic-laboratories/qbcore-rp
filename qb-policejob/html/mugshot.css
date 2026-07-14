@@ -1,0 +1,129 @@
+/* qb-policejob mugshot viewfinder HUD. Self-contained: the shared
+   PoliceJobUI page has no CSS framework, so this file carries its own reset
+   bits and keyframes. */
+#mugshotHud.hidden { display: none !important; }
+#mugshotHud, #mugshotHud * { box-sizing: border-box; }
+@keyframes blip { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes mIn { from { opacity: 0; transform: scale(.97); } }
+
+/* ── Mugshot viewfinder HUD ───────────────────────────────────────────────
+   Fullscreen chrome around the UMG camera feed (client/mugshot.lua). The
+   feed is a 760x950 rect in a 2560x1440 design space, centered — the
+   .mugHole rect below MUST match it (29.6875vw x 65.9722vh). All critical
+   chrome sits OUTSIDE the hole in case the UMG feed draws above the WebUI;
+   only the cosmetic crosshair lives inside. Amber accent = camera mode. */
+#mugshotHud { position: fixed; inset: 0; z-index: 60; pointer-events: none; font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif; color: #d7e2f2; }
+#mugshotHud .mugHole {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 29.6875vw; height: 65.9722vh;
+    /* dim everything around the feed without touching the hole itself */
+    box-shadow: 0 0 0 200vmax rgba(2, 4, 8, .45);
+}
+/* corner brackets — drawn just outside the hole so the feed never covers them */
+#mugshotHud .mugCr { position: absolute; width: 34px; height: 34px; border: 3px solid #e8eef8; }
+#mugshotHud .mugCr.tl { top: -14px; left: -14px; border-right: 0; border-bottom: 0; }
+#mugshotHud .mugCr.tr { top: -14px; right: -14px; border-left: 0; border-bottom: 0; }
+#mugshotHud .mugCr.bl { bottom: -14px; left: -14px; border-right: 0; border-top: 0; }
+#mugshotHud .mugCr.br { bottom: -14px; right: -14px; border-left: 0; border-top: 0; }
+/* side ticks (amber) */
+#mugshotHud .mugTick { position: absolute; top: 50%; width: 26px; height: 3px; background: #ffb020; }
+#mugshotHud .mugTick.l { left: -40px; } #mugshotHud .mugTick.r { right: -40px; }
+/* header strip above the hole */
+#mugshotHud .mugHead {
+    position: absolute; left: 0; right: 0; bottom: 100%; margin-bottom: 10px;
+    text-align: center; padding: 10px 0 12px;
+    background: rgba(8, 11, 18, .88); border: 1px solid #232e45; border-radius: 8px;
+}
+#mugshotHud .mugHead h1 { margin: 0; font: 700 20px 'Rajdhani', sans-serif; letter-spacing: .12em; color: #ffb020; }
+#mugshotHud .mugHead p { margin: 3px 0 0; font-size: 12.5px; color: #8494ad; }
+/* crosshair (inside the hole — cosmetic only) */
+#mugshotHud .mugCross { position: absolute; left: 50%; top: 44%; width: 44px; height: 44px; transform: translate(-50%, -50%); opacity: .9; }
+#mugshotHud .mugCross:before, #mugshotHud .mugCross:after { content: ""; position: absolute; background: #ffffffcc; }
+#mugshotHud .mugCross:before { left: 50%; top: 0; width: 1.5px; height: 100%; transform: translateX(-50%); }
+#mugshotHud .mugCross:after { top: 50%; left: 0; height: 1.5px; width: 100%; transform: translateY(-50%); }
+/* zoom pill below the hole */
+#mugshotHud .mugZoom {
+    position: absolute; left: 50%; top: 100%; margin-top: 12px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 12px; padding: 7px 16px;
+    background: rgba(8, 11, 18, .88); border: 1px solid #232e45; border-radius: 999px;
+    font: 600 13px 'JetBrains Mono', monospace;
+}
+#mugshotHud .mugZoom .zval { color: #ffb020; min-width: 42px; text-align: center; }
+#mugshotHud .mugZoom .zkey { color: #8494ad; font-size: 11px; }
+/* flanking panels */
+#mugshotHud .mugPanel {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 300px; background: rgba(8, 11, 18, .88);
+    border: 1px solid #232e45; border-radius: 10px; padding: 16px 18px;
+}
+#mugshotHud .mugPanel.left { right: calc(50% + 14.84375vw + 60px); }
+#mugshotHud .mugPanel.right { left: calc(50% + 14.84375vw + 60px); }
+#mugshotHud .mugTitle { display: flex; align-items: center; gap: 10px; font: 700 16px 'Rajdhani', sans-serif; letter-spacing: .1em; }
+#mugshotHud .mugTitle svg { width: 26px; height: 26px; color: #ffb020; flex-shrink: 0; }
+#mugshotHud .mugStatus { display: flex; align-items: center; gap: 7px; margin: 8px 0 0; font: 600 11px 'Rajdhani', sans-serif; letter-spacing: .16em; color: #ffb020; }
+#mugshotHud .mugStatus .dot { width: 8px; height: 8px; border-radius: 50%; background: #ffb020; animation: blip 1.6s infinite; }
+#mugshotHud .mugStatus.locked { color: #2ed573; } #mugshotHud .mugStatus.locked .dot { background: #2ed573; }
+#mugshotHud .mugSec { margin-top: 16px; padding-top: 12px; border-top: 1px solid #1c2740; font: 700 12px 'Rajdhani', sans-serif; letter-spacing: .14em; color: #8494ad; }
+#mugshotHud .mugRow { display: flex; justify-content: space-between; align-items: baseline; margin-top: 9px; font-size: 13px; }
+#mugshotHud .mugRow .k { color: #8494ad; }
+#mugshotHud .mugRow .v { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #e8eef8; text-align: right; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#mugshotHud .mugRow .v.none { color: #5c6b85; }
+/* instruction list */
+#mugshotHud .mugIns { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 8px 10px; background: #0d1322; border-radius: 6px; font-size: 12.5px; color: #c9d7ec; }
+#mugshotHud .mugIns svg { width: 16px; height: 16px; color: #ffb020; flex-shrink: 0; }
+/* quality meter */
+#mugshotHud .mugQ { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 12.5px; }
+#mugshotHud .mugQ .k { color: #8494ad; letter-spacing: .04em; }
+#mugshotHud .mugQ .v { font: 600 11.5px 'Rajdhani', sans-serif; letter-spacing: .12em; color: #2ed573; }
+#mugshotHud .mugQ .v.bad { color: #ff4757; }
+#mugshotHud .mugBar { display: flex; gap: 4px; margin-top: 5px; }
+#mugshotHud .mugBar i { flex: 1; height: 5px; border-radius: 2px; background: #2ed573; }
+#mugshotHud .mugBar.bad i { background: #253046; } #mugshotHud .mugBar.bad i:first-child { background: #ff4757; }
+/* bottom controls */
+#mugshotHud .mugCtl { position: absolute; left: 50%; bottom: 5.5vh; transform: translateX(-50%); display: flex; align-items: center; gap: 22px; }
+#mugshotHud .mugBtn { display: flex; align-items: center; gap: 10px; padding: 13px 22px; background: rgba(8, 11, 18, .88); border: 1px solid #232e45; border-radius: 8px; font: 600 13px 'Rajdhani', sans-serif; letter-spacing: .1em; color: #e8eef8; }
+#mugshotHud .mugShutter { width: 72px; height: 72px; border-radius: 50%; border: 3px solid #ffb020; background: rgba(8, 11, 18, .9); display: grid; place-items: center; }
+#mugshotHud .mugShutter svg { width: 30px; height: 30px; color: #fff; }
+#mugshotHud kbd { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 6px; background: #1a2337; border: 1px solid #2c3a58; border-bottom-width: 2px; border-radius: 5px; font: 600 11.5px 'JetBrains Mono', monospace; color: #ffb020; }
+#mugshotHud .mugCancel { position: absolute; left: 34px; bottom: 5.5vh; display: flex; align-items: center; gap: 10px; font: 600 13px 'Rajdhani', sans-serif; letter-spacing: .1em; color: #c9d7ec; }
+/* bottom-right hint card */
+#mugshotHud .mugHint { position: absolute; right: 34px; bottom: 5.5vh; max-width: 330px; padding: 13px 16px; background: rgba(8, 11, 18, .88); border: 1px solid #232e45; border-left: 3px solid #ffb020; border-radius: 8px; font-size: 12.5px; line-height: 1.45; color: #c9d7ec; }
+#mugshotHud .mugHint b { color: #ffb020; }
+#mugshotHud .mugHint .warn { color: #ff9a3d; }
+
+/* ── Mugshot HUD v3: clickable controls (WebUI holds focus in this mode) ── */
+#mugshotHud .mugPanel, #mugshotHud .mugZoom, #mugshotHud .mugCtl, #mugshotHud .mugCancel { pointer-events: auto; }
+#mugshotHud button { font-family: inherit; }
+#mugshotHud .mugBtn, #mugshotHud .mugShutter, #mugshotHud .mugCancel { cursor: pointer; }
+#mugshotHud .mugBtn:hover, #mugshotHud .mugCancel:hover { border-color: #ffb020; color: #ffb020; }
+#mugshotHud .mugShutter:hover { background: #241c0a; }
+#mugshotHud .mugShutter:active { transform: scale(.94); }
+#mugshotHud .mugCancel { background: rgba(8, 11, 18, .88); border: 1px solid #232e45; border-radius: 8px; padding: 11px 16px; }
+/* mini buttons (light / camera / zoom) */
+#mugshotHud .mugMini {
+    min-width: 30px; height: 26px; padding: 0 8px; cursor: pointer;
+    background: #1a2337; border: 1px solid #2c3a58; border-radius: 5px;
+    color: #e8eef8; font: 600 12px 'JetBrains Mono', monospace;
+    display: inline-grid; place-items: center;
+}
+#mugshotHud .mugMini:hover { border-color: #ffb020; color: #ffb020; }
+#mugshotHud .mugMini:active { transform: translateY(1px); }
+#mugshotHud .mugMini.on { background: #ffb020; border-color: #ffb020; color: #10131c; }
+#mugshotHud .mugMini.temp { flex: 1; font-size: 10.5px; letter-spacing: .08em; }
+#mugshotHud .mugMini.wide { width: 100%; font: 600 11px 'Rajdhani', sans-serif; letter-spacing: .12em; }
+#mugshotHud .mugMini.pwr { float: right; min-width: 40px; height: 20px; font-size: 10px; }
+#mugshotHud .mugCtlRow { display: flex; align-items: center; gap: 6px; margin-top: 9px; }
+#mugshotHud .mugCtlRow .clab { width: 38px; flex-shrink: 0; font: 700 10.5px 'Rajdhani', sans-serif; letter-spacing: .12em; color: #8494ad; }
+#mugshotHud .mugGauge { flex: 1; display: flex; gap: 3px; align-items: center; }
+#mugshotHud .mugGauge i { flex: 1; height: 8px; border-radius: 2px; background: #253046; }
+#mugshotHud .mugGauge i.on { background: #ffb020; }
+#mugshotHud .mugNote { margin-top: 8px; font-size: 11.5px; color: #5c6b85; }
+/* quality meter states */
+#mugshotHud .mugQ .v.warn { color: #ff9a3d; }
+#mugshotHud .mugBar i { background: #253046; }
+#mugshotHud .mugBar i.on { background: #2ed573; }
+#mugshotHud .mugBar.warn i.on { background: #ff9a3d; }
+#mugshotHud .mugBar.bad i.on { background: #ff4757; }
+/* zoom pill uses mini buttons now */
+#mugshotHud .mugZoom { padding: 5px 8px; gap: 8px; }
+

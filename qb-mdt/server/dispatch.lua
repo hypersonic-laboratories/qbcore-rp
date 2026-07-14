@@ -429,6 +429,22 @@ RegisterServerEvent('qb-mdt:server:ptt', function(source, talking, voice)
     end
 end)
 
+-- ─────────────────────────── profile image ──────────────────────────────────
+-- The mugshot station lives in qb-policejob (capture, subject resolution,
+-- photo history — see qb-policejob/server/mugshot.lua). It pushes each new
+-- photo here so the citizen profile updates; any other resource may call
+-- this too (e.g. an ID card system).
+exports('qb-mdt', 'SetProfileImage', function(citizenid, url)
+    if type(citizenid) ~= 'string' or citizenid == '' then return false end
+    if type(url) ~= 'string' or url == '' then return false end
+    MDT.Execute(
+        [[INSERT INTO mdt_profiles (citizenid, image) VALUES (?, ?)
+          ON CONFLICT(citizenid) DO UPDATE SET image = excluded.image, updated = CURRENT_TIMESTAMP]],
+        { citizenid, url }
+    )
+    return true
+end)
+
 RegisterServerEvent('qb-mdt:server:panic', function(source, coords)
     local ok, err = pcall(function()
         local Player, role = MDT.GetContext(source)

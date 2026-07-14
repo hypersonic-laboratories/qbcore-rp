@@ -3,6 +3,8 @@
     <head>
         <meta charset="utf-8" />
         <title>Police Job UI</title>
+        <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="mugshot.css" />
         <style>
             html,
             body {
@@ -268,6 +270,11 @@
             </div>
         </div>
 
+        <!-- Mugshot viewfinder chrome (client/mugshot.lua drives it; see mugshot.js).
+             Center hole must match the UMG feed rect: 760x950 in a 2560x1440 design space. -->
+        <div id="mugshotHud" class="hidden"></div>
+
         <script src="script.js"></script>
+        <script src="mugshot.js"></script>
     </body>
 </html>

@@ -11,7 +11,8 @@
         "client/anpr.lua",
         "client/evidence.lua",
         "client/objects.lua",
-        "client/tracker.lua"
+        "client/tracker.lua",
+        "client/mugshot.lua"
     ],
     "server": [
         "server/main.lua",
@@ -19,6 +20,7 @@
         "server/interactions.lua",
         "server/evidence.lua",
         "server/objects.lua",
-        "server/vehicle.lua"
+        "server/vehicle.lua",
+        "server/mugshot.lua"
     ]
 }

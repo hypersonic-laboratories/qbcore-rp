@@ -49,6 +49,12 @@ local function OpenMDT()
             return
         end
         isOpen = true
+        -- CCTV list comes from qb-policejob (single source of truth); pcall in
+        -- case that resource isn't running.
+        if data.role == 'police' then
+            local ok, cams = pcall(function() return exports['qb-policejob']:GetCameraList() end)
+            data.cameras = (ok and cams) or {}
+        end
         my_webui:BringToFront()
         my_webui:SetInputMode(1)
         my_webui:SendEvent('mdt:open', data)
@@ -151,6 +157,18 @@ end)
 
 my_webui:RegisterEventHandler('mdt:close', function()
     CloseMDT()
+end)
+
+my_webui:RegisterEventHandler('mdt:viewCamera', function(data)
+    -- JSON-string payload (nested objects don't survive hEvent JS->Lua).
+    if type(data) ~= 'table' or type(data.payload) ~= 'string' then return end
+    local ok, parsed = pcall(JSON.parse, data.payload)
+    local camId = ok and type(parsed) == 'table' and tonumber(parsed.id) or nil
+    if not camId then return end
+    -- The CCTV view is a full-screen takeover (view-target blend); close the
+    -- tablet first. Backspace exits the camera (qb-policejob behavior).
+    CloseMDT()
+    TriggerLocalClientEvent('qb-policejob:client:ActiveCamera', camId)
 end)
 
 my_webui:RegisterEventHandler('mdt:panic', function()

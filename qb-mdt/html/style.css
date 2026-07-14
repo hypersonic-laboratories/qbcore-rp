@@ -209,3 +209,18 @@ select.inp { appearance: none; }
 .bologrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .ptgrid { display: grid; grid-template-columns: 330px 1fr; gap: 18px; flex: 1; min-height: 0; }
 .zgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cctvgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-content: start; }
+.cctvcard { overflow: hidden; }
+.cctvfeed { height: 130px; background: #0a101c; border-bottom: 1px solid #1c2740; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #33455f; }
+.cctvfeed svg { width: 40px; height: 40px; }
+.btnp[disabled], .btn[disabled] { opacity: .35; pointer-events: none; }
+
+/* ── Citizen photo lightbox ──────────────────────────────────────────────── */
+.mug.zoomable { cursor: zoom-in; transition: border-color .12s; }
+.mug.zoomable:hover { border-color: var(--acc); }
+.photobox { cursor: zoom-out; animation: mIn .2s cubic-bezier(.2, .8, .2, 1); }
+.photobox img {
+    display: block; max-width: 60vw; max-height: 78vh;
+    border-radius: 12px; border: 1px solid #2c3a58;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .7);
+}
